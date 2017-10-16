@@ -16,7 +16,7 @@ func start
 	l.addi	r3, r3, 4
 	l.j	1b
 	l.sw	-4(r3), r0
-2:	l.nop				# Call C entry point
+2:	l.jal	main			# Call C entry point
 	l.ori	r1, r0, lo(STACK_INIT)	# Initialize stack pointer
 3:	l.j	3b			# Infinite loop
 	l.nop
