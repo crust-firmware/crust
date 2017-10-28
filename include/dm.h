@@ -18,6 +18,7 @@ enum {
 enum {
 	DM_CLASS_NONE = 0,
 	DM_CLASS_CLOCK,
+	DM_CLASS_IRQCHIP,
 };
 
 struct driver;
