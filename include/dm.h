@@ -15,6 +15,11 @@ enum {
 	DEVICE_FLAG_RUNNING = BIT(0),
 };
 
+enum {
+	DM_CLASS_NONE = 0,
+	DM_CLASS_CLOCK,
+};
+
 struct driver;
 
 struct device {
