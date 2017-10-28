@@ -19,6 +19,7 @@ enum {
 	DM_CLASS_NONE = 0,
 	DM_CLASS_CLOCK,
 	DM_CLASS_IRQCHIP,
+	DM_CLASS_MSGBOX,
 };
 
 struct driver;
