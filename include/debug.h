@@ -7,6 +7,7 @@
 #define DEBUG_H
 
 #include <compiler.h>
+#include <stdint.h>
 
 #define LOG_STRING_PANIC   "\x01"
 #define LOG_STRING_ERROR   "\x02"
@@ -33,6 +34,7 @@ enum {
 	LOG_LEVELS
 };
 
+void hexdump(uintptr_t addr, uint32_t bytes);
 void log(const char *fmt, ...) __printf(1, 2);
 noreturn void panic(const char *fmt, ...) __printf(1, 2);
 

@@ -11,6 +11,9 @@
 #include <stdint.h>
 #include <string.h>
 
+#define BYTES_PER_ROW  16
+#define BYTES_PER_WORD sizeof(uint32_t)
+
 static char *prefixes[] = {
 	"PANIC:\t ",
 	"ERROR:\t ",
@@ -26,6 +29,34 @@ static void print_hex(int width, bool zero, uint32_t num);
 static void print_padding(int width, bool zero);
 static void print_signed(char sign, int width, bool zero, int32_t num);
 static void print_string(const char *s);
+
+void
+hexdump(uintptr_t addr, uint32_t bytes)
+{
+	uintptr_t start;
+
+	/* Always start at a multiple of BYTES_PER_ROW. */
+	addr &= ~(BYTES_PER_ROW - 1);
+	for (start = addr; addr - start < bytes; addr += BYTES_PER_ROW) {
+		uint32_t *words = (uint32_t *)addr;
+
+		/* This assumes BYTES_PER_ROW is 16, which it will always be.
+		 * It's more of an informational constant, not a variable. */
+		log("%08x: %08x %08x %08x %08x  ",
+		    addr, words[0], words[1], words[2], words[3]);
+
+		/* The ARISC processor's data lines are swapped in hardware for
+		 * compatibility with the little-endian ARM CPUs. To examine
+		 * individual bytes, we must reverse each group of 4 bytes. */
+		for (int i = BYTES_PER_WORD - 1; i < BYTES_PER_ROW; --i) {
+			char c = ((char *)addr)[i];
+			console_putc(isprint(c) ? c : '.');
+			if (i % BYTES_PER_WORD == 0)
+				i += 2 * BYTES_PER_WORD;
+		}
+		console_putc('\n');
+	}
+}
 
 void
 log(const char *fmt, ...)
