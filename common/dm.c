@@ -31,7 +31,7 @@ device_probe(struct device *dev)
 	if ((err = dev->drv->probe(dev)))
 		return err;
 
-	debug("finished probing device %s", dev->name);
+	debug("Finished probing device %s", dev->name);
 	dev->flags |= DEVICE_FLAG_RUNNING;
 	return SUCCESS;
 }
@@ -57,10 +57,10 @@ dm_init(void)
 	for (dev = device_list; dev < device_list_end; ++dev) {
 		if ((err = device_probe(dev))) {
 			if (err == ENODEV)
-				warn("failed to probe missing device %s",
+				warn("Failed to probe missing device %s",
 				     dev->name);
 			else
-				panic("failed to probe device %s (%d)",
+				panic("Failed to probe device %s: %d",
 				      dev->name, err);
 		}
 	}
