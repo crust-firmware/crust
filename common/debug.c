@@ -36,6 +36,8 @@ log(const char *fmt, ...)
 	uintptr_t arg, level;
 	va_list   args;
 
+	assert(fmt);
+
 	level = *fmt - 1;
 	if (level < LOG_LEVELS) {
 		print_string(prefixes[level]);
@@ -80,6 +82,7 @@ conversion:
 			print_hex(width, zero, arg);
 			break;
 		case 's':
+			assert(arg);
 			print_padding(width - strlen((const char *)arg), zero);
 			print_string((const char *)arg);
 			break;
@@ -87,6 +90,7 @@ conversion:
 			print_decimal(sign, width, zero, arg);
 			break;
 		default:
+			assert(c);
 			if (c == '0' && width == 0)
 				zero = true;
 			else if (isdigit(c))
