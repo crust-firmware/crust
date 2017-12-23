@@ -43,6 +43,7 @@ struct driver {
 	void       *ops;
 };
 
+struct device *dm_get_by_name(const char *name);
 void dm_init(void);
 
 #endif /* DM_H */

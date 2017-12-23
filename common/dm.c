@@ -6,11 +6,11 @@
 #include <debug.h>
 #include <dm.h>
 #include <error.h>
+#include <stddef.h>
+#include <string.h>
 
 extern struct device device_list[];
-extern struct device device_list_end;
-extern struct driver driver_list[];
-extern struct driver driver_list_end;
+extern struct device device_list_end[];
 
 static int
 device_probe(struct device *dev)
@@ -36,13 +36,25 @@ device_probe(struct device *dev)
 	return SUCCESS;
 }
 
+struct device *
+dm_get_by_name(const char *name)
+{
+	struct device *dev;
+
+	for (dev = device_list; dev < device_list_end; ++dev)
+		if (!strcmp(dev->name, name))
+			return dev;
+
+	return NULL;
+}
+
 void
 dm_init(void)
 {
 	struct device *dev;
 	int err;
 
-	for (dev = &device_list[0]; dev < &device_list_end; ++dev) {
+	for (dev = device_list; dev < device_list_end; ++dev) {
 		if ((err = device_probe(dev))) {
 			if (err == ENODEV)
 				warn("failed to probe missing device %s",
