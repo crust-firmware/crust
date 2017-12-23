@@ -8,6 +8,7 @@
 
 #include <stddef.h>
 
+int strcmp(const char *a, const char *b);
 size_t strlen(const char *s);
 
 #endif /* STRING_H */

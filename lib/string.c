@@ -6,6 +6,17 @@
 #include <stddef.h>
 #include <string.h>
 
+int
+strcmp(const char *a, const char *b)
+{
+	while (*a && *a == *b) {
+		++a;
+		++b;
+	}
+
+	return *a - *b;
+}
+
 size_t
 strlen(const char *s)
 {
