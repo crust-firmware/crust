@@ -14,6 +14,14 @@
 #define LOG_STRING_INFO    "\x04"
 #define LOG_STRING_DEBUG   "\x05"
 
+#if DEBUG
+#define assert(e)          ((void)((e) || \
+	                           (panic("assertion failed: %s (%s:%d)", #e, \
+	                                  __FILE__, __LINE__), 0)))
+#else
+#define assert(e)          ((void)0)
+#endif
+
 enum {
 	LOG_LEVEL_PANIC = 0,
 	LOG_LEVEL_ERROR,
