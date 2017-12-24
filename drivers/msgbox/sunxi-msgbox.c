@@ -49,10 +49,11 @@ set_handler(struct device *dev, uint8_t chan, msg_handler handler)
 static void
 sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan)
 {
-	uint32_t msg = mmio_read32(dev->address + RECV_MSG_DATA_REG(chan));
+	msg_handler handler;
+	uint32_t    msg = mmio_read32(dev->address + RECV_MSG_DATA_REG(chan));
 
-	if (get_handler(dev, chan))
-		get_handler(dev, chan)(dev, chan, msg);
+	if ((handler = get_handler(dev, chan)))
+		handler(dev, chan, msg);
 	else
 		debug("unsolicited message %08x in channel %d", msg, chan);
 }
