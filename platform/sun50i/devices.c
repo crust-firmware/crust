@@ -5,11 +5,11 @@
 
 #include <dm.h>
 #include <drivers/clock/sunxi-ccu.h>
+#include <drivers/irqchip/sun4i-intc.h>
 #include <platform/ccu.h>
 #include <platform/devices.h>
 #include <platform/irq.h>
 
-extern struct driver sun4i_intc_driver;
 extern struct driver sunxi_msgbox_driver;
 
 static struct device ccu    __device;
@@ -32,8 +32,10 @@ static struct device msgbox = {
 	.irqdev   = &r_intc,
 };
 
+SUN4I_INTC_ALLOC_DRVDATA(DEV_R_INTC);
 static struct device r_intc = {
 	.name    = "r_intc",
 	.address = DEV_R_INTC,
 	.drv     = &sun4i_intc_driver,
+	.drvdata = SUN4I_INTC_DRVDATA(DEV_R_INTC),
 };
