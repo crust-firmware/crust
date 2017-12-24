@@ -12,16 +12,7 @@
 #include <drivers/clock.h>
 #include <drivers/irqchip.h>
 #include <drivers/msgbox.h>
-
-/*
- * The message box hardware provides 8 unidirectional channels. As the mailbox
- * framework expects them to be bidirectional, create virtual channels out of
- * pairs of opposite-direction hardware channels. The first channel in each
- * pair
- * is set up for AP->SCP communication, and the second channel is set up for
- * SCP->AP transmission.
- */
-#define NUM_CHANS               4
+#include <drivers/msgbox/sunxi-msgbox.h>
 
 #define CTRL_REG0               (0x0000)
 #define CTRL_REG1               (0x0004)
@@ -43,15 +34,25 @@
 #define XMIT_MSG_DATA_REG(n)    (0x0184 + 0x8 * (n))
 #define RECV_MSG_DATA_REG(n)    (0x0180 + 0x8 * (n))
 
-static msg_handler handlers[NUM_CHANS];
+static inline msg_handler
+get_handler(struct device *dev, uint8_t chan)
+{
+	return ((msg_handler *)dev->drvdata)[chan];
+}
+
+static inline void
+set_handler(struct device *dev, uint8_t chan, msg_handler handler)
+{
+	((msg_handler *)dev->drvdata)[chan] = handler;
+}
 
 static void
-sunxi_msgbox_handle_msg(struct device *dev, uint32_t chan)
+sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan)
 {
 	uint32_t msg = mmio_read32(dev->address + RECV_MSG_DATA_REG(chan));
 
-	if (handlers[chan])
-		handlers[chan](dev, chan, msg);
+	if (get_handler(dev, chan))
+		get_handler(dev, chan)(dev, chan, msg);
 	else
 		debug("unsolicited message %08x in channel %d", msg, chan);
 }
@@ -61,7 +62,7 @@ sunxi_msgbox_irq(struct device *dev)
 {
 	uint32_t reg = mmio_read32(dev->address + IRQ_STATUS_REG);
 
-	for (uint32_t chan = 0; chan < NUM_CHANS; ++chan) {
+	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; ++chan) {
 		if (!(reg & RECV_IRQ(chan)))
 			continue;
 		while (mmio_read32(dev->address + RECV_MSG_STATUS_REG(chan)))
@@ -78,11 +79,11 @@ sunxi_msgbox_register_handler(struct device *dev, uint8_t chan,
 {
 	uint32_t reg;
 
-	assert(chan < NUM_CHANS);
+	assert(chan < SUNXI_MSGBOX_CHANS);
 
-	if (handlers[chan])
+	if (get_handler(dev, chan))
 		return EEXIST;
-	handlers[chan] = handler;
+	set_handler(dev, chan, handler);
 
 	reg = mmio_read32(dev->address + IRQ_EN_REG);
 	mmio_write32(dev->address + IRQ_EN_REG, reg | RECV_IRQ(chan));
@@ -121,24 +122,24 @@ sunxi_msgbox_unregister_handler(struct device *dev, uint8_t chan)
 {
 	uint32_t reg;
 
-	assert(handlers[chan]);
+	assert(get_handler(dev, chan));
 
 	reg = mmio_read32(dev->address + IRQ_EN_REG);
 	mmio_write32(dev->address + IRQ_EN_REG, reg & ~RECV_IRQ(chan));
 
-	handlers[chan] = NULL;
+	set_handler(dev, chan, NULL);
 
 	return 0;
 }
 
-static struct msgbox_driver_ops sunxi_msgbox_driver_ops = {
+static const struct msgbox_driver_ops sunxi_msgbox_driver_ops = {
 	.class              = DM_CLASS_MSGBOX,
 	.register_handler   = sunxi_msgbox_register_handler,
 	.send_msg           = sunxi_msgbox_send_msg,
 	.unregister_handler = sunxi_msgbox_unregister_handler,
 };
 
-struct driver sunxi_msgbox_driver = {
+const struct driver sunxi_msgbox_driver = {
 	.name  = "sunxi-msgbox",
 	.probe = sunxi_msgbox_probe,
 	.ops   = &sunxi_msgbox_driver_ops,
