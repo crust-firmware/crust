@@ -39,6 +39,7 @@ struct device {
 
 struct driver {
 	const char *name;
+	uint32_t    class;
 	int         (*probe)(struct device *dev);
 	const void *ops;
 };

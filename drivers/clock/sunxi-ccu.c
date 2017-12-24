@@ -83,7 +83,6 @@ sunxi_ccu_set_freq(struct device *clockdev __unused,
 }
 
 static const struct clock_driver_ops sunxi_ccu_driver_ops = {
-	.class    = DM_CLASS_CLOCK,
 	.disable  = sunxi_ccu_disable,
 	.enable   = sunxi_ccu_enable,
 	.set_freq = sunxi_ccu_set_freq,
@@ -91,6 +90,7 @@ static const struct clock_driver_ops sunxi_ccu_driver_ops = {
 
 const struct driver sunxi_ccu_driver = {
 	.name  = "sunxi-ccu",
+	.class = DM_CLASS_CLOCK,
 	.probe = sunxi_ccu_probe,
 	.ops   = &sunxi_ccu_driver_ops,
 };

@@ -19,11 +19,10 @@ struct irq_vector {
 };
 
 struct irqchip_driver_ops {
-	uint32_t class;
-	int      (*irq)(struct device *irqdev);
-	int      (*register_irq)(struct device *irqdev, struct device *dev,
-	                         irq_handler handler);
-	int      (*unregister_irq)(struct device *irqdev, struct device *dev);
+	int (*irq)(struct device *irqdev);
+	int (*register_irq)(struct device *irqdev, struct device *dev,
+	                    irq_handler handler);
+	int (*unregister_irq)(struct device *irqdev, struct device *dev);
 };
 
 int irqchip_device_register(struct device *dev);

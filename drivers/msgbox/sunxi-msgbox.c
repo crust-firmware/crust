@@ -138,7 +138,6 @@ sunxi_msgbox_unregister_handler(struct device *dev, uint8_t chan)
 }
 
 static const struct msgbox_driver_ops sunxi_msgbox_driver_ops = {
-	.class              = DM_CLASS_MSGBOX,
 	.register_handler   = sunxi_msgbox_register_handler,
 	.send_msg           = sunxi_msgbox_send_msg,
 	.unregister_handler = sunxi_msgbox_unregister_handler,
@@ -146,6 +145,7 @@ static const struct msgbox_driver_ops sunxi_msgbox_driver_ops = {
 
 const struct driver sunxi_msgbox_driver = {
 	.name  = "sunxi-msgbox",
+	.class = DM_CLASS_MSGBOX,
 	.probe = sunxi_msgbox_probe,
 	.ops   = &sunxi_msgbox_driver_ops,
 };

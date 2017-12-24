@@ -12,11 +12,10 @@
 #define CLOCK_OPS(ops) ((struct clock_driver_ops *)(ops))
 
 struct clock_driver_ops {
-	uint32_t class;
-	int      (*disable)(struct device *clockdev, struct device *dev);
-	int      (*enable)(struct device *clockdev, struct device *dev);
-	int      (*set_freq)(struct device *clockdev, struct device *dev,
-	                     uint32_t hz);
+	int (*disable)(struct device *clockdev, struct device *dev);
+	int (*enable)(struct device *clockdev, struct device *dev);
+	int (*set_freq)(struct device *clockdev, struct device *dev,
+	                uint32_t hz);
 };
 
 static inline int

@@ -14,11 +14,10 @@
 typedef void (*msg_handler)(struct device *dev, uint8_t chan, uint32_t msg);
 
 struct msgbox_driver_ops {
-	uint32_t class;
-	int      (*register_handler)(struct device *dev, uint8_t chan,
-	                             msg_handler handler);
-	int      (*send_msg)(struct device *dev, uint8_t chan, uint32_t msg);
-	int      (*unregister_handler)(struct device *dev, uint8_t chan);
+	int (*register_handler)(struct device *dev, uint8_t chan,
+	                        msg_handler handler);
+	int (*send_msg)(struct device *dev, uint8_t chan, uint32_t msg);
+	int (*unregister_handler)(struct device *dev, uint8_t chan);
 };
 
 static inline int

@@ -121,7 +121,6 @@ sun4i_intc_unregister_irq(struct device *irqdev, struct device *dev)
 }
 
 static const struct irqchip_driver_ops sun4i_intc_driver_ops = {
-	.class          = DM_CLASS_IRQCHIP,
 	.irq            = sun4i_intc_irq,
 	.register_irq   = sun4i_intc_register_irq,
 	.unregister_irq = sun4i_intc_unregister_irq,
@@ -129,6 +128,7 @@ static const struct irqchip_driver_ops sun4i_intc_driver_ops = {
 
 const struct driver sun4i_intc_driver = {
 	.name  = "sun4i-intc",
+	.class = DM_CLASS_IRQCHIP,
 	.probe = sun4i_intc_probe,
 	.ops   = &sun4i_intc_driver_ops,
 };
