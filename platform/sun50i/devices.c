@@ -10,7 +10,6 @@
 #include <platform/irq.h>
 
 extern struct driver sun4i_intc_driver;
-extern struct driver sunxi_ccu_driver;
 extern struct driver sunxi_msgbox_driver;
 
 static struct device ccu    __device;
