@@ -25,22 +25,22 @@ enum {
 struct driver;
 
 struct device {
-	const char    *name;
-	uintptr_t      address;
-	struct device *bus;
-	uintptr_t      clock;
-	struct device *clockdev;
-	struct driver *drv;
-	uintptr_t      drvdata;
-	uintptr_t      irq;
-	struct device *irqdev;
-	uint8_t        flags;
+	const char          *name;
+	uintptr_t            address;
+	struct device       *bus;
+	uintptr_t            clock;
+	struct device       *clockdev;
+	const struct driver *drv;
+	uintptr_t            drvdata;
+	uintptr_t            irq;
+	struct device       *irqdev;
+	uint8_t              flags;
 };
 
 struct driver {
 	const char *name;
 	int         (*probe)(struct device *dev);
-	void       *ops;
+	const void *ops;
 };
 
 struct device *dm_get_by_name(const char *name);
