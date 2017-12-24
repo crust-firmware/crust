@@ -33,7 +33,7 @@ sun4i_intc_irq(struct device *irqdev)
 	uintptr_t irq;
 
 	/* Get current IRQ. */
-	while ((irq = mmio_read32(irqdev->address + INTC_VECTOR_REG) >> 2)) {
+	while ((irq = mmio_read32(irqdev->regs + INTC_VECTOR_REG) >> 2)) {
 		struct irq_vector *vector = get_vector(irqdev, irq);
 
 		/* Call registered handler. */
@@ -50,7 +50,7 @@ sun4i_intc_irq(struct device *irqdev)
 		}
 
 		/* Clear IRQ pending status. */
-		mmio_setbits32(irqdev->address + INTC_IRQ_PEND_REG, BIT(irq));
+		mmio_setbits32(irqdev->regs + INTC_IRQ_PEND_REG, BIT(irq));
 	}
 
 	return SUCCESS;
@@ -62,12 +62,12 @@ sun4i_intc_probe(struct device *dev)
 	int err;
 
 	/* Clear base address (just return IRQ numbers). */
-	mmio_write32(dev->address + INTC_BASE_ADDR_REG, 0);
+	mmio_write32(dev->regs + INTC_BASE_ADDR_REG, 0);
 
 	/* Disable, unmask, and clear status for all IRQs. */
-	mmio_write32(dev->address + INTC_EN_REG, 0);
-	mmio_write32(dev->address + INTC_MASK_REG, 0);
-	mmio_write32(dev->address + INTC_IRQ_PEND_REG, ~0);
+	mmio_write32(dev->regs + INTC_EN_REG, 0);
+	mmio_write32(dev->regs + INTC_MASK_REG, 0);
+	mmio_write32(dev->regs + INTC_IRQ_PEND_REG, ~0);
 
 	/* Register this device with the irqchip framework. */
 	if ((err = irqchip_device_register(dev)))
@@ -94,7 +94,7 @@ sun4i_intc_register_irq(struct device *irqdev, struct device *dev,
 	debug("IRQ %d now registered to device %s", irq, dev->name);
 
 	/* Enable IRQ. */
-	mmio_setbits32(irqdev->address + INTC_EN_REG, BIT(irq));
+	mmio_setbits32(irqdev->regs + INTC_EN_REG, BIT(irq));
 
 	debug("IRQ %d now enabled for device %s", irq, dev->name);
 
@@ -112,7 +112,7 @@ sun4i_intc_unregister_irq(struct device *irqdev, struct device *dev)
 	assert(vector->handler);
 
 	/* Disable IRQ. */
-	mmio_clearbits32(irqdev->address + INTC_EN_REG, BIT(irq));
+	mmio_clearbits32(irqdev->regs + INTC_EN_REG, BIT(irq));
 
 	/* Remove IRQ vector (but remember the last device). */
 	vector->handler = NULL;

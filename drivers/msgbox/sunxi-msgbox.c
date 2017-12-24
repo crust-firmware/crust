@@ -50,7 +50,7 @@ static void
 sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan)
 {
 	msg_handler handler;
-	uint32_t    msg = mmio_read32(dev->address + RECV_MSG_DATA_REG(chan));
+	uint32_t    msg = mmio_read32(dev->regs + RECV_MSG_DATA_REG(chan));
 
 	if ((handler = get_handler(dev, chan)))
 		handler(dev, chan, msg);
@@ -61,17 +61,17 @@ sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan)
 static void
 sunxi_msgbox_irq(struct device *dev)
 {
-	uint32_t reg = mmio_read32(dev->address + IRQ_STATUS_REG);
+	uint32_t reg = mmio_read32(dev->regs + IRQ_STATUS_REG);
 
 	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; ++chan) {
 		if (!(reg & RECV_IRQ(chan)))
 			continue;
-		while (mmio_read32(dev->address + RECV_MSG_STATUS_REG(chan)))
+		while (mmio_read32(dev->regs + RECV_MSG_STATUS_REG(chan)))
 			sunxi_msgbox_handle_msg(dev, chan);
 	}
 
 	/* Clear all processed pending interrupts. */
-	mmio_write32(dev->address + IRQ_STATUS_REG, reg);
+	mmio_write32(dev->regs + IRQ_STATUS_REG, reg);
 }
 
 static int
@@ -87,8 +87,8 @@ sunxi_msgbox_register_handler(struct device *dev, uint8_t chan,
 		return EEXIST;
 	set_handler(dev, chan, handler);
 
-	reg = mmio_read32(dev->address + IRQ_EN_REG);
-	mmio_write32(dev->address + IRQ_EN_REG, reg | RECV_IRQ(chan));
+	reg = mmio_read32(dev->regs + IRQ_EN_REG);
+	mmio_write32(dev->regs + IRQ_EN_REG, reg | RECV_IRQ(chan));
 
 	return 0;
 }
@@ -102,8 +102,8 @@ sunxi_msgbox_probe(struct device *dev)
 		return err;
 
 	/* Disable and clear all IRQs. */
-	mmio_write32(dev->address + IRQ_EN_REG, 0);
-	mmio_write32(dev->address + IRQ_STATUS_REG, BITMASK(0, 16));
+	mmio_write32(dev->regs + IRQ_EN_REG, 0);
+	mmio_write32(dev->regs + IRQ_STATUS_REG, BITMASK(0, 16));
 
 	if ((err = irqchip_register_irq(dev, sunxi_msgbox_irq)))
 		return err;
@@ -116,7 +116,7 @@ sunxi_msgbox_send_msg(struct device *dev, uint8_t chan, uint32_t msg)
 {
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
-	mmio_write32(dev->address + XMIT_MSG_DATA_REG(chan), msg);
+	mmio_write32(dev->regs + XMIT_MSG_DATA_REG(chan), msg);
 
 	return 0;
 }
@@ -129,8 +129,8 @@ sunxi_msgbox_unregister_handler(struct device *dev, uint8_t chan)
 	assert(chan < SUNXI_MSGBOX_CHANS);
 	assert(get_handler(dev, chan));
 
-	reg = mmio_read32(dev->address + IRQ_EN_REG);
-	mmio_write32(dev->address + IRQ_EN_REG, reg & ~RECV_IRQ(chan));
+	reg = mmio_read32(dev->regs + IRQ_EN_REG);
+	mmio_write32(dev->regs + IRQ_EN_REG, reg & ~RECV_IRQ(chan));
 
 	set_handler(dev, chan, NULL);
 

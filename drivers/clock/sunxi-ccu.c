@@ -26,19 +26,19 @@ sunxi_ccu_disable(struct device *clockdev, struct device *dev)
 	uint8_t reset;
 
 	if ((reset = CCU_GET_RESET(dev->clock))) {
-		mmio_clearbits32(clockdev->address + CCU_RESET_BASE +
+		mmio_clearbits32(clockdev->regs + CCU_RESET_BASE +
 		                 BITMAP_WORDOFF(reset),
 		                 BIT(BITMAP_BIT(reset)));
-		if (mmio_read32(clockdev->address + CCU_RESET_BASE +
+		if (mmio_read32(clockdev->regs + CCU_RESET_BASE +
 		                BITMAP_WORDOFF(reset)) &
 		    BIT(BITMAP_BIT(reset)))
 			return EIO;
 	}
 	if ((gate = CCU_GET_GATE(dev->clock))) {
-		mmio_clearbits32(clockdev->address + CCU_GATE_BASE +
+		mmio_clearbits32(clockdev->regs + CCU_GATE_BASE +
 		                 BITMAP_WORDOFF(gate),
 		                 BIT(BITMAP_BIT(gate)));
-		if (mmio_read32(clockdev->address + CCU_GATE_BASE +
+		if (mmio_read32(clockdev->regs + CCU_GATE_BASE +
 		                BITMAP_WORDOFF(gate)) &
 		    BIT(BITMAP_BIT(gate)))
 			return EIO;
@@ -54,19 +54,19 @@ sunxi_ccu_enable(struct device *clockdev, struct device *dev)
 	uint8_t reset;
 
 	if ((gate = CCU_GET_GATE(dev->clock))) {
-		mmio_setbits32(clockdev->address + CCU_GATE_BASE +
+		mmio_setbits32(clockdev->regs + CCU_GATE_BASE +
 		               BITMAP_WORDOFF(gate),
 		               BIT(BITMAP_BIT(gate)));
-		if (!(mmio_read32(clockdev->address + CCU_GATE_BASE +
+		if (!(mmio_read32(clockdev->regs + CCU_GATE_BASE +
 		                  BITMAP_WORDOFF(gate)) &
 		      BIT(BITMAP_BIT(gate))))
 			return EIO;
 	}
 	if ((reset = CCU_GET_RESET(dev->clock))) {
-		mmio_setbits32(clockdev->address + CCU_RESET_BASE +
+		mmio_setbits32(clockdev->regs + CCU_RESET_BASE +
 		               BITMAP_WORDOFF(reset),
 		               BIT(BITMAP_BIT(reset)));
-		if (!(mmio_read32(clockdev->address + CCU_RESET_BASE +
+		if (!(mmio_read32(clockdev->regs + CCU_RESET_BASE +
 		                  BITMAP_WORDOFF(reset)) &
 		      BIT(BITMAP_BIT(reset))))
 			return EIO;

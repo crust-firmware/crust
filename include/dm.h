@@ -26,8 +26,9 @@ struct driver;
 
 struct device {
 	const char          *name;
-	uintptr_t            address;
 	struct device       *bus;
+	uintptr_t            addr;
+	uintptr_t            regs;
 	uintptr_t            clock;
 	struct device       *clockdev;
 	const struct driver *drv;

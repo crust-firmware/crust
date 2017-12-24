@@ -16,27 +16,27 @@ static struct device msgbox __device;
 static struct device r_intc __device;
 
 static struct device ccu = {
-	.name    = "ccu",
-	.address = DEV_CCU,
-	.drv     = &sunxi_ccu_driver,
+	.name = "ccu",
+	.drv  = &sunxi_ccu_driver,
+	.regs = DEV_CCU,
 };
 
 SUNXI_MSGBOX_ALLOC_DRVDATA(DEV_MSGBOX);
 static struct device msgbox = {
 	.name     = "msgbox",
-	.address  = DEV_MSGBOX,
 	.clock    = CCU_GATE(CCU_GATE_MSGBOX) | CCU_RESET(CCU_RESET_MSGBOX),
 	.clockdev = &ccu,
 	.drv      = &sunxi_msgbox_driver,
 	.drvdata  = SUNXI_MSGBOX_DRVDATA(DEV_MSGBOX),
 	.irq      = IRQ_MSGBOX,
 	.irqdev   = &r_intc,
+	.regs     = DEV_MSGBOX,
 };
 
 SUN4I_INTC_ALLOC_DRVDATA(DEV_R_INTC);
 static struct device r_intc = {
 	.name    = "r_intc",
-	.address = DEV_R_INTC,
 	.drv     = &sun4i_intc_driver,
 	.drvdata = SUN4I_INTC_DRVDATA(DEV_R_INTC),
+	.regs    = DEV_R_INTC,
 };
