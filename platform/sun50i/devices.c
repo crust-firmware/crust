@@ -6,11 +6,10 @@
 #include <dm.h>
 #include <drivers/clock/sunxi-ccu.h>
 #include <drivers/irqchip/sun4i-intc.h>
+#include <drivers/msgbox/sunxi-msgbox.h>
 #include <platform/ccu.h>
 #include <platform/devices.h>
 #include <platform/irq.h>
-
-extern struct driver sunxi_msgbox_driver;
 
 static struct device ccu    __device;
 static struct device msgbox __device;
@@ -22,12 +21,14 @@ static struct device ccu = {
 	.drv     = &sunxi_ccu_driver,
 };
 
+SUNXI_MSGBOX_ALLOC_DRVDATA(DEV_MSGBOX);
 static struct device msgbox = {
 	.name     = "msgbox",
 	.address  = DEV_MSGBOX,
 	.clock    = CCU_GATE(CCU_GATE_MSGBOX) | CCU_RESET(CCU_RESET_MSGBOX),
 	.clockdev = &ccu,
 	.drv      = &sunxi_msgbox_driver,
+	.drvdata  = SUNXI_MSGBOX_DRVDATA(DEV_MSGBOX),
 	.irq      = IRQ_MSGBOX,
 	.irqdev   = &r_intc,
 };
