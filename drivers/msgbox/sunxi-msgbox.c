@@ -80,6 +80,7 @@ sunxi_msgbox_register_handler(struct device *dev, uint8_t chan,
 	uint32_t reg;
 
 	assert(chan < SUNXI_MSGBOX_CHANS);
+	assert(handler);
 
 	if (get_handler(dev, chan))
 		return EEXIST;
@@ -112,6 +113,8 @@ sunxi_msgbox_probe(struct device *dev)
 static int
 sunxi_msgbox_send_msg(struct device *dev, uint8_t chan, uint32_t msg)
 {
+	assert(chan < SUNXI_MSGBOX_CHANS);
+
 	mmio_write32(dev->address + XMIT_MSG_DATA_REG(chan), msg);
 
 	return 0;
@@ -122,6 +125,7 @@ sunxi_msgbox_unregister_handler(struct device *dev, uint8_t chan)
 {
 	uint32_t reg;
 
+	assert(chan < SUNXI_MSGBOX_CHANS);
 	assert(get_handler(dev, chan));
 
 	reg = mmio_read32(dev->address + IRQ_EN_REG);
