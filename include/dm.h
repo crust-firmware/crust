@@ -44,6 +44,7 @@ struct driver {
 	const void *ops;
 };
 
+struct device *dm_get_by_class(uint32_t class);
 struct device *dm_get_by_name(const char *name);
 void dm_init(void);
 

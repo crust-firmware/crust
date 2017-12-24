@@ -7,6 +7,7 @@
 #include <dm.h>
 #include <error.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 
 extern struct device device_list[];
@@ -34,6 +35,18 @@ device_probe(struct device *dev)
 	debug("Finished probing device %s", dev->name);
 	dev->flags |= DEVICE_FLAG_RUNNING;
 	return SUCCESS;
+}
+
+struct device *
+dm_get_by_class(uint32_t class)
+{
+	struct device *dev;
+
+	for (dev = device_list; dev < device_list_end; ++dev)
+		if (dev->drv->class == class)
+			return dev;
+
+	return NULL;
 }
 
 struct device *
