@@ -13,6 +13,11 @@
 
 typedef void (*irq_handler)(struct device *);
 
+struct irq_vector {
+	struct device *dev;
+	irq_handler    handler;
+};
+
 struct irqchip_driver_ops {
 	uint32_t class;
 	int      (*irq)(struct device *irqdev);
