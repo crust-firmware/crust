@@ -13,4 +13,6 @@
 #define CCU_MODULE(n)     ((n) & 0xffff)
 #define CCU_GET_MODULE(n) ((n) & 0xffff)
 
+extern const struct driver sunxi_ccu_driver;
+
 #endif /* DRIVERS_CLOCK_SUNXI_CCU_H */
