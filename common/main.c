@@ -7,6 +7,7 @@
 #include <console.h>
 #include <debug.h>
 #include <dm.h>
+#include <scpi.h>
 #include <stdbool.h>
 #include <test.h>
 #include <watchdog.h>
@@ -34,6 +35,9 @@ main(void)
 		watchdog_enable(watchdog, WDOG_TIMEOUT);
 		info("Trusted watchdog enabled");
 	}
+
+	/* Do this last, as it tells SCPI clients we are finished booting. */
+	scpi_init();
 
 	/* Process work queue. */
 	while (true) {
