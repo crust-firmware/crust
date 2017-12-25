@@ -98,6 +98,8 @@ sunxi_msgbox_probe(struct device *dev)
 {
 	int err;
 
+	assert(dev->drvdata);
+
 	if ((err = clock_enable(dev)))
 		return err;
 
