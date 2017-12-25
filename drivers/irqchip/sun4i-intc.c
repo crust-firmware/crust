@@ -61,6 +61,8 @@ sun4i_intc_probe(struct device *dev)
 {
 	int err;
 
+	assert(dev->drvdata);
+
 	/* Clear base address (just return IRQ numbers). */
 	mmio_write32(dev->regs + INTC_BASE_ADDR_REG, 0);
 
