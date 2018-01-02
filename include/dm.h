@@ -25,16 +25,27 @@ enum {
 struct driver;
 
 struct device {
+	/** A unique name for the device (used for debugging) */
 	const char          *name;
+	/** The parent bus/controller (usually NULL for MMIO devices) */
 	struct device       *bus;
+	/** A bus-specific address/pin/port (if on a bus) */
 	uintptr_t            addr;
+	/** Beginning of an MMIO register block (if one exists) */
 	uintptr_t            regs;
+	/** A clockdev-specific clock description */
 	uintptr_t            clock;
+	/** The controller for the device's clock(s) */
 	struct device       *clockdev;
+	/** The driver for this device */
 	const struct driver *drv;
+	/** Extra per-device driver-specific data */
 	uintptr_t            drvdata;
+	/** An irqdev-specific IRQ description */
 	uintptr_t            irq;
+	/** The controller for the device's IRQ(s) */
 	struct device       *irqdev;
+	/** Flags describing the device's state */
 	uint8_t              flags;
 };
 
