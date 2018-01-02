@@ -20,7 +20,7 @@ CFLAGS		 = -Os -pipe -std=c11 \
 		   -fdata-sections \
 		   -ffreestanding \
 		   -ffunction-sections \
-		   $(if $(filter-out 0,$(DEBUG)),-fno-lto,-flto) \
+		   -flto \
 		   -fno-asynchronous-unwind-tables \
 		   -fno-common \
 		   -fomit-frame-pointer \
