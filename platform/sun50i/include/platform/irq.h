@@ -6,10 +6,22 @@
 #ifndef PLATFORM_IRQ_H
 #define PLATFORM_IRQ_H
 
-#define IRQ_NMI    0x00
-#define IRQ_TIMER0 0x01
-#define IRQ_TIMER1 0x02
+#define IRQ_NMI      0x00
+#define IRQ_R_TIMER0 0x01
+#define IRQ_R_TIMER1 0x02
 
-#define IRQ_MSGBOX 0x11
+#define IRQ_R_WDOG   0x04
+#define IRQ_R_CIR_RX 0x05
+#define IRQ_R_UART   0x06
+
+#define IRQ_R_ALARM0 0x08
+#define IRQ_R_ALARM1 0x09
+#define IRQ_R_TIMER2 0x0a
+#define IRQ_R_TIMER3 0x0b
+#define IRQ_R_I2C    0x0c
+#define IRQ_R_PIO_PL 0x0d
+#define IRQ_R_TWD    0x0e
+
+#define IRQ_MSGBOX   0x11
 
 #endif /* PLATFORM_IRQ_H */
