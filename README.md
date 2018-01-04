@@ -131,7 +131,7 @@ This tag can be added automatically by `git` using `git commit -s`.
 The code in this project is formatted with `uncrustify`. You will need a recent
 version of that program (possibly compiled from its [git repository][ucgit]) to
 format any changes you make. You can use the target `make format` to correctly
-format your code.
+format your code. Other files should be wrapped to 79 columns.
 
 Please run `make check` to check your changes before submitting a pull request.
 Additionally, please ensure your changes work on real hardware before
