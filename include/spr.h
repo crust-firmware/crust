@@ -10,6 +10,14 @@
 #include <stdint.h>
 #include <arch/spr.h>
 
+#define SPR_VR       0x12000001
+#define SPR_UPR      0x00000765
+#define SPR_CPUCFGR  0x00000020
+#define SPR_DMMUCFGR 0x00000000
+#define SPR_IMMUCFGR 0x00000000
+#define SPR_DCCFGR   0x00002600
+#define SPR_ICCFGR   0x00002640
+
 static inline uint32_t
 mfspr(uint16_t addr)
 {
