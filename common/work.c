@@ -43,7 +43,7 @@ queue_work(work_function fn, void *param)
 	/* Find first available index and verify work item is not queued. */
 	for (size_t i = 0; i < MAX_WORK_ITEMS; ++i) {
 		if (!queued && work_items[i].fn == NULL) {
-			queued              = true;
+			queued = true;
 			work_items[i].fn    = fn;
 			work_items[i].param = param;
 		} else if (work_items[i].fn == fn &&
