@@ -82,7 +82,7 @@ static int
 sun4i_intc_register_irq(struct device *irqdev, struct device *dev,
                         irq_handler handler)
 {
-	uintptr_t irq             = dev->irq;
+	uintptr_t irq = dev->irq;
 	struct irq_vector *vector = get_vector(irqdev, irq);
 
 	assert(irq < SUN4I_INTC_IRQS);
@@ -106,7 +106,7 @@ sun4i_intc_register_irq(struct device *irqdev, struct device *dev,
 static int
 sun4i_intc_unregister_irq(struct device *irqdev, struct device *dev)
 {
-	uintptr_t irq             = dev->irq;
+	uintptr_t irq = dev->irq;
 	struct irq_vector *vector = get_vector(irqdev, irq);
 
 	assert(irq < SUN4I_INTC_IRQS);
