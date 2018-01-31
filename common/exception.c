@@ -18,7 +18,7 @@ handle_exception(uint32_t number, struct exception_regs *regs)
 		irqchip_irq();
 		break;
 	default:
-		panic("unhandled exception %d at %p! (lr=%p)",
+		panic("Unhandled exception %d at %p! (lr=%p)",
 		      number, (void *)regs->pc, (void *)regs->r9);
 	}
 }

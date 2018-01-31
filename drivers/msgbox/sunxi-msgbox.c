@@ -55,7 +55,7 @@ sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan)
 	if ((handler = get_handler(dev, chan)))
 		handler(dev, chan, msg);
 	else
-		debug("unsolicited message %08x in channel %d", msg, chan);
+		debug("Unsolicited message %08x in channel %d", msg, chan);
 }
 
 static void
