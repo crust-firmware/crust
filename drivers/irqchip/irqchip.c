@@ -30,5 +30,5 @@ irqchip_irq(void)
 	if (!irqchip_device)
 		panic("Interrupt with no irqchip registered");
 
-	return IRQCHIP_OPS(irqchip_device->drv->ops)->irq(irqchip_device);
+	return IRQCHIP_OPS(irqchip_device)->irq(irqchip_device);
 }

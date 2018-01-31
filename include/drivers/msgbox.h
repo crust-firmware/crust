@@ -9,7 +9,7 @@
 #include <dm.h>
 #include <stdint.h>
 
-#define MSGBOX_OPS(ops) ((struct msgbox_driver_ops *)(ops))
+#define MSGBOX_OPS(dev) ((struct msgbox_driver_ops *)((dev)->drv->ops))
 
 typedef void (*msg_handler)(struct device *dev, uint8_t chan, uint32_t msg);
 
@@ -23,19 +23,19 @@ struct msgbox_driver_ops {
 static inline int
 msgbox_register_handler(struct device *dev, uint8_t chan, msg_handler handler)
 {
-	return MSGBOX_OPS(dev->drv->ops)->register_handler(dev, chan, handler);
+	return MSGBOX_OPS(dev)->register_handler(dev, chan, handler);
 }
 
 static inline int
 msgbox_send_msg(struct device *dev, uint8_t chan, uint32_t msg)
 {
-	return MSGBOX_OPS(dev->drv->ops)->send_msg(dev, chan, msg);
+	return MSGBOX_OPS(dev)->send_msg(dev, chan, msg);
 }
 
 static inline int
 msgbox_unregister_handler(struct device *dev, uint8_t chan)
 {
-	return MSGBOX_OPS(dev->drv->ops)->unregister_handler(dev, chan);
+	return MSGBOX_OPS(dev)->unregister_handler(dev, chan);
 }
 
 #endif /* DRIVERS_MSGBOX_H */
