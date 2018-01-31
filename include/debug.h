@@ -17,7 +17,7 @@
 
 #if DEBUG
 #define assert(e)          ((void)((e) || \
-	                           (panic("assertion failed: %s (%s:%d)", #e, \
+	                           (panic("Assertion failed: %s (%s:%d)", #e, \
 	                                  __FILE__, __LINE__), 0)))
 #else
 #define assert(e)          ((void)0)
