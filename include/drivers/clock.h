@@ -9,7 +9,7 @@
 #include <dm.h>
 #include <stdint.h>
 
-#define CLOCK_OPS(ops) ((struct clock_driver_ops *)(ops))
+#define CLOCK_OPS(dev) ((struct clock_driver_ops *)((dev)->drv->ops))
 
 struct clock_driver_ops {
 	int (*disable)(struct device *clockdev, struct device *dev);
@@ -23,7 +23,7 @@ clock_disable(struct device *dev)
 {
 	struct device *clockdev = dev->clockdev;
 
-	return CLOCK_OPS(clockdev->drv->ops)->disable(clockdev, dev);
+	return CLOCK_OPS(clockdev)->disable(clockdev, dev);
 }
 
 static inline int
@@ -31,7 +31,7 @@ clock_enable(struct device *dev)
 {
 	struct device *clockdev = dev->clockdev;
 
-	return CLOCK_OPS(clockdev->drv->ops)->enable(clockdev, dev);
+	return CLOCK_OPS(clockdev)->enable(clockdev, dev);
 }
 
 static inline int
@@ -39,7 +39,7 @@ clock_set_freq(struct device *dev, uint32_t hz)
 {
 	struct device *clockdev = dev->clockdev;
 
-	return CLOCK_OPS(clockdev->drv->ops)->set_freq(clockdev, dev, hz);
+	return CLOCK_OPS(clockdev)->set_freq(clockdev, dev, hz);
 }
 
 #endif /* DRIVERS_CLOCK_H */

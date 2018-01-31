@@ -9,7 +9,7 @@
 #include <dm.h>
 #include <stdint.h>
 
-#define IRQCHIP_OPS(ops) ((struct irqchip_driver_ops *)(ops))
+#define IRQCHIP_OPS(dev) ((struct irqchip_driver_ops *)((dev)->drv->ops))
 
 typedef void (*irq_handler)(struct device *);
 
@@ -33,8 +33,7 @@ irqchip_register_irq(struct device *dev, irq_handler handler)
 {
 	struct device *irqdev = dev->irqdev;
 
-	return IRQCHIP_OPS(irqdev->drv->ops)->register_irq(irqdev, dev,
-	                                                   handler);
+	return IRQCHIP_OPS(irqdev)->register_irq(irqdev, dev, handler);
 }
 
 static inline int
@@ -42,7 +41,7 @@ irqchip_unregister_irq(struct device *dev)
 {
 	struct device *irqdev = dev->irqdev;
 
-	return IRQCHIP_OPS(irqdev->drv->ops)->unregister_irq(irqdev, dev);
+	return IRQCHIP_OPS(irqdev)->unregister_irq(irqdev, dev);
 }
 
 #endif /* DRIVERS_IRQCHIP_H */
