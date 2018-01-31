@@ -43,24 +43,23 @@ LDFLAGS		 = -nostdlib \
 HOSTCC		 = cc
 HOSTCFLAGS	 = -O2 -pipe -std=c11 \
 		   $(WARNINGS)
-HOSTCPPFLAGS	 =
+HOSTCPPFLAGS	 = $(addprefix -I,$(toolincdirs))
 HOSTLDFLAGS	 =
 HOSTLIBS	 =
 
 pathjoin	 = $(foreach X,$2,$(addsuffix /$X,$1))
 
-boardfiles	 = $(wildcard $(srcdir)/board/*)
-boards		 = $(sort $(notdir $(boardfiles)))
+incdirs		 = $(objdir)/include $(platdir)/include $(srcdir)/include
+incpatterns	 = *.h */*.h */*/*.h *.S
+includes	 = $(wildcard $(call pathjoin,$(incdirs),$(incpatterns))) \
+		   $(objdir)/include/config.h
+
+platdir		 = $(srcdir)/platform/$(CONFIG_PLATFORM)
 
 srcdir		 = .
-srcdirs		 = $(addprefix $(srcdir)/,common drivers/* lib) \
-		   $(srcdir)/platform/$(PLATFORM)
+srcdirs		 = $(addprefix $(srcdir)/,common drivers/* lib) $(platdir)
 srcpatterns	 = *.c *.S
 sources		 = $(wildcard $(call pathjoin,$(srcdirs),$(srcpatterns)))
-
-incdirs		 = $(addprefix $(srcdir)/,include platform/$(PLATFORM)/include)
-incpatterns	 = *.h */*.h */*/*.h *.S
-includes	 = $(wildcard $(call pathjoin,$(incdirs),$(incpatterns)))
 
 objdir		 = build
 objdirs		 = $(sort $(dir $(objects)))
@@ -72,14 +71,14 @@ fmtincludes	 = $(wildcard $(call pathjoin,$(fmtincdirs),*.h */*.h */*/*.h))
 fmtsrcdirs	 = $(addprefix $(srcdir)/,common drivers/* lib platform/* tools)
 fmtsources	 = $(wildcard $(call pathjoin,$(fmtsrcdirs),*.c))
 
-toolsrc		 = $(wildcard $(srcdir)/tools/*.c)
-tools		 = $(patsubst $(srcdir)/tools/%.c,$(objdir)/tools/%,$(toolsrc))
+toolincdirs	 = $(objdir)/include $(platdir)/include
+toolincludes	 = $(wildcard $(call pathjoin,$(toolincdirs),$(incpatterns))) \
+		   $(objdir)/include/config.h
+toolsources	 = $(wildcard $(srcdir)/tools/*.c)
+tools		 = $(patsubst $(srcdir)/%.c,$(objdir)/%,$(toolsources))
 
--include .config
-ifeq ($(filter clean distclean %config format,$(MAKECMDGOALS)),)
-ifeq ($(PLATFORM),)
-$(error No board chosen! Run `make <board>_defconfig`. Known boards: $(boards))
-endif
+ifeq ($(filter %clean %config %format,$(MAKECMDGOALS)),)
+include $(objdir)/config.mk
 endif
 
 M := @$(if $(filter-out 0,$(V)),:,printf '  %-7s %s\n')
@@ -108,7 +107,7 @@ format: $(fmtincludes) $(fmtsources)
 
 tools: $(tools)
 
-$(objdir) $(objdirs) $(objdir)/tools:
+$(objdir) $(objdirs) $(objdir)/include $(objdir)/tools:
 	$(Q) mkdir -p $@
 
 $(objdir)/%.bin: $(objdir)/%.elf | $(objdir)
@@ -132,7 +131,13 @@ $(objdir)/%.o: $(srcdir)/%.S $(incdirs) $(includes) | $(objdirs)
 	$(M) CC $@
 	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
-$(objdir)/tools/%: $(srcdir)/tools/%.c | $(objdir)/tools
+$(objdir)/config.mk: .config | $(objdir)
+	$(Q) sed 's/#.*$$//;s/="\(.*\)"$$/=\1/' $< > $@
+
+$(objdir)/include/config.h: .config | $(objdir)/include
+	$(Q) sed -n 's/#.*$$//;s/^\([^=]\+\)=\(.*\)$$/#define \1 \2/p' $< > $@
+
+$(objdir)/%: $(srcdir)/%.c $(toolincdirs) $(toolincludes) | $(objdir)/tools
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(HOSTLDFLAGS) \
 		-o $@ $< $(HOSTLIBS)
