@@ -20,6 +20,7 @@ enum {
 	DM_CLASS_CLOCK,
 	DM_CLASS_IRQCHIP,
 	DM_CLASS_MSGBOX,
+	DM_CLASS_WALLCLOCK,
 };
 
 struct driver;
