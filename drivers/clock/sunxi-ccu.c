@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
+#include <bitmap.h>
 #include <compiler.h>
 #include <debug.h>
 #include <dm.h>
