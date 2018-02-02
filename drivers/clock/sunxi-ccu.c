@@ -9,7 +9,6 @@
 #include <error.h>
 #include <drivers/clock.h>
 #include <drivers/clock/sunxi-ccu.h>
-#include <platform/ccu.h>
 
 static int
 sunxi_ccu_probe(struct device *dev __unused)
@@ -20,18 +19,18 @@ sunxi_ccu_probe(struct device *dev __unused)
 static int
 sunxi_ccu_disable(struct device *clockdev, struct device *dev)
 {
-	uint8_t gate;
-	uint8_t reset;
+	uint16_t gate;
+	uint16_t reset;
 
 	/* Put the device in reset before turning off its clock. */
 	if ((reset = CCU_GET_RESET(dev->clock))) {
-		bitmap_clear(clockdev->regs + CCU_RESET_BASE, reset);
-		if (bitmap_get(clockdev->regs + CCU_RESET_BASE, reset))
+		bitmap_clear(clockdev->regs, reset);
+		if (bitmap_get(clockdev->regs, reset))
 			return EIO;
 	}
 	if ((gate = CCU_GET_GATE(dev->clock))) {
-		bitmap_clear(clockdev->regs + CCU_GATE_BASE, gate);
-		if (bitmap_get(clockdev->regs + CCU_GATE_BASE, gate))
+		bitmap_clear(clockdev->regs, gate);
+		if (bitmap_get(clockdev->regs, gate))
 			return EIO;
 	}
 
@@ -41,18 +40,18 @@ sunxi_ccu_disable(struct device *clockdev, struct device *dev)
 static int
 sunxi_ccu_enable(struct device *clockdev, struct device *dev)
 {
-	uint8_t gate;
-	uint8_t reset;
+	uint16_t gate;
+	uint16_t reset;
 
 	/* Enable the clock before taking the device out of reset. */
 	if ((gate = CCU_GET_GATE(dev->clock))) {
-		bitmap_set(clockdev->regs + CCU_GATE_BASE, gate);
-		if (!bitmap_get(clockdev->regs + CCU_GATE_BASE, gate))
+		bitmap_set(clockdev->regs, gate);
+		if (!bitmap_get(clockdev->regs, gate))
 			return EIO;
 	}
 	if ((reset = CCU_GET_RESET(dev->clock))) {
-		bitmap_set(clockdev->regs + CCU_RESET_BASE, reset);
-		if (!bitmap_get(clockdev->regs + CCU_RESET_BASE, reset))
+		bitmap_set(clockdev->regs, reset);
+		if (!bitmap_get(clockdev->regs, reset))
 			return EIO;
 	}
 
