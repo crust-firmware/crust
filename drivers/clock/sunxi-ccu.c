@@ -11,12 +11,6 @@
 #include <drivers/clock/sunxi-ccu.h>
 
 static int
-sunxi_ccu_probe(struct device *dev __unused)
-{
-	return SUCCESS;
-}
-
-static int
 sunxi_ccu_disable(struct device *clockdev, struct device *dev)
 {
 	uint16_t gate;
@@ -59,8 +53,15 @@ sunxi_ccu_enable(struct device *clockdev, struct device *dev)
 }
 
 static int
-sunxi_ccu_set_freq(struct device *clockdev __unused,
-                   struct device *dev __unused, uint32_t hz __unused)
+sunxi_ccu_get_rate(struct device *clockdev __unused,
+                   struct device *dev __unused, uint32_t *rate __unused)
+{
+	return ENOTSUP;
+}
+
+static int
+sunxi_ccu_set_rate(struct device *clockdev __unused,
+                   struct device *dev __unused, uint32_t rate __unused)
 {
 	return ENOTSUP;
 }
@@ -68,8 +69,15 @@ sunxi_ccu_set_freq(struct device *clockdev __unused,
 static const struct clock_driver_ops sunxi_ccu_driver_ops = {
 	.disable  = sunxi_ccu_disable,
 	.enable   = sunxi_ccu_enable,
-	.set_freq = sunxi_ccu_set_freq,
+	.get_rate = sunxi_ccu_get_rate,
+	.set_rate = sunxi_ccu_set_rate,
 };
+
+static int
+sunxi_ccu_probe(struct device *dev __unused)
+{
+	return SUCCESS;
+}
 
 const struct driver sunxi_ccu_driver = {
 	.name  = "sunxi-ccu",
