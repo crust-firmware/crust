@@ -10,11 +10,8 @@
 
 #define SUN4I_INTC_IRQS 32
 
-#define SUN4I_INTC_ALLOC_DRVDATA(id) \
-	static struct irq_vector sun4i_intc_ ## id ## _vectors[SUN4I_INTC_IRQS]
-
-#define SUN4I_INTC_DRVDATA(id) \
-	((uintptr_t)&sun4i_intc_ ## id ## _vectors)
+#define SUN4I_INTC_DRVDATA \
+	(uintptr_t)&(struct irq_vector[SUN4I_INTC_IRQS])
 
 extern const struct driver sun4i_intc_driver;
 
