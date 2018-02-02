@@ -1,6 +1,6 @@
 align_asm_colon                 = false
 align_assign_span               = 1
-align_assign_thresh             = 4
+align_assign_thresh             = 8
 align_enum_equ_span             = 3
 align_enum_equ_thresh           = 0
 align_func_params               = false
@@ -32,7 +32,7 @@ align_same_func_call_params     = false
 align_single_line_brace         = false
 align_single_line_brace_gap     = 0
 align_single_line_func          = false
-align_struct_init_span          = 3
+align_struct_init_span          = 0
 align_typedef_amp_style         = 2
 align_typedef_func              = 2
 align_typedef_gap               = 0
