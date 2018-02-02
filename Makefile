@@ -20,7 +20,7 @@ CFLAGS		 = -Os -pipe -std=c11 \
 		   -fdata-sections \
 		   -ffreestanding \
 		   -ffunction-sections \
-		   $(if $(filter-out 0,$(DEBUG)),-fno-lto,-flto) \
+		   -flto \
 		   -fno-asynchronous-unwind-tables \
 		   -fno-common \
 		   -fomit-frame-pointer \
@@ -43,7 +43,8 @@ LDFLAGS		 = -nostdlib \
 HOSTCC		 = cc
 HOSTCFLAGS	 = -O2 -pipe -std=c11 \
 		   $(WARNINGS)
-HOSTCPPFLAGS	 =
+HOSTCPPFLAGS	 = -DPLATFORM='"$(PLATFORM)"' \
+		   $(addprefix -I,$(toolincdirs))
 HOSTLDFLAGS	 =
 HOSTLIBS	 =
 
@@ -67,8 +68,10 @@ objdirs		 = $(sort $(dir $(objects)))
 objects		 = $(patsubst $(srcdir)/%,$(objdir)/%.o,$(basename $(sources)))
 outputs		 = $(addprefix $(objdir)/,scp.bin scp.elf scp.map)
 
-toolsrc		 = $(wildcard $(srcdir)/tools/*.c)
-tools		 = $(patsubst $(srcdir)/tools/%.c,$(objdir)/tools/%,$(toolsrc))
+toolincdirs	 = $(srcdir)/platform/$(PLATFORM)/include
+toolincludes	 = $(wildcard $(call pathjoin,$(toolincdirs),$(incpatterns)))
+toolsources	 = $(wildcard $(srcdir)/tools/*.c)
+tools		 = $(patsubst $(srcdir)/tools/%.c,$(objdir)/tools/%,$(toolsources))
 
 -include .config
 ifeq ($(filter clean distclean %config format,$(MAKECMDGOALS)),)
@@ -84,7 +87,7 @@ all: $(outputs) $(tools)
 
 check: check-format
 
-check-format: $(filter-out %.S,$(includes) $(sources) $(toolsrc))
+check-format: $(filter-out %.S,$(includes) $(sources) $(toolsources))
 	$(Q) uncrustify -c .uncrustify -l C -q --check $^
 
 clean:
@@ -98,7 +101,7 @@ distclean:
 
 firmware: $(outputs)
 
-format: $(filter-out %.S,$(includes) $(sources) $(toolsrc))
+format: $(filter-out %.S,$(includes) $(sources) $(toolsources))
 	$(Q) uncrustify -c .uncrustify -l C -q --no-backup $^
 
 tools: $(tools)
@@ -127,7 +130,7 @@ $(objdir)/%.o: $(srcdir)/%.S $(incdirs) $(includes) | $(objdirs)
 	$(M) CC $@
 	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
-$(objdir)/tools/%: $(srcdir)/tools/%.c | $(objdir)/tools
+$(objdir)/%: $(srcdir)/%.c $(toolincdirs) $(toolincludes) | $(objdir)/tools
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(HOSTLDFLAGS) \
 		-o $@ $< $(HOSTLIBS)
