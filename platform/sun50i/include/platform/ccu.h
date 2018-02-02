@@ -6,7 +6,7 @@
 #ifndef PLATFORM_CCU_H
 #define PLATFORM_CCU_H
 
-#include <util.h>
+#include <bitmap.h>
 
 #define CCU_GATE_BASE         0x0060
 
