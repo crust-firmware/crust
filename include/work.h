@@ -12,6 +12,14 @@
 typedef void (*work_function)(void *);
 
 /**
+ * Structure representing a unit of work that can be done.
+ */
+struct work_item {
+	work_function fn;
+	void         *param;
+};
+
+/**
  * Execute each work item in the queue until it is empty.
  */
 void process_work(void);
