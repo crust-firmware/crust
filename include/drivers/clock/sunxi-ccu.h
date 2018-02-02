@@ -6,10 +6,17 @@
 #ifndef DRIVERS_CLOCK_SUNXI_CCU_H
 #define DRIVERS_CLOCK_SUNXI_CCU_H
 
-#define CCU_GATE(n)      (((n) & 0xffff) << 16)
-#define CCU_GET_GATE(n)  (((n) >> 16) & 0xffff)
-#define CCU_RESET(n)     ((n) & 0xffff)
-#define CCU_GET_RESET(n) ((n) & 0xffff)
+#include <stdint.h>
+
+#define SUNXI_CCU_DRVDATA \
+	(uintptr_t)&(struct sunxi_ccu_clock[])
+
+struct sunxi_ccu_clock {
+	/** Offset into the CCU of the clock gate bit, zero for none. */
+	uint16_t gate;
+	/** Offset into the CCU of the module reset bit, zero for none. */
+	uint16_t reset;
+};
 
 extern const struct driver sunxi_ccu_driver;
 

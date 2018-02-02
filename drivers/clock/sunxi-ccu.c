@@ -10,21 +10,28 @@
 #include <drivers/clock.h>
 #include <drivers/clock/sunxi-ccu.h>
 
-static int
-sunxi_ccu_disable(struct device *clockdev, struct device *dev)
+static struct sunxi_ccu_clock *
+get_clock(struct device *dev, uint8_t id)
 {
-	uint16_t gate;
-	uint16_t reset;
+	return &((struct sunxi_ccu_clock *)(dev->drvdata))[id];
+}
+
+static int
+sunxi_ccu_disable_id(struct device *dev, int id)
+{
+	struct sunxi_ccu_clock *clock = get_clock(dev, id);
+	uint16_t gate  = clock->gate;
+	uint16_t reset = clock->reset;
 
 	/* Put the device in reset before turning off its clock. */
-	if ((reset = CCU_GET_RESET(dev->clock))) {
-		bitmap_clear(clockdev->regs, reset);
-		if (bitmap_get(clockdev->regs, reset))
+	if (reset != 0) {
+		bitmap_clear(dev->regs, reset);
+		if (bitmap_get(dev->regs, reset))
 			return EIO;
 	}
-	if ((gate = CCU_GET_GATE(dev->clock))) {
-		bitmap_clear(clockdev->regs, gate);
-		if (bitmap_get(clockdev->regs, gate))
+	if (gate != 0) {
+		bitmap_clear(dev->regs, gate);
+		if (bitmap_get(dev->regs, gate))
 			return EIO;
 	}
 
@@ -32,24 +39,38 @@ sunxi_ccu_disable(struct device *clockdev, struct device *dev)
 }
 
 static int
-sunxi_ccu_enable(struct device *clockdev, struct device *dev)
+sunxi_ccu_enable_id(struct device *dev, int id)
 {
-	uint16_t gate;
-	uint16_t reset;
+	struct sunxi_ccu_clock *clock = get_clock(dev, id);
+	uint16_t gate  = clock->gate;
+	uint16_t reset = clock->reset;
 
 	/* Enable the clock before taking the device out of reset. */
-	if ((gate = CCU_GET_GATE(dev->clock))) {
-		bitmap_set(clockdev->regs, gate);
-		if (!bitmap_get(clockdev->regs, gate))
+	if (gate != 0) {
+		bitmap_set(dev->regs, gate);
+		if (!bitmap_get(dev->regs, gate))
 			return EIO;
 	}
-	if ((reset = CCU_GET_RESET(dev->clock))) {
-		bitmap_set(clockdev->regs, reset);
-		if (!bitmap_get(clockdev->regs, reset))
+	/* Only deassert reset once the device has a running clock. */
+	if (reset != 0) {
+		bitmap_set(dev->regs, reset);
+		if (!bitmap_get(dev->regs, reset))
 			return EIO;
 	}
 
 	return SUCCESS;
+}
+
+static int
+sunxi_ccu_disable(struct device *clockdev, struct device *dev)
+{
+	return sunxi_ccu_disable_id(clockdev, dev->clock);
+}
+
+static int
+sunxi_ccu_enable(struct device *clockdev, struct device *dev)
+{
+	return sunxi_ccu_enable_id(clockdev, dev->clock);
 }
 
 static int
@@ -76,6 +97,8 @@ static const struct clock_driver_ops sunxi_ccu_driver_ops = {
 static int
 sunxi_ccu_probe(struct device *dev __unused)
 {
+	assert(dev->drvdata);
+
 	return SUCCESS;
 }
 

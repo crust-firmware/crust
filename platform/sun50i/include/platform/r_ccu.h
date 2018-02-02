@@ -9,6 +9,13 @@
 #include <bitmap.h>
 #include <stdint.h>
 
+#define R_CCU_CLOCK_R_PIO   0
+#define R_CCU_CLOCK_R_CIR   1
+#define R_CCU_CLOCK_R_TIMER 2
+#define R_CCU_CLOCK_R_UART  3
+#define R_CCU_CLOCK_R_I2C   4
+#define R_CCU_CLOCK_R_TWD   5
+
 #define R_CCU_GATE_BASE     (0x0028 / sizeof(uint32_t))
 
 #define R_CCU_GATE_R_PIO    BITMAP_INDEX(R_CCU_GATE_BASE + 0, 0)
