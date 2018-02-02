@@ -23,13 +23,12 @@ static struct device ccu = {
 	.regs = DEV_CCU,
 };
 
-SUNXI_MSGBOX_ALLOC_DRVDATA(DEV_MSGBOX);
 static struct device msgbox = {
 	.name     = "msgbox",
 	.clock    = CCU_GATE(CCU_GATE_MSGBOX) | CCU_RESET(CCU_RESET_MSGBOX),
 	.clockdev = &ccu,
 	.drv      = &sunxi_msgbox_driver,
-	.drvdata  = SUNXI_MSGBOX_DRVDATA(DEV_MSGBOX),
+	.drvdata  = SUNXI_MSGBOX_DRVDATA { 0 },
 	.irq      = IRQ_MSGBOX,
 	.irqdev   = &r_intc,
 	.regs     = DEV_MSGBOX,
@@ -41,10 +40,9 @@ static struct device r_ccu = {
 	.regs = DEV_R_PRCM,
 };
 
-SUN4I_INTC_ALLOC_DRVDATA(DEV_R_INTC);
 static struct device r_intc = {
 	.name    = "r_intc",
 	.drv     = &sun4i_intc_driver,
-	.drvdata = SUN4I_INTC_DRVDATA(DEV_R_INTC),
+	.drvdata = SUN4I_INTC_DRVDATA { { 0 } },
 	.regs    = DEV_R_INTC,
 };
