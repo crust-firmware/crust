@@ -26,15 +26,25 @@ static struct device r_pio    __device;
 static struct device r_timer0 __device;
 
 static struct device ccu = {
-	.name = "ccu",
-	.regs = DEV_CCU,
-	.drv  = &sunxi_ccu_driver,
+	.name    = "ccu",
+	.regs    = DEV_CCU,
+	.drv     = &sunxi_ccu_driver,
+	.drvdata = SUNXI_CCU_DRVDATA {
+		[CCU_CLOCK_MSGBOX] = {
+			.gate  = CCU_GATE_MSGBOX,
+			.reset = CCU_RESET_MSGBOX,
+		},
+		[CCU_CLOCK_PIO] = {
+			.gate  = CCU_GATE_PIO,
+			.reset = CCU_RESET_PIO,
+		},
+	},
 };
 
 static struct device msgbox = {
 	.name     = "msgbox",
 	.regs     = DEV_MSGBOX,
-	.clock    = CCU_GATE(CCU_GATE_MSGBOX) | CCU_RESET(CCU_RESET_MSGBOX),
+	.clock    = CCU_CLOCK_MSGBOX,
 	.clockdev = &ccu,
 	.drv      = &sunxi_msgbox_driver,
 	.drvdata  = SUNXI_MSGBOX_DRVDATA { 0 },
@@ -45,16 +55,40 @@ static struct device msgbox = {
 static struct device pio = {
 	.name     = "pio",
 	.regs     = DEV_PIO,
-	.clock    = CCU_GATE(CCU_GATE_PIO) | CCU_RESET(CCU_RESET_PIO),
+	.clock    = CCU_CLOCK_PIO,
 	.clockdev = &ccu,
 	.drv      = &sunxi_pio_driver,
 	.drvdata  = BITMASK(1, 7), /*< Physically implemented ports (1-7). */
 };
 
 static struct device r_ccu = {
-	.name = "r_ccu",
-	.regs = DEV_R_PRCM,
-	.drv  = &sunxi_ccu_driver,
+	.name    = "r_ccu",
+	.regs    = DEV_R_PRCM,
+	.drv     = &sunxi_ccu_driver,
+	.drvdata = SUNXI_CCU_DRVDATA {
+		[R_CCU_CLOCK_R_PIO] = {
+			.gate = R_CCU_GATE_R_PIO,
+		},
+		[R_CCU_CLOCK_R_CIR] = {
+			.gate  = R_CCU_GATE_R_CIR,
+			.reset = R_CCU_RESET_R_CIR,
+		},
+		[R_CCU_CLOCK_R_TIMER] = {
+			.gate  = R_CCU_GATE_R_TIMER,
+			.reset = R_CCU_RESET_R_TIMER,
+		},
+		[R_CCU_CLOCK_R_UART] = {
+			.gate  = R_CCU_GATE_R_UART,
+			.reset = R_CCU_RESET_R_UART,
+		},
+		[R_CCU_CLOCK_R_I2C] = {
+			.gate  = R_CCU_GATE_R_I2C,
+			.reset = R_CCU_RESET_R_I2C,
+		},
+		[R_CCU_CLOCK_R_TWD] = {
+			.gate = R_CCU_GATE_R_TWD,
+		},
+	},
 };
 
 static struct device r_cnt64 = {
@@ -73,17 +107,16 @@ static struct device r_intc = {
 static struct device r_pio = {
 	.name     = "r_pio",
 	.regs     = DEV_R_PIO,
-	.clock    = CCU_GATE(R_CCU_GATE_R_PIO),
+	.clock    = R_CCU_CLOCK_R_PIO,
 	.clockdev = &r_ccu,
 	.drv      = &sunxi_pio_driver,
 	.drvdata  = BIT(0), /*< Physically implemented ports (0). */
 };
 
 static struct device r_timer0 = {
-	.name  = "r_timer0",
-	.regs  = DEV_R_TIMER,
-	.clock = CCU_GATE(R_CCU_GATE_R_TIMER) |
-	         CCU_RESET(R_CCU_GATE_R_TIMER),
+	.name     = "r_timer0",
+	.regs     = DEV_R_TIMER,
+	.clock    = R_CCU_CLOCK_R_TIMER,
 	.clockdev = &r_ccu,
 	.drv      = &sun8i_r_timer_driver,
 	.drvdata  = 0, /*< Timer index within the device. */
