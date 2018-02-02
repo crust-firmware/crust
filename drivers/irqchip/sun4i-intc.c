@@ -123,7 +123,7 @@ sun4i_intc_unregister_irq(struct device *irqdev, struct device *dev)
 }
 
 static const struct irqchip_driver_ops sun4i_intc_driver_ops = {
-	.irq            = sun4i_intc_irq,
+	.irq = sun4i_intc_irq,
 	.register_irq   = sun4i_intc_register_irq,
 	.unregister_irq = sun4i_intc_unregister_irq,
 };
