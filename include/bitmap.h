@@ -14,7 +14,6 @@
 
 #define BITMAP_INDEX(word, bit) (WORD_BIT * (word) + (bit))
 #define BITMAP_WORD(index)      ((index) / WORD_BIT)
-#define BITMAP_WORDOFF(index)   (BITMAP_WORD(index) * (WORD_BIT / CHAR_BIT))
 #define BITMAP_BIT(index)       ((index) % WORD_BIT)
 
 static inline void
