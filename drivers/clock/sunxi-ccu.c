@@ -5,11 +5,8 @@
 
 #include <bitmap.h>
 #include <compiler.h>
-#include <debug.h>
 #include <dm.h>
 #include <error.h>
-#include <mmio.h>
-#include <util.h>
 #include <drivers/clock.h>
 #include <drivers/clock/sunxi-ccu.h>
 #include <platform/ccu.h>
@@ -26,22 +23,15 @@ sunxi_ccu_disable(struct device *clockdev, struct device *dev)
 	uint8_t gate;
 	uint8_t reset;
 
+	/* Put the device in reset before turning off its clock. */
 	if ((reset = CCU_GET_RESET(dev->clock))) {
-		mmio_clearbits32(clockdev->regs + CCU_RESET_BASE +
-		                 BITMAP_WORDOFF(reset),
-		                 BIT(BITMAP_BIT(reset)));
-		if (mmio_read32(clockdev->regs + CCU_RESET_BASE +
-		                BITMAP_WORDOFF(reset)) &
-		    BIT(BITMAP_BIT(reset)))
+		bitmap_clear(clockdev->regs + CCU_RESET_BASE, reset);
+		if (bitmap_get(clockdev->regs + CCU_RESET_BASE, reset))
 			return EIO;
 	}
 	if ((gate = CCU_GET_GATE(dev->clock))) {
-		mmio_clearbits32(clockdev->regs + CCU_GATE_BASE +
-		                 BITMAP_WORDOFF(gate),
-		                 BIT(BITMAP_BIT(gate)));
-		if (mmio_read32(clockdev->regs + CCU_GATE_BASE +
-		                BITMAP_WORDOFF(gate)) &
-		    BIT(BITMAP_BIT(gate)))
+		bitmap_clear(clockdev->regs + CCU_GATE_BASE, gate);
+		if (bitmap_get(clockdev->regs + CCU_GATE_BASE, gate))
 			return EIO;
 	}
 
@@ -54,22 +44,15 @@ sunxi_ccu_enable(struct device *clockdev, struct device *dev)
 	uint8_t gate;
 	uint8_t reset;
 
+	/* Enable the clock before taking the device out of reset. */
 	if ((gate = CCU_GET_GATE(dev->clock))) {
-		mmio_setbits32(clockdev->regs + CCU_GATE_BASE +
-		               BITMAP_WORDOFF(gate),
-		               BIT(BITMAP_BIT(gate)));
-		if (!(mmio_read32(clockdev->regs + CCU_GATE_BASE +
-		                  BITMAP_WORDOFF(gate)) &
-		      BIT(BITMAP_BIT(gate))))
+		bitmap_set(clockdev->regs + CCU_GATE_BASE, gate);
+		if (!bitmap_get(clockdev->regs + CCU_GATE_BASE, gate))
 			return EIO;
 	}
 	if ((reset = CCU_GET_RESET(dev->clock))) {
-		mmio_setbits32(clockdev->regs + CCU_RESET_BASE +
-		               BITMAP_WORDOFF(reset),
-		               BIT(BITMAP_BIT(reset)));
-		if (!(mmio_read32(clockdev->regs + CCU_RESET_BASE +
-		                  BITMAP_WORDOFF(reset)) &
-		      BIT(BITMAP_BIT(reset))))
+		bitmap_set(clockdev->regs + CCU_RESET_BASE, reset);
+		if (!bitmap_get(clockdev->regs + CCU_RESET_BASE, reset))
 			return EIO;
 	}
 
