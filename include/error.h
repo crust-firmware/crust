@@ -6,13 +6,15 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#define SUCCESS 0    /* The operation succeeded. */
-#define EAGAIN  (-1) /* Try again immediately. */
-#define EBUSY   (-2) /* Try again later. */
-#define EEXIST  (-3) /* The object already exists. */
-#define EIO     (-4) /* Communication with the hardware failed. */
-#define ENOBUS  (-5) /* The bus for this device does not exist. */
-#define ENODEV  (-6) /* This device does not exist. */
-#define ENOTSUP (-7) /* The operation is not supported. */
+#define SUCCESS 0     /* The operation succeeded. */
+#define EAGAIN  (-1)  /* Try again immediately. */
+#define EBUSY   (-2)  /* Try again later. */
+#define EEXIST  (-3)  /* The object already exists. */
+#define EINVAL  (-4)  /* The argument to the function was invalid. */
+#define EIO     (-5)  /* Communication with the hardware failed. */
+#define ENOBUS  (-6)  /* The bus for this device does not exist. */
+#define ENODEV  (-7)  /* This device does not exist. */
+#define ENOTSUP (-8)  /* The operation is not supported. */
+#define ERANGE  (-10) /* The argument to the function was out of range. */
 
 #endif /* ERROR_H */
