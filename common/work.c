@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017 Drew Walters <drewwalters96@gmail.com>
+ * Copyright © 2017-2018 The Crust Firmware Authors.
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
