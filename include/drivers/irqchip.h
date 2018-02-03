@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017 Samuel Holland <samuel@sholland.org>
+ * Copyright © 2017-2018 The Crust Firmware Authors.
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 

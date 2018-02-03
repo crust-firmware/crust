@@ -1,6 +1,6 @@
 /*
  * Copyright © 2005-2014 Rich Felker, et al.
- * Copyright © 2017 Samuel Holland <samuel@sholland.org>
+ * Copyright © 2017-2018 The Crust Firmware Authors.
  * SPDX-License-Identifier: MIT
  */
 
