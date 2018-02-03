@@ -118,7 +118,14 @@ The ARISC firmware *must* run from SRAM A2, because
 Unfortunately, on `sun50i` SoCs, ATF currently takes up the entirety of SRAM
 A2. Fortunately, it can be made smaller. [This version of ATF][crust-atf] has
 been patched to put its dynamically-allocated data in SRAM A1. This leaves half
-of SRAM A2 for the ARISC firmware.
+of SRAM A2 for the ARISC firmware. You'll also need [a patched version of
+U-Boot][crust-uboot] that loads ATF to the right place. You can use the build
+system in [our meta-repository][crust-meta] to automatically generate an SPI
+flash image containing the correct versions of all firmware components.
+
+[crust-atf]: https://github.com/crust-firmware/arm-trusted-firmware
+[crust-meta]: https://github.com/crust-firmware/meta
+[crust-uboot]: https://github.com/crust-firmware/u-boot
 
 ## Contributing
 
