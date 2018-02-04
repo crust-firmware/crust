@@ -67,6 +67,11 @@ objdirs		 = $(sort $(dir $(objects)))
 objects		 = $(patsubst $(srcdir)/%,$(objdir)/%.o,$(basename $(sources)))
 outputs		 = $(addprefix $(objdir)/,scp.bin scp.elf scp.map)
 
+fmtincdirs	 = $(addprefix $(srcdir)/,include platform/*/include)
+fmtincludes	 = $(wildcard $(call pathjoin,$(fmtincdirs),*.h */*.h */*/*.h))
+fmtsrcdirs	 = $(addprefix $(srcdir)/,common drivers/* lib platform/* tools)
+fmtsources	 = $(wildcard $(call pathjoin,$(fmtsrcdirs),*.c))
+
 toolsrc		 = $(wildcard $(srcdir)/tools/*.c)
 tools		 = $(patsubst $(srcdir)/tools/%.c,$(objdir)/tools/%,$(toolsrc))
 
@@ -84,7 +89,7 @@ all: $(outputs) $(tools)
 
 check: check-format
 
-check-format: $(filter-out %.S,$(includes) $(sources) $(toolsrc))
+check-format: $(fmtincludes) $(fmtsources)
 	$(Q) uncrustify -c $(srcdir)/.uncrustify -l C -q --check $^
 
 clean:
@@ -98,7 +103,7 @@ distclean:
 
 firmware: $(outputs)
 
-format: $(filter-out %.S,$(includes) $(sources) $(toolsrc))
+format: $(fmtincludes) $(fmtsources)
 	$(Q) uncrustify -c $(srcdir)/.uncrustify -l C -q --no-backup $^
 
 tools: $(tools)
