@@ -10,9 +10,11 @@
 #include <platform/ccu.h>
 #include <platform/devices.h>
 #include <platform/irq.h>
+#include <platform/r_ccu.h>
 
 static struct device ccu    __device;
 static struct device msgbox __device;
+static struct device r_ccu  __device;
 static struct device r_intc __device;
 
 static struct device ccu = {
@@ -31,6 +33,12 @@ static struct device msgbox = {
 	.irq      = IRQ_MSGBOX,
 	.irqdev   = &r_intc,
 	.regs     = DEV_MSGBOX,
+};
+
+static struct device r_ccu = {
+	.name = "r_ccu",
+	.drv  = &sunxi_ccu_driver,
+	.regs = DEV_R_PRCM,
 };
 
 SUN4I_INTC_ALLOC_DRVDATA(DEV_R_INTC);
