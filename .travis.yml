@@ -1,34 +1,51 @@
 ---
-addons:
-  apt:
-    packages:
-      - g++-7
-    sources:
-      - ubuntu-toolchain-r-test
-
 env:
-  global:
-    - HOSTCC=gcc-7
   matrix:
     - BOARD=orangepi_win
     - BOARD=orangepi_zero_plus
 
-install:
-  - curl -sL https://github.com/openrisc/or1k-gcc/releases/download/or1k-5.4.0-20170218/or1k-linux-musl-5.4.0-20170218.tar.xz | tar xJf -
-  - git clone --depth 1 https://github.com/uncrustify/uncrustify
-  - git -C uncrustify rev-parse HEAD
-  - curl https://raw.githubusercontent.com/smaeul/portage/c45f5c43bfd/patches/dev-util/uncrustify-9999/fix-issue-1570.patch | git -C uncrustify apply
-  - >
-    sh -c "mkdir uncrustify/build &&
-      cd uncrustify/build &&
-      cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-7 -DCMAKE_CXX_COMPILER=g++-7 -DCMAKE_INSTALL_PREFIX=$PWD/or1k-linux-musl .. &&
-      make install"
-  - export PATH=$PATH:$PWD/or1k-linux-musl/bin
-
 language: c
 
+install:
+  - curl -LSs https://github.com/openrisc/or1k-gcc/releases/download/or1k-5.4.0-20170218/or1k-linux-musl-5.4.0-20170218.tar.xz | tar xJf -
+  - export PATH=$PATH:$PWD/or1k-linux-musl/bin
+
+matrix:
+  include:
+    - addons:
+        apt:
+          packages:
+            - g++-7
+            - codespell
+          sources:
+            - ubuntu-toolchain-r-test
+      cache:
+        directories:
+          - uncrustify
+      env:
+        - BUILD_TYPE=check-format
+        - HOSTCC=gcc-7
+      install:
+        - |-
+          if test -d uncrustify/.git; then
+            (cd uncrustify && git fetch -q && git reset -q --hard FETCH_HEAD)
+          else
+            git clone -q https://github.com/uncrustify/uncrustify
+          fi
+        - git -C uncrustify rev-parse HEAD
+        - curl -LSs http://sholland.org/paste/fix-issue-1570.patch |
+            git -C uncrustify apply
+        - mkdir -p uncrustify/build
+        - (cd uncrustify/build && cmake -DCMAKE_INSTALL_PREFIX=$PWD
+            -DCMAKE_C_COMPILER=gcc-7 -DCMAKE_CXX_COMPILER=g++-7 ..)
+        - make -C uncrustify/build
+        - export PATH=$PATH:$PWD/uncrustify/build
+      script:
+        - make check-format
+        - codespell -i 0 -q 4 $(git ls-files)
+
 script:
-  - make ${BOARD}_defconfig
+  - make distclean && make ${BOARD}_defconfig
   - make DEBUG=0 V=1 && make check && make clean
   - make DEBUG=1 V=1 && make check
 ...

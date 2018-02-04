@@ -86,7 +86,7 @@ Q :=  $(if $(filter-out 0,$(V)),,@)
 
 all: $(outputs) $(tools)
 
-check: check-format
+check:
 
 check-format: $(fmtincludes) $(fmtsources)
 	$(Q) uncrustify -c $(srcdir)/.uncrustify -l C -q --check $^
