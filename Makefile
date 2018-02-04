@@ -85,13 +85,13 @@ all: $(outputs) $(tools)
 check: check-format
 
 check-format: $(filter-out %.S,$(includes) $(sources) $(toolsrc))
-	$(Q) uncrustify -c .uncrustify -l C -q --check $^
+	$(Q) uncrustify -c $(srcdir)/.uncrustify -l C -q --check $^
 
 clean:
 	$(Q) rm -fr $(objdir)
 
 %_defconfig:
-	$(Q) cp -f board/$* .config
+	$(Q) cp -f $(srcdir)/board/$* .config
 
 distclean:
 	$(Q) rm -fr $(objdir) .config
@@ -99,7 +99,7 @@ distclean:
 firmware: $(outputs)
 
 format: $(filter-out %.S,$(includes) $(sources) $(toolsrc))
-	$(Q) uncrustify -c .uncrustify -l C -q --no-backup $^
+	$(Q) uncrustify -c $(srcdir)/.uncrustify -l C -q --no-backup $^
 
 tools: $(tools)
 
