@@ -10,6 +10,8 @@
  * T. Rodeheffer. Software Integer Division. Microsoft Research, 2008.
  */
 func __udivsi3				# u32 __udivsi3(u32 x, u32 y) {
+	l.sfeqi	r4, 1			#	if (y == 1)
+	l.bf	5f			#		goto identity;
 	l.ori	r5, r3, 0		#	u32 r = x;
 	l.ori	r6, r4, 0		#	u32 y0 = y;
 	l.addi	r11, r0, 0		#	u32 q = 0;
@@ -31,5 +33,7 @@ func __udivsi3				# u32 __udivsi3(u32 x, u32 y) {
 	l.j	2b			#	}
 	l.add	r11, r11, r11		#		q *= 2;
 4:	l.jr	r9			#	return q;
-	l.nop				# }
-endfunc __udivsi3
+	l.nop
+5:	l.jr	r9			# identity:
+	l.ori	r11, r3, 0		#	return x;
+endfunc __udivsi3			# }
