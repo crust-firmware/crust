@@ -31,12 +31,17 @@ static struct device ccu = {
 	.drv     = &sunxi_ccu_driver,
 	.drvdata = SUNXI_CCU_DRVDATA {
 		[CCU_CLOCK_MSGBOX] = {
-			.gate  = CCU_GATE_MSGBOX,
-			.reset = CCU_RESET_MSGBOX,
+			.gate    = CCU_GATE_MSGBOX,
+			.reset   = CCU_RESET_MSGBOX,
+			.parents = SUNXI_CCU_NO_PARENTS,
 		},
 		[CCU_CLOCK_PIO] = {
-			.gate  = CCU_GATE_PIO,
-			.reset = CCU_RESET_PIO,
+			.gate    = CCU_GATE_PIO,
+			.reset   = CCU_RESET_PIO,
+			.parents = SUNXI_CCU_NO_PARENTS,
+		},
+		[CCU_CLOCK_SENTINEL] = {
+			.flags = SUNXI_CCU_FLAG_LAST,
 		},
 	},
 };
@@ -66,27 +71,83 @@ static struct device r_ccu = {
 	.regs    = DEV_R_PRCM,
 	.drv     = &sunxi_ccu_driver,
 	.drvdata = SUNXI_CCU_DRVDATA {
+		[R_CCU_CLOCK_OSC24M] = {
+			.rate    = 24000000,
+			.parents = SUNXI_CCU_NO_PARENTS,
+		},
+		[R_CCU_CLOCK_OSC32K] = {
+			.rate    = 32768,
+			.parents = SUNXI_CCU_NO_PARENTS,
+		},
+		[R_CCU_CLOCK_IOSC] = {
+			.rate    = 16000000,
+			.parents = SUNXI_CCU_NO_PARENTS,
+		},
+		[R_CCU_CLOCK_PLL_PERIPH0] = {
+			.rate    = 600000000,
+			.parents = SUNXI_CCU_NO_PARENTS,
+		},
+		[R_CCU_CLOCK_ARISC] = {
+			.max_rate = 300000000,
+			.reg      = R_CCU_CLOCK_ARISC_REG,
+			.parents  = {
+				R_CCU_CLOCK_OSC32K,
+				R_CCU_CLOCK_OSC24M,
+				R_CCU_CLOCK_PLL_PERIPH0,
+				R_CCU_CLOCK_IOSC,
+			},
+			.mux = BITFIELD(16, 2),
+			.pd  = {
+				[2] = BITFIELD(8, 5),
+			},
+			.p = BITFIELD(4, 2),
+		},
+		[R_CCU_CLOCK_APB0] = {
+			.max_rate = 100000000,
+			.reg      = R_CCU_CLOCK_APB0_REG,
+			.parents  = SUNXI_CCU_ONE_PARENT(R_CCU_CLOCK_ARISC),
+			.p        = BITFIELD(0, 2),
+		},
 		[R_CCU_CLOCK_R_PIO] = {
-			.gate = R_CCU_GATE_R_PIO,
+			.gate    = R_CCU_GATE_R_PIO,
+			.parents = SUNXI_CCU_NO_PARENTS,
 		},
 		[R_CCU_CLOCK_R_CIR] = {
-			.gate  = R_CCU_GATE_R_CIR,
-			.reset = R_CCU_RESET_R_CIR,
+			.gate    = R_CCU_GATE_R_CIR,
+			.reset   = R_CCU_RESET_R_CIR,
+			.reg     = R_CCU_CLOCK_R_CIR_REG,
+			.parents = {
+				R_CCU_CLOCK_OSC32K,
+				R_CCU_CLOCK_OSC24M,
+				SUNXI_CCU_NONE,
+				SUNXI_CCU_NONE,
+			},
+			.mux   = BITFIELD(24, 2),
+			.m     = BITFIELD(0, 4),
+			.p     = BITFIELD(16, 2),
+			.flags = SUNXI_CCU_FLAG_GATED,
 		},
 		[R_CCU_CLOCK_R_TIMER] = {
-			.gate  = R_CCU_GATE_R_TIMER,
-			.reset = R_CCU_RESET_R_TIMER,
+			.gate    = R_CCU_GATE_R_TIMER,
+			.reset   = R_CCU_RESET_R_TIMER,
+			.parents = SUNXI_CCU_NO_PARENTS,
 		},
 		[R_CCU_CLOCK_R_UART] = {
-			.gate  = R_CCU_GATE_R_UART,
-			.reset = R_CCU_RESET_R_UART,
+			.gate    = R_CCU_GATE_R_UART,
+			.reset   = R_CCU_RESET_R_UART,
+			.parents = SUNXI_CCU_NO_PARENTS,
 		},
 		[R_CCU_CLOCK_R_I2C] = {
-			.gate  = R_CCU_GATE_R_I2C,
-			.reset = R_CCU_RESET_R_I2C,
+			.gate    = R_CCU_GATE_R_I2C,
+			.reset   = R_CCU_RESET_R_I2C,
+			.parents = SUNXI_CCU_NO_PARENTS,
 		},
 		[R_CCU_CLOCK_R_TWD] = {
-			.gate = R_CCU_GATE_R_TWD,
+			.gate    = R_CCU_GATE_R_TWD,
+			.parents = SUNXI_CCU_NO_PARENTS,
+		},
+		[R_CCU_CLOCK_SENTINEL] = {
+			.flags = SUNXI_CCU_FLAG_LAST,
 		},
 	},
 };
