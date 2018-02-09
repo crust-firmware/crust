@@ -80,6 +80,11 @@ log(const char *fmt, ...)
 			console_putc(c);
 			continue;
 		}
+		if (*fmt == '%') {
+			++fmt;
+			console_putc(c);
+			continue;
+		}
 		arg   = va_arg(args, uintptr_t);
 		sign  = '\0';
 		width = 0;
@@ -90,9 +95,6 @@ conversion:
 			if (!sign)
 				sign = ' ';
 			goto conversion;
-		case '%':
-			console_putc(c);
-			break;
 		case '+':
 			sign = '+';
 			goto conversion;
