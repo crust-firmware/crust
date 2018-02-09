@@ -33,12 +33,10 @@ matrix:
             git clone -q https://github.com/uncrustify/uncrustify
           fi
         - git -C uncrustify rev-parse HEAD
-        - curl -LSs http://sholland.org/paste/fix-issue-1570.patch |
-            git -C uncrustify apply
         - mkdir -p uncrustify/build
         - (cd uncrustify/build && cmake -DCMAKE_INSTALL_PREFIX=$PWD
             -DCMAKE_C_COMPILER=gcc-7 -DCMAKE_CXX_COMPILER=g++-7 ..)
-        - make -C uncrustify/build
+        - make -C uncrustify/build -j$(nproc)
         - export PATH=$PATH:$PWD/uncrustify/build
       script:
         - make check-format
