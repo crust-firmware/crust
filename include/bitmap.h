@@ -60,7 +60,7 @@ bitmap_get(uintptr_t base, uint32_t index)
 {
 	uintptr_t word = (uintptr_t)((uint32_t *)base + BITMAP_WORD(index));
 
-	return !!(mmio_read32(word) & BIT(BITMAP_BIT(index)));
+	return mmio_read32(word) & BIT(BITMAP_BIT(index));
 }
 
 /**
