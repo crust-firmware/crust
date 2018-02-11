@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#include <compiler.h>
 #include <error.h>
 #include <mmio.h>
 #include <util.h>
@@ -11,27 +10,24 @@
 #include <drivers/wallclock.h>
 #include <drivers/wallclock/sun6i-cnt64.h>
 
-#define OSC24M_CNT64_CTRL_REG 0x280
-#define OSC24M_CNT64_LOW_REG  0x284
-#define OSC24M_CNT64_HIGH_REG 0x288
+#define CNT64_CTRL_REG 0x280
+#define CNT64_LOW_REG  0x284
+#define CNT64_HIGH_REG 0x288
 
 static uint64_t
 sun6i_cnt64_read(struct device *dev)
 {
 	uint32_t high_reg;
 	uint32_t low_reg;
-	uint64_t time;
 
-	mmio_setbits32(dev->regs + OSC24M_CNT64_CTRL_REG, BIT(1));
-	while (mmio_read32(dev->regs + OSC24M_CNT64_CTRL_REG) & BIT(1)) {
+	mmio_setbits32(dev->regs + CNT64_CTRL_REG, BIT(1));
+	while (mmio_read32(dev->regs + CNT64_CTRL_REG) & BIT(1)) {
 		/* Wait for counter to latch. */
 	}
+	high_reg = mmio_read32(dev->regs + CNT64_HIGH_REG);
+	low_reg  = mmio_read32(dev->regs + CNT64_LOW_REG);
 
-	low_reg  = mmio_read32(dev->regs + OSC24M_CNT64_LOW_REG);
-	high_reg = mmio_read32(dev->regs + OSC24M_CNT64_HIGH_REG);
-	time     = ((uint64_t)high_reg << 32) | low_reg;
-
-	return time;
+	return ((uint64_t)high_reg << 32) | low_reg;
 }
 
 static const struct wallclock_driver_ops sun6i_cnt64_driver_ops = {
@@ -39,8 +35,13 @@ static const struct wallclock_driver_ops sun6i_cnt64_driver_ops = {
 };
 
 static int
-sun6i_cnt64_probe(struct device *dev __unused)
+sun6i_cnt64_probe(struct device *dev)
 {
+	int err;
+
+	if ((err = wallclock_device_register(dev)))
+		return err;
+
 	return SUCCESS;
 }
 
