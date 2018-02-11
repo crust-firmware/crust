@@ -15,10 +15,7 @@ struct wallclock_driver_ops {
 	uint64_t (*read)(struct device *dev);
 };
 
-static inline uint64_t
-wallclock_read(struct device *dev)
-{
-	return WALLCLOCK_OPS(dev)->read(dev);
-}
+int wallclock_device_register(struct device *dev);
+uint64_t wallclock_read(void);
 
 #endif /* DRIVERS_WALLCLOCK_H */
