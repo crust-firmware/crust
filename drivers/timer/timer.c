@@ -4,24 +4,37 @@
  */
 
 #include <compiler.h>
+#include <debug.h>
 #include <dm.h>
 #include <error.h>
 #include <stddef.h>
 #include <drivers/timer.h>
 #include <drivers/wallclock.h>
 
+#define MAX_PERIODIC_ITEMS 1
+
 /* One second at a reference clock rate of 24MHz. */
-#define TICK_INTERVAL 24000000
+#define TICK_INTERVAL      24000000
 
 static uint64_t last_tick;
-static struct device *timer;
+static struct work_item periodic_work_items[MAX_PERIODIC_ITEMS];
+static struct device   *timer;
 
 int
-timer_cancel_periodic(work_function fn __unused, void *param __unused)
+timer_cancel_periodic(work_function fn, void *param)
 {
 	assert(fn);
 
-	return ENOTSUP;
+	/* Walk the list and try to find a matching work item. */
+	for (size_t i = 0; i < MAX_PERIODIC_ITEMS; ++i) {
+		if (periodic_work_items[i].fn == fn &&
+		    periodic_work_items[i].param == param) {
+			periodic_work_items[i].fn = NULL;
+			return SUCCESS;
+		}
+	}
+
+	return EINVAL;
 }
 
 int
@@ -70,15 +83,33 @@ timer_run_delayed(work_function fn __unused, void *param __unused,
 }
 
 int
-timer_run_periodic(work_function fn __unused, void *param __unused)
+timer_run_periodic(work_function fn, void *param)
 {
 	assert(fn);
 
-	return ENOTSUP;
+	/* Find the first available index (does not handle duplicates). */
+	for (size_t i = 0; i < MAX_PERIODIC_ITEMS; ++i) {
+		if (periodic_work_items[i].fn == NULL) {
+			periodic_work_items[i].fn    = fn;
+			periodic_work_items[i].param = param;
+			/* Start ticking. */
+			return timer_refresh();
+		}
+	}
+
+	panic("Periodic work queue is full");
 }
 
 void
 timer_tick(void)
 {
+	/* Walk through periodic work items and add each to the work queue. */
+	for (size_t i = 0; i < MAX_PERIODIC_ITEMS; ++i) {
+		if (periodic_work_items[i].fn != NULL) {
+			queue_work(periodic_work_items[i].fn,
+			           periodic_work_items[i].param);
+		}
+	}
+
 	timer_refresh();
 }
