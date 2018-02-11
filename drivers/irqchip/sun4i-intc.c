@@ -40,12 +40,11 @@ sun4i_intc_irq(struct device *irqdev)
 		if (likely(vector->handler)) {
 			vector->handler(vector->dev);
 		} else {
-			warn("No handler registered for %s IRQ %d",
+			warn("%s: No handler registered for IRQ %d",
 			     irqdev->name, irq);
 			if (vector->dev) {
-				debug("IRQ %d last registered to device %s",
-				      irq,
-				      vector->dev->name);
+				debug("%s: IRQ %d last registered to %s",
+				      irqdev->name, irq, vector->dev->name);
 			}
 		}
 
@@ -93,12 +92,14 @@ sun4i_intc_register_irq(struct device *irqdev, struct device *dev,
 	vector->dev     = dev;
 	vector->handler = handler;
 
-	debug("IRQ %d now registered to device %s", irq, dev->name);
+	debug("%s: IRQ %d now registered to device %s",
+	      irqdev->name, irq, dev->name);
 
 	/* Enable IRQ. */
 	mmio_setbits32(irqdev->regs + INTC_EN_REG, BIT(irq));
 
-	debug("IRQ %d now enabled for device %s", irq, dev->name);
+	debug("%s: IRQ %d now enabled for device %s",
+	      irqdev->name, irq, dev->name);
 
 	return SUCCESS;
 }
