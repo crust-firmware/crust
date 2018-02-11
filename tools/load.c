@@ -136,8 +136,8 @@ main(int argc, char *argv[])
 		puts("Failed to assert ARISC reset");
 		return EXIT_FAILURE;
 	}
-	printf("Writing firmware (%ld/%d bytes used)\n",
-	       st.st_size - VECTORS_SIZE, FIRMWARE_SIZE);
+	printf("Writing firmware (%jd/%d bytes used)\n",
+	       (intmax_t)(st.st_size - VECTORS_SIZE), FIRMWARE_SIZE);
 	memcpy(sram, file, st.st_size);
 	msync(sram, st.st_size, MS_SYNC);
 	puts("Deasserting ARISC reset");
