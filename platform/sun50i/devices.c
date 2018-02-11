@@ -7,15 +7,17 @@
 #include <drivers/clock/sunxi-ccu.h>
 #include <drivers/irqchip/sun4i-intc.h>
 #include <drivers/msgbox/sunxi-msgbox.h>
+#include <drivers/wallclock/sun6i-cnt64.h>
 #include <platform/ccu.h>
 #include <platform/devices.h>
 #include <platform/irq.h>
 #include <platform/r_ccu.h>
 
-static struct device ccu    __device;
-static struct device msgbox __device;
-static struct device r_ccu  __device;
-static struct device r_intc __device;
+static struct device ccu     __device;
+static struct device msgbox  __device;
+static struct device r_ccu   __device;
+static struct device r_cnt64 __device;
+static struct device r_intc  __device;
 
 static struct device ccu = {
 	.name = "ccu",
@@ -38,6 +40,12 @@ static struct device r_ccu = {
 	.name = "r_ccu",
 	.regs = DEV_R_PRCM,
 	.drv  = &sunxi_ccu_driver,
+};
+
+static struct device r_cnt64 = {
+	.name = "r_cnt64",
+	.regs = DEV_R_CPUCFG,
+	.drv  = &sun6i_cnt64_driver,
 };
 
 static struct device r_intc = {
