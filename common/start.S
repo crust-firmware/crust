@@ -9,15 +9,14 @@
 #define STACK_INIT (STACK_BASE + STACK_SIZE)
 
 func start
-	l.ori	r3, r0, lo(__bss_start)
+	l.ori	r3, r0, lo(__bss_start)	# Clear .bss
 	l.ori	r4, r0, lo(__bss_end)
-1:	l.sfgeu	r3, r4			# Clear .bss
-	l.bf	2f
+1:	l.sw    0(r3), r0
+	l.sfltu r3, r4
+	l.bf	1b
 	l.addi	r3, r3, 4
-	l.j	1b
-	l.sw	-4(r3), r0
-2:	l.jal	main			# Call C entry point
+	l.jal	main			# Call C entry point
 	l.ori	r1, r0, lo(STACK_INIT)	# Initialize stack pointer
-3:	l.j	3b			# Infinite loop
+2:	l.j	2b			# Infinite loop
 	l.nop
 endfunc start
