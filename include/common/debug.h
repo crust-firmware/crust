@@ -61,4 +61,17 @@ debug_print_latency(void)
 
 #endif
 
+#if CONFIG_DEBUG_PRINT_SPRS
+
+void debug_print_sprs(void);
+
+#else
+
+static inline void
+debug_print_sprs(void)
+{
+}
+
+#endif
+
 #endif /* COMMON_DEBUG_H */

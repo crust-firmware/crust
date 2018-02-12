@@ -4,3 +4,4 @@
 #
 
 obj-$(CONFIG_DEBUG_PRINT_LATENCY) += latency.o
+obj-$(CONFIG_DEBUG_PRINT_SPRS)    += sprs.o

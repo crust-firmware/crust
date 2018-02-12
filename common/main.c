@@ -17,6 +17,8 @@ main(uint32_t exception)
 		      exception, (void *)mfspr(SPR_SYS_EPCR_ADDR(0)));
 	}
 
+	debug_print_sprs();
+
 	/* Cede control to the system state machine (never returns). */
 	system_state_machine();
 }
