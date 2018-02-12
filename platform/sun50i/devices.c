@@ -4,9 +4,11 @@
  */
 
 #include <dm.h>
+#include <util.h>
 #include <drivers/clock/sunxi-ccu.h>
 #include <drivers/irqchip/sun4i-intc.h>
 #include <drivers/msgbox/sunxi-msgbox.h>
+#include <drivers/pio/sunxi-pio.h>
 #include <drivers/wallclock/sun6i-cnt64.h>
 #include <platform/ccu.h>
 #include <platform/devices.h>
@@ -15,9 +17,11 @@
 
 static struct device ccu     __device;
 static struct device msgbox  __device;
+static struct device pio     __device;
 static struct device r_ccu   __device;
 static struct device r_cnt64 __device;
 static struct device r_intc  __device;
+static struct device r_pio   __device;
 
 static struct device ccu = {
 	.name = "ccu",
@@ -34,6 +38,15 @@ static struct device msgbox = {
 	.drvdata  = SUNXI_MSGBOX_DRVDATA { 0 },
 	.irq      = IRQ_MSGBOX,
 	.irqdev   = &r_intc,
+};
+
+static struct device pio = {
+	.name     = "pio",
+	.regs     = DEV_PIO,
+	.clock    = CCU_GATE(CCU_GATE_PIO) | CCU_RESET(CCU_RESET_PIO),
+	.clockdev = &ccu,
+	.drv      = &sunxi_pio_driver,
+	.drvdata  = BITMASK(1, 7), /*< Physically implemented ports (1-7). */
 };
 
 static struct device r_ccu = {
@@ -53,4 +66,13 @@ static struct device r_intc = {
 	.regs    = DEV_R_INTC,
 	.drv     = &sun4i_intc_driver,
 	.drvdata = SUN4I_INTC_DRVDATA { { 0 } },
+};
+
+static struct device r_pio = {
+	.name     = "r_pio",
+	.regs     = DEV_R_PIO,
+	.clock    = CCU_GATE(R_CCU_GATE_R_PIO),
+	.clockdev = &r_ccu,
+	.drv      = &sunxi_pio_driver,
+	.drvdata  = BIT(0), /*< Physically implemented ports (0). */
 };
