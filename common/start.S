@@ -15,8 +15,6 @@ func start
 	l.sfltu r3, r4
 	l.bf	1b
 	l.addi	r3, r3, 4
-	l.jal	main			# Call C entry point
+	l.j	main			# Jump to C entry point
 	l.ori	r1, r0, lo(STACK_INIT)	# Initialize stack pointer
-2:	l.j	2b			# Infinite loop
-	l.nop
 endfunc start
