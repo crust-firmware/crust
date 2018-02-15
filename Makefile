@@ -27,7 +27,7 @@ CFLAGS		 = -Os -pipe -std=c11 \
 		   -fomit-frame-pointer \
 		   -funsigned-char \
 		   -g$(if $(filter-out 0,$(DEBUG)),gdb,0) \
-		   -mcmov -mdelay -mhard-mul -msoft-float \
+		   -mdelay -mhard-mul -msoft-float \
 		   -Wa,--fatal-warnings \
 		   $(WARNINGS)
 CPPFLAGS	 = -DDEBUG=$(if $(filter-out 0,$(DEBUG)),1,0) \
