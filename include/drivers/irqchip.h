@@ -6,6 +6,7 @@
 #ifndef DRIVERS_IRQCHIP_H
 #define DRIVERS_IRQCHIP_H
 
+#include <debug.h>
 #include <dm.h>
 #include <stdint.h>
 
@@ -33,6 +34,8 @@ irqchip_register_irq(struct device *dev, irq_handler handler)
 {
 	struct device *irqdev = dev->irqdev;
 
+	assert(irqdev);
+
 	return IRQCHIP_OPS(irqdev)->register_irq(irqdev, dev, handler);
 }
 
@@ -40,6 +43,8 @@ static inline int
 irqchip_unregister_irq(struct device *dev)
 {
 	struct device *irqdev = dev->irqdev;
+
+	assert(irqdev);
 
 	return IRQCHIP_OPS(irqdev)->unregister_irq(irqdev, dev);
 }

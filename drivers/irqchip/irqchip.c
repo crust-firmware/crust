@@ -8,15 +8,17 @@
 #include <error.h>
 #include <irqchip.h>
 #include <spr.h>
+#include <stddef.h>
 
-static struct device *irqchip_device;
+static struct device *irqchip;
 
 int
 irqchip_device_register(struct device *dev)
 {
-	if (irqchip_device)
+	if (irqchip != NULL)
 		return EEXIST;
-	irqchip_device = dev;
+
+	irqchip = dev;
 
 	/* Enable the CPU external interrupt input. */
 	mtspr(SPR_SYS_SR_ADDR, SPR_SYS_SR_IEE_SET(mfspr(SPR_SYS_SR_ADDR), 1));
@@ -27,8 +29,7 @@ irqchip_device_register(struct device *dev)
 int
 irqchip_irq(void)
 {
-	if (!irqchip_device)
-		panic("Interrupt with no irqchip registered");
+	assert(irqchip != NULL);
 
-	return IRQCHIP_OPS(irqchip_device)->irq(irqchip_device);
+	return IRQCHIP_OPS(irqchip)->irq(irqchip);
 }
