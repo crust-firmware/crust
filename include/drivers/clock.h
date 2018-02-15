@@ -6,6 +6,7 @@
 #ifndef DRIVERS_CLOCK_H
 #define DRIVERS_CLOCK_H
 
+#include <debug.h>
 #include <dm.h>
 #include <stdint.h>
 
@@ -25,6 +26,8 @@ clock_disable(struct device *dev)
 {
 	struct device *clockdev = dev->clockdev;
 
+	assert(clockdev);
+
 	return CLOCK_OPS(clockdev)->disable(clockdev, dev);
 }
 
@@ -32,6 +35,8 @@ static inline int
 clock_enable(struct device *dev)
 {
 	struct device *clockdev = dev->clockdev;
+
+	assert(clockdev);
 
 	return CLOCK_OPS(clockdev)->enable(clockdev, dev);
 }
@@ -41,6 +46,8 @@ clock_get_rate(struct device *dev, uint32_t *rate)
 {
 	struct device *clockdev = dev->clockdev;
 
+	assert(clockdev);
+
 	return CLOCK_OPS(clockdev)->get_rate(clockdev, dev, rate);
 }
 
@@ -48,6 +55,8 @@ static inline int
 clock_set_rate(struct device *dev, uint32_t rate)
 {
 	struct device *clockdev = dev->clockdev;
+
+	assert(clockdev);
 
 	return CLOCK_OPS(clockdev)->set_rate(clockdev, dev, rate);
 }
