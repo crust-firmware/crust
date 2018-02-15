@@ -19,6 +19,8 @@ static struct device *timer;
 int
 timer_cancel_periodic(work_function fn __unused, void *param __unused)
 {
+	assert(fn);
+
 	return ENOTSUP;
 }
 
@@ -36,6 +38,8 @@ timer_device_register(struct device *dev)
 int
 timer_get_timeout(uint32_t *timeout)
 {
+	assert(timeout);
+
 	if (timer == NULL)
 		return ENODEV;
 
@@ -68,6 +72,8 @@ timer_run_delayed(work_function fn __unused, void *param __unused,
 int
 timer_run_periodic(work_function fn __unused, void *param __unused)
 {
+	assert(fn);
+
 	return ENOTSUP;
 }
 
