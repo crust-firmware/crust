@@ -10,29 +10,36 @@
 #include <irqchip.h>
 #include <mmio.h>
 #include <msgbox.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <util.h>
 #include <msgbox/sunxi-msgbox.h>
 
-#define CTRL_REG0               (0x0000)
-#define CTRL_REG1               (0x0004)
-
 /* These macros take a virtual channel number. */
-#define IRQ_EN_REG              (0x0040)
-#define IRQ_STATUS_REG          (0x0050)
-#define XMIT_IRQ(n)             BIT(3 + 4 * (n))
-#define RECV_IRQ(n)             BIT(0 + 4 * (n))
+#define CTRL_REG(n)           (0x0000 + 0x4 * ((n) / 2))
+#define CTRL_MASK(n)          (0x1111 << 16 * ((n) % 2))
+#define CTRL_SET(n)           (0x0110 << 16 * ((n) % 2))
 
-#define XMIT_FIFO_STATUS_REG(n) (0x0104 + 0x8 * (n))
-#define RECV_FIFO_STATUS_REG(n) (0x0100 + 0x8 * (n))
-#define FIFO_STATUS_MASK        BIT(0)
+#define IRQ_EN_REG            0x0040
+#define IRQ_STATUS_REG        0x0050
+#define RX_IRQ(n)             BIT(0 + 4 * (n))
+#define TX_IRQ(n)             BIT(3 + 4 * (n))
 
-#define XMIT_MSG_STATUS_REG(n)  (0x0144 + 0x8 * (n))
-#define RECV_MSG_STATUS_REG(n)  (0x0140 + 0x8 * (n))
-#define MSG_STATUS_MASK         BITMASK(0, 3)
+#define REMOTE_IRQ_EN_REG     0x0060
+#define REMOTE_IRQ_STATUS_REG 0x0070
+#define REMOTE_RX_IRQ(n)      BIT(2 + 4 * (n))
+#define REMOTE_TX_IRQ(n)      BIT(1 + 4 * (n))
 
-#define XMIT_MSG_DATA_REG(n)    (0x0184 + 0x8 * (n))
-#define RECV_MSG_DATA_REG(n)    (0x0180 + 0x8 * (n))
+#define RX_FIFO_STATUS_REG(n) (0x0100 + 0x8 * (n))
+#define TX_FIFO_STATUS_REG(n) (0x0104 + 0x8 * (n))
+#define FIFO_STATUS_MASK      BIT(0)
+
+#define RX_MSG_STATUS_REG(n)  (0x0140 + 0x8 * (n))
+#define TX_MSG_STATUS_REG(n)  (0x0144 + 0x8 * (n))
+#define MSG_STATUS_MASK       BITMASK(0, 3)
+
+#define RX_MSG_DATA_REG(n)    (0x0180 + 0x8 * (n))
+#define TX_MSG_DATA_REG(n)    (0x0184 + 0x8 * (n))
 
 static inline msgbox_handler
 get_handler(struct device *dev, uint8_t chan)
@@ -46,33 +53,14 @@ set_handler(struct device *dev, uint8_t chan, msgbox_handler handler)
 	((msgbox_handler *)dev->drvdata)[chan] = handler;
 }
 
-static void
-sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan)
+static bool
+sunxi_msgbox_peek_data(struct device *dev, uint8_t chan)
 {
-	msgbox_handler handler;
-	uint32_t msg = mmio_read32(dev->regs + RECV_MSG_DATA_REG(chan));
+	uint32_t reg;
 
-	if ((handler = get_handler(dev, chan)))
-		handler(dev, chan, msg);
-	else
-		debug("%s: Unsolicited message %08x in channel %d",
-		      dev->name, msg, chan);
-}
+	reg = mmio_read32(dev->regs + RX_MSG_STATUS_REG(chan));
 
-static void
-sunxi_msgbox_irq(struct device *dev)
-{
-	uint32_t reg = mmio_read32(dev->regs + IRQ_STATUS_REG);
-
-	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; ++chan) {
-		if (!(reg & RECV_IRQ(chan)))
-			continue;
-		while (mmio_read32(dev->regs + RECV_MSG_STATUS_REG(chan)))
-			sunxi_msgbox_handle_msg(dev, chan);
-	}
-
-	/* Clear all processed pending interrupts. */
-	mmio_write32(dev->regs + IRQ_STATUS_REG, reg);
+	return (reg & MSG_STATUS_MASK) > 0;
 }
 
 static int
@@ -80,15 +68,87 @@ sunxi_msgbox_register_handler(struct device *dev, uint8_t chan,
                               msgbox_handler handler)
 {
 	assert(chan < SUNXI_MSGBOX_CHANS);
-	assert(handler);
+	assert(handler != NULL);
 
-	if (get_handler(dev, chan))
+	if (get_handler(dev, chan) != NULL)
 		return EEXIST;
 	set_handler(dev, chan, handler);
 
-	mmio_setbits32(dev->regs + IRQ_EN_REG, RECV_IRQ(chan));
+	/* Ensure FIFO directions are set properly. */
+	mmio_clearsetbits32(dev->regs + CTRL_REG(chan),
+	                    CTRL_MASK(chan),
+	                    CTRL_SET(chan));
 
-	return 0;
+	/* Clear existing messages in the receive FIFO. */
+	while (sunxi_msgbox_peek_data(dev, chan))
+		mmio_read32(dev->regs + RX_MSG_DATA_REG(chan));
+
+	/* Clear and enable the receive interrupt. */
+	mmio_setbits32(dev->regs + IRQ_STATUS_REG, RX_IRQ(chan));
+	mmio_setbits32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
+
+	return SUCCESS;
+}
+
+static int
+sunxi_msgbox_send_msg(struct device *dev, uint8_t chan, uint32_t msg)
+{
+	assert(chan < SUNXI_MSGBOX_CHANS);
+
+	mmio_write32(dev->regs + TX_MSG_DATA_REG(chan), msg);
+
+	return SUCCESS;
+}
+
+static int
+sunxi_msgbox_unregister_handler(struct device *dev, uint8_t chan)
+{
+	assert(chan < SUNXI_MSGBOX_CHANS);
+	assert(get_handler(dev, chan) != NULL);
+
+	/* Disable the receive interrupt. */
+	mmio_clearbits32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
+
+	set_handler(dev, chan, NULL);
+
+	return SUCCESS;
+}
+
+static const struct msgbox_driver_ops sunxi_msgbox_driver_ops = {
+	.register_handler   = sunxi_msgbox_register_handler,
+	.send_msg           = sunxi_msgbox_send_msg,
+	.unregister_handler = sunxi_msgbox_unregister_handler,
+};
+
+static void
+sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan, uint32_t msg)
+{
+	msgbox_handler handler = get_handler(dev, chan);
+
+	if (handler != NULL) {
+		handler(dev, chan, msg);
+		return;
+	}
+
+	debug("%s: %u: Unsolicited message 0x%08x", dev->name, chan, msg);
+}
+
+static void
+sunxi_msgbox_irq(struct device *dev)
+{
+	uint32_t msg, reg;
+
+	reg = mmio_read32(dev->regs + IRQ_STATUS_REG);
+	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; ++chan) {
+		if (!(reg & RX_IRQ(chan)))
+			continue;
+		while (sunxi_msgbox_peek_data(dev, chan)) {
+			msg = mmio_read32(dev->regs + RX_MSG_DATA_REG(chan));
+			sunxi_msgbox_handle_msg(dev, chan, msg);
+		}
+		/* Clear the pending interrupt once the FIFO is empty. */
+		mmio_write32(dev->regs + IRQ_STATUS_REG, RX_IRQ(chan));
+	}
 }
 
 static int
@@ -101,7 +161,13 @@ sunxi_msgbox_probe(struct device *dev)
 	if ((err = clock_enable(dev)))
 		return err;
 
-	/* Disable and clear all IRQs. */
+	/* Drain all messages (required to clear interrupts). */
+	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; ++chan) {
+		while (sunxi_msgbox_peek_data(dev, chan))
+			mmio_read32(dev->regs + RX_MSG_DATA_REG(chan));
+	}
+
+	/* Disable and clear all interrupts. */
 	mmio_write32(dev->regs + IRQ_EN_REG, 0);
 	mmio_write32(dev->regs + IRQ_STATUS_REG, BITMASK(0, 16));
 
@@ -110,35 +176,6 @@ sunxi_msgbox_probe(struct device *dev)
 
 	return SUCCESS;
 }
-
-static int
-sunxi_msgbox_send_msg(struct device *dev, uint8_t chan, uint32_t msg)
-{
-	assert(chan < SUNXI_MSGBOX_CHANS);
-
-	mmio_write32(dev->regs + XMIT_MSG_DATA_REG(chan), msg);
-
-	return 0;
-}
-
-static int
-sunxi_msgbox_unregister_handler(struct device *dev, uint8_t chan)
-{
-	assert(chan < SUNXI_MSGBOX_CHANS);
-	assert(get_handler(dev, chan));
-
-	mmio_clearbits32(dev->regs + IRQ_EN_REG, RECV_IRQ(chan));
-
-	set_handler(dev, chan, NULL);
-
-	return 0;
-}
-
-static const struct msgbox_driver_ops sunxi_msgbox_driver_ops = {
-	.register_handler   = sunxi_msgbox_register_handler,
-	.send_msg           = sunxi_msgbox_send_msg,
-	.unregister_handler = sunxi_msgbox_unregister_handler,
-};
 
 const struct driver sunxi_msgbox_driver = {
 	.name  = "sunxi-msgbox",
