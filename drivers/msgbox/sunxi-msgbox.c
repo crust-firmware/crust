@@ -41,6 +41,8 @@
 #define RX_MSG_DATA_REG(n)    (0x0180 + 0x8 * (n))
 #define TX_MSG_DATA_REG(n)    (0x0184 + 0x8 * (n))
 
+static bool sunxi_msgbox_tx_pending(struct device *dev, uint8_t chan);
+
 static inline msgbox_handler
 get_handler(struct device *dev, uint8_t chan)
 {
@@ -95,9 +97,23 @@ sunxi_msgbox_send_msg(struct device *dev, uint8_t chan, uint32_t msg)
 {
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
+	if (sunxi_msgbox_tx_pending(dev, chan))
+		return EBUSY;
 	mmio_write32(dev->regs + TX_MSG_DATA_REG(chan), msg);
 
 	return SUCCESS;
+}
+
+static bool
+sunxi_msgbox_tx_pending(struct device *dev, uint8_t chan)
+{
+	uint32_t reg;
+
+	assert(chan < SUNXI_MSGBOX_CHANS);
+
+	reg = mmio_read32(dev->regs + REMOTE_IRQ_STATUS_REG);
+
+	return reg & REMOTE_RX_IRQ(chan);
 }
 
 static int
@@ -117,6 +133,7 @@ sunxi_msgbox_unregister_handler(struct device *dev, uint8_t chan)
 static const struct msgbox_driver_ops sunxi_msgbox_driver_ops = {
 	.register_handler   = sunxi_msgbox_register_handler,
 	.send_msg           = sunxi_msgbox_send_msg,
+	.tx_pending         = sunxi_msgbox_tx_pending,
 	.unregister_handler = sunxi_msgbox_unregister_handler,
 };
 
