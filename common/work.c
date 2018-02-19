@@ -9,7 +9,7 @@
 #include <work.h>
 
 /* Work item queue capacity. */
-#define MAX_WORK_ITEMS 1
+#define MAX_WORK_ITEMS 8
 
 static size_t queue_head = 0;
 static size_t queue_tail = MAX_WORK_ITEMS;
