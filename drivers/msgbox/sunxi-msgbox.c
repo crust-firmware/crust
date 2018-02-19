@@ -34,23 +34,23 @@
 #define XMIT_MSG_DATA_REG(n)    (0x0184 + 0x8 * (n))
 #define RECV_MSG_DATA_REG(n)    (0x0180 + 0x8 * (n))
 
-static inline msg_handler
+static inline msgbox_handler
 get_handler(struct device *dev, uint8_t chan)
 {
-	return ((msg_handler *)dev->drvdata)[chan];
+	return ((msgbox_handler *)dev->drvdata)[chan];
 }
 
 static inline void
-set_handler(struct device *dev, uint8_t chan, msg_handler handler)
+set_handler(struct device *dev, uint8_t chan, msgbox_handler handler)
 {
-	((msg_handler *)dev->drvdata)[chan] = handler;
+	((msgbox_handler *)dev->drvdata)[chan] = handler;
 }
 
 static void
 sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan)
 {
-	msg_handler handler;
-	uint32_t    msg = mmio_read32(dev->regs + RECV_MSG_DATA_REG(chan));
+	msgbox_handler handler;
+	uint32_t msg = mmio_read32(dev->regs + RECV_MSG_DATA_REG(chan));
 
 	if ((handler = get_handler(dev, chan)))
 		handler(dev, chan, msg);
@@ -77,7 +77,7 @@ sunxi_msgbox_irq(struct device *dev)
 
 static int
 sunxi_msgbox_register_handler(struct device *dev, uint8_t chan,
-                              msg_handler handler)
+                              msgbox_handler handler)
 {
 	assert(chan < SUNXI_MSGBOX_CHANS);
 	assert(handler);

@@ -11,17 +11,18 @@
 
 #define MSGBOX_OPS(dev) ((struct msgbox_driver_ops *)((dev)->drv->ops))
 
-typedef void (*msg_handler)(struct device *dev, uint8_t chan, uint32_t msg);
+typedef void (*msgbox_handler)(struct device *dev, uint8_t chan, uint32_t msg);
 
 struct msgbox_driver_ops {
 	int (*register_handler)(struct device *dev, uint8_t chan,
-	                        msg_handler handler);
+	                        msgbox_handler handler);
 	int (*send_msg)(struct device *dev, uint8_t chan, uint32_t msg);
 	int (*unregister_handler)(struct device *dev, uint8_t chan);
 };
 
 static inline int
-msgbox_register_handler(struct device *dev, uint8_t chan, msg_handler handler)
+msgbox_register_handler(struct device *dev, uint8_t chan,
+                        msgbox_handler handler)
 {
 	return MSGBOX_OPS(dev)->register_handler(dev, chan, handler);
 }

@@ -18,7 +18,7 @@
 #define SUNXI_MSGBOX_CHANS 4
 
 #define SUNXI_MSGBOX_DRVDATA \
-	(uintptr_t)&(msg_handler[SUNXI_MSGBOX_CHANS])
+	(uintptr_t)&(msgbox_handler[SUNXI_MSGBOX_CHANS])
 
 extern const struct driver sunxi_msgbox_driver;
 
