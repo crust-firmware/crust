@@ -11,6 +11,7 @@
 #include <drivers/pio/sunxi-pio.h>
 #include <drivers/timer/sun8i-r_timer.h>
 #include <drivers/wallclock/sun6i-cnt64.h>
+#include <drivers/watchdog/sunxi-twd.h>
 #include <platform/ccu.h>
 #include <platform/devices.h>
 #include <platform/irq.h>
@@ -24,6 +25,7 @@ static struct device r_cnt64  __device;
 static struct device r_intc   __device;
 static struct device r_pio    __device;
 static struct device r_timer0 __device;
+static struct device r_twd    __device;
 
 static struct device ccu = {
 	.name    = "ccu",
@@ -182,5 +184,15 @@ static struct device r_timer0 = {
 	.drv      = &sun8i_r_timer_driver,
 	.drvdata  = 0, /*< Timer index within the device. */
 	.irq      = IRQ_R_TIMER0,
+	.irqdev   = &r_intc,
+};
+
+static struct device r_twd = {
+	.name     = "r_twd",
+	.regs     = DEV_R_TWD,
+	.clock    = R_CCU_CLOCK_R_TWD,
+	.clockdev = &r_ccu,
+	.drv      = &sunxi_twd_driver,
+	.irq      = IRQ_R_TWD,
 	.irqdev   = &r_intc,
 };
