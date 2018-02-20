@@ -23,6 +23,7 @@ enum {
 	DM_CLASS_PIO,
 	DM_CLASS_TIMER,
 	DM_CLASS_WALLCLOCK,
+	DM_CLASS_WATCHDOG,
 };
 
 struct driver;
