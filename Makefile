@@ -40,8 +40,10 @@ LDFLAGS		 = -nostdlib \
 		   -Wl,--gc-sections \
 		   -Wl,--no-undefined
 
+HOSTAR		 = ar
 HOSTCC		 = cc
-HOSTCFLAGS	 = -O2 -pipe -std=c11 \
+HOSTCFLAGS	 = -fno-builtin \
+		   -O2 -pipe -std=c11 \
 		   $(WARNINGS)
 HOSTCPPFLAGS	 = -D_XOPEN_SOURCE=700
 HOSTLDFLAGS	 =
@@ -62,7 +64,7 @@ objects		 = $(patsubst $(srcdir)$2/%,$(objdir)$3/%$4,$(basename $1))
 
 format-filter	 = $(filter-out $(objdir)/% %.S,$1)
 formatheaders	 = $(call headers,include/* platform/*/include)
-formatsources	 = $(call sources,common drivers/* lib platform/* tools)
+formatsources	 = $(call sources,common drivers/* lib platform/* test tools)
 formatfiles	 = $(call format-filter,$(formatheaders) $(formatsources))
 
 fwincbase	 = $(platdir)/include include/*
@@ -73,6 +75,23 @@ fwobjects	 = $(call objects,$(fwsources),,,.o)
 fwobjdirs	 = $(call objdirs,$(fwobjects))
 fwfiles		 = $(addprefix $(objdir)/,scp.bin scp.elf scp.map)
 
+libincbase	 = include/lib
+libincdirs	 = $(call incdirs,$(libincbase))
+libheaders	 = $(call headers,$(libincbase))
+libsources	 = $(call files,lib,*.c)
+libobjects	 = $(call objects,$(libsources),,/host,.o)
+libobjdirs	 = $(call objdirs,$(libobjects))
+library		 = $(objdir)/host/lib/libcrust.a
+
+testincbase	 = 3rdparty/unity include/lib
+testincdirs	 = $(call incdirs,$(testincbase))
+testheaders	 = $(call headers,$(testincbase))
+testsources	 = $(call sources,test)
+testobjects	 = $(call objects,$(testsources),,/host,.o)
+testobjdirs	 = $(call objdirs,$(testobjects) $(unityobjects))
+tests		 = $(basename $(testobjects))
+testresults	 = $(addsuffix .test,$(tests))
+
 toolincbase	 = $(platdir)/include include/lib
 toolincdirs	 = $(call incdirs,$(toolincbase))
 toolheaders	 = $(call headers,$(toolincbase))
@@ -81,7 +100,11 @@ toolobjects	 = $(call objects,$(toolsources),,/host,.o)
 toolobjdirs	 = $(call objdirs,$(toolobjects))
 tools		 = $(basename $(toolobjects))
 
-allobjdirs	 = $(objdir) $(objdir)/include $(fwobjdirs) $(toolobjdirs)
+unitysources	 = $(call sources,3rdparty/unity)
+unityobjects	 = $(call objects,$(unitysources),/3rdparty,/host/test,.o)
+
+allobjdirs	 = $(objdir) $(objdir)/include $(fwobjdirs) $(libobjdirs) \
+		   $(testobjdirs) $(toolobjdirs)
 
 ifeq ($(MAKECMDGOALS),)
 include $(objdir)/config.mk
@@ -94,9 +117,9 @@ endif
 M := @$(if $(filter-out 0,$(V)),:,printf '  %-7s %s\n')
 Q :=  $(if $(filter-out 0,$(V)),,@)
 
-all: $(fwfiles) $(tools)
+all: $(fwfiles) $(tests) $(tools)
 
-check:
+check: $(testresults)
 
 check-format: $(formatfiles)
 	$(Q) uncrustify -c $(srcdir)/.uncrustify -l C -q --check $^
@@ -114,6 +137,8 @@ firmware: $(fwfiles)
 
 format: $(formatfiles)
 	$(Q) uncrustify -c $(srcdir)/.uncrustify -l C -q --no-backup $^
+
+test: check
 
 tools: $(tools)
 
@@ -147,11 +172,35 @@ $(objdir)/config.mk: .config | $(objdir)
 $(objdir)/include/config.h: .config | $(objdir)/include
 	$(Q) sed -n 's/#.*$$//;s/^\([^=]\+\)=\(.*\)$$/#define \1 \2/p' $< > $@
 
+$(library): $(libobjects) | $(libobjdirs)
+	$(M) HOSTAR $@
+	$(Q) $(HOSTAR) rcs $@ $^
+
+$(objdir)/host/lib/%.o: $(srcdir)/lib/%.c $(libheaders) | $(libobjdirs)
+	$(M) HOSTCC $@
+	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(libincdirs) -c -o $@ $<
+
+$(objdir)/host/test/%.test: $(objdir)/host/test/%
+	$(M) TEST $@
+	$(Q) $< > $@.tmp && mv -f $@.tmp $@ || { cat $@.tmp; rm -f $@.tmp; }
+
+$(objdir)/host/test/%: $(objdir)/host/test/%.o $(unityobjects) $(library)
+	$(M) HOSTLD $@
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLIBS)
+
+$(objdir)/host/test/%.o: $(srcdir)/3rdparty/%.c $(testheaders) | $(testobjdirs)
+	$(M) HOSTCC $@
+	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(testincdirs) -c -o $@ $<
+
+$(objdir)/host/test/%.o: $(srcdir)/test/%.c $(testheaders) | $(testobjdirs)
+	$(M) HOSTCC $@
+	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(testincdirs) -c -o $@ $<
+
 $(objdir)/host/tools/%: $(srcdir)/tools/%.c $(toolheaders) | $(toolobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(HOSTLDFLAGS) \
 		$(toolincdirs) -o $@ $< $(HOSTLIBS)
 
-.PHONY: all check check-format clean distclean firmware format tools
+.PHONY: all check check-format clean distclean firmware format test tools
 .SECONDARY:
 .SUFFIXES:
