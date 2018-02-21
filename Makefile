@@ -31,7 +31,6 @@ CFLAGS		 = -Os -pipe -std=c11 \
 		   -Wa,--fatal-warnings \
 		   $(WARNINGS)
 CPPFLAGS	 = -DDEBUG=$(if $(filter-out 0,$(DEBUG)),1,0) \
-		   $(addprefix -I,$(incdirs)) \
 		   -nostdinc \
 		   -Werror=missing-include-dirs
 LDFLAGS		 = -nostdlib \
@@ -44,41 +43,45 @@ LDFLAGS		 = -nostdlib \
 HOSTCC		 = cc
 HOSTCFLAGS	 = -O2 -pipe -std=c11 \
 		   $(WARNINGS)
-HOSTCPPFLAGS	 = -D_XOPEN_SOURCE=700 \
-		   $(addprefix -I,$(toolincdirs))
+HOSTCPPFLAGS	 = -D_XOPEN_SOURCE=700
 HOSTLDFLAGS	 =
 HOSTLIBS	 =
 
-pathjoin	 = $(foreach X,$2,$(addsuffix /$X,$1))
-
-incdirs		 = $(objdir)/include $(platdir)/include \
-		   $(wildcard $(srcdir)/include/*)
-incpatterns	 = *.h */*.h */*/*.h *.S
-includes	 = $(wildcard $(call pathjoin,$(incdirs),$(incpatterns))) \
-		   $(objdir)/include/config.h
-
-platdir		 = $(srcdir)/platform/$(CONFIG_PLATFORM)
-
 srcdir		 = .
-srcdirs		 = $(addprefix $(srcdir)/,common drivers/* lib) $(platdir)
-srcpatterns	 = *.c *.S
-sources		 = $(wildcard $(call pathjoin,$(srcdirs),$(srcpatterns)))
-
 objdir		 = build
-objdirs		 = $(sort $(dir $(objects)))
-objects		 = $(patsubst $(srcdir)/%,$(objdir)/%.o,$(basename $(sources)))
-outputs		 = $(addprefix $(objdir)/,scp.bin scp.elf scp.map)
+platdir		 = platform/$(CONFIG_PLATFORM)
 
-fmtincdirs	 = $(addprefix $(srcdir)/,include/* platform/*/include)
-fmtincludes	 = $(wildcard $(call pathjoin,$(fmtincdirs),*.h */*.h */*/*.h))
-fmtsrcdirs	 = $(addprefix $(srcdir)/,common drivers/* lib platform/* tools)
-fmtsources	 = $(wildcard $(call pathjoin,$(fmtsrcdirs),*.c))
+generated	 = $(objdir)/include/config.h
 
-toolincdirs	 = $(objdir)/include $(platdir)/include
-toolincludes	 = $(wildcard $(call pathjoin,$(toolincdirs),$(incpatterns))) \
-		   $(objdir)/include/config.h
-toolsources	 = $(wildcard $(srcdir)/tools/*.c)
-tools		 = $(patsubst $(srcdir)/%.c,$(objdir)/%,$(toolsources))
+files		 = $(sort $(wildcard $(foreach x,$2,$(1:%=$(srcdir)/%/$x))))
+incdirs		 = $(addprefix -I,$(sort $(objdir)/include $(wildcard $1)))
+headers		 = $(call files,$1,*.h */*.h *.S) $(generated)
+sources		 = $(call files,$1,*.c *.S)
+objdirs		 = $(sort $(patsubst %/,%,$(dir $1)))
+objects		 = $(patsubst $(srcdir)$2/%,$(objdir)$3/%$4,$(basename $1))
+
+format-filter	 = $(filter-out $(objdir)/% %.S,$1)
+formatheaders	 = $(call headers,include/* platform/*/include)
+formatsources	 = $(call sources,common drivers/* lib platform/* tools)
+formatfiles	 = $(call format-filter,$(formatheaders) $(formatsources))
+
+fwincbase	 = $(platdir)/include include/*
+fwincdirs	 = $(call incdirs,$(fwincbase))
+fwheaders	 = $(call headers,$(fwincbase))
+fwsources	 = $(call sources,common drivers/* lib $(platdir))
+fwobjects	 = $(call objects,$(fwsources),,,.o)
+fwobjdirs	 = $(call objdirs,$(fwobjects))
+fwfiles		 = $(addprefix $(objdir)/,scp.bin scp.elf scp.map)
+
+toolincbase	 = $(platdir)/include include/lib
+toolincdirs	 = $(call incdirs,$(toolincbase))
+toolheaders	 = $(call headers,$(toolincbase))
+toolsources	 = $(call sources,tools)
+toolobjects	 = $(call objects,$(toolsources),,/host,.o)
+toolobjdirs	 = $(call objdirs,$(toolobjects))
+tools		 = $(basename $(toolobjects))
+
+allobjdirs	 = $(objdir) $(objdir)/include $(fwobjdirs) $(toolobjdirs)
 
 ifeq ($(MAKECMDGOALS),)
 include $(objdir)/config.mk
@@ -91,11 +94,11 @@ endif
 M := @$(if $(filter-out 0,$(V)),:,printf '  %-7s %s\n')
 Q :=  $(if $(filter-out 0,$(V)),,@)
 
-all: $(outputs) $(tools)
+all: $(fwfiles) $(tools)
 
 check:
 
-check-format: $(fmtincludes) $(fmtsources)
+check-format: $(formatfiles)
 	$(Q) uncrustify -c $(srcdir)/.uncrustify -l C -q --check $^
 
 clean:
@@ -107,36 +110,36 @@ clean:
 distclean:
 	$(Q) rm -fr $(objdir) .config
 
-firmware: $(outputs)
+firmware: $(fwfiles)
 
-format: $(fmtincludes) $(fmtsources)
+format: $(formatfiles)
 	$(Q) uncrustify -c $(srcdir)/.uncrustify -l C -q --no-backup $^
 
 tools: $(tools)
 
-$(objdir) $(objdirs) $(objdir)/include $(objdir)/tools:
+$(allobjdirs):
 	$(Q) mkdir -p $@
 
 $(objdir)/%.bin: $(objdir)/%.elf | $(objdir)
 	$(M) OBJCOPY $@
 	$(Q) $(OBJCOPY) -O binary -S --reverse-bytes 4 $< $@
 
-$(objdir)/%.elf $(objdir)/%.map: $(objdir)/%.ld $(objects) | $(objdir)
+$(objdir)/%.elf $(objdir)/%.map: $(objdir)/%.ld $(fwobjects) | $(objdir)
 	$(M) CCLD $@
 	$(Q) $(CC) $(CFLAGS) $(LDFLAGS) \
 		-Wl,-Map,$(objdir)/$*.map -o $(objdir)/$*.elf -T $^
 
-$(objdir)/%.ld: $(srcdir)/scripts/%.ld.S $(incdirs) $(includes) | $(objdir)
+$(objdir)/%.ld: $(srcdir)/scripts/%.ld.S $(fwheaders) | $(objdir)
 	$(M) CPP $@
-	$(Q) $(CPP) $(CPPFLAGS) -o $@ -P $<
+	$(Q) $(CPP) $(CPPFLAGS) $(fwincdirs) -o $@ -P $<
 
-$(objdir)/%.o: $(srcdir)/%.c $(incdirs) $(includes) | $(objdirs)
+$(objdir)/%.o: $(srcdir)/%.c $(fwheaders) | $(fwobjdirs)
 	$(M) CC $@
-	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
 
-$(objdir)/%.o: $(srcdir)/%.S $(incdirs) $(includes) | $(objdirs)
+$(objdir)/%.o: $(srcdir)/%.S $(fwheaders) | $(fwobjdirs)
 	$(M) CC $@
-	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
 
 $(objdir)/config.mk: .config | $(objdir)
 	$(Q) sed 's/#.*$$//;s/="\(.*\)"$$/=\1/' $< > $@
@@ -144,10 +147,10 @@ $(objdir)/config.mk: .config | $(objdir)
 $(objdir)/include/config.h: .config | $(objdir)/include
 	$(Q) sed -n 's/#.*$$//;s/^\([^=]\+\)=\(.*\)$$/#define \1 \2/p' $< > $@
 
-$(objdir)/%: $(srcdir)/%.c $(toolincdirs) $(toolincludes) | $(objdir)/tools
+$(objdir)/host/tools/%: $(srcdir)/tools/%.c $(toolheaders) | $(toolobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(HOSTLDFLAGS) \
-		-o $@ $< $(HOSTLIBS)
+		$(toolincdirs) -o $@ $< $(HOSTLIBS)
 
 .PHONY: all check check-format clean distclean firmware format tools
 .SECONDARY:
