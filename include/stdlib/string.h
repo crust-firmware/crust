@@ -8,7 +8,7 @@
 
 #include <stddef.h>
 
-void *memcpy(void *dest, void *src, size_t n);
+void *memcpy(void *restrict dest, const void *restrict src, size_t n);
 int strcmp(const char *a, const char *b);
 size_t strlen(const char *s);
 
