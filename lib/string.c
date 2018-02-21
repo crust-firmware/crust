@@ -7,10 +7,10 @@
 #include <string.h>
 
 void *
-memcpy(void *dest, void *src, size_t n)
+memcpy(void *restrict dest, const void *restrict src, size_t n)
 {
-	char *d = dest;
-	char *s = src;
+	char *d       = dest;
+	const char *s = src;
 
 	while (n-- > 0)
 		*d++ = *s++;
