@@ -44,7 +44,8 @@ LDFLAGS		 = -nostdlib \
 HOSTCC		 = cc
 HOSTCFLAGS	 = -O2 -pipe -std=c11 \
 		   $(WARNINGS)
-HOSTCPPFLAGS	 = $(addprefix -I,$(toolincdirs))
+HOSTCPPFLAGS	 = -D_XOPEN_SOURCE=700 \
+		   $(addprefix -I,$(toolincdirs))
 HOSTLDFLAGS	 =
 HOSTLIBS	 =
 

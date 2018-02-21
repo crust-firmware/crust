@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#define _XOPEN_SOURCE 700
 #include <fcntl.h>
 #include <limits.h>
 #include <stdint.h>
