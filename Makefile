@@ -78,8 +78,12 @@ toolincludes	 = $(wildcard $(call pathjoin,$(toolincdirs),$(incpatterns))) \
 toolsources	 = $(wildcard $(srcdir)/tools/*.c)
 tools		 = $(patsubst $(srcdir)/%.c,$(objdir)/%,$(toolsources))
 
-ifeq ($(filter %clean %config %format,$(MAKECMDGOALS)),)
+ifeq ($(MAKECMDGOALS),)
 include $(objdir)/config.mk
+else
+ifneq ($(filter-out %clean %config %format,$(MAKECMDGOALS)),)
+include $(objdir)/config.mk
+endif
 endif
 
 M := @$(if $(filter-out 0,$(V)),:,printf '  %-7s %s\n')
