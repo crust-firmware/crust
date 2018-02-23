@@ -6,6 +6,10 @@
 #include <stddef.h>
 #include <string.h>
 
+#undef memcpy
+#undef strcmp
+#undef strlen
+
 void *
 memcpy(void *restrict dest, const void *restrict src, size_t n)
 {
