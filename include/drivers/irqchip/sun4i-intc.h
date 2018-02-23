@@ -6,7 +6,7 @@
 #ifndef DRIVERS_IRQCHIP_SUN4I_INTC_H
 #define DRIVERS_IRQCHIP_SUN4I_INTC_H
 
-#include <drivers/irqchip.h>
+#include <irqchip.h>
 
 #define SUN4I_INTC_IRQS 32
 

@@ -6,8 +6,8 @@
 #include <debug.h>
 #include <dm.h>
 #include <error.h>
+#include <irqchip.h>
 #include <spr.h>
-#include <drivers/irqchip.h>
 
 static struct device *irqchip_device;
 

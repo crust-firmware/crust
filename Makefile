@@ -51,7 +51,8 @@ HOSTLIBS	 =
 
 pathjoin	 = $(foreach X,$2,$(addsuffix /$X,$1))
 
-incdirs		 = $(objdir)/include $(platdir)/include $(srcdir)/include
+incdirs		 = $(objdir)/include $(platdir)/include \
+		   $(wildcard $(srcdir)/include/*)
 incpatterns	 = *.h */*.h */*/*.h *.S
 includes	 = $(wildcard $(call pathjoin,$(incdirs),$(incpatterns))) \
 		   $(objdir)/include/config.h
@@ -68,7 +69,7 @@ objdirs		 = $(sort $(dir $(objects)))
 objects		 = $(patsubst $(srcdir)/%,$(objdir)/%.o,$(basename $(sources)))
 outputs		 = $(addprefix $(objdir)/,scp.bin scp.elf scp.map)
 
-fmtincdirs	 = $(addprefix $(srcdir)/,include platform/*/include)
+fmtincdirs	 = $(addprefix $(srcdir)/,include/* platform/*/include)
 fmtincludes	 = $(wildcard $(call pathjoin,$(fmtincdirs),*.h */*.h */*/*.h))
 fmtsrcdirs	 = $(addprefix $(srcdir)/,common drivers/* lib platform/* tools)
 fmtsources	 = $(wildcard $(call pathjoin,$(fmtsrcdirs),*.c))

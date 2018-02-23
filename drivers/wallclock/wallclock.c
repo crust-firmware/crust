@@ -6,7 +6,7 @@
 #include <dm.h>
 #include <error.h>
 #include <stddef.h>
-#include <drivers/wallclock.h>
+#include <wallclock.h>
 
 static struct device *wallclock;
 

@@ -6,11 +6,11 @@
 #include <debug.h>
 #include <dm.h>
 #include <error.h>
+#include <irqchip.h>
 #include <mmio.h>
 #include <stddef.h>
 #include <util.h>
-#include <drivers/irqchip.h>
-#include <drivers/irqchip/sun4i-intc.h>
+#include <irqchip/sun4i-intc.h>
 
 #define INTC_VECTOR_REG    0x0000
 #define INTC_BASE_ADDR_REG 0x0004

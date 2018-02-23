@@ -5,6 +5,7 @@
 
 #include <bitfield.h>
 #include <bitmap.h>
+#include <clock.h>
 #include <compiler.h>
 #include <debug.h>
 #include <delay.h>
@@ -13,8 +14,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <drivers/clock.h>
-#include <drivers/clock/sunxi-ccu.h>
+#include <clock/sunxi-ccu.h>
 
 #define IS_LAST_CLOCK(clock) ((clock)->flags & SUNXI_CCU_FLAG_LAST)
 
