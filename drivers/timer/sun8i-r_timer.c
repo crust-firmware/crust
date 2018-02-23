@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
+#include <clock.h>
 #include <delay.h>
 #include <dm.h>
 #include <error.h>
+#include <irqchip.h>
 #include <mmio.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <drivers/clock.h>
-#include <drivers/irqchip.h>
-#include <drivers/timer.h>
-#include <drivers/timer/sun8i-r_timer.h>
+#include <timer.h>
+#include <timer/sun8i-r_timer.h>
 
 #define IRQ_EN_REG      0x0000
 #define IRQ_STATUS_REG  0x0004

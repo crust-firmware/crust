@@ -6,7 +6,7 @@
 #ifndef DRIVERS_MSGBOX_SUNXI_MSGBOX_H
 #define DRIVERS_MSGBOX_SUNXI_MSGBOX_H
 
-#include <drivers/msgbox.h>
+#include <msgbox.h>
 
 /*
  * The message box hardware provides 8 unidirectional channels. As the mailbox

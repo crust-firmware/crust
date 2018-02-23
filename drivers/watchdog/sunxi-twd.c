@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
+#include <clock.h>
 #include <error.h>
 #include <mmio.h>
-#include <drivers/clock.h>
-#include <drivers/timer.h>
-#include <drivers/watchdog.h>
-#include <drivers/watchdog/sunxi-twd.h>
+#include <timer.h>
+#include <watchdog.h>
+#include <watchdog/sunxi-twd.h>
 
 #define TWD_STATUS_REG  0x00
 #define TWD_CTRL_REG    0x10

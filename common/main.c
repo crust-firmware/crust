@@ -8,8 +8,8 @@
 #include <debug.h>
 #include <dm.h>
 #include <stdbool.h>
+#include <watchdog.h>
 #include <work.h>
-#include <drivers/watchdog.h>
 #include <platform/devices.h>
 
 #define WDOG_TIMEOUT (5 * 1000 * 1000 * 24) /* 5 seconds */

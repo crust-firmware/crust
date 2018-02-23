@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
+#include <clock.h>
 #include <error.h>
 #include <mmio.h>
 #include <util.h>
-#include <drivers/clock.h>
-#include <drivers/wallclock.h>
-#include <drivers/wallclock/sun6i-cnt64.h>
+#include <wallclock.h>
+#include <wallclock/sun6i-cnt64.h>
 
 #define CNT64_CTRL_REG 0x280
 #define CNT64_LOW_REG  0x284

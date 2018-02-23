@@ -5,7 +5,7 @@
 
 #include <delay.h>
 #include <stdint.h>
-#include <drivers/wallclock.h>
+#include <wallclock.h>
 
 void
 delay_cycles(uint32_t cycles)

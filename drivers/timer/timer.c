@@ -8,8 +8,8 @@
 #include <dm.h>
 #include <error.h>
 #include <stddef.h>
-#include <drivers/timer.h>
-#include <drivers/wallclock.h>
+#include <timer.h>
+#include <wallclock.h>
 
 #define MAX_PERIODIC_ITEMS 1
 

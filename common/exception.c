@@ -5,8 +5,8 @@
 
 #include <debug.h>
 #include <exception.h>
+#include <irqchip.h>
 #include <stdint.h>
-#include <drivers/irqchip.h>
 
 void
 handle_exception(uint32_t number, struct exception_regs *regs)

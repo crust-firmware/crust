@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
+#include <clock.h>
 #include <debug.h>
 #include <dm.h>
 #include <error.h>
+#include <irqchip.h>
 #include <mmio.h>
+#include <msgbox.h>
 #include <stddef.h>
 #include <util.h>
-#include <drivers/clock.h>
-#include <drivers/irqchip.h>
-#include <drivers/msgbox.h>
-#include <drivers/msgbox/sunxi-msgbox.h>
+#include <msgbox/sunxi-msgbox.h>
 
 #define CTRL_REG0               (0x0000)
 #define CTRL_REG1               (0x0004)

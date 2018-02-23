@@ -5,13 +5,13 @@
 
 #include <dm.h>
 #include <util.h>
-#include <drivers/clock/sunxi-ccu.h>
-#include <drivers/irqchip/sun4i-intc.h>
-#include <drivers/msgbox/sunxi-msgbox.h>
-#include <drivers/pio/sunxi-pio.h>
-#include <drivers/timer/sun8i-r_timer.h>
-#include <drivers/wallclock/sun6i-cnt64.h>
-#include <drivers/watchdog/sunxi-twd.h>
+#include <clock/sunxi-ccu.h>
+#include <irqchip/sun4i-intc.h>
+#include <msgbox/sunxi-msgbox.h>
+#include <pio/sunxi-pio.h>
+#include <timer/sun8i-r_timer.h>
+#include <wallclock/sun6i-cnt64.h>
+#include <watchdog/sunxi-twd.h>
 #include <platform/ccu.h>
 #include <platform/devices.h>
 #include <platform/irq.h>

@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
+#include <clock.h>
 #include <dm.h>
 #include <error.h>
+#include <irqchip.h>
 #include <mmio.h>
+#include <pio.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <util.h>
-#include <drivers/clock.h>
-#include <drivers/irqchip.h>
-#include <drivers/pio.h>
-#include <drivers/pio/sunxi-pio.h>
+#include <pio/sunxi-pio.h>
 
 #define MAX_PORTS      8
 
