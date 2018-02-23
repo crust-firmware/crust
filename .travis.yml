@@ -43,7 +43,8 @@ matrix:
         - codespell -i 0 -q 4 $(git ls-files)
 
 script:
-  - make distclean && make ${BOARD}_defconfig
-  - make DEBUG=0 V=1 && make check && make clean
-  - make DEBUG=1 V=1 && make check
+  - make ${BOARD}_defconfig
+  - make DEBUG=0 V=1 all check
+  - make clean
+  - make DEBUG=1 V=1 all check
 ...
