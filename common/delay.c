@@ -3,9 +3,12 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
+#include <debug.h>
 #include <delay.h>
+#include <limits.h>
 #include <stdint.h>
 #include <wallclock.h>
+#include <platform/time.h>
 
 void
 delay_cycles(uint32_t cycles)
@@ -19,4 +22,12 @@ delay_cycles(uint32_t cycles)
 	while (wallclock_read() < start + cycles) {
 		/* Wait for time to pass. */
 	}
+}
+
+void
+udelay(uint32_t useconds)
+{
+	assert(useconds < UINT32_MAX / REFCLK_MHZ);
+
+	delay_cycles(REFCLK_MHZ * useconds);
 }

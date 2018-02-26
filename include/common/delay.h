@@ -16,4 +16,11 @@
  */
 void delay_cycles(uint32_t cycles);
 
+/**
+ * Spin (do nothing) for at least the given number of microseconds.
+ *
+ * @param The number of microseconds to delay for.
+ */
+void udelay(uint32_t useconds);
+
 #endif /* DELAY_H */
