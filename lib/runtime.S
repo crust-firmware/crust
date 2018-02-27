@@ -6,6 +6,37 @@
 #include <macros.S>
 
 /*
+ * Derived from the "best method for counting bits in a 32-bit integer" at
+ * https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel.
+ *
+ * Signed multiplication is used because l.mulu is broken in hardware. This is
+ * safe because the previous bit masking ensures neither operand is negative.
+ */
+func __popcountsi2
+	l.movhi	r5, 0x5555		# Statement 1:
+	l.ori	r5, r5, 0x5555		#	r5 = 0x55555555
+	l.srli	r4, r3, 1		#	r4 = v >> 1
+	l.and	r4, r4, r5		#	r4 = (v >> 1) & 0x55555555
+	l.sub	r3, r3, r4		#	v = v - ((v >> 1) & 0x55555555)
+	l.movhi	r5, 0x3333		# Statement 2:
+	l.ori	r5, r5, 0x3333		#	r5 = 0x33333333
+	l.srli	r4, r3, 2		#	r4 = v >> 2
+	l.and	r4, r4, r5		#	r4 = (v >> 2) & 0x33333333
+	l.and	r3, r3, r5		#	v = v & 0x33333333
+	l.add	r3, r3, r4		#	v += ((v >> 2) & 0x33333333)
+	l.movhi	r5, 0x0f0f		# Statement 3:
+	l.ori	r5, r5, 0x0f0f		#	r5 = 0x0f0f0f0f
+	l.srli	r4, r3, 4		#	r4 = v >> 4
+	l.add	r4, r3, r4		#	r4 = v + (v >> 4)
+	l.and	r4, r4, r5		#	r4 = v + (v >> 4) & 0x0f0f0f0f
+	l.movhi	r5, 0x0101
+	l.ori	r5, r5, 0x0101		#	r5 = 0x01010101
+	l.mul	r11, r4, r5		#	c = r4 * 0x01010101
+	l.jr	r9
+	l.srli	r11, r11, 24		#	return c >> 24
+endfunc __popcountsi2
+
+/*
  * Optimized implementation of the "shift divisor method" algorithm from
  * T. Rodeheffer. Software Integer Division. Microsoft Research, 2008.
  *
