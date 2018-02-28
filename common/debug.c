@@ -19,9 +19,7 @@ static char *prefixes[] = {
 	"ERROR:\t ",
 	"WARNING: ",
 	"INFO:\t ",
-#if DEBUG
 	"DEBUG:\t ",
-#endif
 };
 
 static void print_decimal(char sign, int width, bool zero, uint32_t num);
