@@ -386,7 +386,7 @@ sunxi_ccu_set_rate_id(struct device *dev, uint8_t id, uint32_t rate)
 	reg = bitfield_set(reg, clock->p, factors.p);
 	if (reg != orig_reg) {
 		mmio_write32(dev->regs + clock->reg, reg);
-		delay_cycles(2);
+		udelay(1);
 		if (mmio_read32(dev->regs + clock->reg) != reg)
 			return EIO;
 	}
@@ -395,7 +395,7 @@ sunxi_ccu_set_rate_id(struct device *dev, uint8_t id, uint32_t rate)
 		reg = bitfield_set(reg, clock->mux, factors.parent_index);
 		if (reg != orig_reg) {
 			mmio_write32(dev->regs + clock->reg, reg);
-			delay_cycles(2);
+			udelay(1);
 			if (mmio_read32(dev->regs + clock->reg) != reg)
 				return EIO;
 		}
