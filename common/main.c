@@ -8,6 +8,7 @@
 #include <debug.h>
 #include <dm.h>
 #include <stdbool.h>
+#include <test.h>
 #include <watchdog.h>
 #include <work.h>
 #include <platform/devices.h>
@@ -24,6 +25,9 @@ main(void)
 
 	console_init(DEV_UART0);
 	dm_init();
+#if TEST
+	run_tests();
+#endif
 
 	/* Enable watchdog. */
 	if ((watchdog = dm_get_by_class(DM_CLASS_WATCHDOG))) {

@@ -14,6 +14,7 @@
 #define LOG_STRING_WARNING "\x03"
 #define LOG_STRING_INFO    "\x04"
 #define LOG_STRING_DEBUG   "\x05"
+#define LOG_STRING_TEST    "\x06"
 
 #if DEBUG
 #define assert(e)          ((void)((e) || \
@@ -29,6 +30,7 @@ enum {
 	LOG_LEVEL_WARNING,
 	LOG_LEVEL_INFO,
 	LOG_LEVEL_DEBUG,
+	LOG_LEVEL_TEST,
 	LOG_LEVELS
 };
 
@@ -44,6 +46,9 @@ noreturn void panic(const char *fmt, ...) __printf(1, 2);
 #define debug(...) log(LOG_STRING_DEBUG __VA_ARGS__)
 #else
 #define debug(...) ((void)0)
+#endif
+#if TEST
+#define test(...)  log(LOG_STRING_TEST __VA_ARGS__)
 #endif
 
 #endif /* DEBUG_H */
