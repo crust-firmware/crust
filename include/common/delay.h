@@ -9,14 +9,6 @@
 #include <stdint.h>
 
 /**
- * Spin (do nothing) for at least the given number of reference clock (24MHz)
- * cycles.
- *
- * @param The number of cycles to delay for.
- */
-void delay_cycles(uint32_t cycles);
-
-/**
  * Spin (do nothing) for at least the given number of microseconds.
  *
  * @param The number of microseconds to delay for.

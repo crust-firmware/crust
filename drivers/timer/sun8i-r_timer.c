@@ -45,7 +45,7 @@ sun8i_r_timer_set_timeout(struct device *dev, uint32_t timeout)
 	if (running) {
 		mmio_clearbits32(dev->regs + CONTROL_REG(index), BIT(0));
 		/* Must wait at least two cycles before resuming the timer. */
-		delay_cycles(2);
+		udelay(1);
 	}
 	mmio_write32(dev->regs + INTERVAL_REG(index), timeout);
 	/* If the timer is paused (not stopped), also set the reload bit. */
