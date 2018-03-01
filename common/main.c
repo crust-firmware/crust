@@ -11,8 +11,9 @@
 #include <watchdog.h>
 #include <work.h>
 #include <platform/devices.h>
+#include <platform/time.h>
 
-#define WDOG_TIMEOUT (5 * 1000 * 1000 * 24) /* 5 seconds */
+#define WDOG_TIMEOUT (5 * REFCLK_HZ) /* 5 seconds */
 
 noreturn void main(void);
 

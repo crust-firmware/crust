@@ -10,11 +10,9 @@
 #include <stddef.h>
 #include <timer.h>
 #include <wallclock.h>
+#include <platform/time.h>
 
 #define MAX_PERIODIC_ITEMS 1
-
-/* One second at a reference clock rate of 24MHz. */
-#define TICK_INTERVAL      24000000
 
 static uint64_t last_tick;
 static struct work_item periodic_work_items[MAX_PERIODIC_ITEMS];
@@ -69,8 +67,9 @@ timer_refresh(void)
 
 	if (unlikely(last_tick == 0))
 		last_tick = current_time;
+	/* Tick at least once every second. */
 	while (last_tick <= current_time)
-		last_tick += TICK_INTERVAL;
+		last_tick += REFCLK_HZ;
 
 	return TIMER_OPS(timer)->set_timeout(timer, last_tick - current_time);
 }
