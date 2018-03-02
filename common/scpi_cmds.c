@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
+#include <bitmap.h>
 #include <debug.h>
 #include <scpi.h>
 #include <stdbool.h>
@@ -35,11 +36,41 @@ struct scpi_cmd {
 };
 
 /*
+ * Handler/payload data for SCPI_CMD_GET_SCP_CAP: Get SCP capability.
+ */
+#define SCP_FIRMWARE_VERSION(x, y, z) \
+	((((x) & 0xff) << 24) | (((y) & 0xff) << 16) | ((z) & 0xffff))
+#define SCPI_PAYLOAD_LIMITS(x, y)   (((x) & 0x01ff) << 16 | ((y) & 0x01ff))
+#define SCPI_PROTOCOL_VERSION(x, y) (((x) & 0xffff) << 16 | ((y) & 0xffff))
+
+static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
+	/* SCPI protocol version. */
+	SCPI_PROTOCOL_VERSION(1, 2),
+	/* Payload size limits. */
+	SCPI_PAYLOAD_LIMITS(SCPI_PAYLOAD_SIZE, SCPI_PAYLOAD_SIZE),
+	/* Firmware version. */
+	SCP_FIRMWARE_VERSION(0, 0, 0),
+	/* Commands enabled 0. */
+	BITMAP_BIT(SCPI_CMD_SCP_READY) |
+	BITMAP_BIT(SCPI_CMD_GET_SCP_CAP),
+	/* Commands enabled 1. */
+	0,
+	/* Commands enabled 2. */
+	0,
+	/* Commands enabled 3. */
+	0,
+};
+
+/*
  * The list of supported SCPI commands.
  */
 static const struct scpi_cmd scpi_cmds[] = {
 	[SCPI_CMD_SCP_READY] = {
 		.flags = FLAG_EMPTY_PAYLOAD | FLAG_NO_REPLY | FLAG_SECURE_ONLY,
+	},
+	[SCPI_CMD_GET_SCP_CAP] = {
+		.tx_payload = scpi_cmd_get_scp_cap_tx_payload,
+		.tx_size    = sizeof(scpi_cmd_get_scp_cap_tx_payload),
 	},
 };
 
