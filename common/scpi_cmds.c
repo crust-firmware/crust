@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <system_power.h>
 #include <util.h>
 
 enum {
@@ -52,7 +53,8 @@ static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
 	SCP_FIRMWARE_VERSION(0, 0, 0),
 	/* Commands enabled 0. */
 	BITMAP_BIT(SCPI_CMD_SCP_READY) |
-	BITMAP_BIT(SCPI_CMD_GET_SCP_CAP),
+	BITMAP_BIT(SCPI_CMD_GET_SCP_CAP) |
+	BITMAP_BIT(SCPI_CMD_SET_SYS_PWR),
 	/* Commands enabled 1. */
 	0,
 	/* Commands enabled 2. */
@@ -60,6 +62,25 @@ static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
 	/* Commands enabled 3. */
 	0,
 };
+
+/*
+ * Handler/payload data for SCPI_CMD_SET_SYS_PWR: Set system power state.
+ */
+uint32_t
+scpi_cmd_set_sys_power_handler(uint32_t *rx_payload, uint16_t rx_size __unused,
+                               uint32_t *tx_payload __unused,
+                               uint16_t *tx_size __unused)
+{
+	uint8_t system_state = rx_payload[0] & BITMASK(0, 8);
+
+	if (system_state != SYSTEM_POWER_STATE_SHUTDOWN &&
+	    system_state != SYSTEM_POWER_STATE_REBOOT &&
+	    system_state != SYSTEM_POWER_STATE_RESET)
+		return SCPI_E_PARAM;
+
+	/* Since there's no PMIC or wakeup source support yet, always reset. */
+	system_reset();
+}
 
 /*
  * The list of supported SCPI commands.
@@ -71,6 +92,11 @@ static const struct scpi_cmd scpi_cmds[] = {
 	[SCPI_CMD_GET_SCP_CAP] = {
 		.tx_payload = scpi_cmd_get_scp_cap_tx_payload,
 		.tx_size    = sizeof(scpi_cmd_get_scp_cap_tx_payload),
+	},
+	[SCPI_CMD_SET_SYS_PWR] = {
+		.handler = scpi_cmd_set_sys_power_handler,
+		.rx_size = sizeof(uint8_t),
+		.flags   = FLAG_SECURE_ONLY,
 	},
 };
 
