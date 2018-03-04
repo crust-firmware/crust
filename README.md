@@ -129,20 +129,8 @@ flash image containing the correct versions of all firmware components.
 
 ## Contributing
 
-All contributions to this project must be released under the open-source
-license used by the project. To help ensure this, all commits you make must be
-accompanied by your real name and a `Signed-off-by` tag asserting authorship
-and permission to contribute, per the [Developer Certificate of Origin][dco].
-This tag can be added automatically by `git` using `git commit -s`.
+The success of the Crust firmware project is made possible by community
+support. For more information regarding community contributions, please
+reference the Crust firmware [contribution guidelines][cg].
 
-The code in this project is formatted with `uncrustify`. You will need a recent
-version of that program (possibly compiled from its [git repository][ucgit]) to
-format any changes you make. You can use the target `make format` to correctly
-format your code. Other files should be wrapped to 79 columns.
-
-Please run `make check` to check your changes before submitting a pull request.
-Additionally, please ensure your changes work on real hardware before
-submitting them.
-
-[dco]: https://developercertificate.org/
-[ucgit]: https://github.com/uncrustify/uncrustify
+[cg]: CONTRIBUTING.md
