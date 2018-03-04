@@ -15,16 +15,10 @@ matrix:
     - addons:
         apt:
           packages:
-            - g++-7
             - codespell
-          sources:
-            - ubuntu-toolchain-r-test
       cache:
         directories:
           - uncrustify
-      env:
-        - BUILD_TYPE=check-format
-        - HOSTCC=gcc-7
       install:
         - |-
           if test -d uncrustify/.git; then
@@ -35,7 +29,7 @@ matrix:
         - git -C uncrustify rev-parse HEAD
         - mkdir -p uncrustify/build
         - (cd uncrustify/build && cmake -DCMAKE_INSTALL_PREFIX=$PWD
-            -DCMAKE_C_COMPILER=gcc-7 -DCMAKE_CXX_COMPILER=g++-7 ..)
+            -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..)
         - make -C uncrustify/build -j$(nproc)
         - export PATH=$PATH:$PWD/uncrustify/build
       script:
