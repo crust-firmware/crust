@@ -4,6 +4,7 @@
  */
 
 #include <debug.h>
+#include <interrupts.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <work.h>
@@ -62,23 +63,41 @@ queue_next(size_t i)
 void
 process_work(void)
 {
-	/* Walk the queue. */
+	uint32_t flags;
+	void    *param;
+	work_function fn;
+
+	/* Walk the queue with interrupts disabled. */
+	flags = disable_interrupts();
 	while (!queue_empty(queue_head, queue_tail)) {
 		size_t i = queue_head % MAX_WORK_ITEMS;
-		work_items[i].fn(work_items[i].param);
+		/* First make a copy of the work function and its parameter. */
+		fn    = work_items[i].fn;
+		param = work_items[i].param;
+		/* Then remove the it from the locked queue. */
 		queue_head = queue_next(queue_head);
+		restore_interrupts(flags);
+		/* Call the work function with interrupts enabled. This is only
+		 * safe if process_work() is never run concurrently, or else
+		 * the other call could update queue_head behind our back. */
+		fn(param);
+		flags = disable_interrupts();
 	}
+	restore_interrupts(flags);
 }
 
 void
 queue_work(work_function fn, void *param)
 {
-	size_t i;
+	size_t   i;
+	uint32_t flags;
 
-	/* Walk the queue and check for duplicates. */
+	/* Walk the queue with interrupts disabled and check for duplicates. */
+	flags = disable_interrupts();
 	for (i = queue_head; !queue_empty(i, queue_tail); i = queue_next(i)) {
 		if (work_items[i % MAX_WORK_ITEMS].fn == fn &&
 		    work_items[i % MAX_WORK_ITEMS].param == param) {
+			restore_interrupts(flags);
 			debug("(%p, %p) is already in the work queue",
 			      (void *)(uintptr_t)fn, param);
 			return;
@@ -92,4 +111,5 @@ queue_work(work_function fn, void *param)
 	work_items[queue_tail % MAX_WORK_ITEMS].fn    = fn;
 	work_items[queue_tail % MAX_WORK_ITEMS].param = param;
 	queue_tail = queue_next(queue_tail);
+	restore_interrupts(flags);
 }
