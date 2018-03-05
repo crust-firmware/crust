@@ -63,7 +63,7 @@ static struct device pio = {
 	.clock    = CCU_CLOCK_PIO,
 	.clockdev = &ccu,
 	.drv      = &sunxi_pio_driver,
-	.drvdata  = BITMASK(1, 7), /*< Physically implemented ports (1-7). */
+	.drvdata  = BITMASK(1, 7), /**< Physically implemented ports (1-7). */
 };
 
 static struct device r_ccu = {
@@ -165,7 +165,7 @@ static struct device r_pio = {
 	.clock    = R_CCU_CLOCK_R_PIO,
 	.clockdev = &r_ccu,
 	.drv      = &sunxi_pio_driver,
-	.drvdata  = BIT(0), /*< Physically implemented ports (0). */
+	.drvdata  = BIT(0), /**< Physically implemented ports (0). */
 };
 
 static struct device r_timer0 = {
@@ -174,7 +174,7 @@ static struct device r_timer0 = {
 	.clock    = R_CCU_CLOCK_R_TIMER,
 	.clockdev = &r_ccu,
 	.drv      = &sun8i_r_timer_driver,
-	.drvdata  = 0, /*< Timer index within the device. */
+	.drvdata  = 0, /**< Timer index within the device. */
 	.irq      = IRQ_R_TIMER0,
 	.irqdev   = &r_intc,
 };
