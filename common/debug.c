@@ -20,7 +20,7 @@ static char *prefixes[] = {
 	"WARNING: ",
 	"INFO:\t ",
 	"DEBUG:\t ",
-	"TEST:\t",
+	"TEST:\t ",
 };
 
 static void print_decimal(char sign, int width, bool zero, uint32_t num);
