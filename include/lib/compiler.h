@@ -23,6 +23,9 @@
 #define always_inline     __attribute__((__always_inline__)) inline
 #define noinline          __attribute__((__noinline__))
 
+/* Barriers */
+#define barrier()         asm volatile ("" : : : "memory")
+
 /* Builtins */
 #define likely(e)         __builtin_expect(!!(e), 1)
 #define unlikely(e)       __builtin_expect(e, 0)
