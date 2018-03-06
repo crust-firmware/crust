@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef COMPILER_H
-#define COMPILER_H
+#ifndef LIB_COMPILER_H
+#define LIB_COMPILER_H
 
 /* Attributes */
 #define __alias(symbol)   __attribute__((alias(#symbol)))
@@ -35,4 +35,4 @@
 #define noreturn          _Noreturn
 #define static_assert     _Static_assert
 
-#endif /* COMPILER_H */
+#endif /* LIB_COMPILER_H */

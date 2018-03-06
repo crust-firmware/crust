@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: BSD-1-Clause
  */
 
-#ifndef ARCH_SPR_H
-#define ARCH_SPR_H
+#ifndef COMMON_ARCH_SPR_H
+#define COMMON_ARCH_SPR_H
 
 #include <util.h>
 
@@ -2660,4 +2660,4 @@
 /*****************************/
 #define SPR_FPU_GROUP 0x0b
 
-#endif /* ARCH_SPR_H */
+#endif /* COMMON_ARCH_SPR_H */

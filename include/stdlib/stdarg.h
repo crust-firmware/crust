@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef STDARG_H
-#define STDARG_H
+#ifndef STDLIB_STDARG_H
+#define STDLIB_STDARG_H
 
 #define va_arg(v, l)   __builtin_va_arg(v, l)
 #define va_copy(d, s)  __builtin_va_copy(d, s)
@@ -14,4 +14,4 @@
 
 typedef __builtin_va_list va_list;
 
-#endif /* STDARG_H */
+#endif /* STDLIB_STDARG_H */

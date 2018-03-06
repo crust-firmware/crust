@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef BYTESWAP_H
-#define BYTESWAP_H
+#ifndef LIB_BYTESWAP_H
+#define LIB_BYTESWAP_H
 
 #include <stdint.h>
 
@@ -24,4 +24,4 @@ bswap32(uint32_t n)
 	       ((n >> 24) & 0xffU);
 }
 
-#endif /* BYTESWAP_H */
+#endif /* LIB_BYTESWAP_H */

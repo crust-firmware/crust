@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef STDINT_H
-#define STDINT_H
+#ifndef STDLIB_STDINT_H
+#define STDLIB_STDINT_H
 
 #define INT8_MAX    0x7f
 #define INT8_MIN    (-1 - 0x7f)
@@ -50,4 +50,4 @@ typedef unsigned long long uint64_t;
 typedef unsigned long long uintmax_t;
 typedef unsigned           uintptr_t;
 
-#endif /* STDINT_H */
+#endif /* STDLIB_STDINT_H */

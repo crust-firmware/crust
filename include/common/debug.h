@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef DEBUG_H
-#define DEBUG_H
+#ifndef COMMON_DEBUG_H
+#define COMMON_DEBUG_H
 
 #include <compiler.h>
 #include <stdint.h>
@@ -46,4 +46,4 @@ noreturn void panic(const char *fmt, ...) __printf(1, 2);
 #define debug(...) ((void)0)
 #endif
 
-#endif /* DEBUG_H */
+#endif /* COMMON_DEBUG_H */

@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef LIMITS_H
-#define LIMITS_H
+#ifndef STDLIB_LIMITS_H
+#define STDLIB_LIMITS_H
 
 #define CHAR_BIT   8
 #define CHAR_MAX   0xff
@@ -36,4 +36,4 @@
 
 #define USHRT_MAX  0xffff
 
-#endif /* LIMITS_H */
+#endif /* STDLIB_LIMITS_H */
