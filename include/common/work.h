@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef WORK_H
-#define WORK_H
+#ifndef COMMON_WORK_H
+#define COMMON_WORK_H
 
 /**
  * A function that performs asynchronous/delayed work.
@@ -29,4 +29,4 @@ void process_work(void);
  */
 void queue_work(work_function fn, void *param);
 
-#endif /* WORK_H */
+#endif /* COMMON_WORK_H */

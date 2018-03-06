@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef ERROR_H
-#define ERROR_H
+#ifndef LIB_ERROR_H
+#define LIB_ERROR_H
 
 #define SUCCESS 0     /**< The operation succeeded. */
 #define EAGAIN  (-1)  /**< Try again immediately. */
@@ -18,4 +18,4 @@
 #define EPERM   (-9)  /**< The operation is not permitted. */
 #define ERANGE  (-10) /**< The argument to the function was out of range. */
 
-#endif /* ERROR_H */
+#endif /* LIB_ERROR_H */

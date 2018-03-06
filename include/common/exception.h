@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef EXCEPTION_H
-#define EXCEPTION_H
+#ifndef COMMON_EXCEPTION_H
+#define COMMON_EXCEPTION_H
 
 #include <compiler.h>
 #include <stdint.h>
@@ -47,4 +47,4 @@ struct exception_regs {
 
 void handle_exception(uint32_t number, struct exception_regs *regs);
 
-#endif /* EXCEPTION_H */
+#endif /* COMMON_EXCEPTION_H */

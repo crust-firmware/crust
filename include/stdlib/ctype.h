@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-#ifndef CTYPE_H
-#define CTYPE_H
+#ifndef STDLIB_CTYPE_H
+#define STDLIB_CTYPE_H
 
 #include <stdbool.h>
 
@@ -55,4 +55,4 @@ isxdigit(char c)
 	return isdigit(c) || ((unsigned)c | 32) - 'a' < 6;
 }
 
-#endif /* CTYPE_H */
+#endif /* STDLIB_CTYPE_H */

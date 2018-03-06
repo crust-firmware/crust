@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef DELAY_H
-#define DELAY_H
+#ifndef COMMON_DELAY_H
+#define COMMON_DELAY_H
 
 #include <stdint.h>
 
@@ -15,4 +15,4 @@
  */
 void udelay(uint32_t useconds);
 
-#endif /* DELAY_H */
+#endif /* COMMON_DELAY_H */

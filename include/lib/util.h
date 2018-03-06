@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef LIB_UTIL_H
+#define LIB_UTIL_H
 
 #ifdef __ASSEMBLER__
 #define U(n)              (n)
@@ -22,4 +22,4 @@
  */
 #define popcount(x)       __builtin_popcount(x)
 
-#endif /* UTIL_H */
+#endif /* LIB_UTIL_H */

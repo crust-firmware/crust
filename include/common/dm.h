@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef DM_H
-#define DM_H
+#ifndef COMMON_DM_H
+#define COMMON_DM_H
 
 #include <stdint.h>
 #include <util.h>
@@ -64,4 +64,4 @@ struct device *dm_get_by_class(uint32_t class);
 struct device *dm_get_by_name(const char *name);
 void dm_init(void);
 
-#endif /* DM_H */
+#endif /* COMMON_DM_H */

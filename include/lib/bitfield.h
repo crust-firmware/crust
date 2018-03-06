@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef BITFIELD_H
-#define BITFIELD_H
+#ifndef LIB_BITFIELD_H
+#define LIB_BITFIELD_H
 
 #include <limits.h>
 #include <stdint.h>
@@ -83,4 +83,4 @@ bitfield_set(uint32_t word, bitfield_t field, uint8_t value)
 	       ((value & BITMASK(0, BF_WIDTH(field))) << BF_OFFSET(field));
 }
 
-#endif /* BITFIELD_H */
+#endif /* LIB_BITFIELD_H */

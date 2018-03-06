@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef SPR_H
-#define SPR_H
+#ifndef COMMON_SPR_H
+#define COMMON_SPR_H
 
 #include <compiler.h>
 #include <stdint.h>
@@ -25,4 +25,4 @@ mtspr(uint16_t addr, uint32_t value)
 	asm volatile ("l.mtspr r0, %1, %0" : : "K" (addr), "r" (value));
 }
 
-#endif /* SPR_H */
+#endif /* COMMON_SPR_H */

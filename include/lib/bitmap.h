@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef BITMAP_H
-#define BITMAP_H
+#ifndef LIB_BITMAP_H
+#define LIB_BITMAP_H
 
 #include <limits.h>
 #include <mmio.h>
@@ -77,4 +77,4 @@ bitmap_set(uintptr_t base, uint32_t index)
 	mmio_setbits32(word, BIT(BITMAP_BIT(index)));
 }
 
-#endif /* BITMAP_H */
+#endif /* LIB_BITMAP_H */
