@@ -7,6 +7,7 @@
 #include <debug.h>
 #include <dm.h>
 #include <error.h>
+#include <interrupts.h>
 #include <msgbox.h>
 #include <scpi.h>
 #include <stdbool.h>
@@ -42,22 +43,39 @@ static struct device *scpi_msgbox;
 /** Buffers used to hold messages while they are being processed. */
 static struct scpi_buffer scpi_buffers[SCPI_BUFFER_MAX];
 
+/**
+ * Allocate a temporary buffer for processing an SCPI message.
+ *
+ * Because this function is called from both IRQ handlers and process context,
+ * it must be locked.
+ */
 static struct scpi_buffer *
 scpi_alloc_buffer(uint8_t client)
 {
+	struct scpi_buffer *buffer = NULL;
+	uint32_t flags;
+
+	flags = disable_interrupts();
 	for (size_t i = 0; i < SCPI_BUFFER_MAX; ++i) {
 		if (!scpi_buffers[i].busy) {
-			struct scpi_buffer *buffer = &scpi_buffers[i];
-
-			/* Mark the buffer as being in use. */
+			buffer         = &scpi_buffers[i];
 			buffer->busy   = true;
 			buffer->client = client;
-
-			return buffer;
+			break;
 		}
 	}
+	restore_interrupts(flags);
 
-	return NULL;
+	return buffer;
+}
+
+static inline void
+scpi_free_buffer(struct scpi_buffer *buffer)
+{
+	/* Prevent the compiler from reordering the store (the unlock
+	 * operation) before earlier operations. */
+	barrier();
+	buffer->busy = false;
 }
 
 /**
@@ -79,7 +97,7 @@ scpi_send_message(void *param)
 	while (msgbox_tx_pending(scpi_msgbox, buffer->client)) {
 		if (wallclock_read() >= timeout) {
 			warn("SCPI.%u: Channel busy, message dropped", client);
-			buffer->busy = false;
+			scpi_free_buffer(buffer);
 			return;
 		}
 	}
@@ -93,7 +111,7 @@ scpi_send_message(void *param)
 		error("SCPI.%u: Error sending reply: %d", client, err);
 
 	/* Mark the buffer as no longer in use. */
-	buffer->busy = false;
+	scpi_free_buffer(buffer);
 }
 
 /**
@@ -145,7 +163,7 @@ scpi_handle_message(void *param)
 	if (!scpi_handle_cmd(buffer->client, &buffer->mem.rx_msg,
 	                     &buffer->mem.tx_msg)) {
 		/* If the message does not need a reply, stop processing. */
-		buffer->busy = false;
+		scpi_free_buffer(buffer);
 		return;
 	}
 
