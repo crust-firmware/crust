@@ -26,9 +26,7 @@ main(void)
 
 	console_init(DEV_UART0);
 	dm_init();
-#if TEST
 	run_tests();
-#endif
 
 	/* Enable watchdog. */
 	if ((watchdog = dm_get_by_class(DM_CLASS_WATCHDOG))) {

@@ -10,6 +10,13 @@
 
 void run_tests(void);
 
+#else
+
+static inline void
+run_tests(void)
+{
+}
+
 #endif
 
 #endif /* COMMON_TEST_H */
