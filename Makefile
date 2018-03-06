@@ -15,6 +15,7 @@ WARNINGS	 = -Wall -Wextra -Wformat=2 -Wpedantic -Wshadow \
 		   -Werror=pointer-arith \
 		   -Werror=pointer-sign \
 		   -Werror=strict-prototypes \
+		   -Werror=vla \
 		   -Wno-missing-field-initializers
 
 CFLAGS		 = -Os -pipe -std=c11 \
