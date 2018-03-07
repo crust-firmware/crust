@@ -4,6 +4,7 @@
  */
 
 #include <bitmap.h>
+#include <css.h>
 #include <debug.h>
 #include <scpi.h>
 #include <stdbool.h>
@@ -54,6 +55,8 @@ static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
 	/* Commands enabled 0. */
 	BITMAP_BIT(SCPI_CMD_SCP_READY) |
 	BITMAP_BIT(SCPI_CMD_GET_SCP_CAP) |
+	BITMAP_BIT(SCPI_CMD_SET_CSS_PWR) |
+	BITMAP_BIT(SCPI_CMD_GET_CSS_PWR) |
 	BITMAP_BIT(SCPI_CMD_SET_SYS_PWR),
 	/* Commands enabled 1. */
 	0,
@@ -62,6 +65,75 @@ static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
 	/* Commands enabled 3. */
 	0,
 };
+
+/*
+ * Handler/payload data for SCPI_CMD_SET_CSS_PWR: Set CSS power state.
+ *
+ * This sets the power state of a single core, its parent cluster, and the CSS.
+ *
+ * The power state provided by PSCI is already coordinated. Simply turn things
+ * on from highest to lowest power level, then turn things off from lowest to
+ * highest power level. This ensures no power domain is turned on before its
+ * parent, and no power domain is turned off before any of its children.
+ */
+uint32_t
+scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload, uint16_t rx_size __unused,
+                             uint32_t *tx_payload __unused,
+                             uint16_t *tx_size __unused)
+{
+	uint32_t descriptor    = rx_payload[0];
+	uint8_t  core          = (descriptor >> 0x00) & BITMASK(0, 4);
+	uint8_t  cluster       = (descriptor >> 0x04) & BITMASK(0, 4);
+	uint8_t  core_state    = (descriptor >> 0x08) & BITMASK(0, 4);
+	uint8_t  cluster_state = (descriptor >> 0x0c) & BITMASK(0, 4);
+	uint8_t  css_state     = (descriptor >> 0x10) & BITMASK(0, 4);
+
+	/* Do not check if the CSS should be turned on, as receiving this
+	 * command from an ARM CPU via PSCI implies that it is already on. */
+	if (cluster_state == POWER_STATE_ON &&
+	    css_set_cluster_state(cluster, cluster_state))
+		return SCPI_E_DEVICE;
+	if (css_set_core_state(cluster, core, core_state))
+		return SCPI_E_DEVICE;
+	if (cluster_state != POWER_STATE_ON &&
+	    css_set_cluster_state(cluster, cluster_state))
+		return SCPI_E_DEVICE;
+	if (css_state != POWER_STATE_ON &&
+	    css_set_css_state(css_state))
+		return SCPI_E_DEVICE;
+
+	return SCPI_OK;
+}
+
+/*
+ * Handler/payload data for SCPI_CMD_GET_CSS_PWR: Get CSS power state.
+ *
+ * This gets the power states of all clusters and all cores they contain.
+ */
+#define CLUSTER_ID(x)          ((x) & BITMASK(0, 4))
+#define CLUSTER_POWER_STATE(x) (((x) & BITMASK(0, 4)) << 4)
+#define CORE_POWER_STATES(x)   ((x) << 8)
+uint32_t
+scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload __unused,
+                             uint16_t rx_size __unused,
+                             uint32_t *tx_payload, uint16_t *tx_size)
+{
+	uint8_t  clusters = css_get_cluster_count();
+	uint16_t descriptor;
+
+	/* Each cluster has its own power state descriptor. */
+	for (uint8_t i = 0; i < clusters; ++i) {
+		descriptor = CLUSTER_ID(i) |
+		             CLUSTER_POWER_STATE(css_get_cluster_state(i)) |
+		             CORE_POWER_STATES(css_get_online_cores(i));
+		/* Work around the hardware byte swapping, since this is an
+		 * array of elements each aligned to less than 4 bytes. */
+		((uint16_t *)tx_payload)[i ^ 1] = descriptor;
+	}
+	*tx_size = clusters * sizeof(descriptor);
+
+	return SCPI_OK;
+}
 
 /*
  * Handler/payload data for SCPI_CMD_SET_SYS_PWR: Set system power state.
@@ -92,6 +164,14 @@ static const struct scpi_cmd scpi_cmds[] = {
 	[SCPI_CMD_GET_SCP_CAP] = {
 		.tx_payload = scpi_cmd_get_scp_cap_tx_payload,
 		.tx_size    = sizeof(scpi_cmd_get_scp_cap_tx_payload),
+	},
+	[SCPI_CMD_SET_CSS_PWR] = {
+		.handler = scpi_cmd_set_css_pwr_handler,
+		.rx_size = sizeof(uint32_t),
+		.flags   = FLAG_NO_REPLY | FLAG_SECURE_ONLY,
+	},
+	[SCPI_CMD_GET_CSS_PWR] = {
+		.handler = scpi_cmd_get_css_pwr_handler,
 	},
 	[SCPI_CMD_SET_SYS_PWR] = {
 		.handler = scpi_cmd_set_sys_power_handler,
