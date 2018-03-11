@@ -69,6 +69,9 @@ scpi_alloc_buffer(uint8_t client)
 	return buffer;
 }
 
+/**
+ * Free a temporary buffer after processing an SCPI message.
+ */
 static inline void
 scpi_free_buffer(struct scpi_buffer *buffer)
 {
@@ -76,6 +79,21 @@ scpi_free_buffer(struct scpi_buffer *buffer)
 	 * operation) before earlier operations. */
 	barrier();
 	buffer->busy = false;
+}
+
+/**
+ * Copy an SCPI message to or from shared memory. This function examines the
+ * message's payload size field and only copies as many bytes as are necessary.
+ * To work around hardware byte swapping, it copies four bytes at a time.
+ */
+static void
+scpi_copy_message(struct scpi_msg *dest, struct scpi_msg *src)
+{
+	uint32_t *d = (uint32_t *)dest;
+	uint32_t *s = (uint32_t *)src;
+
+	for (int n = src->size + SCPI_HEADER_SIZE; n > 0; n -= 4)
+		*d++ = *s++;
 }
 
 /**
@@ -103,8 +121,7 @@ scpi_send_message(void *param)
 	}
 
 	/* Copy the prepared reply from the buffer to shared memory. */
-	memcpy(&SCPI_MEM_AREA(client).tx_msg, &buffer->mem.tx_msg,
-	       SCPI_HEADER_SIZE + buffer->mem.tx_msg.size);
+	scpi_copy_message(&SCPI_MEM_AREA(client).tx_msg, &buffer->mem.tx_msg);
 
 	/* Notify the client that the message has been sent. */
 	if ((err = msgbox_send_msg(scpi_msgbox, client, SCPI_VIRTUAL_CHANNEL)))
@@ -211,7 +228,7 @@ scpi_receive_message(struct device *dev __unused, uint8_t client, uint32_t msg)
 	if (rx_msg->size > SCPI_PAYLOAD_SIZE)
 		rx_msg->size = SCPI_PAYLOAD_SIZE;
 	/* Save the received message outside the shared memory area. */
-	memcpy(&buffer->mem.rx_msg, rx_msg, SCPI_HEADER_SIZE + rx_msg->size);
+	scpi_copy_message(&buffer->mem.rx_msg, rx_msg);
 
 	queue_work(scpi_handle_message, buffer);
 }
