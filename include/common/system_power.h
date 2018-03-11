@@ -9,6 +9,15 @@
 #include <compiler.h>
 
 /**
+ * Possible system power states, matching those defined in the SCPI protocol.
+ */
+enum {
+	SYSTEM_POWER_STATE_SHUTDOWN = 0,
+	SYSTEM_POWER_STATE_REBOOT   = 1,
+	SYSTEM_POWER_STATE_RESET    = 2,
+};
+
+/**
  * Reset the SoC, including all CPU cores and internal peripheral devices.
  */
 noreturn void system_reset(void);
