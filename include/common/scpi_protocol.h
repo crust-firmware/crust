@@ -112,6 +112,6 @@ struct scpi_msg {
 	uint8_t  command;
 	uint32_t status;
 	uint32_t payload[SCPI_PAYLOAD_WORDS];
-} __packed;
+};
 
 #endif /* COMMON_SCPI_PROTOCOL_H */
