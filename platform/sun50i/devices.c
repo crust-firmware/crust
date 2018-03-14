@@ -51,21 +51,21 @@ static struct device ccu = {
 static struct device msgbox = {
 	.name     = "msgbox",
 	.regs     = DEV_MSGBOX,
-	.clock    = CCU_CLOCK_MSGBOX,
-	.clockdev = &ccu,
 	.drv      = &sunxi_msgbox_driver,
 	.drvdata  = SUNXI_MSGBOX_DRVDATA { 0 },
-	.irq      = IRQ_MSGBOX,
+	.clockdev = &ccu,
+	.clock    = CCU_CLOCK_MSGBOX,
 	.irqdev   = &r_intc,
+	.irq      = IRQ_MSGBOX,
 };
 
 static struct device pio = {
 	.name     = "pio",
 	.regs     = DEV_PIO,
-	.clock    = CCU_CLOCK_PIO,
-	.clockdev = &ccu,
 	.drv      = &sunxi_gpio_driver,
 	.drvdata  = BITMASK(1, 7), /**< Physically implemented ports (1-7). */
+	.clockdev = &ccu,
+	.clock    = CCU_CLOCK_PIO,
 };
 
 static struct device r_ccu = {
@@ -156,13 +156,13 @@ static struct device r_ccu = {
 
 static struct device r_i2c = {
 	.name     = "r_i2c",
-	.bus      = &r_pio,
 	.regs     = DEV_R_I2C,
-	.clock    = R_CCU_CLOCK_R_I2C,
-	.clockdev = &r_ccu,
 	.drv      = &sun6i_a31_i2c_driver,
-	.irq      = IRQ_R_I2C,
+	.bus      = &r_pio,
+	.clockdev = &r_ccu,
+	.clock    = R_CCU_CLOCK_R_I2C,
 	.irqdev   = &r_intc,
+	.irq      = IRQ_R_I2C,
 };
 
 static struct device r_intc = {
@@ -175,29 +175,29 @@ static struct device r_intc = {
 static struct device r_pio = {
 	.name     = "r_pio",
 	.regs     = DEV_R_PIO,
-	.clock    = R_CCU_CLOCK_R_PIO,
-	.clockdev = &r_ccu,
 	.drv      = &sunxi_gpio_driver,
 	.drvdata  = BIT(0), /**< Physically implemented ports (0). */
+	.clockdev = &r_ccu,
+	.clock    = R_CCU_CLOCK_R_PIO,
 };
 
 static struct device r_timer0 = {
 	.name     = "r_timer0",
 	.regs     = DEV_R_TIMER,
-	.clock    = R_CCU_CLOCK_R_TIMER,
-	.clockdev = &r_ccu,
 	.drv      = &sun8i_r_timer_driver,
 	.drvdata  = 0, /**< Timer index within the device. */
-	.irq      = IRQ_R_TIMER0,
+	.clockdev = &r_ccu,
+	.clock    = R_CCU_CLOCK_R_TIMER,
 	.irqdev   = &r_intc,
+	.irq      = IRQ_R_TIMER0,
 };
 
 static struct device r_twd = {
 	.name     = "r_twd",
 	.regs     = DEV_R_TWD,
-	.clock    = R_CCU_CLOCK_R_TWD,
-	.clockdev = &r_ccu,
 	.drv      = &sunxi_twd_driver,
-	.irq      = IRQ_R_TWD,
+	.clockdev = &r_ccu,
+	.clock    = R_CCU_CLOCK_R_TWD,
 	.irqdev   = &r_intc,
+	.irq      = IRQ_R_TWD,
 };
