@@ -21,8 +21,13 @@ device_probe(struct device *dev)
 	assert(dev->drv);
 	assert(dev->drv->probe);
 
+	/* Skip already-probed devices. */
 	if (dev->flags & DEVICE_FLAG_RUNNING)
 		return SUCCESS;
+	if (dev->flags & DEVICE_FLAG_MISSING)
+		return ENODEV;
+
+	/* Probe all devices this device depends on. */
 	if (dev->bus && (err = device_probe(dev->bus)))
 		return err;
 	if (dev->clockdev && (err = device_probe(dev->clockdev)))
@@ -31,12 +36,19 @@ device_probe(struct device *dev)
 		return err;
 	if (dev->supplydev && (err = device_probe(dev->supplydev)))
 		return err;
-	if ((err = dev->drv->probe(dev)))
-		return err;
 
-	debug("Finished probing device %s", dev->name);
-	dev->flags |= DEVICE_FLAG_RUNNING;
-	return SUCCESS;
+	/* Probe the device itself, and report any errors. */
+	if ((err = dev->drv->probe(dev)) == SUCCESS) {
+		dev->flags |= DEVICE_FLAG_RUNNING;
+		debug("dm: Probed %s", dev->name);
+	} else if (err == ENODEV) {
+		dev->flags |= DEVICE_FLAG_MISSING;
+		warn("dm: Failed to probe %s (missing)", dev->name);
+	} else {
+		panic("dm: Failed to probe %s (%d)", dev->name, err);
+	}
+
+	return err;
 }
 
 struct device *
@@ -72,17 +84,6 @@ dm_get_by_name(const char *name)
 void
 dm_init(void)
 {
-	struct device *dev;
-	int err;
-
-	for (dev = device_list; dev < device_list_end; ++dev) {
-		if ((err = device_probe(dev))) {
-			if (err == ENODEV)
-				warn("Failed to probe missing device %s",
-				     dev->name);
-			else
-				panic("Failed to probe device %s: %d",
-				      dev->name, err);
-		}
-	}
+	for (struct device *dev = device_list; dev < device_list_end; ++dev)
+		device_probe(dev);
 }
