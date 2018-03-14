@@ -29,6 +29,8 @@ device_probe(struct device *dev)
 		return err;
 	if (dev->irqdev && (err = device_probe(dev->irqdev)))
 		return err;
+	if (dev->supplydev && (err = device_probe(dev->supplydev)))
+		return err;
 	if ((err = dev->drv->probe(dev)))
 		return err;
 
