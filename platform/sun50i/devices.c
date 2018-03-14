@@ -6,10 +6,10 @@
 #include <dm.h>
 #include <util.h>
 #include <clock/sunxi-ccu.h>
+#include <gpio/sunxi-gpio.h>
 #include <i2c/sun6i-a31-i2c.h>
 #include <irqchip/sun4i-intc.h>
 #include <msgbox/sunxi-msgbox.h>
-#include <pio/sunxi-pio.h>
 #include <timer/sun8i-r_timer.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/ccu.h>
@@ -64,7 +64,7 @@ static struct device pio = {
 	.regs     = DEV_PIO,
 	.clock    = CCU_CLOCK_PIO,
 	.clockdev = &ccu,
-	.drv      = &sunxi_pio_driver,
+	.drv      = &sunxi_gpio_driver,
 	.drvdata  = BITMASK(1, 7), /**< Physically implemented ports (1-7). */
 };
 
@@ -177,7 +177,7 @@ static struct device r_pio = {
 	.regs     = DEV_R_PIO,
 	.clock    = R_CCU_CLOCK_R_PIO,
 	.clockdev = &r_ccu,
-	.drv      = &sunxi_pio_driver,
+	.drv      = &sunxi_gpio_driver,
 	.drvdata  = BIT(0), /**< Physically implemented ports (0). */
 };
 
