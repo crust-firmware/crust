@@ -69,8 +69,23 @@ struct driver {
 	const void *const ops;
 };
 
+/**
+ * Get the first device of a given class.
+ *
+ * @param class One of the enumerated driver classes.
+ */
 struct device *dm_get_by_class(uint32_t class);
+
+/**
+ * Get the device with the given name.
+ *
+ * @param name The name of the device.
+ */
 struct device *dm_get_by_name(const char *name);
+
+/**
+ * Initialize the driver model, probing all devices in topological order.
+ */
 void dm_init(void);
 
 #endif /* COMMON_DM_H */
