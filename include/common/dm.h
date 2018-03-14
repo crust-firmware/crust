@@ -13,6 +13,7 @@
 
 enum {
 	DEVICE_FLAG_RUNNING = BIT(0),
+	DEVICE_FLAG_MISSING = BIT(1),
 };
 
 enum {
