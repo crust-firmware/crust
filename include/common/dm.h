@@ -30,28 +30,32 @@ enum {
 struct driver;
 
 struct device {
-	/** A unique name for the device (used for debugging) */
-	const char          *name;
-	/** The parent bus/controller (usually NULL for MMIO devices) */
-	struct device       *bus;
-	/** A bus-specific address/pin/port (if on a bus) */
-	uintptr_t            addr;
-	/** Beginning of an MMIO register block (if one exists) */
-	uintptr_t            regs;
-	/** A clockdev-specific clock description */
-	uintptr_t            clock;
-	/** The controller for the device's clock(s) */
-	struct device       *clockdev;
-	/** The driver for this device */
-	const struct driver *drv;
-	/** Extra per-device driver-specific data */
-	uintptr_t            drvdata;
-	/** An irqdev-specific IRQ description */
-	uintptr_t            irq;
-	/** The controller for the device's IRQ(s) */
-	struct device       *irqdev;
-	/** Flags describing the device's state */
-	uint8_t              flags;
+	/** A unique name for this device. */
+	const char *const          name;
+	/** The address of a block of MMIO registers (if one is used). */
+	const uintptr_t            regs;
+	/** The driver for this device. */
+	const struct driver *const drv;
+	/** Extra per-device data private to its driver. */
+	uintptr_t                  drvdata;
+	/** The controller for the bus this device is connected to. */
+	struct device *const       bus;
+	/** The controller for this device's clock. */
+	struct device *const       clockdev;
+	/** The controller for this device's IRQ. */
+	struct device *const       irqdev;
+	/** The controller for this device's power supply (regulator). */
+	struct device *const       supplydev;
+	/** A bus-specific address/port (if this device is on a bus). */
+	const uint8_t              addr;
+	/** A clockdev-specific clock identifier. */
+	const uint8_t              clock;
+	/** An irqdev-specific IRQ number. */
+	const uint8_t              irq;
+	/** A supplydev-specific power supply identifier. */
+	const uint8_t              supply;
+	/** Flags describing about this device's state. */
+	uint8_t                    flags;
 };
 
 struct driver {
