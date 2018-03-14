@@ -6,13 +6,13 @@
 #include <clock.h>
 #include <dm.h>
 #include <error.h>
+#include <gpio.h>
 #include <irqchip.h>
 #include <mmio.h>
-#include <pio.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <util.h>
-#include <pio/sunxi-pio.h>
+#include <gpio/sunxi-gpio.h>
 
 #define MAX_PORTS      8
 
@@ -32,13 +32,13 @@
 #define INT_STATUS_REG(port)  (0x0214 + (port) * 0x20)
 
 static bool
-sunxi_pio_read_pin(struct device *dev, uint8_t pin)
+sunxi_gpio_read_pin(struct device *dev, uint8_t pin)
 {
 	return mmio_read32(dev->regs + DATA_REG(pin)) & BIT(PIN_INDEX(pin));
 }
 
 static int
-sunxi_pio_set_mode(struct device *dev, uint8_t pin, uint8_t mode)
+sunxi_gpio_set_mode(struct device *dev, uint8_t pin, uint8_t mode)
 {
 	/* Verify port exists. */
 	if (!(dev->drvdata & BIT(PIN_PORT(pin))))
@@ -52,7 +52,7 @@ sunxi_pio_set_mode(struct device *dev, uint8_t pin, uint8_t mode)
 }
 
 static int
-sunxi_pio_write_pin(struct device *dev, uint8_t pin, bool val)
+sunxi_gpio_write_pin(struct device *dev, uint8_t pin, bool val)
 {
 	/* Set pin to specified val. */
 	mmio_clearsetbits32(dev->regs + DATA_REG(pin),
@@ -62,14 +62,14 @@ sunxi_pio_write_pin(struct device *dev, uint8_t pin, bool val)
 	return SUCCESS;
 }
 
-static const struct pio_driver_ops sunxi_pio_driver_ops = {
-	.read_pin  = sunxi_pio_read_pin,
-	.set_mode  = sunxi_pio_set_mode,
-	.write_pin = sunxi_pio_write_pin,
+static const struct gpio_driver_ops sunxi_gpio_driver_ops = {
+	.read_pin  = sunxi_gpio_read_pin,
+	.set_mode  = sunxi_gpio_set_mode,
+	.write_pin = sunxi_gpio_write_pin,
 };
 
 static int
-sunxi_pio_probe(struct device *dev)
+sunxi_gpio_probe(struct device *dev)
 {
 	int err;
 
@@ -87,9 +87,9 @@ sunxi_pio_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct driver sunxi_pio_driver = {
-	.name  = "sunxi-pio",
-	.class = DM_CLASS_PIO,
-	.probe = sunxi_pio_probe,
-	.ops   = &sunxi_pio_driver_ops,
+const struct driver sunxi_gpio_driver = {
+	.name  = "sunxi-gpio",
+	.class = DM_CLASS_GPIO,
+	.probe = sunxi_gpio_probe,
+	.ops   = &sunxi_gpio_driver_ops,
 };

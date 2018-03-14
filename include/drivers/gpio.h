@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#ifndef DRIVERS_PIO_H
-#define DRIVERS_PIO_H
+#ifndef DRIVERS_GPIO_H
+#define DRIVERS_GPIO_H
 
 #include <dm.h>
 #include <stdbool.h>
 #include <stdint.h>
 
-#define PIO_OPS(dev) ((struct pio_driver_ops *)((dev)->drv->ops))
+#define GPIO_OPS(dev) ((struct gpio_driver_ops *)((dev)->drv->ops))
 
-struct pio_driver_ops {
+struct gpio_driver_ops {
 	bool (*read_pin)(struct device *dev, uint8_t pin);
 	int  (*set_mode)(struct device *dev, uint8_t pin, uint8_t mode);
 	int  (*write_pin)(struct device *dev, uint8_t pin, bool val);
@@ -25,9 +25,9 @@ struct pio_driver_ops {
  * @param pin The index of the pin to retrieve the value for.
  */
 static inline bool
-pio_read_pin(struct device *dev, uint8_t pin)
+gpio_read_pin(struct device *dev, uint8_t pin)
 {
-	return PIO_OPS(dev)->read_pin(dev, pin);
+	return GPIO_OPS(dev)->read_pin(dev, pin);
 }
 
 /**
@@ -38,9 +38,9 @@ pio_read_pin(struct device *dev, uint8_t pin)
  * @param mode The mode to set for the specified pin.
  */
 static inline int
-pio_set_mode(struct device *dev, uint8_t pin, uint8_t mode)
+gpio_set_mode(struct device *dev, uint8_t pin, uint8_t mode)
 {
-	return PIO_OPS(dev)->set_mode(dev, pin, mode);
+	return GPIO_OPS(dev)->set_mode(dev, pin, mode);
 }
 
 /**
@@ -51,9 +51,9 @@ pio_set_mode(struct device *dev, uint8_t pin, uint8_t mode)
  * @param val The value to write to the specified pin.
  */
 static inline int
-pio_write_pin(struct device *dev, uint8_t pin, bool val)
+gpio_write_pin(struct device *dev, uint8_t pin, bool val)
 {
-	return PIO_OPS(dev)->write_pin(dev, pin, val);
+	return GPIO_OPS(dev)->write_pin(dev, pin, val);
 }
 
-#endif /* DRIVERS_PIO_H */
+#endif /* DRIVERS_GPIO_H */
