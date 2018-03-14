@@ -18,42 +18,37 @@ struct gpio_driver_ops {
 	int  (*write_pin)(struct device *dev, uint8_t pin, bool val);
 };
 
+struct gpio_pins {
+	struct device *dev; /**< The device that utilizes the GPIO pins. */
+	uint8_t        count;
+	struct {
+		uint8_t id;
+		uint8_t mode;
+	} pins[];
+};
+
 /**
  * Read the value of a pin.
  *
  * @param dev The port I/O device.
  * @param pin The index of the pin to retrieve the value for.
  */
-static inline bool
-gpio_read_pin(struct device *dev, uint8_t pin)
-{
-	return GPIO_OPS(dev)->read_pin(dev, pin);
-}
+bool gpio_read_pin(struct device *dev, uint8_t pin);
 
 /**
- * Set the mode of a pin.
+ * Sets the mode of all pins registered in the device description.
  *
  * @param dev  The port I/O device.
- * @param pin  The index of the pin to set the mode of.
- * @param mode The mode to set for the specified pin.
  */
-static inline int
-gpio_set_mode(struct device *dev, uint8_t pin, uint8_t mode)
-{
-	return GPIO_OPS(dev)->set_mode(dev, pin, mode);
-}
+int gpio_set_pins(struct device *dev);
 
 /**
  * Write the value of a pin.
  *
  * @param dev The port I/O device.
- * @param pin The pin to write a value to.
+ * @param pin The index of the pin in the device specification to write to.
  * @param val The value to write to the specified pin.
  */
-static inline int
-gpio_write_pin(struct device *dev, uint8_t pin, bool val)
-{
-	return GPIO_OPS(dev)->write_pin(dev, pin, val);
-}
+int gpio_write_pin(struct device *dev, uint8_t pin, bool val);
 
 #endif /* DRIVERS_GPIO_H */
