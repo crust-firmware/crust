@@ -59,10 +59,14 @@ struct device {
 };
 
 struct driver {
-	const char *name;
-	uint32_t    class;
-	int         (*probe)(struct device *dev);
-	const void *ops;
+	/** A unique name for this driver. */
+	const char *const name;
+	/** One of the enumerated driver classes. */
+	const uint32_t    class;
+	/** A function called to detect and initialize new devices. */
+	int               (*probe)(struct device *dev);
+	/** Operations used to implement the generic class functionality. */
+	const void *const ops;
 };
 
 struct device *dm_get_by_class(uint32_t class);
