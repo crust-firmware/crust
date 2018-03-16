@@ -6,7 +6,6 @@
 #ifndef DRIVERS_IRQCHIP_H
 #define DRIVERS_IRQCHIP_H
 
-#include <debug.h>
 #include <dm.h>
 #include <stdint.h>
 
@@ -20,30 +19,23 @@ struct irq_vector {
 };
 
 struct irqchip_driver_ops {
-	int  (*disable)(struct device *irqdev, struct device *dev);
-	int  (*enable)(struct device *irqdev, struct device *dev,
-	               irq_handler handler);
+	int  (*disable)(struct device *dev, uint8_t irq);
+	int  (*enable)(struct device *dev, uint8_t irq, irq_handler handler,
+	               struct device *child);
 	void (*irq)(struct device *irqdev);
 };
 
 static inline int
-irqchip_disable(struct device *dev)
+irqchip_disable(struct device *dev, uint8_t irq)
 {
-	struct device *irqdev = dev->irqdev;
-
-	assert(irqdev);
-
-	return IRQCHIP_OPS(irqdev)->disable(irqdev, dev);
+	return IRQCHIP_OPS(dev)->disable(dev, irq);
 }
 
 static inline int
-irqchip_enable(struct device *dev, irq_handler handler)
+irqchip_enable(struct device *dev, uint8_t irq, irq_handler handler,
+               struct device *child)
 {
-	struct device *irqdev = dev->irqdev;
-
-	assert(irqdev);
-
-	return IRQCHIP_OPS(irqdev)->enable(irqdev, dev, handler);
+	return IRQCHIP_OPS(dev)->enable(dev, irq, handler, child);
 }
 
 void irqchip_irq(void);

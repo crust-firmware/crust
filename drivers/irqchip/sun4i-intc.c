@@ -21,81 +21,64 @@
 #define INTC_MASK_REG      0x0050
 #define INTC_RESP_REG      0x0060
 
-static struct irq_vector *
-get_vector(struct device *irqdev, uintptr_t irq)
+static inline struct irq_vector *
+get_vector(struct device *dev, uint8_t irq)
 {
-	return &((struct irq_vector *)irqdev->drvdata)[irq];
+	return &((struct irq_vector *)dev->drvdata)[irq];
 }
 
 static int
-sun4i_intc_disable(struct device *irqdev, struct device *dev)
+sun4i_intc_disable(struct device *dev, uint8_t irq)
 {
-	uintptr_t irq = dev->irq;
-	struct irq_vector *vector = get_vector(irqdev, irq);
+	struct irq_vector *vector = get_vector(dev, irq);
 
 	assert(irq < SUN4I_INTC_IRQS);
-	assert(vector->dev == dev);
-	assert(vector->handler);
+	assert(vector->handler != NULL);
 
-	/* Disable IRQ. */
-	mmio_clearbits32(irqdev->regs + INTC_EN_REG, BIT(irq));
+	/* Disable the IRQ. */
+	mmio_clearbits32(dev->regs + INTC_EN_REG, BIT(irq));
 
-	/* Remove IRQ vector (but remember the last device). */
+	/* Remove the IRQ vector callback from the vector table. */
 	vector->handler = NULL;
 
 	return SUCCESS;
 }
 
 static int
-sun4i_intc_enable(struct device *irqdev, struct device *dev,
-                  irq_handler handler)
+sun4i_intc_enable(struct device *dev, uint8_t irq, irq_handler handler,
+                  struct device *child)
 {
-	uintptr_t irq = dev->irq;
-	struct irq_vector *vector = get_vector(irqdev, irq);
+	struct irq_vector *vector = get_vector(dev, irq);
 
 	assert(irq < SUN4I_INTC_IRQS);
-	assert(handler);
-	assert(!vector->handler);
+	assert(handler != NULL);
+	assert(vector->handler == NULL);
 
-	/* Add IRQ vector. */
-	vector->dev     = dev;
+	/* Copy the IRQ vector callback to the vector table. */
+	vector->dev     = child;
 	vector->handler = handler;
 
-	debug("%s: IRQ %d now registered to device %s",
-	      irqdev->name, irq, dev->name);
-
-	/* Enable IRQ. */
-	mmio_setbits32(irqdev->regs + INTC_EN_REG, BIT(irq));
-
-	debug("%s: IRQ %d now enabled for device %s",
-	      irqdev->name, irq, dev->name);
+	/* Enable the IRQ. */
+	mmio_setbits32(dev->regs + INTC_EN_REG, BIT(irq));
 
 	return SUCCESS;
 }
 
 static void
-sun4i_intc_irq(struct device *irqdev)
+sun4i_intc_irq(struct device *dev)
 {
-	uintptr_t irq;
+	uint8_t irq;
 
 	/* Get current IRQ. */
-	while ((irq = mmio_read32(irqdev->regs + INTC_VECTOR_REG) >> 2)) {
-		struct irq_vector *vector = get_vector(irqdev, irq);
+	while ((irq = mmio_read32(dev->regs + INTC_VECTOR_REG) >> 2)) {
+		struct irq_vector *vector = get_vector(dev, irq);
 
-		/* Call registered handler. */
-		if (likely(vector->handler)) {
-			vector->handler(vector->dev);
-		} else {
-			warn("%s: No handler registered for IRQ %d",
-			     irqdev->name, irq);
-			if (vector->dev) {
-				debug("%s: IRQ %d last registered to %s",
-				      irqdev->name, irq, vector->dev->name);
-			}
-		}
+		/* Call the registered callback. */
+		assert(vector->handler != NULL);
+		vector->handler(vector->dev);
 
-		/* Clear IRQ pending status. */
-		mmio_setbits32(irqdev->regs + INTC_IRQ_PEND_REG, BIT(irq));
+		/* Clear the IRQ pending status. */
+		mmio_setbits32(dev->regs + INTC_IRQ_PEND_REG, BIT(irq));
 	}
 }
 
@@ -110,12 +93,13 @@ sun4i_intc_probe(struct device *dev)
 {
 	int err;
 
+	/* Ensure an IRQ vector table was allocated. */
 	assert(dev->drvdata);
 
-	/* Clear base address (just return IRQ numbers). */
+	/* Clear the table base address (just return IRQ numbers). */
 	mmio_write32(dev->regs + INTC_BASE_ADDR_REG, 0);
 
-	/* Disable, unmask, and clear status for all IRQs. */
+	/* Disable, unmask, and clear the status of all IRQs. */
 	mmio_write32(dev->regs + INTC_EN_REG, 0);
 	mmio_write32(dev->regs + INTC_MASK_REG, 0);
 	mmio_write32(dev->regs + INTC_IRQ_PEND_REG, ~0);
