@@ -38,17 +38,6 @@ timer_cancel_periodic(callback_t *fn, void *param)
 }
 
 int
-timer_device_register(struct device *dev)
-{
-	if (timer != NULL)
-		return EEXIST;
-
-	timer = dev;
-
-	return SUCCESS;
-}
-
-int
 timer_get_timeout(uint32_t *timeout)
 {
 	assert(timeout);
@@ -74,6 +63,17 @@ timer_refresh(void)
 		last_tick += REFCLK_HZ;
 
 	return TIMER_OPS(timer)->set_timeout(timer, last_tick - current_time);
+}
+
+int
+timer_register_device(struct device *dev)
+{
+	if (timer != NULL)
+		return EEXIST;
+
+	timer = dev;
+
+	return SUCCESS;
 }
 
 int

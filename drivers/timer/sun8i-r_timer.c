@@ -95,7 +95,7 @@ sun8i_r_timer_probe(struct device *dev)
 		return err;
 
 	/* Register this device with the timer framework. */
-	if ((err = timer_device_register(dev)))
+	if ((err = timer_register_device(dev)))
 		return err;
 
 	return SUCCESS;

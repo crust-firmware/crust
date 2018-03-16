@@ -23,11 +23,6 @@ struct timer_driver_ops {
 int timer_cancel_periodic(callback_t *fn, void *param);
 
 /**
- * Register an available timer device with the timer framework.
- */
-int timer_device_register(struct device *dev);
-
-/**
  * Get the number of reference clock cycles until the next timer tick.
  */
 int timer_get_timeout(uint32_t *timeout);
@@ -36,6 +31,11 @@ int timer_get_timeout(uint32_t *timeout);
  * Recalculate the time until the next scheduled timer tick.
  */
 int timer_refresh(void);
+
+/**
+ * Register an available timer device with the timer framework.
+ */
+int timer_register_device(struct device *dev);
 
 /**
  * Enqueue a function to run once at some point in the future.
