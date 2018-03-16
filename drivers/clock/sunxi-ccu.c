@@ -430,13 +430,6 @@ sunxi_ccu_set_rate(struct device *dev, uint8_t id, uint32_t rate)
 	return sunxi_ccu_set_rate_id(dev, id, rate);
 }
 
-static const struct clock_driver_ops sunxi_ccu_driver_ops = {
-	.disable  = sunxi_ccu_disable,
-	.enable   = sunxi_ccu_enable,
-	.get_rate = sunxi_ccu_get_rate,
-	.set_rate = sunxi_ccu_set_rate,
-};
-
 static int
 sunxi_ccu_probe(struct device *dev __unused)
 {
@@ -449,5 +442,10 @@ const struct driver sunxi_ccu_driver = {
 	.name  = "sunxi-ccu",
 	.class = DM_CLASS_CLOCK,
 	.probe = sunxi_ccu_probe,
-	.ops   = &sunxi_ccu_driver_ops,
+	.ops   = &(struct clock_driver_ops) {
+		.disable  = sunxi_ccu_disable,
+		.enable   = sunxi_ccu_enable,
+		.get_rate = sunxi_ccu_get_rate,
+		.set_rate = sunxi_ccu_set_rate,
+	},
 };
