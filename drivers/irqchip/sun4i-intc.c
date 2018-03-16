@@ -27,6 +27,52 @@ get_vector(struct device *irqdev, uintptr_t irq)
 	return &((struct irq_vector *)irqdev->drvdata)[irq];
 }
 
+static int
+sun4i_intc_disable(struct device *irqdev, struct device *dev)
+{
+	uintptr_t irq = dev->irq;
+	struct irq_vector *vector = get_vector(irqdev, irq);
+
+	assert(irq < SUN4I_INTC_IRQS);
+	assert(vector->dev == dev);
+	assert(vector->handler);
+
+	/* Disable IRQ. */
+	mmio_clearbits32(irqdev->regs + INTC_EN_REG, BIT(irq));
+
+	/* Remove IRQ vector (but remember the last device). */
+	vector->handler = NULL;
+
+	return SUCCESS;
+}
+
+static int
+sun4i_intc_enable(struct device *irqdev, struct device *dev,
+                  irq_handler handler)
+{
+	uintptr_t irq = dev->irq;
+	struct irq_vector *vector = get_vector(irqdev, irq);
+
+	assert(irq < SUN4I_INTC_IRQS);
+	assert(handler);
+	assert(!vector->handler);
+
+	/* Add IRQ vector. */
+	vector->dev     = dev;
+	vector->handler = handler;
+
+	debug("%s: IRQ %d now registered to device %s",
+	      irqdev->name, irq, dev->name);
+
+	/* Enable IRQ. */
+	mmio_setbits32(irqdev->regs + INTC_EN_REG, BIT(irq));
+
+	debug("%s: IRQ %d now enabled for device %s",
+	      irqdev->name, irq, dev->name);
+
+	return SUCCESS;
+}
+
 static void
 sun4i_intc_irq(struct device *irqdev)
 {
@@ -53,56 +99,10 @@ sun4i_intc_irq(struct device *irqdev)
 	}
 }
 
-static int
-sun4i_intc_register_irq(struct device *irqdev, struct device *dev,
-                        irq_handler handler)
-{
-	uintptr_t irq = dev->irq;
-	struct irq_vector *vector = get_vector(irqdev, irq);
-
-	assert(irq < SUN4I_INTC_IRQS);
-	assert(handler);
-	assert(!vector->handler);
-
-	/* Add IRQ vector. */
-	vector->dev     = dev;
-	vector->handler = handler;
-
-	debug("%s: IRQ %d now registered to device %s",
-	      irqdev->name, irq, dev->name);
-
-	/* Enable IRQ. */
-	mmio_setbits32(irqdev->regs + INTC_EN_REG, BIT(irq));
-
-	debug("%s: IRQ %d now enabled for device %s",
-	      irqdev->name, irq, dev->name);
-
-	return SUCCESS;
-}
-
-static int
-sun4i_intc_unregister_irq(struct device *irqdev, struct device *dev)
-{
-	uintptr_t irq = dev->irq;
-	struct irq_vector *vector = get_vector(irqdev, irq);
-
-	assert(irq < SUN4I_INTC_IRQS);
-	assert(vector->dev == dev);
-	assert(vector->handler);
-
-	/* Disable IRQ. */
-	mmio_clearbits32(irqdev->regs + INTC_EN_REG, BIT(irq));
-
-	/* Remove IRQ vector (but remember the last device). */
-	vector->handler = NULL;
-
-	return SUCCESS;
-}
-
 static const struct irqchip_driver_ops sun4i_intc_driver_ops = {
-	.irq = sun4i_intc_irq,
-	.register_irq   = sun4i_intc_register_irq,
-	.unregister_irq = sun4i_intc_unregister_irq,
+	.disable = sun4i_intc_disable,
+	.enable  = sun4i_intc_enable,
+	.irq     = sun4i_intc_irq,
 };
 
 static int

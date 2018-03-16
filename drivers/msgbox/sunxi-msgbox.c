@@ -188,7 +188,7 @@ sunxi_msgbox_probe(struct device *dev)
 	mmio_write32(dev->regs + IRQ_EN_REG, 0);
 	mmio_write32(dev->regs + IRQ_STATUS_REG, BITMASK(0, 16));
 
-	if ((err = irqchip_register_irq(dev, sunxi_msgbox_irq)))
+	if ((err = irqchip_enable(dev, sunxi_msgbox_irq)))
 		return err;
 
 	return SUCCESS;

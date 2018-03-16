@@ -20,33 +20,33 @@ struct irq_vector {
 };
 
 struct irqchip_driver_ops {
+	int  (*disable)(struct device *irqdev, struct device *dev);
+	int  (*enable)(struct device *irqdev, struct device *dev,
+	               irq_handler handler);
 	void (*irq)(struct device *irqdev);
-	int  (*register_irq)(struct device *irqdev, struct device *dev,
-	                     irq_handler handler);
-	int  (*unregister_irq)(struct device *irqdev, struct device *dev);
 };
 
+static inline int
+irqchip_disable(struct device *dev)
+{
+	struct device *irqdev = dev->irqdev;
+
+	assert(irqdev);
+
+	return IRQCHIP_OPS(irqdev)->disable(irqdev, dev);
+}
+
+static inline int
+irqchip_enable(struct device *dev, irq_handler handler)
+{
+	struct device *irqdev = dev->irqdev;
+
+	assert(irqdev);
+
+	return IRQCHIP_OPS(irqdev)->enable(irqdev, dev, handler);
+}
+
 void irqchip_irq(void);
-
-static inline int
-irqchip_register_irq(struct device *dev, irq_handler handler)
-{
-	struct device *irqdev = dev->irqdev;
-
-	assert(irqdev);
-
-	return IRQCHIP_OPS(irqdev)->register_irq(irqdev, dev, handler);
-}
-
-static inline int
-irqchip_unregister_irq(struct device *dev)
-{
-	struct device *irqdev = dev->irqdev;
-
-	assert(irqdev);
-
-	return IRQCHIP_OPS(irqdev)->unregister_irq(irqdev, dev);
-}
 
 int irqchip_register_device(struct device *dev);
 
