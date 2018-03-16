@@ -10,6 +10,7 @@
 #include <mmio.h>
 #include <stddef.h>
 #include <util.h>
+#include <work.h>
 #include <irqchip/sun4i-intc.h>
 
 #define INTC_VECTOR_REG    0x0000
@@ -21,42 +22,41 @@
 #define INTC_MASK_REG      0x0050
 #define INTC_RESP_REG      0x0060
 
-static inline struct irq_vector *
+static inline struct handler *
 get_vector(struct device *dev, uint8_t irq)
 {
-	return &((struct irq_vector *)dev->drvdata)[irq];
+	return &((struct handler *)dev->drvdata)[irq];
 }
 
 static int
 sun4i_intc_disable(struct device *dev, uint8_t irq)
 {
-	struct irq_vector *vector = get_vector(dev, irq);
+	struct handler *vector = get_vector(dev, irq);
 
 	assert(irq < SUN4I_INTC_IRQS);
-	assert(vector->handler != NULL);
+	assert(vector->fn != NULL);
 
 	/* Disable the IRQ. */
 	mmio_clearbits32(dev->regs + INTC_EN_REG, BIT(irq));
 
 	/* Remove the IRQ vector callback from the vector table. */
-	vector->handler = NULL;
+	vector->fn = NULL;
 
 	return SUCCESS;
 }
 
 static int
-sun4i_intc_enable(struct device *dev, uint8_t irq, irq_handler handler,
-                  struct device *child)
+sun4i_intc_enable(struct device *dev, uint8_t irq, callback_t *fn, void *param)
 {
-	struct irq_vector *vector = get_vector(dev, irq);
+	struct handler *vector = get_vector(dev, irq);
 
 	assert(irq < SUN4I_INTC_IRQS);
-	assert(handler != NULL);
-	assert(vector->handler == NULL);
+	assert(fn != NULL);
+	assert(vector->fn == NULL);
 
 	/* Copy the IRQ vector callback to the vector table. */
-	vector->dev     = child;
-	vector->handler = handler;
+	vector->fn    = fn;
+	vector->param = param;
 
 	/* Enable the IRQ. */
 	mmio_setbits32(dev->regs + INTC_EN_REG, BIT(irq));
@@ -71,11 +71,11 @@ sun4i_intc_irq(struct device *dev)
 
 	/* Get current IRQ. */
 	while ((irq = mmio_read32(dev->regs + INTC_VECTOR_REG) >> 2)) {
-		struct irq_vector *vector = get_vector(dev, irq);
+		struct handler *vector = get_vector(dev, irq);
 
 		/* Call the registered callback. */
-		assert(vector->handler != NULL);
-		vector->handler(vector->dev);
+		assert(vector->fn != NULL);
+		vector->fn(vector->param);
 
 		/* Clear the IRQ pending status. */
 		mmio_setbits32(dev->regs + INTC_IRQ_PEND_REG, BIT(irq));
