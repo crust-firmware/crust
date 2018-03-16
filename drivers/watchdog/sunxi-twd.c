@@ -54,11 +54,6 @@ sunxi_twd_enable(struct device *dev, uint32_t timeout)
 	return EPERM;
 }
 
-static const struct watchdog_driver_ops sunxi_twd_driver_ops = {
-	.disable = sunxi_twd_disable,
-	.enable  = sunxi_twd_enable,
-};
-
 static int
 sunxi_twd_probe(struct device *dev)
 {
@@ -75,5 +70,8 @@ const struct driver sunxi_twd_driver = {
 	.name  = "sunxi-twd",
 	.class = DM_CLASS_WATCHDOG,
 	.probe = sunxi_twd_probe,
-	.ops   = &sunxi_twd_driver_ops,
+	.ops   = &(const struct watchdog_driver_ops) {
+		.disable = sunxi_twd_disable,
+		.enable  = sunxi_twd_enable,
+	},
 };
