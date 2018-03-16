@@ -124,7 +124,7 @@ scpi_send_message(void *param)
 	scpi_copy_message(&SCPI_MEM_AREA(client).tx_msg, &buffer->mem.tx_msg);
 
 	/* Notify the client that the message has been sent. */
-	if ((err = msgbox_send_msg(scpi_msgbox, client, SCPI_VIRTUAL_CHANNEL)))
+	if ((err = msgbox_send(scpi_msgbox, client, SCPI_VIRTUAL_CHANNEL)))
 		error("SCPI.%u: Error sending reply: %d", client, err);
 
 	/* Mark the buffer as no longer in use. */
@@ -240,13 +240,13 @@ scpi_init(void)
 
 	scpi_msgbox = dm_get_by_class(DM_CLASS_MSGBOX);
 	/* Non-secure client channel. */
-	if ((err = msgbox_register_handler(scpi_msgbox, SCPI_CLIENT_NS,
-	                                   scpi_receive_message)))
+	if ((err = msgbox_enable(scpi_msgbox, SCPI_CLIENT_NS,
+	                         scpi_receive_message)))
 		panic("SCPI.%u: Error registering handler: %d",
 		      SCPI_CLIENT_NS, err);
 	/* Secure client channel. */
-	if ((err = msgbox_register_handler(scpi_msgbox, SCPI_CLIENT_SECURE,
-	                                   scpi_receive_message)))
+	if ((err = msgbox_enable(scpi_msgbox, SCPI_CLIENT_SECURE,
+	                         scpi_receive_message)))
 		panic("SCPI.%u: Error registering handler: %d",
 		      SCPI_CLIENT_SECURE, err);
 
