@@ -54,28 +54,6 @@ sun4i_intc_irq(struct device *irqdev)
 }
 
 static int
-sun4i_intc_probe(struct device *dev)
-{
-	int err;
-
-	assert(dev->drvdata);
-
-	/* Clear base address (just return IRQ numbers). */
-	mmio_write32(dev->regs + INTC_BASE_ADDR_REG, 0);
-
-	/* Disable, unmask, and clear status for all IRQs. */
-	mmio_write32(dev->regs + INTC_EN_REG, 0);
-	mmio_write32(dev->regs + INTC_MASK_REG, 0);
-	mmio_write32(dev->regs + INTC_IRQ_PEND_REG, ~0);
-
-	/* Register this device with the irqchip framework. */
-	if ((err = irqchip_register_device(dev)))
-		return err;
-
-	return SUCCESS;
-}
-
-static int
 sun4i_intc_register_irq(struct device *irqdev, struct device *dev,
                         irq_handler handler)
 {
@@ -126,6 +104,28 @@ static const struct irqchip_driver_ops sun4i_intc_driver_ops = {
 	.register_irq   = sun4i_intc_register_irq,
 	.unregister_irq = sun4i_intc_unregister_irq,
 };
+
+static int
+sun4i_intc_probe(struct device *dev)
+{
+	int err;
+
+	assert(dev->drvdata);
+
+	/* Clear base address (just return IRQ numbers). */
+	mmio_write32(dev->regs + INTC_BASE_ADDR_REG, 0);
+
+	/* Disable, unmask, and clear status for all IRQs. */
+	mmio_write32(dev->regs + INTC_EN_REG, 0);
+	mmio_write32(dev->regs + INTC_MASK_REG, 0);
+	mmio_write32(dev->regs + INTC_IRQ_PEND_REG, ~0);
+
+	/* Register this device with the irqchip framework. */
+	if ((err = irqchip_register_device(dev)))
+		return err;
+
+	return SUCCESS;
+}
 
 const struct driver sun4i_intc_driver = {
 	.name  = "sun4i-intc",
