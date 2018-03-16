@@ -175,7 +175,7 @@ sunxi_msgbox_probe(struct device *dev)
 
 	assert(dev->drvdata);
 
-	if ((err = clock_enable(dev)))
+	if ((err = clock_enable(dev->clockdev, dev->clock)))
 		return err;
 
 	/* Drain all messages (required to clear interrupts). */

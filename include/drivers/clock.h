@@ -6,59 +6,40 @@
 #ifndef DRIVERS_CLOCK_H
 #define DRIVERS_CLOCK_H
 
-#include <debug.h>
 #include <dm.h>
 #include <stdint.h>
 
 #define CLOCK_OPS(dev) ((struct clock_driver_ops *)((dev)->drv->ops))
 
 struct clock_driver_ops {
-	int (*disable)(struct device *clockdev, struct device *dev);
-	int (*enable)(struct device *clockdev, struct device *dev);
-	int (*get_rate)(struct device *clockdev, struct device *dev,
-	                uint32_t *rate);
-	int (*set_rate)(struct device *clockdev, struct device *dev,
-	                uint32_t rate);
+	int (*disable)(struct device *dev, uint8_t id);
+	int (*enable)(struct device *dev, uint8_t id);
+	int (*get_rate)(struct device *dev, uint8_t id, uint32_t *rate);
+	int (*set_rate)(struct device *dev, uint8_t id, uint32_t rate);
 };
 
 static inline int
-clock_disable(struct device *dev)
+clock_disable(struct device *dev, uint8_t id)
 {
-	struct device *clockdev = dev->clockdev;
-
-	assert(clockdev);
-
-	return CLOCK_OPS(clockdev)->disable(clockdev, dev);
+	return CLOCK_OPS(dev)->disable(dev, id);
 }
 
 static inline int
-clock_enable(struct device *dev)
+clock_enable(struct device *dev, uint8_t id)
 {
-	struct device *clockdev = dev->clockdev;
-
-	assert(clockdev);
-
-	return CLOCK_OPS(clockdev)->enable(clockdev, dev);
+	return CLOCK_OPS(dev)->enable(dev, id);
 }
 
 static inline int
-clock_get_rate(struct device *dev, uint32_t *rate)
+clock_get_rate(struct device *dev, uint8_t id, uint32_t *rate)
 {
-	struct device *clockdev = dev->clockdev;
-
-	assert(clockdev);
-
-	return CLOCK_OPS(clockdev)->get_rate(clockdev, dev, rate);
+	return CLOCK_OPS(dev)->get_rate(dev, id, rate);
 }
 
 static inline int
-clock_set_rate(struct device *dev, uint32_t rate)
+clock_set_rate(struct device *dev, uint8_t id, uint32_t rate)
 {
-	struct device *clockdev = dev->clockdev;
-
-	assert(clockdev);
-
-	return CLOCK_OPS(clockdev)->set_rate(clockdev, dev, rate);
+	return CLOCK_OPS(dev)->set_rate(dev, id, rate);
 }
 
 #endif /* DRIVERS_CLOCK_H */

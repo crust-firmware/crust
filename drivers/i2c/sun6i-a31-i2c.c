@@ -170,7 +170,7 @@ sun6i_a31_i2c_probe(struct device *dev)
 {
 	int err;
 
-	if ((err = clock_enable(dev)))
+	if ((err = clock_enable(dev->clockdev, dev->clock)))
 		return err;
 
 	/* Set port L pins 0-1 to I²C. */
