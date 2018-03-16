@@ -82,12 +82,6 @@ sun4i_intc_irq(struct device *dev)
 	}
 }
 
-static const struct irqchip_driver_ops sun4i_intc_driver_ops = {
-	.disable = sun4i_intc_disable,
-	.enable  = sun4i_intc_enable,
-	.irq     = sun4i_intc_irq,
-};
-
 static int
 sun4i_intc_probe(struct device *dev)
 {
@@ -115,5 +109,9 @@ const struct driver sun4i_intc_driver = {
 	.name  = "sun4i-intc",
 	.class = DM_CLASS_IRQCHIP,
 	.probe = sun4i_intc_probe,
-	.ops   = &sun4i_intc_driver_ops,
+	.ops   = &(struct irqchip_driver_ops) {
+		.disable = sun4i_intc_disable,
+		.enable  = sun4i_intc_enable,
+		.irq     = sun4i_intc_irq,
+	},
 };
