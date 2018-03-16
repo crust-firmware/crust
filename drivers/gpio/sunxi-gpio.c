@@ -32,7 +32,7 @@
 #define INT_STATUS_REG(port)  (0x0214 + (port) * 0x20)
 
 static int
-sunxi_gpio_read_pin(struct device *dev, uint8_t pin, bool *value)
+sunxi_gpio_get_value(struct device *dev, uint8_t pin, bool *value)
 {
 	*value = mmio_read32(dev->regs + DATA_REG(pin)) & BIT(PIN_INDEX(pin));
 
@@ -54,20 +54,20 @@ sunxi_gpio_set_mode(struct device *dev, uint8_t pin, uint8_t mode)
 }
 
 static int
-sunxi_gpio_write_pin(struct device *dev, uint8_t pin, bool val)
+sunxi_gpio_set_value(struct device *dev, uint8_t pin, bool value)
 {
 	/* Set pin to specified val. */
 	mmio_clearsetbits32(dev->regs + DATA_REG(pin),
 	                    BIT(PIN_INDEX(pin)),
-	                    val << PIN_INDEX(pin));
+	                    value << PIN_INDEX(pin));
 
 	return SUCCESS;
 }
 
 static const struct gpio_driver_ops sunxi_gpio_driver_ops = {
-	.read_pin  = sunxi_gpio_read_pin,
+	.get_value = sunxi_gpio_get_value,
 	.set_mode  = sunxi_gpio_set_mode,
-	.write_pin = sunxi_gpio_write_pin,
+	.set_value = sunxi_gpio_set_value,
 };
 
 static int
