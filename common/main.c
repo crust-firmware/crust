@@ -22,17 +22,13 @@ noreturn void main(void);
 noreturn void
 main(void)
 {
-	struct device *watchdog;
-
 	console_init(DEV_UART0);
 	dm_init();
 	run_tests();
 
 	/* Enable watchdog. */
-	if ((watchdog = dm_get_by_class(DM_CLASS_WATCHDOG))) {
-		watchdog_enable(watchdog, WDOG_TIMEOUT);
-		info("Trusted watchdog enabled");
-	}
+	watchdog_enable(dm_get_by_class(DM_CLASS_WATCHDOG), WDOG_TIMEOUT);
+	info("Trusted watchdog enabled");
 
 	/* Do this last, as it tells SCPI clients we are finished booting. */
 	scpi_init();
