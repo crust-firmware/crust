@@ -43,16 +43,16 @@
 
 static bool sunxi_msgbox_tx_pending(struct device *dev, uint8_t chan);
 
-static inline msgbox_handler
+static inline msgbox_handler *
 get_handler(struct device *dev, uint8_t chan)
 {
-	return ((msgbox_handler *)dev->drvdata)[chan];
+	return ((msgbox_handler **)dev->drvdata)[chan];
 }
 
 static inline void
-set_handler(struct device *dev, uint8_t chan, msgbox_handler handler)
+set_handler(struct device *dev, uint8_t chan, msgbox_handler *handler)
 {
-	((msgbox_handler *)dev->drvdata)[chan] = handler;
+	((msgbox_handler **)dev->drvdata)[chan] = handler;
 }
 
 static bool
@@ -67,7 +67,7 @@ sunxi_msgbox_peek_data(struct device *dev, uint8_t chan)
 
 static int
 sunxi_msgbox_register_handler(struct device *dev, uint8_t chan,
-                              msgbox_handler handler)
+                              msgbox_handler *handler)
 {
 	assert(chan < SUNXI_MSGBOX_CHANS);
 	assert(handler != NULL);
@@ -140,7 +140,7 @@ static const struct msgbox_driver_ops sunxi_msgbox_driver_ops = {
 static void
 sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan, uint32_t msg)
 {
-	msgbox_handler handler = get_handler(dev, chan);
+	msgbox_handler *handler = get_handler(dev, chan);
 
 	if (handler != NULL) {
 		handler(dev, chan, msg);
