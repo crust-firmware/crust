@@ -31,10 +31,12 @@
 #define INT_CONTROL_REG(port) (0x0210 + (port) * 0x20)
 #define INT_STATUS_REG(port)  (0x0214 + (port) * 0x20)
 
-static bool
-sunxi_gpio_read_pin(struct device *dev, uint8_t pin)
+static int
+sunxi_gpio_read_pin(struct device *dev, uint8_t pin, bool *value)
 {
-	return mmio_read32(dev->regs + DATA_REG(pin)) & BIT(PIN_INDEX(pin));
+	*value = mmio_read32(dev->regs + DATA_REG(pin)) & BIT(PIN_INDEX(pin));
+
+	return SUCCESS;
 }
 
 static int
