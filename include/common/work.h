@@ -9,14 +9,14 @@
 /**
  * A function that performs asynchronous/delayed work.
  */
-typedef void (*work_function)(void *);
+typedef void callback_t (void *);
 
 /**
  * Structure representing a unit of work that can be done.
  */
-struct work_item {
-	work_function fn;
-	void         *param;
+struct handler {
+	callback_t *fn;
+	void       *param;
 };
 
 /**
@@ -27,6 +27,6 @@ void process_work(void);
 /**
  * Queue a work item, e.g. from an interrupt handler.
  */
-void queue_work(work_function fn, void *param);
+void queue_work(callback_t *fn, void *param);
 
 #endif /* COMMON_WORK_H */

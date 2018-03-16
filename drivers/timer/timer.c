@@ -10,16 +10,18 @@
 #include <stddef.h>
 #include <timer.h>
 #include <wallclock.h>
+#include <work.h>
 #include <platform/time.h>
 
 #define MAX_PERIODIC_ITEMS 1
 
+static struct handler periodic_work_items[MAX_PERIODIC_ITEMS];
+static struct device *timer;
+
 static uint64_t last_tick;
-static struct work_item periodic_work_items[MAX_PERIODIC_ITEMS];
-static struct device   *timer;
 
 int
-timer_cancel_periodic(work_function fn, void *param)
+timer_cancel_periodic(callback_t *fn, void *param)
 {
 	assert(fn);
 
@@ -75,14 +77,14 @@ timer_refresh(void)
 }
 
 int
-timer_run_delayed(work_function fn __unused, void *param __unused,
+timer_run_delayed(callback_t *fn __unused, void *param __unused,
                   uint32_t delay __unused)
 {
 	return ENOTSUP;
 }
 
 int
-timer_run_periodic(work_function fn, void *param)
+timer_run_periodic(callback_t *fn, void *param)
 {
 	assert(fn);
 
