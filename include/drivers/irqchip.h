@@ -8,20 +8,14 @@
 
 #include <dm.h>
 #include <stdint.h>
+#include <work.h>
 
 #define IRQCHIP_OPS(dev) ((struct irqchip_driver_ops *)((dev)->drv->ops))
 
-typedef void (*irq_handler)(struct device *);
-
-struct irq_vector {
-	struct device *dev;
-	irq_handler    handler;
-};
-
 struct irqchip_driver_ops {
 	int  (*disable)(struct device *dev, uint8_t irq);
-	int  (*enable)(struct device *dev, uint8_t irq, irq_handler handler,
-	               struct device *child);
+	int  (*enable)(struct device *dev, uint8_t irq, callback_t *fn,
+	               void *param);
 	void (*irq)(struct device *irqdev);
 };
 
@@ -32,10 +26,9 @@ irqchip_disable(struct device *dev, uint8_t irq)
 }
 
 static inline int
-irqchip_enable(struct device *dev, uint8_t irq, irq_handler handler,
-               struct device *child)
+irqchip_enable(struct device *dev, uint8_t irq, callback_t *fn, void *param)
 {
-	return IRQCHIP_OPS(dev)->enable(dev, irq, handler, child);
+	return IRQCHIP_OPS(dev)->enable(dev, irq, fn, param);
 }
 
 void irqchip_irq(void);

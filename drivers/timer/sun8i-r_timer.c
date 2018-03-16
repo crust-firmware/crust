@@ -61,9 +61,10 @@ static const struct timer_driver_ops sun8i_r_timer_driver_ops = {
 };
 
 void
-sun8i_r_timer_irq(struct device *dev)
+sun8i_r_timer_irq(void *param)
 {
-	uintptr_t index = dev->drvdata;
+	struct device *dev = param;
+	uintptr_t index    = dev->drvdata;
 
 	/* Clear the pending IRQ. */
 	mmio_write32(dev->regs + IRQ_STATUS_REG, BIT(index));
