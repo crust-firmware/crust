@@ -129,13 +129,6 @@ sunxi_msgbox_tx_pending(struct device *dev, uint8_t chan)
 	return reg & REMOTE_RX_IRQ(chan);
 }
 
-static const struct msgbox_driver_ops sunxi_msgbox_driver_ops = {
-	.disable    = sunxi_msgbox_disable,
-	.enable     = sunxi_msgbox_enable,
-	.send       = sunxi_msgbox_send,
-	.tx_pending = sunxi_msgbox_tx_pending,
-};
-
 static void
 sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan, uint32_t msg)
 {
@@ -200,5 +193,10 @@ const struct driver sunxi_msgbox_driver = {
 	.name  = "sunxi-msgbox",
 	.class = DM_CLASS_MSGBOX,
 	.probe = sunxi_msgbox_probe,
-	.ops   = &sunxi_msgbox_driver_ops,
+	.ops   = &(struct msgbox_driver_ops) {
+		.disable    = sunxi_msgbox_disable,
+		.enable     = sunxi_msgbox_enable,
+		.send       = sunxi_msgbox_send,
+		.tx_pending = sunxi_msgbox_tx_pending,
+	},
 };
