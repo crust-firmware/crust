@@ -89,7 +89,8 @@ sun8i_r_timer_probe(struct device *dev)
 	mmio_write32(dev->regs + IRQ_STATUS_REG, BIT(index));
 
 	/* Register and enable the IRQ at the interrupt controller. */
-	if ((err = irqchip_enable(dev, sun8i_r_timer_irq)))
+	if ((err = irqchip_enable(dev->irqdev, dev->irq,
+	                          sun8i_r_timer_irq, dev)))
 		return err;
 
 	/* Register this device with the timer framework. */
