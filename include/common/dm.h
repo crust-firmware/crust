@@ -66,8 +66,6 @@ struct driver {
 	const uint32_t    class;
 	/** A function called to detect and initialize new devices. */
 	int               (*probe)(struct device *dev);
-	/** Operations used to implement the generic class functionality. */
-	const void *const ops;
 };
 
 /**

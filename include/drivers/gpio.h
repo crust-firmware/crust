@@ -7,15 +7,22 @@
 #define DRIVERS_GPIO_H
 
 #include <dm.h>
+#include <intrusive.h>
 #include <stdbool.h>
 #include <stdint.h>
 
-#define GPIO_OPS(dev) ((struct gpio_driver_ops *)((dev)->drv->ops))
+#define GPIO_OPS(dev) \
+	(&container_of((dev)->drv, struct gpio_driver, drv)->ops)
 
 struct gpio_driver_ops {
 	int (*get_value)(struct device *dev, uint8_t pin, bool *value);
 	int (*set_mode)(struct device *dev, uint8_t pin, uint8_t mode);
 	int (*set_value)(struct device *dev, uint8_t pin, bool value);
+};
+
+struct gpio_driver {
+	const struct driver          drv;
+	const struct gpio_driver_ops ops;
 };
 
 /**

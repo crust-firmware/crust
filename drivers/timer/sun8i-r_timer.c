@@ -96,11 +96,13 @@ sun8i_r_timer_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct driver sun8i_r_timer_driver = {
-	.name  = "sunxi-r_timer",
-	.class = DM_CLASS_TIMER,
-	.probe = sun8i_r_timer_probe,
-	.ops   = &(struct timer_driver_ops) {
+const struct timer_driver sun8i_r_timer_driver = {
+	.drv = {
+		.name  = "sunxi-r_timer",
+		.class = DM_CLASS_TIMER,
+		.probe = sun8i_r_timer_probe,
+	},
+	.ops = {
 		.get_timeout = sun8i_r_timer_get_timeout,
 		.set_timeout = sun8i_r_timer_set_timeout,
 	},

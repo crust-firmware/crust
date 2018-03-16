@@ -7,10 +7,12 @@
 #define DRIVERS_MSGBOX_H
 
 #include <dm.h>
+#include <intrusive.h>
 #include <stdbool.h>
 #include <stdint.h>
 
-#define MSGBOX_OPS(dev) ((struct msgbox_driver_ops *)((dev)->drv->ops))
+#define MSGBOX_OPS(dev) \
+	(&container_of((dev)->drv, struct msgbox_driver, drv)->ops)
 
 typedef void msgbox_handler (struct device *dev, uint8_t, uint32_t);
 
@@ -21,6 +23,11 @@ struct msgbox_driver_ops {
 	int  (*send)(struct device *dev, uint8_t chan,
 	             uint32_t message);
 	bool (*tx_pending)(struct device *dev, uint8_t chan);
+};
+
+struct msgbox_driver {
+	const struct driver            drv;
+	const struct msgbox_driver_ops ops;
 };
 
 /**

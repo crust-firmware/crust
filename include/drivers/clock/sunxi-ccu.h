@@ -7,6 +7,7 @@
 #define DRIVERS_CLOCK_SUNXI_CCU_H
 
 #include <bitfield.h>
+#include <clock.h>
 #include <stdint.h>
 #include <util.h>
 
@@ -56,6 +57,6 @@ struct sunxi_ccu_clock {
 	uint8_t    flags;
 };
 
-extern const struct driver sunxi_ccu_driver;
+extern const struct clock_driver sunxi_ccu_driver;
 
 #endif /* DRIVERS_CLOCK_SUNXI_CCU_H */

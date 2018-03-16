@@ -83,11 +83,13 @@ sunxi_gpio_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct driver sunxi_gpio_driver = {
-	.name  = "sunxi-gpio",
-	.class = DM_CLASS_GPIO,
-	.probe = sunxi_gpio_probe,
-	.ops   = &(struct gpio_driver_ops) {
+const struct gpio_driver sunxi_gpio_driver = {
+	.drv = {
+		.name  = "sunxi-gpio",
+		.class = DM_CLASS_GPIO,
+		.probe = sunxi_gpio_probe,
+	},
+	.ops = {
 		.get_value = sunxi_gpio_get_value,
 		.set_mode  = sunxi_gpio_set_mode,
 		.set_value = sunxi_gpio_set_value,

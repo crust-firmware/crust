@@ -105,11 +105,13 @@ sun4i_intc_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct driver sun4i_intc_driver = {
-	.name  = "sun4i-intc",
-	.class = DM_CLASS_IRQCHIP,
-	.probe = sun4i_intc_probe,
-	.ops   = &(struct irqchip_driver_ops) {
+const struct irqchip_driver sun4i_intc_driver = {
+	.drv = {
+		.name  = "sun4i-intc",
+		.class = DM_CLASS_IRQCHIP,
+		.probe = sun4i_intc_probe,
+	},
+	.ops = {
 		.disable = sun4i_intc_disable,
 		.enable  = sun4i_intc_enable,
 		.irq     = sun4i_intc_irq,

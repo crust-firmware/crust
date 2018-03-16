@@ -66,11 +66,13 @@ sunxi_twd_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct driver sunxi_twd_driver = {
-	.name  = "sunxi-twd",
-	.class = DM_CLASS_WATCHDOG,
-	.probe = sunxi_twd_probe,
-	.ops   = &(const struct watchdog_driver_ops) {
+const struct watchdog_driver sunxi_twd_driver = {
+	.drv = {
+		.name  = "sunxi-twd",
+		.class = DM_CLASS_WATCHDOG,
+		.probe = sunxi_twd_probe,
+	},
+	.ops = {
 		.disable = sunxi_twd_disable,
 		.enable  = sunxi_twd_enable,
 	},

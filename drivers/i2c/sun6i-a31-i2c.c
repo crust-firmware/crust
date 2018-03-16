@@ -191,11 +191,13 @@ sun6i_a31_i2c_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct driver sun6i_a31_i2c_driver = {
-	.name  = "sun6i-a31-i2c",
-	.class = DM_CLASS_I2C,
-	.probe = sun6i_a31_i2c_probe,
-	.ops   = &(struct i2c_driver_ops) {
+const struct i2c_driver sun6i_a31_i2c_driver = {
+	.drv = {
+		.name  = "sun6i-a31-i2c",
+		.class = DM_CLASS_I2C,
+		.probe = sun6i_a31_i2c_probe,
+	},
+	.ops = {
 		.read  = sun6i_a31_i2c_read,
 		.start = sun6i_a31_i2c_start,
 		.stop  = sun6i_a31_i2c_stop,
