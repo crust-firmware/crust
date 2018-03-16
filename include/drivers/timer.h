@@ -20,7 +20,7 @@ struct timer_driver_ops {
 /**
  * Dequeue a function so it is not run on future timer ticks.
  */
-int timer_cancel_periodic(work_function fn, void *param);
+int timer_cancel_periodic(callback_t *fn, void *param);
 
 /**
  * Register an available timer device with the timer framework.
@@ -42,12 +42,12 @@ int timer_refresh(void);
  *
  * @param delay Offset from current time in reference clock cycles.
  */
-int timer_run_delayed(work_function fn, void *param, uint32_t delay);
+int timer_run_delayed(callback_t *fn, void *param, uint32_t delay);
 
 /**
  * Enqueue a function to run once on every periodic timer tick.
  */
-int timer_run_periodic(work_function fn, void *param);
+int timer_run_periodic(callback_t *fn, void *param);
 
 /**
  * Dispatch functions queued to run on this timer tick.

@@ -16,7 +16,7 @@ static size_t queue_head = 0;
 static size_t queue_tail = MAX_WORK_ITEMS;
 
 /* Queue of work items. */
-static struct work_item work_items[MAX_WORK_ITEMS];
+static struct handler work_items[MAX_WORK_ITEMS];
 
 /**
  * Determine if the queue is empty using the given arguments. The values of
@@ -63,9 +63,9 @@ queue_next(size_t i)
 void
 process_work(void)
 {
-	uint32_t flags;
-	void    *param;
-	work_function fn;
+	callback_t *fn;
+	uint32_t    flags;
+	void *param;
 
 	/* Walk the queue with interrupts disabled. */
 	flags = disable_interrupts();
@@ -87,7 +87,7 @@ process_work(void)
 }
 
 void
-queue_work(work_function fn, void *param)
+queue_work(callback_t *fn, void *param)
 {
 	size_t   i;
 	uint32_t flags;
