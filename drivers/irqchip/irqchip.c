@@ -12,8 +12,16 @@
 
 static struct device *irqchip;
 
+void
+irqchip_irq(void)
+{
+	assert(irqchip != NULL);
+
+	IRQCHIP_OPS(irqchip)->irq(irqchip);
+}
+
 int
-irqchip_device_register(struct device *dev)
+irqchip_register_device(struct device *dev)
 {
 	if (irqchip != NULL)
 		return EEXIST;
@@ -24,12 +32,4 @@ irqchip_device_register(struct device *dev)
 	mtspr(SPR_SYS_SR_ADDR, SPR_SYS_SR_IEE_SET(mfspr(SPR_SYS_SR_ADDR), 1));
 
 	return SUCCESS;
-}
-
-int
-irqchip_irq(void)
-{
-	assert(irqchip != NULL);
-
-	return IRQCHIP_OPS(irqchip)->irq(irqchip);
 }

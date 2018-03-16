@@ -27,7 +27,7 @@ get_vector(struct device *irqdev, uintptr_t irq)
 	return &((struct irq_vector *)irqdev->drvdata)[irq];
 }
 
-static int
+static void
 sun4i_intc_irq(struct device *irqdev)
 {
 	uintptr_t irq;
@@ -51,8 +51,6 @@ sun4i_intc_irq(struct device *irqdev)
 		/* Clear IRQ pending status. */
 		mmio_setbits32(irqdev->regs + INTC_IRQ_PEND_REG, BIT(irq));
 	}
-
-	return SUCCESS;
 }
 
 static int
@@ -71,7 +69,7 @@ sun4i_intc_probe(struct device *dev)
 	mmio_write32(dev->regs + INTC_IRQ_PEND_REG, ~0);
 
 	/* Register this device with the irqchip framework. */
-	if ((err = irqchip_device_register(dev)))
+	if ((err = irqchip_register_device(dev)))
 		return err;
 
 	return SUCCESS;
