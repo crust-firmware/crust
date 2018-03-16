@@ -11,6 +11,11 @@
 
 #define I2C_OPS(dev) ((struct i2c_driver_ops *)((dev)->drv->ops))
 
+enum {
+	I2C_READ  = 1,
+	I2C_WRITE = 0,
+};
+
 struct i2c_driver_ops {
 	int (*read)(struct device *dev, uint8_t *data);
 	int (*start)(struct device *dev, uint8_t addr, uint8_t direction);
@@ -18,35 +23,32 @@ struct i2c_driver_ops {
 	int (*write)(struct device *dev, uint8_t data);
 };
 
-enum {
-	I2C_READ  = 1,
-	I2C_WRITE = 0,
-};
+/**
+ * Probe for the existence of an I²C device.
+ *
+ * @param dev  The I²C controller that the device is connected to.
+ * @param addr The address of the I²C device on the bus.
+ */
+int i2c_probe(struct device *dev, uint8_t addr);
 
 /**
- * Probe an I2C device.
+ * Read a register contained inside an I²C device.
  *
- * @param dev  The I2C device to probe.
+ * @param dev   The I²C controller that the device is connected to.
+ * @param addr  The address of the I²C device on the bus.
+ * @param reg   The register within the the I²C device to read.
+ * @param data  The location to save the data read from the register.
  */
-int i2c_probe(struct device *dev);
+int i2c_read_reg(struct device *dev, uint8_t addr, uint8_t reg, uint8_t *data);
 
 /**
- * Read the register of an I2C device.
+ * Write to a register contained inside an I²C device.
  *
- * @param dev   The I2C device that contains the register to read.
- * @param addr  The register address of the I2C device.
- * @param data  The location to save the contents read from the I2C device
- * register.
+ * @param dev   The I²C controller that the device is connected to.
+ * @param addr  The address of the I²C device on the bus.
+ * @param reg   The register within the the I²C device to write.
+ * @param data  The data to write to the register.
  */
-int i2c_read_reg(struct device *dev, uint8_t addr, uint8_t *data);
-
-/**
- * Write to the register of an I2C device.
- *
- * @param dev   The I2C device that contains the register to write to.
- * @param addr  The register address of the I2C device.
- * @param data  The data to write to the register of the supplied I2C device.
- */
-int i2c_write_reg(struct device *dev, uint8_t addr, uint8_t data);
+int i2c_write_reg(struct device *dev, uint8_t addr, uint8_t reg, uint8_t data);
 
 #endif /* DRIVERS_I2C_H */
