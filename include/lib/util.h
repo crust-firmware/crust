@@ -17,9 +17,4 @@
 #define BIT(n)            (U(1) << (n))
 #define BITMASK(off, len) ((BIT(len) - 1) << (off))
 
-/**
- * Count the number of set bits in an integer.
- */
-#define popcount(x)       __builtin_popcount(x)
-
 #endif /* LIB_UTIL_H */
