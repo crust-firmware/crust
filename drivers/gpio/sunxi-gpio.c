@@ -64,12 +64,6 @@ sunxi_gpio_set_value(struct device *dev, uint8_t pin, bool value)
 	return SUCCESS;
 }
 
-static const struct gpio_driver_ops sunxi_gpio_driver_ops = {
-	.get_value = sunxi_gpio_get_value,
-	.set_mode  = sunxi_gpio_set_mode,
-	.set_value = sunxi_gpio_set_value,
-};
-
 static int
 sunxi_gpio_probe(struct device *dev)
 {
@@ -93,5 +87,9 @@ const struct driver sunxi_gpio_driver = {
 	.name  = "sunxi-gpio",
 	.class = DM_CLASS_GPIO,
 	.probe = sunxi_gpio_probe,
-	.ops   = &sunxi_gpio_driver_ops,
+	.ops   = &(struct gpio_driver_ops) {
+		.get_value = sunxi_gpio_get_value,
+		.set_mode  = sunxi_gpio_set_mode,
+		.set_value = sunxi_gpio_set_value,
+	},
 };
