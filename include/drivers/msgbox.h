@@ -15,39 +15,53 @@
 typedef void msgbox_handler (struct device *dev, uint8_t, uint32_t);
 
 struct msgbox_driver_ops {
-	int  (*register_handler)(struct device *dev, uint8_t chan,
-	                         msgbox_handler *handler);
-	int  (*send_msg)(struct device *dev, uint8_t chan, uint32_t msg);
+	int  (*disable)(struct device *dev, uint8_t chan);
+	int  (*enable)(struct device *dev, uint8_t chan,
+	               msgbox_handler *handler);
+	int  (*send)(struct device *dev, uint8_t chan,
+	             uint32_t message);
 	bool (*tx_pending)(struct device *dev, uint8_t chan);
-	int  (*unregister_handler)(struct device *dev, uint8_t chan);
 };
 
 /**
- * Register a handler to be called when messages are received on a message box
- * channel.
+ * Disable a message channel, so it will no longer be able to send or receive
+ * messages.
+ *
+ * @param dev  The message box device.
+ * @param chan The message box channel.
+ */
+static inline int
+msgbox_disable(struct device *dev, uint8_t chan)
+{
+	return MSGBOX_OPS(dev)->disable(dev, chan);
+}
+
+/**
+ * Enable a message box channel to send and receive messages. The provided
+ * handler is called for each incoming message.
  *
  * @param dev     The message box device.
  * @param chan    The message box channel.
  * @param handler The callback function to register.
  */
 static inline int
-msgbox_register_handler(struct device *dev, uint8_t chan,
-                        msgbox_handler *handler)
+msgbox_enable(struct device *dev, uint8_t chan, msgbox_handler *handler)
 {
-	return MSGBOX_OPS(dev)->register_handler(dev, chan, handler);
+	return MSGBOX_OPS(dev)->enable(dev, chan, handler);
 }
 
 /**
- * Send a message via a message box device.
+ * Send a message via a message box device. The message box channel must have
+ * previously been enabled.
  *
- * @param dev  The message box device.
- * @param chan The channel to use within the message box.
- * @param msg  The message to send.
+ * @param dev     The message box device.
+ * @param chan    The channel to use within the message box.
+ * @param message The message to send.
  */
 static inline int
-msgbox_send_msg(struct device *dev, uint8_t chan, uint32_t msg)
+msgbox_send(struct device *dev, uint8_t chan, uint32_t message)
 {
-	return MSGBOX_OPS(dev)->send_msg(dev, chan, msg);
+	return MSGBOX_OPS(dev)->send(dev, chan, message);
 }
 
 /**
@@ -56,25 +70,12 @@ msgbox_send_msg(struct device *dev, uint8_t chan, uint32_t msg)
  * interface.
  *
  * @param dev  The message box device.
- * @param chan    The message box channel.
+ * @param chan The message box channel.
  */
 static inline bool
 msgbox_tx_pending(struct device *dev, uint8_t chan)
 {
 	return MSGBOX_OPS(dev)->tx_pending(dev, chan);
-}
-
-/**
- * Unregister a message handler, so it will no longer be called for new
- * messages on a message box channel.
- *
- * @param dev     The message box device.
- * @param chan    The message box channel.
- */
-static inline int
-msgbox_unregister_handler(struct device *dev, uint8_t chan)
-{
-	return MSGBOX_OPS(dev)->unregister_handler(dev, chan);
 }
 
 #endif /* DRIVERS_MSGBOX_H */

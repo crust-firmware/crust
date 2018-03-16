@@ -66,8 +66,22 @@ sunxi_msgbox_peek_data(struct device *dev, uint8_t chan)
 }
 
 static int
-sunxi_msgbox_register_handler(struct device *dev, uint8_t chan,
-                              msgbox_handler *handler)
+sunxi_msgbox_disable(struct device *dev, uint8_t chan)
+{
+	assert(chan < SUNXI_MSGBOX_CHANS);
+	assert(get_handler(dev, chan) != NULL);
+
+	/* Disable the receive interrupt. */
+	mmio_clearbits32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
+
+	set_handler(dev, chan, NULL);
+
+	return SUCCESS;
+}
+
+static int
+sunxi_msgbox_enable(struct device *dev, uint8_t chan,
+                    msgbox_handler *handler)
 {
 	assert(chan < SUNXI_MSGBOX_CHANS);
 	assert(handler != NULL);
@@ -78,8 +92,7 @@ sunxi_msgbox_register_handler(struct device *dev, uint8_t chan,
 
 	/* Ensure FIFO directions are set properly. */
 	mmio_clearsetbits32(dev->regs + CTRL_REG(chan),
-	                    CTRL_MASK(chan),
-	                    CTRL_SET(chan));
+	                    CTRL_MASK(chan), CTRL_SET(chan));
 
 	/* Clear existing messages in the receive FIFO. */
 	while (sunxi_msgbox_peek_data(dev, chan))
@@ -93,7 +106,7 @@ sunxi_msgbox_register_handler(struct device *dev, uint8_t chan,
 }
 
 static int
-sunxi_msgbox_send_msg(struct device *dev, uint8_t chan, uint32_t msg)
+sunxi_msgbox_send(struct device *dev, uint8_t chan, uint32_t msg)
 {
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
@@ -116,25 +129,11 @@ sunxi_msgbox_tx_pending(struct device *dev, uint8_t chan)
 	return reg & REMOTE_RX_IRQ(chan);
 }
 
-static int
-sunxi_msgbox_unregister_handler(struct device *dev, uint8_t chan)
-{
-	assert(chan < SUNXI_MSGBOX_CHANS);
-	assert(get_handler(dev, chan) != NULL);
-
-	/* Disable the receive interrupt. */
-	mmio_clearbits32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
-
-	set_handler(dev, chan, NULL);
-
-	return SUCCESS;
-}
-
 static const struct msgbox_driver_ops sunxi_msgbox_driver_ops = {
-	.register_handler   = sunxi_msgbox_register_handler,
-	.send_msg           = sunxi_msgbox_send_msg,
-	.tx_pending         = sunxi_msgbox_tx_pending,
-	.unregister_handler = sunxi_msgbox_unregister_handler,
+	.disable    = sunxi_msgbox_disable,
+	.enable     = sunxi_msgbox_enable,
+	.send       = sunxi_msgbox_send,
+	.tx_pending = sunxi_msgbox_tx_pending,
 };
 
 static void
@@ -174,6 +173,7 @@ sunxi_msgbox_probe(struct device *dev)
 {
 	int err;
 
+	/* Ensure a handler array was allocated. */
 	assert(dev->drvdata);
 
 	if ((err = clock_enable(dev->clockdev, dev->clock)))
