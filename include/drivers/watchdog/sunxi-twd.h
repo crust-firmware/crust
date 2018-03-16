@@ -6,6 +6,8 @@
 #ifndef DRIVERS_WATCHDOG_SUNXI_TWD_H
 #define DRIVERS_WATCHDOG_SUNXI_TWD_H
 
-extern const struct driver sunxi_twd_driver;
+#include <watchdog.h>
+
+extern const struct watchdog_driver sunxi_twd_driver;
 
 #endif /* DRIVERS_WATCHDOG_SUNXI_TWD_H */

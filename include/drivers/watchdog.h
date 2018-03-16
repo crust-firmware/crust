@@ -7,13 +7,20 @@
 #define DRIVERS_WATCHDOG_H
 
 #include <dm.h>
+#include <intrusive.h>
 #include <stdint.h>
 
-#define WATCHDOG_OPS(dev) ((struct watchdog_driver_ops *)((dev)->drv->ops))
+#define WATCHDOG_OPS(dev) \
+	(&container_of((dev)->drv, struct watchdog_driver, drv)->ops)
 
 struct watchdog_driver_ops {
 	int (*disable)(struct device *dev);
 	int (*enable)(struct device *dev, uint32_t timeout);
+};
+
+struct watchdog_driver {
+	const struct driver              drv;
+	const struct watchdog_driver_ops ops;
 };
 
 /**

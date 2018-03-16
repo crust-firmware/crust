@@ -7,14 +7,21 @@
 #define DRIVERS_TIMER_H
 
 #include <dm.h>
+#include <intrusive.h>
 #include <stdint.h>
 #include <work.h>
 
-#define TIMER_OPS(dev) ((struct timer_driver_ops *)((dev)->drv->ops))
+#define TIMER_OPS(dev) \
+	(&container_of((dev)->drv, struct timer_driver, drv)->ops)
 
 struct timer_driver_ops {
 	int (*get_timeout)(struct device *dev, uint32_t *timeout);
 	int (*set_timeout)(struct device *dev, uint32_t timeout);
+};
+
+struct timer_driver {
+	const struct driver           drv;
+	const struct timer_driver_ops ops;
 };
 
 /**

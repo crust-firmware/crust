@@ -14,6 +14,6 @@
 #define SUN4I_INTC_DRVDATA \
 	(uintptr_t)&(struct handler[SUN4I_INTC_IRQS])
 
-extern const struct driver sun4i_intc_driver;
+extern const struct irqchip_driver sun4i_intc_driver;
 
 #endif /* DRIVERS_IRQCHIP_SUN4I_INTC_H */

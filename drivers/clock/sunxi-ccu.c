@@ -438,11 +438,13 @@ sunxi_ccu_probe(struct device *dev __unused)
 	return SUCCESS;
 }
 
-const struct driver sunxi_ccu_driver = {
-	.name  = "sunxi-ccu",
-	.class = DM_CLASS_CLOCK,
-	.probe = sunxi_ccu_probe,
-	.ops   = &(struct clock_driver_ops) {
+const struct clock_driver sunxi_ccu_driver = {
+	.drv = {
+		.name  = "sunxi-ccu",
+		.class = DM_CLASS_CLOCK,
+		.probe = sunxi_ccu_probe,
+	},
+	.ops = {
 		.disable  = sunxi_ccu_disable,
 		.enable   = sunxi_ccu_enable,
 		.get_rate = sunxi_ccu_get_rate,

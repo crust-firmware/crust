@@ -7,9 +7,11 @@
 #define DRIVERS_I2C_H
 
 #include <dm.h>
+#include <intrusive.h>
 #include <stdint.h>
 
-#define I2C_OPS(dev) ((struct i2c_driver_ops *)((dev)->drv->ops))
+#define I2C_OPS(dev) \
+	(&container_of((dev)->drv, struct i2c_driver, drv)->ops)
 
 enum {
 	I2C_READ  = 1,
@@ -21,6 +23,11 @@ struct i2c_driver_ops {
 	int (*start)(struct device *dev, uint8_t addr, uint8_t direction);
 	int (*stop)(struct device *dev);
 	int (*write)(struct device *dev, uint8_t data);
+};
+
+struct i2c_driver {
+	const struct driver         drv;
+	const struct i2c_driver_ops ops;
 };
 
 /**

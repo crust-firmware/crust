@@ -189,11 +189,13 @@ sunxi_msgbox_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct driver sunxi_msgbox_driver = {
-	.name  = "sunxi-msgbox",
-	.class = DM_CLASS_MSGBOX,
-	.probe = sunxi_msgbox_probe,
-	.ops   = &(struct msgbox_driver_ops) {
+const struct msgbox_driver sunxi_msgbox_driver = {
+	.drv = {
+		.name  = "sunxi-msgbox",
+		.class = DM_CLASS_MSGBOX,
+		.probe = sunxi_msgbox_probe,
+	},
+	.ops = {
 		.disable    = sunxi_msgbox_disable,
 		.enable     = sunxi_msgbox_enable,
 		.send       = sunxi_msgbox_send,

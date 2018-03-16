@@ -7,15 +7,22 @@
 #define DRIVERS_CLOCK_H
 
 #include <dm.h>
+#include <intrusive.h>
 #include <stdint.h>
 
-#define CLOCK_OPS(dev) ((struct clock_driver_ops *)((dev)->drv->ops))
+#define CLOCK_OPS(dev) \
+	(&container_of((dev)->drv, struct clock_driver, drv)->ops)
 
 struct clock_driver_ops {
 	int (*disable)(struct device *dev, uint8_t id);
 	int (*enable)(struct device *dev, uint8_t id);
 	int (*get_rate)(struct device *dev, uint8_t id, uint32_t *rate);
 	int (*set_rate)(struct device *dev, uint8_t id, uint32_t rate);
+};
+
+struct clock_driver {
+	const struct driver           drv;
+	const struct clock_driver_ops ops;
 };
 
 static inline int

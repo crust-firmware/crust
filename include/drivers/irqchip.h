@@ -7,16 +7,23 @@
 #define DRIVERS_IRQCHIP_H
 
 #include <dm.h>
+#include <intrusive.h>
 #include <stdint.h>
 #include <work.h>
 
-#define IRQCHIP_OPS(dev) ((struct irqchip_driver_ops *)((dev)->drv->ops))
+#define IRQCHIP_OPS(dev) \
+	(&container_of((dev)->drv, struct irqchip_driver, drv)->ops)
 
 struct irqchip_driver_ops {
 	int  (*disable)(struct device *dev, uint8_t irq);
 	int  (*enable)(struct device *dev, uint8_t irq, callback_t *fn,
 	               void *param);
 	void (*irq)(struct device *irqdev);
+};
+
+struct irqchip_driver {
+	const struct driver             drv;
+	const struct irqchip_driver_ops ops;
 };
 
 static inline int
