@@ -9,9 +9,9 @@
 #include <bitmap.h>
 #include <stdint.h>
 
-#define CCU_CLOCK_MSGBOX      0
-#define CCU_CLOCK_PIO         1
-#define CCU_CLOCK_SENTINEL    2
+#define CCU_CLOCK_PLL_PERIPH0 0
+#define CCU_CLOCK_MSGBOX      1
+#define CCU_CLOCK_PIO         2
 
 #define CCU_GATE_BASE         (0x0060 / sizeof(uint32_t))
 

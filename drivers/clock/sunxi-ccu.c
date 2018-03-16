@@ -16,28 +16,18 @@
 #include <stddef.h>
 #include <clock/sunxi-ccu.h>
 
-#define IS_LAST_CLOCK(clock) ((clock)->flags & SUNXI_CCU_FLAG_LAST)
-
 struct sunxi_ccu_factors {
-	size_t   parent_index; /**< Mux index for the parent. */
-	uint32_t parent_rate;  /**< The expected rate of the parent clock. */
-	uint8_t  pd;           /**< Linear parent PD ("pre-divider"). */
-	uint8_t  m;            /**< Linear M ("multiple") divider. */
-	uint8_t  p;            /**< Exponential P ("power") divider. */
+	uint8_t mux; /**< Mux index for the parent. */
+	uint8_t pd;  /**< Linear parent PD ("post-divider"). */
+	uint8_t m;   /**< Linear M ("multiple") divider. */
+	uint8_t p;   /**< Exponential P ("power") divider. */
 };
 
-static uint32_t find_factors(struct device *dev, struct sunxi_ccu_clock *clock,
-                             struct sunxi_ccu_factors *factors, uint32_t rate);
-static struct sunxi_ccu_clock *get_clock(struct device *dev, uint8_t id);
-static uint32_t get_max_rate(struct device *dev,
-                             struct sunxi_ccu_clock *clock);
-static size_t get_parent_index(struct device *dev,
-                               struct sunxi_ccu_clock *clock);
-static int sunxi_ccu_disable_id(struct device *dev, int id);
-static int sunxi_ccu_enable_id(struct device *dev, int id, uint32_t rate);
-static uint32_t sunxi_ccu_get_rate_id(struct device *dev, uint8_t id);
-static int sunxi_ccu_set_rate_id(struct device *dev, uint8_t id,
-                                 uint32_t rate);
+static struct sunxi_ccu_clock *
+get_clock(struct device *dev, uint8_t id)
+{
+	return &((struct sunxi_ccu_clock *)dev->drvdata)[id];
+}
 
 /*
  * Choose the parent and set of dividers that will configure the clock to run
@@ -45,8 +35,8 @@ static int sunxi_ccu_set_rate_id(struct device *dev, uint8_t id,
  *
  * Iterate through each possible parent and each combination of dividers
  * (including a pre-divider if present for that parent) until an exact match
- * is found. If no exact match is found, return the best match that is below
- * this clock's maximum rate.
+ * is found. If no exact match is found, return the best match that is between
+ * this clock's minimum and maximum rates.
  *
  * Order the iterations to favor changing PD divider over the M divider (since
  * use of the M divider is sometimes recommended against, and the PD and M
@@ -55,348 +45,212 @@ static int sunxi_ccu_set_rate_id(struct device *dev, uint8_t id,
  * cause instability), and prefer changing all dividers over changing the
  * parent.
  *
- * Since clocks do not have multiplier factors, only parents with a maximum
- * rate at least as high as the requested reate are considered.
- *
- * @param dev     The CCU device.
  * @param clock   The clock description.
  * @param factors A pointer to the structure where factors are written.
  * @param rate    The requested clock rate.
+ * @return        The calculated clock rate, or zero if no rate was found.
  */
 static uint32_t
-find_factors(struct device *dev, struct sunxi_ccu_clock *clock,
-             struct sunxi_ccu_factors *factors, uint32_t rate)
+find_factors(struct sunxi_ccu_clock *clock, struct sunxi_ccu_factors *factors,
+             uint32_t rate)
 {
+	uint8_t  mux_max    = BIT(BF_WIDTH(clock->mux));
+	uint8_t  m_max      = BIT(BF_WIDTH(clock->m));
+	uint8_t  p_max      = BIT(BF_WIDTH(clock->p));
 	int32_t  best_error = INT32_MAX;
-	size_t   best_parent_index;
-	size_t   orig_parent_index = get_parent_index(dev, clock);
-	uint8_t  m_max     = BIT(BF_WIDTH(clock->m));
-	uint8_t  p_max     = BIT(BF_WIDTH(clock->p));
-	uint32_t best_rate = 0;
-	uint32_t max_rate  = get_max_rate(dev, clock);
+	uint32_t best_rate  = 0;
+	uint32_t min_rate   = clock->info.min_rate;
+	uint32_t max_rate   = clock->info.max_rate;
 
 	/* Iterate through each combination of parent and factors twice. */
-	for (size_t i = 0; i < 2 * SUNXI_CCU_PARENT_MAX; ++i) {
-		size_t   parent_index;
-		uint8_t  parent_id, pd_max;
-		uint32_t parent_max;
+	for (size_t i = 0; i < mux_max; ++i) {
+		const struct clock_handle *parent = &clock->parents[i];
+		uint8_t  pd_max;
+		uint32_t parent_rate;
 
-		/* Start at the current parent. */
-		parent_index = (orig_parent_index + i) % SUNXI_CCU_PARENT_MAX;
-		parent_id    = clock->parents[parent_index];
 		/* Skip mux index where there is no parent. */
-		if (parent_id == SUNXI_CCU_NONE)
+		if (parent->dev == NULL)
 			continue;
-		/* Use parent current rate the first round, then max rate. */
-		if (i < SUNXI_CCU_PARENT_MAX) {
-			parent_max = sunxi_ccu_get_rate_id(dev, parent_id);
-		} else {
-			static struct sunxi_ccu_clock *parent_clock;
-			parent_clock = get_clock(dev, parent_id);
-			parent_max   = get_max_rate(dev, parent_clock);
-		}
-		pd_max = BIT(BF_WIDTH(clock->pd[parent_index]));
+		/* Start calculations based on the parent clock's rate. */
+		if (clock_get_rate(parent->dev, parent->id, &parent_rate))
+			continue;
+		pd_max = BIT(BF_WIDTH(parent->vdiv));
 		/* Calculate factors to get closest to the requested rate. */
 		for (uint8_t p = 0; p < p_max; ++p) {
-			uint32_t rate1 = parent_max >> p;
+			uint32_t p_rate = parent_rate >> p;
 			for (uint8_t m = 0; m < m_max; ++m) {
-				uint32_t rate2 = rate1 / (m + 1);
+				uint32_t m_rate = p_rate / (m + 1);
 				for (uint8_t pd = 0; pd < pd_max; ++pd) {
 					int32_t  error;
-					uint32_t new_rate = rate2 / (pd + 1);
-					/* Skip anything above the max rate. */
-					if (new_rate > max_rate)
+					uint32_t new_rate = m_rate / (pd + 1);
+					/* Skip anything out of range. */
+					if (min_rate && new_rate < min_rate)
 						continue;
+					if (max_rate && new_rate > max_rate)
+						continue;
+					/* Get the absolute value of error. */
 					if ((error = rate - new_rate) < 0)
 						error = -error;
-					/* Skip choices with worse error. */
+					/* Skip factors with worse error. */
 					if (error >= best_error)
 						continue;
-					best_error           = error;
-					best_parent_index    = parent_index;
-					best_rate            = new_rate;
-					factors->parent_rate = parent_max;
-					factors->pd          = pd;
-					factors->m           = m;
-					factors->p           = p;
+					best_error   = error;
+					best_rate    = new_rate;
+					factors->mux = i;
+					factors->pd  = pd;
+					factors->m   = m;
+					factors->p   = p;
 					/* Stop if an exact match is found. */
 					if (new_rate == rate)
-						goto exact;
+						return new_rate;
 				}
 			}
 		}
 	}
-	if (best_rate > 0 && best_error >= (int32_t)(rate / 20))
-		warn("%s: Selected rate %u is >5%% from %u", dev->name,
-		     best_rate, rate);
-
-exact:
-	/* Fill in the reset of the factors struct. */
-	factors->parent_index = best_parent_index;
 
 	return best_rate;
 }
 
-/**
- * Get the structure reprensenting a clock from the CCU device and the clock's
- * numerical ID.
- *
- * @param dev The CCU device.
- * @param id  The numerical clock ID—must not be SUNXI_CCU_NONE.
- */
-static struct sunxi_ccu_clock *
-get_clock(struct device *dev, uint8_t id)
+static struct clock_info *
+sunxi_ccu_get_info(struct device *dev, uint8_t id)
 {
-	assert(id < SUNXI_CCU_NONE);
-
-	return &((struct sunxi_ccu_clock *)(dev->drvdata))[id];
+	return &get_clock(dev, id)->info;
 }
 
-/**
- * Get the maximum possible rate of this clock. If no maximum rate is
- * defined in driver data, this is the rate available when the fastest parent
- * is also running at its maximum rate, and all dividers are at unity.
- *
- * @param dev   The CCU device.
- * @param clock The clock description.
- */
-static uint32_t
-get_max_rate(struct device *dev, struct sunxi_ccu_clock *clock)
+static struct clock_handle *
+sunxi_ccu_get_parent(struct device *dev, uint8_t id)
 {
-	uint32_t max_rate = 0, parent_max;
+	struct sunxi_ccu_clock *clock = get_clock(dev, id);
+	size_t index = 0;
 
-	/* Use the cached or pre-assigned maximum rate if there is one. */
-	if (clock->max_rate > 0)
-		return clock->max_rate;
-
-	/* Choose the highest maximum rate of all parents. */
-	for (size_t i = 0; i < SUNXI_CCU_PARENT_MAX; ++i) {
-		uint8_t parent_id = clock->parents[i];
-		if (clock->parents[i] == SUNXI_CCU_NONE)
-			continue;
-		parent_max = get_max_rate(dev, get_clock(dev, parent_id));
-		if (parent_max > max_rate)
-			max_rate = parent_max;
-	}
-	/* If there's no rate control, the maximum rate is the current rate. */
-	if (max_rate == 0)
-		max_rate = clock->rate;
-
-	/* Record the calculated maximum rate in the clock struct. */
-	clock->max_rate = max_rate;
-
-	return max_rate;
-}
-
-/**
- * Get the index in the mux of the current parent clock. If this clock has no
- * mux, this function returns 0.
- *
- * @param dev   The CCU device.
- * @param clock The clock description.
- */
-static size_t
-get_parent_index(struct device *dev, struct sunxi_ccu_clock *clock)
-{
 	if (BF_PRESENT(clock->mux)) {
 		uint32_t reg = mmio_read32(dev->regs + clock->reg);
-		return bitfield_get(reg, clock->mux);
+		index = bitfield_get(reg, clock->mux);
 	}
 
-	return 0;
+	return &clock->parents[index];
 }
 
 static int
-sunxi_ccu_disable_id(struct device *dev, int id)
+sunxi_ccu_get_rate(struct device *dev, uint8_t id, uint32_t *rate)
 {
-	struct sunxi_ccu_clock *child;
-	struct sunxi_ccu_clock *clock = get_clock(dev, id);
-	uint16_t gate  = clock->gate;
-	uint16_t reset = clock->reset;
+	struct clock_handle    *parent = sunxi_ccu_get_parent(dev, id);
+	struct sunxi_ccu_clock *clock  = get_clock(dev, id);
+	int err;
+	uint32_t reg, tmp;
 
-	/* Not allowed to modify fixed clocks. */
-	if (clock->flags & SUNXI_CCU_FLAG_FIXED)
-		return EPERM;
-	/* Do nothing when the clock is already disabled. */
-	if (!(clock->flags & SUNXI_CCU_FLAG_ACTIVE))
+	/* If a clock has no parent, it runs at a fixed rate. Return that. */
+	if (parent == NULL) {
+		*rate = clock->info.max_rate;
 		return SUCCESS;
-	/* Prevent disabling the clock if any children are in use. */
-	for (size_t i = 0; !IS_LAST_CLOCK(child = get_clock(dev, i)); ++i) {
-		if (child->parents[get_parent_index(dev, child)] != id)
-			continue;
-		if (child->flags & SUNXI_CCU_FLAG_ACTIVE)
-			return EBUSY;
 	}
 
-	/* Put the device in reset before turning off its clock. */
-	if (reset != 0) {
-		bitmap_clear(dev->regs, reset);
-		if (bitmap_get(dev->regs, reset))
-			return EIO;
-	}
-	/* Disable any special module clock gate before the bus clock. */
-	if (clock->flags & SUNXI_CCU_FLAG_GATED) {
-		mmio_clearbits32(dev->regs + clock->reg, BIT(31));
-		if (mmio_read32(dev->regs + clock->reg) & BIT(31))
-			return EIO;
-	}
-	/* Finally disable the bus clock gate. */
-	if (gate != 0) {
-		bitmap_clear(dev->regs, gate);
-		if (bitmap_get(dev->regs, gate))
-			return EIO;
-	}
-
-	/* Mark the clock as no longer running. */
-	clock->flags &= ~SUNXI_CCU_FLAG_ACTIVE;
-	clock->rate   = 0;
+	/* Otherwise, the rate is the parent's rate divided by some factors. */
+	if ((err = clock_get_rate(parent->dev, parent->id, &tmp)))
+		return err;
+	reg   = mmio_read32(dev->regs + clock->reg);
+	tmp  /= bitfield_get(reg, parent->vdiv) + 1;
+	tmp  /= bitfield_get(reg, clock->m) + 1;
+	tmp >>= bitfield_get(reg, clock->p);
+	*rate = tmp;
 
 	return SUCCESS;
 }
 
 static int
-sunxi_ccu_enable_id(struct device *dev, int id, uint32_t rate)
+sunxi_ccu_get_state(struct device *dev, uint8_t id)
 {
 	struct sunxi_ccu_clock *clock = get_clock(dev, id);
 	uint16_t gate  = clock->gate;
 	uint16_t reset = clock->reset;
 
-	/* Do nothing when no rate given and the clock is already active. */
-	if (clock->flags & SUNXI_CCU_FLAG_ACTIVE)
-		return SUCCESS;
-	/* Not allowed to modify fixed clocks. */
-	if (clock->flags & SUNXI_CCU_FLAG_FIXED)
-		return EPERM;
+	/* Check the bus clock gate. */
+	if (gate != 0 && !bitmap_get(dev->regs, gate))
+		return false;
+	/* Check the reset line. */
+	if (reset != 0 && !bitmap_get(dev->regs, reset))
+		return false;
 
-	/* Set the clock to its requested rate. This takes care of choosing a
-	 * parent and ensuring that the parent is enabled. Setting the rate
-	 * will fail for fixed clocks and those without rate control, but those
-	 * must be set up in advance anyway. Only propagate the error forward
-	 * if it signifies a hardware issue. */
-	if (sunxi_ccu_set_rate_id(dev, id, rate) == EIO)
-		return EIO;
-	/* Enable the clock before taking the device out of reset. */
-	if (gate != 0) {
-		bitmap_set(dev->regs, gate);
-		if (!bitmap_get(dev->regs, gate))
-			return EIO;
-	}
-	/* Enable any special module clock gate after the bus clock. */
-	if (clock->flags & SUNXI_CCU_FLAG_GATED) {
-		mmio_setbits32(dev->regs + clock->reg, BIT(31));
-		if (!(mmio_read32(dev->regs + clock->reg) & BIT(31)))
-			return EIO;
-	}
-	/* Only deassert the reset once the device has a running clock. */
-	if (reset != 0) {
-		bitmap_set(dev->regs, reset);
-		if (!bitmap_get(dev->regs, reset))
-			return EIO;
-	}
-
-	/* Mark the clock as being in use. */
-	clock->flags |= SUNXI_CCU_FLAG_ACTIVE;
-
-	return SUCCESS;
-}
-
-static uint32_t
-sunxi_ccu_get_rate_id(struct device *dev, uint8_t id)
-{
-	struct sunxi_ccu_clock *clock = get_clock(dev, id);
-	size_t   parent_index;
-	uint32_t rate, reg;
-
-	/* Use the cached or pre-assigned fixed rate if there is one. */
-	if (clock->rate > 0)
-		return clock->rate;
-
-	parent_index = get_parent_index(dev, clock);
-	/* If the clock has no parent or fixed rate, it must not be running. */
-	if (clock->parents[parent_index] == SUNXI_CCU_NONE)
-		return 0;
-	/* Calculate the current clock rate from its parent and dividers. */
-	rate   = sunxi_ccu_get_rate_id(dev, clock->parents[parent_index]);
-	reg    = mmio_read32(dev->regs + clock->reg);
-	rate  /= bitfield_get(reg, clock->pd[parent_index]) + 1;
-	rate  /= bitfield_get(reg, clock->m) + 1;
-	rate >>= bitfield_get(reg, clock->p);
-
-	/* Cache the current rate for future queries. */
-	clock->rate = rate;
-
-	return rate;
+	return true;
 }
 
 static int
-sunxi_ccu_set_rate_id(struct device *dev, uint8_t id, uint32_t rate)
+sunxi_ccu_set_rate(struct device *dev, uint8_t id, uint32_t rate)
 {
 	struct sunxi_ccu_clock  *clock = get_clock(dev, id);
 	struct sunxi_ccu_factors factors;
-	uint8_t  parent_id;
-	uint32_t new_rate, old_rate, orig_reg, reg;
+	int err;
+	uint32_t chosen_rate, old_rate, old_reg, reg;
 
-	/* Not allowed to modify fixed clocks. */
-	if (clock->flags & SUNXI_CCU_FLAG_FIXED)
-		return EPERM;
-
-	old_rate = sunxi_ccu_get_rate_id(dev, id);
-	if (rate == 0) {
-		uint32_t max_rate = get_max_rate(dev, clock);
-		/* Try to keep the current rate unless it's out of range. */
-		rate = old_rate <= max_rate ? old_rate : max_rate;
-	}
-	/* Find the best configuration for the clock at this rate. */
-	new_rate = find_factors(dev, clock, &factors, rate);
+	/* Find the best configuration for the clock at the desired rate. */
+	chosen_rate = find_factors(clock, &factors, rate);
 	/* Ensure some valid rate was possible with this clock's factors. */
-	if (new_rate == 0)
+	if (chosen_rate == 0)
 		return ERANGE;
-	debug("%s: set_rate(%u, %u) chose mux=%u PD=%u M=%u P=%u -> %u",
-	      dev->name, id, rate, factors.parent_index, factors.pd, factors.m,
-	      factors.p, new_rate);
-	/* Now that the parent is known, enable it and raise its rate. */
-	parent_id = clock->parents[factors.parent_index];
-	if (sunxi_ccu_enable_id(dev, parent_id, factors.parent_rate) == EIO)
-		return EIO;
-	if (new_rate != old_rate) {
-		struct sunxi_ccu_clock *child;
-		size_t i;
-
-		/* Update the cached rate with the new calculated rate. */
-		clock->rate = new_rate;
-		/* Update the dividers of active children for the new rate. */
-		for (i = 0; !IS_LAST_CLOCK(child = get_clock(dev, i)); ++i) {
-			if (child->parents[get_parent_index(dev, child)] != id)
-				continue;
-			if (!(child->flags & SUNXI_CCU_FLAG_ACTIVE))
-				continue;
-			/* The child's cached rate is now wrong; clear it. */
-			child->rate = 0;
-			/* Ensure the child is running below its max rate. */
-			if (sunxi_ccu_set_rate_id(dev, i, 0) == EIO)
-				warn("%s: set_rate(%u) update child %u fail!",
-				     dev->name, id, i);
-		}
-	}
+	debug("%s: set_rate(%s, %u) chose mux=%u pd=%u m=%u p=%u → %u",
+	      dev->name, clock->info.name, rate, factors.mux,
+	      factors.pd, factors.m, factors.p, chosen_rate);
+	/* If the chosen rate is the same as the existing rate, do nothing. */
+	if ((err = sunxi_ccu_get_rate(dev, id, &old_rate)))
+		return err;
+	if (chosen_rate == old_rate)
+		return SUCCESS;
 
 	/* Set the dividers for this clock. */
-	reg = orig_reg = mmio_read32(dev->regs + clock->reg);
-	reg = bitfield_set(reg, clock->pd[factors.parent_index], factors.pd);
+	reg = old_reg = mmio_read32(dev->regs + clock->reg);
+	reg = bitfield_set(reg, clock->parents[factors.mux].vdiv, factors.pd);
 	reg = bitfield_set(reg, clock->m, factors.m);
 	reg = bitfield_set(reg, clock->p, factors.p);
-	if (reg != orig_reg) {
+	if (reg != old_reg) {
 		mmio_write32(dev->regs + clock->reg, reg);
 		udelay(1);
 		if (mmio_read32(dev->regs + clock->reg) != reg)
 			return EIO;
 	}
-	/* If this clock has a mux, update that. */
-	if (BF_PRESENT(clock->mux)) {
-		reg = bitfield_set(reg, clock->mux, factors.parent_index);
-		if (reg != orig_reg) {
-			mmio_write32(dev->regs + clock->reg, reg);
-			udelay(1);
-			if (mmio_read32(dev->regs + clock->reg) != reg)
+
+	/* Set the parent in the mux for this clock. */
+	reg = bitfield_set(reg, clock->mux, factors.mux);
+	if (reg != old_reg) {
+		mmio_write32(dev->regs + clock->reg, reg);
+		udelay(1);
+		if (mmio_read32(dev->regs + clock->reg) != reg)
+			return EIO;
+	}
+
+	return SUCCESS;
+}
+
+static int
+sunxi_ccu_set_state(struct device *dev, uint8_t id, bool enable)
+{
+	struct sunxi_ccu_clock *clock = get_clock(dev, id);
+	uint16_t gate  = clock->gate;
+	uint16_t reset = clock->reset;
+
+	if (enable) {
+		/* Enable the clock before taking the device out of reset. */
+		if (gate != 0) {
+			bitmap_set(dev->regs, gate);
+			if (!bitmap_get(dev->regs, gate))
+				return EIO;
+		}
+		/* Deassert the reset once the device has a running clock. */
+		if (reset != 0) {
+			bitmap_set(dev->regs, reset);
+			if (!bitmap_get(dev->regs, reset))
+				return EIO;
+		}
+	} else {
+		/* Put the device in reset before turning off its clock. */
+		if (reset != 0) {
+			bitmap_clear(dev->regs, reset);
+			if (bitmap_get(dev->regs, reset))
+				return EIO;
+		}
+		/* Finally gate the bus clock. */
+		if (gate != 0) {
+			bitmap_clear(dev->regs, gate);
+			if (bitmap_get(dev->regs, gate))
 				return EIO;
 		}
 	}
@@ -405,34 +259,9 @@ sunxi_ccu_set_rate_id(struct device *dev, uint8_t id, uint32_t rate)
 }
 
 static int
-sunxi_ccu_disable(struct device *dev, uint8_t id)
-{
-	return sunxi_ccu_disable_id(dev, id);
-}
-
-static int
-sunxi_ccu_enable(struct device *dev, uint8_t id)
-{
-	return sunxi_ccu_enable_id(dev, id, 0);
-}
-
-static int
-sunxi_ccu_get_rate(struct device *dev, uint8_t id, uint32_t *rate)
-{
-	*rate = sunxi_ccu_get_rate_id(dev, id);
-
-	return SUCCESS;
-}
-
-static int
-sunxi_ccu_set_rate(struct device *dev, uint8_t id, uint32_t rate)
-{
-	return sunxi_ccu_set_rate_id(dev, id, rate);
-}
-
-static int
 sunxi_ccu_probe(struct device *dev __unused)
 {
+	/* Ensure a list of clock descriptions was provided. */
 	assert(dev->drvdata);
 
 	return SUCCESS;
@@ -445,9 +274,11 @@ const struct clock_driver sunxi_ccu_driver = {
 		.probe = sunxi_ccu_probe,
 	},
 	.ops = {
-		.disable  = sunxi_ccu_disable,
-		.enable   = sunxi_ccu_enable,
-		.get_rate = sunxi_ccu_get_rate,
-		.set_rate = sunxi_ccu_set_rate,
+		.get_info   = sunxi_ccu_get_info,
+		.get_parent = sunxi_ccu_get_parent,
+		.get_rate   = sunxi_ccu_get_rate,
+		.get_state  = sunxi_ccu_get_state,
+		.set_rate   = sunxi_ccu_set_rate,
+		.set_state  = sunxi_ccu_set_state,
 	},
 };
