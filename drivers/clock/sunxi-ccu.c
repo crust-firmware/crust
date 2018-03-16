@@ -405,29 +405,29 @@ sunxi_ccu_set_rate_id(struct device *dev, uint8_t id, uint32_t rate)
 }
 
 static int
-sunxi_ccu_disable(struct device *clockdev, struct device *dev)
+sunxi_ccu_disable(struct device *dev, uint8_t id)
 {
-	return sunxi_ccu_disable_id(clockdev, dev->clock);
+	return sunxi_ccu_disable_id(dev, id);
 }
 
 static int
-sunxi_ccu_enable(struct device *clockdev, struct device *dev)
+sunxi_ccu_enable(struct device *dev, uint8_t id)
 {
-	return sunxi_ccu_enable_id(clockdev, dev->clock, 0);
+	return sunxi_ccu_enable_id(dev, id, 0);
 }
 
 static int
-sunxi_ccu_get_rate(struct device *clockdev, struct device *dev, uint32_t *rate)
+sunxi_ccu_get_rate(struct device *dev, uint8_t id, uint32_t *rate)
 {
-	*rate = sunxi_ccu_get_rate_id(clockdev, dev->clock);
+	*rate = sunxi_ccu_get_rate_id(dev, id);
 
 	return SUCCESS;
 }
 
 static int
-sunxi_ccu_set_rate(struct device *clockdev, struct device *dev, uint32_t rate)
+sunxi_ccu_set_rate(struct device *dev, uint8_t id, uint32_t rate)
 {
-	return sunxi_ccu_set_rate_id(clockdev, dev->clock, rate);
+	return sunxi_ccu_set_rate_id(dev, id, rate);
 }
 
 static const struct clock_driver_ops sunxi_ccu_driver_ops = {
