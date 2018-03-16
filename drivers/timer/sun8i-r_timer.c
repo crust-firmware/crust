@@ -55,11 +55,6 @@ sun8i_r_timer_set_timeout(struct device *dev, uint32_t timeout)
 	return SUCCESS;
 }
 
-static const struct timer_driver_ops sun8i_r_timer_driver_ops = {
-	.get_timeout = sun8i_r_timer_get_timeout,
-	.set_timeout = sun8i_r_timer_set_timeout,
-};
-
 void
 sun8i_r_timer_irq(void *param)
 {
@@ -105,5 +100,8 @@ const struct driver sun8i_r_timer_driver = {
 	.name  = "sunxi-r_timer",
 	.class = DM_CLASS_TIMER,
 	.probe = sun8i_r_timer_probe,
-	.ops   = &sun8i_r_timer_driver_ops,
+	.ops   = &(struct timer_driver_ops) {
+		.get_timeout = sun8i_r_timer_get_timeout,
+		.set_timeout = sun8i_r_timer_set_timeout,
+	},
 };
