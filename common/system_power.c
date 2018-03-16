@@ -15,10 +15,8 @@ system_reset(void)
 {
 	struct device *watchdog = dm_get_by_class(DM_CLASS_WATCHDOG);
 
-	if (watchdog != NULL) {
-		watchdog_disable(watchdog);
-		watchdog_enable(watchdog, 0);
-		udelay(1);
-	}
+	watchdog_disable(watchdog);
+	watchdog_enable(watchdog, 0);
+	udelay(1);
 	panic("Failed to reset system");
 }
