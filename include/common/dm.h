@@ -40,6 +40,8 @@ struct device {
 	uintptr_t                  drvdata;
 	/** The controller for the bus this device is connected to. */
 	struct device *const       bus;
+	/** The GPIO pins utilized by this device. */
+	struct gpio_handle        *gpio_pins;
 	/** The controller for this device's clock. */
 	struct device *const       clockdev;
 	/** The controller for this device's IRQ. */
@@ -85,5 +87,13 @@ struct device *dm_get_by_name(const char *name);
  * Initialize the driver model, probing all devices in topological order.
  */
 void dm_init(void);
+
+/**
+ * Set the mode of the GPIO pins specified for a device.
+ *
+ * @param dev       The device containing the GPIO pins to initialize.
+ * @param num_pins  The number of pins utilized by the device.
+ */
+int dm_setup_pins(struct device *dev, uint8_t num_pins);
 
 #endif /* COMMON_DM_H */
