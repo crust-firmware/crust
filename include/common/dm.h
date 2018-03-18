@@ -22,7 +22,6 @@ enum {
 	DM_CLASS_I2C,
 	DM_CLASS_IRQCHIP,
 	DM_CLASS_MSGBOX,
-	DM_CLASS_PIO,
 	DM_CLASS_TIMER,
 	DM_CLASS_WATCHDOG,
 };
@@ -40,6 +39,8 @@ struct device {
 	uintptr_t                  drvdata;
 	/** The controller for the bus this device is connected to. */
 	struct device *const       bus;
+	/** Set of GPIO pins utilized by this device. */
+	struct gpio_pins          *gpio;
 	/** The controller for this device's clock. */
 	struct device *const       clockdev;
 	/** The controller for this device's IRQ. */

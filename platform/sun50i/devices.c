@@ -14,6 +14,7 @@
 #include <watchdog/sunxi-twd.h>
 #include <platform/ccu.h>
 #include <platform/devices.h>
+#include <platform/gpio.h>
 #include <platform/irq.h>
 #include <platform/r_ccu.h>
 
@@ -156,6 +157,7 @@ static struct device r_ccu = {
 
 static struct device r_i2c = {
 	.name     = "r_i2c",
+	.gpio     = &r_i2c_pins,
 	.regs     = DEV_R_I2C,
 	.drv      = &sun6i_a31_i2c_driver,
 	.bus      = &r_pio,
@@ -200,4 +202,13 @@ static struct device r_twd = {
 	.clock    = R_CCU_CLOCK_R_TWD,
 	.irqdev   = &r_intc,
 	.irq      = IRQ_R_TWD,
+};
+
+struct gpio_pins r_i2c_pins = {
+	.dev   = &r_i2c,
+	.count = 2,
+	.pins  = {
+		{ .id = 0, .mode = 3 },
+		{ .id = 1, .mode = 3 },
+	},
 };

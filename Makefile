@@ -9,7 +9,7 @@ CC		 = $(CROSS_COMPILE)gcc
 CPP		 = $(CROSS_COMPILE)cpp
 OBJCOPY		 = $(CROSS_COMPILE)objcopy
 
-WARNINGS	 = -Wall -Wextra -Wformat=2 -Wpedantic -Wshadow \
+WARNINGS	 = -Wall -Wextra -Wformat=2 -Wshadow \
 		   -Werror=implicit-function-declaration \
 		   -Werror=implicit-int \
 		   -Werror=pointer-arith \
