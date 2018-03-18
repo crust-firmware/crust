@@ -6,6 +6,7 @@
 #include <debug.h>
 #include <dm.h>
 #include <error.h>
+#include <gpio.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -82,4 +83,29 @@ dm_init(void)
 {
 	for (struct device *dev = device_list; dev < device_list_end; ++dev)
 		device_probe(dev);
+}
+
+int
+dm_setup_pins(struct device *dev, uint8_t num_pins)
+{
+	struct gpio_handle *pins = dev->gpio_pins;
+	struct device *gpio_dev;
+	uint8_t pin_id, mode;
+	int     err;
+
+	for (size_t i = 0; i < num_pins; ++i) {
+		gpio_dev = pins[i].dev;
+		pin_id   = pins[i].pin;
+		mode     = pins[i].mode;
+
+		/* Probe to ensure GPIO controller is loaded. */
+		if ((err = device_probe(gpio_dev)))
+			return err;
+
+		/* Set pin mode and return if error occurs. */
+		if ((err = gpio_set_mode(gpio_dev, pin_id, mode)))
+			return err;
+	}
+
+	return SUCCESS;
 }
