@@ -4,6 +4,7 @@
  */
 
 #include <dm.h>
+#include <i2c.h>
 #include <util.h>
 #include <clock/sunxi-ccu.h>
 #include <gpio/sunxi-gpio.h>
@@ -160,10 +161,14 @@ static struct device r_ccu = {
 };
 
 static struct device r_i2c = {
-	.name     = "r_i2c",
-	.regs     = DEV_R_I2C,
-	.drv      = &sun6i_a31_i2c_driver.drv,
-	.bus      = &r_pio,
+	.name      = "r_i2c",
+	.regs      = DEV_R_I2C,
+	.drv       = &sun6i_a31_i2c_driver.drv,
+	.bus       = &r_pio,
+	.gpio_pins = GPIO_PINS(I2C_NUM_PINS) {
+		{ &r_pio, 0, 3 },
+		{ &r_pio, 1, 3 },
+	},
 	.clockdev = &r_ccu,
 	.clock    = R_CCU_CLOCK_R_I2C,
 	.irqdev   = &r_intc,
