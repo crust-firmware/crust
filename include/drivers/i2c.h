@@ -13,6 +13,8 @@
 #define I2C_OPS(dev) \
 	(&container_of((dev)->drv, struct i2c_driver, drv)->ops)
 
+#define I2C_NUM_PINS 2
+
 enum {
 	I2C_READ  = 1,
 	I2C_WRITE = 0,
