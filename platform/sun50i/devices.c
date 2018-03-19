@@ -164,7 +164,6 @@ static struct device r_i2c = {
 	.name      = "r_i2c",
 	.regs      = DEV_R_I2C,
 	.drv       = &sun6i_a31_i2c_driver.drv,
-	.bus       = &r_pio,
 	.gpio_pins = GPIO_PINS(I2C_NUM_PINS) {
 		{ &r_pio, 0, 3 },
 		{ &r_pio, 1, 3 },
