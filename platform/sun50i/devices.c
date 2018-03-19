@@ -11,6 +11,7 @@
 #include <i2c/sun6i-a31-i2c.h>
 #include <irqchip/sun4i-intc.h>
 #include <msgbox/sunxi-msgbox.h>
+#include <regulator/sy8106a.h>
 #include <timer/sun8i-r_timer.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/ccu.h>
@@ -27,6 +28,9 @@ static struct device r_intc   __device;
 static struct device r_pio    __device;
 static struct device r_timer0 __device;
 static struct device r_twd    __device;
+#if CONFIG_REGULATOR_SY8106A
+static struct device sy8106a __device;
+#endif
 
 static struct device ccu = {
 	.name    = "ccu",
@@ -210,3 +214,13 @@ static struct device r_twd = {
 	.irqdev   = &r_intc,
 	.irq      = IRQ_R_TWD,
 };
+
+#if CONFIG_REGULATOR_SY8106A
+static struct device sy8106a = {
+	.name    = "sy8106a",
+	.drv     = &sy8106a_driver.drv,
+	.drvdata = 1100, /**< Default CPU voltage. */
+	.bus     = &r_i2c,
+	.addr    = SY8106A_I2C_ADDRESS,
+};
+#endif
