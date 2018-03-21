@@ -692,7 +692,7 @@ int main(int ac, char **av)
 		}
 	} else if (input_mode == savedefconfig) {
 		if (conf_write_defconfig(defconfig_file)) {
-			fprintf(stderr, _("n*** Error while saving defconfig to: %s\n\n"),
+			fprintf(stderr, _("\n*** Error while saving defconfig to: %s\n\n"),
 				defconfig_file);
 			return 1;
 		}
