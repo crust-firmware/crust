@@ -841,7 +841,7 @@ next:
 static int conf_split_config(void)
 {
 	const char *name;
-	char path[PATH_MAX+1];
+	char oldpath[PATH_MAX+1], path[PATH_MAX+1];
 	char *s, *d, c;
 	struct symbol *sym;
 	struct stat sb;
@@ -851,7 +851,12 @@ static int conf_split_config(void)
 	conf_read_simple(name, S_DEF_AUTO);
 	sym_calc_value(modules_sym);
 
-	if (chdir("include/config"))
+	if (!getcwd(oldpath, sizeof(oldpath)))
+		return 1;
+	strcpy(path, conf_get_autoconfig_name());
+	if ((s = strrchr(path, '/')))
+		*s = '\0';
+	if (chdir(path))
 		return 1;
 
 	res = 0;
@@ -945,7 +950,7 @@ static int conf_split_config(void)
 		close(fd);
 	}
 out:
-	if (chdir("../.."))
+	if (chdir(oldpath))
 		return 1;
 
 	return res;
@@ -954,13 +959,15 @@ out:
 int conf_write_autoconf(void)
 {
 	struct symbol *sym;
+	char fullname[PATH_MAX+1];
 	const char *name;
 	FILE *out, *tristate, *out_h;
 	int i;
 
 	sym_clear_all_valid();
 
-	file_write_dep("include/config/auto.conf.cmd");
+	sprintf(fullname, "%s.cmd", conf_get_autoconfig_name());
+	file_write_dep(fullname);
 
 	if (conf_split_config())
 		return 1;
