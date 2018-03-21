@@ -561,8 +561,7 @@ int main(int ac, char **av)
 			fprintf(stderr, _("***\n"
 				"*** Configuration file \"%s\" not found!\n"
 				"***\n"
-				"*** Please run some configurator (e.g. \"make oldconfig\" or\n"
-				"*** \"make menuconfig\" or \"make xconfig\").\n"
+				"*** Please run some configurator (e.g. \"make nconfig\").\n"
 				"***\n"), name);
 			exit(1);
 		}

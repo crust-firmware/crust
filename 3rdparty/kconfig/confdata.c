@@ -30,7 +30,7 @@ static void conf_message(const char *fmt, ...)
 static const char *conf_filename;
 static int conf_lineno, conf_warnings;
 
-const char conf_defname[] = "arch/$ARCH/defconfig";
+const char conf_defname[] = "scripts/defconfig";
 
 static void conf_warning(const char *fmt, ...)
 {
