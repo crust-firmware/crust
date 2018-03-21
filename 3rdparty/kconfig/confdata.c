@@ -909,7 +909,7 @@ static int conf_write_dep(const char *name)
 static int conf_split_config(void)
 {
 	const char *name;
-	char path[PATH_MAX+1];
+	char oldpath[PATH_MAX+1], path[PATH_MAX+1];
 	char *s, *d, c;
 	struct symbol *sym;
 	int res, i, fd;
@@ -918,9 +918,14 @@ static int conf_split_config(void)
 	conf_read_simple(name, S_DEF_AUTO);
 	sym_calc_value(modules_sym);
 
-	if (make_parent_dir("include/config/foo.h"))
+	if (!getcwd(oldpath, sizeof(oldpath)))
 		return 1;
-	if (chdir("include/config"))
+	strcpy(path, conf_get_autoconfig_name());
+	if (make_parent_dir(path))
+		return 1;
+	if ((s = strrchr(path, '/')))
+		*s = '\0';
+	if (chdir(path))
 		return 1;
 
 	res = 0;
@@ -1007,7 +1012,7 @@ static int conf_split_config(void)
 		close(fd);
 	}
 out:
-	if (chdir("../.."))
+	if (chdir(oldpath))
 		return 1;
 
 	return res;
@@ -1016,6 +1021,7 @@ out:
 int conf_write_autoconf(int overwrite)
 {
 	struct symbol *sym;
+	char fullname[PATH_MAX+1];
 	const char *name;
 	const char *autoconf_name = conf_get_autoconfig_name();
 	FILE *out, *tristate, *out_h;
@@ -1026,7 +1032,8 @@ int conf_write_autoconf(int overwrite)
 
 	sym_clear_all_valid();
 
-	conf_write_dep("include/config/auto.conf.cmd");
+	sprintf(fullname, "%s.cmd", autoconf_name);
+	conf_write_dep(fullname);
 
 	if (conf_split_config())
 		return 1;
