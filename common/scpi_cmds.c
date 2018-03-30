@@ -25,8 +25,8 @@ enum {
 
 struct scpi_cmd {
 	/** Handler that can process a message and create a dynamic reply. */
-	uint32_t  (*handler)(uint32_t *rx_payload, uint16_t rx_size,
-	                     uint32_t *tx_payload, uint16_t *tx_size);
+	uint32_t  (*handler)(uint32_t *rx_payload, uint32_t *tx_payload,
+	                     uint16_t *tx_size);
 	/** Fixed reply payload. */
 	uint32_t *tx_payload;
 	/** Expected size of received payload. */
@@ -77,7 +77,7 @@ static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
  * parent, and no power domain is turned off before any of its children.
  */
 uint32_t
-scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload, uint16_t rx_size __unused,
+scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
                              uint32_t *tx_payload __unused,
                              uint16_t *tx_size __unused)
 {
@@ -115,7 +115,6 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload, uint16_t rx_size __unused,
 #define CORE_POWER_STATES(x)   ((x) << 8)
 uint32_t
 scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload __unused,
-                             uint16_t rx_size __unused,
                              uint32_t *tx_payload, uint16_t *tx_size)
 {
 	uint8_t  clusters = css_get_cluster_count();
@@ -139,7 +138,7 @@ scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload __unused,
  * Handler/payload data for SCPI_CMD_SET_SYS_PWR: Set system power state.
  */
 uint32_t
-scpi_cmd_set_sys_power_handler(uint32_t *rx_payload, uint16_t rx_size __unused,
+scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
                                uint32_t *tx_payload __unused,
                                uint16_t *tx_size __unused)
 {
@@ -217,8 +216,8 @@ scpi_handle_cmd(uint8_t client, struct scpi_msg *rx_msg,
 		memcpy(&tx_msg->payload, cmd->tx_payload, cmd->tx_size);
 	} else if (cmd->handler) {
 		/* Run the handler for this command to make a response. */
-		tx_msg->status = cmd->handler(rx_msg->payload, rx_msg->size,
-		                              tx_msg->payload, &tx_msg->size);
+		tx_msg->status = cmd->handler(rx_msg->payload, tx_msg->payload,
+		                              &tx_msg->size);
 	} else {
 		warn("SCPI: Unknown command %u", rx_msg->command);
 	}
