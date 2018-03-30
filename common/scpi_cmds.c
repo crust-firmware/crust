@@ -4,8 +4,10 @@
  */
 
 #include <bitmap.h>
+#include <clock.h>
 #include <css.h>
 #include <debug.h>
+#include <dm.h>
 #include <scpi.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -77,7 +79,11 @@ static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
 	BITMAP_BIT(SCPI_CMD_GET_SCP_CAP) |
 	BITMAP_BIT(SCPI_CMD_SET_CSS_PWR) |
 	BITMAP_BIT(SCPI_CMD_GET_CSS_PWR) |
-	BITMAP_BIT(SCPI_CMD_SET_SYS_PWR),
+	BITMAP_BIT(SCPI_CMD_SET_SYS_PWR) |
+	BITMAP_BIT(SCPI_CMD_GET_CLOCK_CAP) |
+	BITMAP_BIT(SCPI_CMD_GET_CLOCK_INFO) |
+	BITMAP_BIT(SCPI_CMD_SET_CLOCK) |
+	BITMAP_BIT(SCPI_CMD_GET_CLOCK),
 	/* Commands enabled 1. */
 	0,
 	/* Commands enabled 2. */
@@ -174,6 +180,97 @@ scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
 }
 
 /*
+ * Handler/payload data for SCPI_CMD_GET_CLOCK_CAP: Get clock capability.
+ */
+uint32_t
+scpi_cmd_get_clock_cap_handler(uint32_t *rx_payload __unused,
+                               uint32_t *tx_payload, uint16_t *tx_size)
+{
+	tx_payload[0] = dm_count_subdevs_by_class(DM_CLASS_CLOCK);
+	*tx_size      = 2;
+
+	return SCPI_OK;
+}
+
+/*
+ * Handler/payload data for SCPI_CMD_GET_CLOCK_INFO: Get clock info.
+ */
+uint32_t
+scpi_cmd_get_clock_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
+                                uint16_t *tx_size)
+{
+	struct clock_info *info;
+	struct device     *dev;
+	uint8_t id;
+	uint8_t index = rx_payload[0] & BITMASK(0, 8);
+
+	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
+		return SCPI_E_PARAM;
+	if ((info = clock_get_info(dev, id)) == NULL)
+		return SCPI_E_PARAM;
+
+	tx_payload[0] = index | (info->flags & CLK_SCPI_MASK) << 16;
+	tx_payload[1] = info->min_rate;
+	tx_payload[2] = info->max_rate;
+	strncpy((char *)&tx_payload[3], info->name, 20);
+	*tx_size = 32;
+
+	return SCPI_OK;
+}
+
+/*
+ * Handler/payload data for SCPI_CMD_SET_CLOCK: Set clock value.
+ */
+uint32_t
+scpi_cmd_set_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
+                           uint16_t *tx_size __unused)
+{
+	struct clock_info *info;
+	struct device     *dev;
+	uint8_t  id;
+	uint8_t  index = rx_payload[0] & BITMASK(0, 8);
+	uint32_t rate  = rx_payload[1];
+
+	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
+		return SCPI_E_PARAM;
+	if ((info = clock_get_info(dev, id)) == NULL)
+		return SCPI_E_PARAM;
+	if (!(info->flags & CLK_WRITABLE))
+		return SCPI_E_ACCESS;
+
+	return scpi_map_error(clock_set_rate(dev, id, rate));
+}
+
+/*
+ * Handler/payload data for SCPI_CMD_GET_CLOCK: Get clock value.
+ */
+uint32_t
+scpi_cmd_get_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload,
+                           uint16_t *tx_size)
+{
+	struct clock_info *info;
+	struct device     *dev;
+	int      err;
+	uint8_t  id;
+	uint8_t  index = rx_payload[0] & BITMASK(0, 8);
+	uint32_t rate;
+
+	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
+		return SCPI_E_PARAM;
+	if ((info = clock_get_info(dev, id)) == NULL)
+		return SCPI_E_PARAM;
+	if (!(info->flags & CLK_READABLE))
+		return SCPI_E_ACCESS;
+	if ((err = clock_get_rate(dev, id, &rate)))
+		return scpi_map_error(err);
+
+	tx_payload[0] = rate;
+	*tx_size      = sizeof(rate);
+
+	return SCPI_OK;
+}
+
+/*
  * The list of supported SCPI commands.
  */
 static const struct scpi_cmd scpi_cmds[] = {
@@ -196,6 +293,21 @@ static const struct scpi_cmd scpi_cmds[] = {
 		.handler = scpi_cmd_set_sys_power_handler,
 		.rx_size = sizeof(uint8_t),
 		.flags   = FLAG_SECURE_ONLY,
+	},
+	[SCPI_CMD_GET_CLOCK_CAP] = {
+		.handler = scpi_cmd_get_clock_cap_handler,
+	},
+	[SCPI_CMD_GET_CLOCK_INFO] = {
+		.handler = scpi_cmd_get_clock_info_handler,
+		.rx_size = sizeof(uint16_t),
+	},
+	[SCPI_CMD_SET_CLOCK] = {
+		.handler = scpi_cmd_set_clock_handler,
+		.rx_size = 2 * sizeof(uint32_t),
+	},
+	[SCPI_CMD_GET_CLOCK] = {
+		.handler = scpi_cmd_get_clock_handler,
+		.rx_size = sizeof(uint16_t),
 	},
 };
 
