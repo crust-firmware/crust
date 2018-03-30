@@ -42,7 +42,7 @@ enum {
 	SCPI_CMD_GET_SCP_CAP       = 0x02, /**< Get SCP capability. */
 	SCPI_CMD_SET_CSS_PWR       = 0x03, /**< Set CSS power state. */
 	SCPI_CMD_GET_CSS_PWR       = 0x04, /**< Get CSS power state. */
-	SCPI_CMD_SET_SYS_PWR       = 0x05, /**< Set System power state. */
+	SCPI_CMD_SET_SYS_PWR       = 0x05, /**< Set system power state. */
 	SCPI_CMD_SET_CPU_TIMER     = 0x06, /**< Set CPU timer. */
 	SCPI_CMD_CANCEL_CPU_TIMER  = 0x07, /**< Cancel CPU timer. */
 	SCPI_CMD_GET_DVFS_CAP      = 0x08, /**< Get DVFS capability. */
@@ -50,7 +50,7 @@ enum {
 	SCPI_CMD_SET_DVFS          = 0x0a, /**< Set DVFS. */
 	SCPI_CMD_GET_DVFS          = 0x0b, /**< Get DVFS. */
 	SCPI_CMD_GET_DVFS_STATS    = 0x0c, /**< Get DVFS statistics. */
-	SCPI_CMD_GET_CLOCK_CAP     = 0x0d, /**< Get clocks capability. */
+	SCPI_CMD_GET_CLOCK_CAP     = 0x0d, /**< Get clock capability. */
 	SCPI_CMD_GET_CLOCK_INFO    = 0x0e, /**< Get clock info. */
 	SCPI_CMD_SET_CLOCK         = 0x0f, /**< Set clock value. */
 	SCPI_CMD_GET_CLOCK         = 0x10, /**< Get clock value. */
