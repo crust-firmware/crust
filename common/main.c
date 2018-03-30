@@ -29,7 +29,7 @@ main(void)
 	run_tests();
 
 	/* Enable watchdog. */
-	if ((watchdog = dm_get_by_class(DM_CLASS_WATCHDOG))) {
+	if ((watchdog = dm_first_dev_by_class(DM_CLASS_WATCHDOG))) {
 		watchdog_enable(watchdog, WDOG_TIMEOUT);
 		info("Trusted watchdog enabled");
 	}

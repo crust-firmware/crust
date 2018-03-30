@@ -16,6 +16,12 @@ extern struct device device_list_end[];
 
 static uint8_t total_subdevs[DM_CLASS_COUNT];
 
+static inline bool
+device_is_running(struct device *dev)
+{
+	return dev->flags & DEVICE_FLAG_RUNNING;
+}
+
 static int
 device_probe(struct device *dev)
 {
@@ -63,15 +69,25 @@ device_probe(struct device *dev)
 	return err;
 }
 
-struct device *
-dm_get_by_class(uint32_t class)
+uint8_t
+dm_count_subdevs_by_class(uint32_t class)
 {
-	struct device *dev;
+	assert(class < DM_CLASS_COUNT);
 
-	for (dev = device_list; dev < device_list_end; ++dev) {
-		if (!(dev->flags & DEVICE_FLAG_RUNNING))
-			continue;
-		if (dev->drv->class == class)
+	return total_subdevs[class];
+}
+
+struct device *
+dm_first_dev_by_class(uint32_t class)
+{
+	return dm_next_dev_by_class(class, device_list - 1);
+}
+
+struct device *
+dm_next_dev_by_class(uint32_t class, struct device *prev)
+{
+	for (struct device *dev = prev + 1; dev < device_list_end; ++dev) {
+		if (device_is_running(dev) && dev->drv->class == class)
 			return dev;
 	}
 
@@ -79,18 +95,44 @@ dm_get_by_class(uint32_t class)
 }
 
 struct device *
-dm_get_by_name(const char *name)
+dm_get_dev_by_name(const char *name)
 {
-	struct device *dev;
-
-	for (dev = device_list; dev < device_list_end; ++dev) {
-		if (!(dev->flags & DEVICE_FLAG_RUNNING))
-			continue;
-		if (!strcmp(dev->name, name))
+	for (struct device *dev = device_list; dev < device_list_end; ++dev) {
+		if (device_is_running(dev) && strcmp(dev->name, name) == 0)
 			return dev;
 	}
 
 	return NULL;
+}
+
+struct device *
+dm_get_subdev_by_index(uint32_t class, uint8_t index,
+                       uint8_t *id)
+{
+	for_each_dev_in_class(dev, class) {
+		uint8_t start = dev->subdev_index;
+		uint8_t end   = dev->subdev_index + dev->subdev_count;
+
+		if (index >= start && index < end) {
+			*id = index - start;
+			return dev;
+		}
+	}
+
+	return NULL;
+}
+
+struct device *
+dm_next_subdev(struct device *dev, uint8_t *id)
+{
+	/* Case when the given subdevice is not the last in its controller. */
+	if (++*id < dev->subdev_count)
+		return dev;
+
+	/* Otherwise, it is the first subdevice in the next device. */
+	*id = 0;
+
+	return dm_next_dev_by_class(dev->drv->class, dev);
 }
 
 void

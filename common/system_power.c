@@ -13,7 +13,7 @@
 noreturn void
 system_reset(void)
 {
-	struct device *watchdog = dm_get_by_class(DM_CLASS_WATCHDOG);
+	struct device *watchdog = dm_first_dev_by_class(DM_CLASS_WATCHDOG);
 
 	if (watchdog != NULL) {
 		watchdog_disable(watchdog);
