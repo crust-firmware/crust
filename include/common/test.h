@@ -6,7 +6,7 @@
 #ifndef COMMON_TEST_H
 #define COMMON_TEST_H
 
-#if TEST
+#if CONFIG_TEST
 
 void run_tests(void);
 

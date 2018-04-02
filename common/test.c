@@ -6,8 +6,6 @@
 #include <debug.h>
 #include <test.h>
 
-#if TEST
-
 static void
 test_crust_boots(void)
 {
@@ -19,5 +17,3 @@ run_tests(void)
 {
 	test_crust_boots();
 }
-
-#endif

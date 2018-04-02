@@ -30,13 +30,12 @@ CFLAGS		 = -Os -pipe -std=c11 \
 		   -fno-common \
 		   -fomit-frame-pointer \
 		   -funsigned-char \
-		   -g$(if $(filter-out 0,$(DEBUG)),gdb,0) \
+		   -g$(if $(CONFIG_DEBUG_INFO),gdb,0) \
 		   -mdelay -mhard-mul -msoft-float \
 		   -Wa,--fatal-warnings \
 		   $(WARNINGS)
-CPPFLAGS	 = -DDEBUG=$(if $(filter-out 0,$(DEBUG)),1,0) \
-		   -DTEST=$(if $(filter-out 0,$(TEST)),1,0) \
-		   -I$(OBJ)/include \
+CPPFLAGS	 = -I$(OBJ)/include \
+		   -include config.h \
 		   -nostdinc \
 		   -Werror=missing-include-dirs
 LDFLAGS		 = -nostdlib \
@@ -77,11 +76,8 @@ check-format: $(formatfiles)
 clean:
 	$(Q) rm -fr $(OBJ)
 
-%_defconfig:
-	$(Q) cp -f $(SRC)/board/$* .config
-
 distclean:
-	$(Q) rm -fr $(OBJ) .config
+	$(Q) rm -fr $(OBJ) ..config* .config*
 
 firmware: $(OBJ)/scp.bin $(OBJ)/scp.elf $(OBJ)/scp.map
 
@@ -92,8 +88,17 @@ test: check
 
 tools:
 
+.config:;
+
 %/:
 	$(Q) mkdir -p $@
+
+$(OBJ)/include/config.h: $(OBJ)/include/config/auto.conf;
+
+$(OBJ)/include/config/auto.conf: .config
+	$(Q) $(MAKE) -f $(SRC)/Makefile silentoldconfig
+
+$(OBJ)/include/config/auto.conf.cmd: $(OBJ)/include/config/auto.conf;
 
 $(OBJ)/scp.bin: $(OBJ)/scp.elf
 	$(M) OBJCOPY $@
@@ -112,12 +117,6 @@ $(OBJ)/scp.ld.d:;
 -include $(OBJ)/scp.ld.d
 
 $(OBJ)/scp.map: $(OBJ)/scp.elf;
-
-$(OBJ)/config.mk: .config $(OBJ)/include/config.h | $(OBJ)/
-	$(Q) sed 's/#.*$$//;s/="\(.*\)"$$/=\1/' $< > $@
-
-$(OBJ)/include/config.h: .config | $(OBJ)/include/
-	$(Q) sed -n 's/#.*$$//;s/^\([^=]\+\)=\(.*\)$$/#define \1 \2/p' $< > $@
 
 $(OBJ)/%.a:
 	$(M) AR $@
@@ -139,6 +138,10 @@ $(OBJ)/host/%.a:
 	$(M) HOSTAR $@
 	$(Q) $(HOSTAR) rcs $@ $^
 
+$(OBJ)/host/%.o: $(OBJ)/host/%.c
+	$(M) HOSTCC $@
+	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) -MMD -c -o $@ $<
+
 $(OBJ)/host/%.o: $(SRC)/%.c
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) -MMD -c -o $@ $<
@@ -147,6 +150,14 @@ $(OBJ)/host/%.o: $(SRC)/3rdparty/%.c
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) -MMD -c -o $@ $<
 
+$(OBJ)/host/%.lex.c: $(SRC)/3rdparty/%.l
+	$(M) LEX $@
+	$(Q) $(LEX) -L -o $@ $<
+
+$(OBJ)/host/%.tab.c $(OBJ)/host/%.tab.h: $(SRC)/3rdparty/%.y
+	$(M) YACC $@
+	$(Q) $(YACC) -d -l -t -o $@ $<
+
 $(OBJ)/host/test/%.test: $(OBJ)/host/test/%
 	$(M) TEST $@
 	$(Q) $< > $@.tmp && mv -f $@.tmp $@ || { cat $@.tmp; rm -f $@.tmp; }
@@ -154,10 +165,10 @@ $(OBJ)/host/test/%.test: $(OBJ)/host/test/%
 $(SRC)/Makefile:;
 
 ifeq ($(MAKECMDGOALS),)
-include $(OBJ)/config.mk
+include $(OBJ)/include/config/auto.conf $(OBJ)/include/config/auto.conf.cmd
 else
 ifneq ($(filter-out %clean %config %format,$(MAKECMDGOALS)),)
-include $(OBJ)/config.mk
+include $(OBJ)/include/config/auto.conf $(OBJ)/include/config/auto.conf.cmd
 endif
 endif
 

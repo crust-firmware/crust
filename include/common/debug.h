@@ -16,7 +16,7 @@
 #define LOG_STRING_DEBUG   "\x05"
 #define LOG_STRING_TEST    "\x06"
 
-#if DEBUG
+#if CONFIG_DEBUG || DEBUG
 #define assert(e)          ((void)((e) || \
 	                           (panic("Assertion failed: %s (%s:%d)", #e, \
 	                                  __FILE__, __LINE__), 0)))
@@ -42,12 +42,12 @@ noreturn void panic(const char *fmt, ...) __printf(1, 2);
 #define error(...) log(LOG_STRING_ERROR __VA_ARGS__)
 #define warn(...)  log(LOG_STRING_WARNING __VA_ARGS__)
 #define info(...)  log(LOG_STRING_INFO __VA_ARGS__)
-#if DEBUG
+#if CONFIG_DEBUG || DEBUG
 #define debug(...) log(LOG_STRING_DEBUG __VA_ARGS__)
 #else
 #define debug(...) ((void)0)
 #endif
-#if TEST
+#if CONFIG_TEST
 #define test(...)  log(LOG_STRING_TEST __VA_ARGS__)
 #endif
 

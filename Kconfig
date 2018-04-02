@@ -1,0 +1,37 @@
+mainmenu "Crust firmware configuration"
+
+menu "Hardware selection"
+
+source "platform/Kconfig"
+
+endmenu
+
+menu "Debugging options"
+
+config DEBUG
+	bool "Globally enable assertions and debug logging"
+	default n
+	help
+		Enable assert() and debug() by default for every source
+		file. When this option is disabled, they can still be
+		enabled for a single file by putting at the top:
+
+		    #define DEBUG 1
+
+		Note that this option significantly increases the size
+		of the final firmware binary. If in doubt, say N.
+
+config DEBUG_INFO
+	bool "Compile the firmware with debugging symbols"
+	default y
+	help
+		Tell the compiler to generate debugging symbols for use
+		with gdb. These are stripped out of the final firmware
+		binary (but are kept in the linked ELF), so this option
+		does not affect the firmware size. If in doubt, say Y.
+
+config TEST
+	bool "Run on-device integration tests"
+	default n
+
+endmenu

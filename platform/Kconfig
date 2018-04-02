@@ -1,0 +1,11 @@
+config PLATFORM
+	string
+	default "sun50i" if PLATFORM_SUN50I
+
+choice
+	prompt "Hardware platform"
+
+config PLATFORM_SUN50I
+	bool "sun50i"
+
+endchoice
