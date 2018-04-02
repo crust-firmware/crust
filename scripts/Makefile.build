@@ -7,12 +7,8 @@ add-headers	 = $(call append-flags,$1,CPPFLAGS,$(call header-flag,$2))
 add-libs	 = $(foreach lib,$1,$(eval $(value expand-lib)))
 add-programs	 = $(foreach program,$1,$(eval $(value expand-program)))
 add-subdirs	 = $(foreach subdir,$1,$(eval $(value expand-subdir)))
+append-flags	 = $(eval $1: $2 += $3)$(eval $1: HOST$2 += $3)
 header-flag	 = $(addprefix -I,$(sort $(wildcard $(addprefix $(SRC)/,$1))))
-
-define append-flags
-$(eval $1: $2 += $3)
-$(eval $1: HOST$2 += $3)
-endef
 
 define expand-lib
 ifneq ($($(lib)-y),)
