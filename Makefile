@@ -7,9 +7,9 @@ SRC		 = .
 OBJ		 = build
 
 CROSS_COMPILE	?= or1k-linux-musl-
-AR		 = $(CROSS_COMPILE)ar
+AR		 = $(CROSS_COMPILE)gcc-ar
 CC		 = $(CROSS_COMPILE)gcc
-CPP		 = $(CROSS_COMPILE)cpp
+CPP		 = $(CROSS_COMPILE)gcc -E
 OBJCOPY		 = $(CROSS_COMPILE)objcopy
 
 WARNINGS	 = -Wall -Wextra -Wformat=2 -Wpedantic -Wshadow \
