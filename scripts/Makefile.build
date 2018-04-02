@@ -1,0 +1,102 @@
+#
+# Copyright © 2017-2018 The Crust Firmware Authors.
+# SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
+#
+
+add-headers	 = $(call append-flags,$1,CPPFLAGS,$(call header-flag,$2))
+add-libs	 = $(foreach lib,$1,$(eval $(value expand-lib)))
+add-programs	 = $(foreach program,$1,$(eval $(value expand-program)))
+add-subdirs	 = $(foreach subdir,$1,$(eval $(value expand-subdir)))
+header-flag	 = $(addprefix -I,$(sort $(wildcard $(addprefix $(SRC)/,$1))))
+
+define append-flags
+$(eval $1: $2 += $3)
+$(eval $1: HOST$2 += $3)
+endef
+
+define expand-lib
+ifneq ($($(lib)-y),)
+objects := $(addprefix $(hostobj)/,$($(lib)-y))
+deps	:= $(patsubst %.o,%.d,$(filter %.o,$(objects)))
+
+$(hostobj)/$(lib).a: $(objects)
+$(objects): | $(hostobj)/
+$(deps):;
+-include $(deps)
+
+objects := $(addprefix $(obj)/,$($(lib)-y))
+deps	:= $(patsubst %.o,%.d,$(filter %.o,$(objects)))
+
+$(obj)/$(lib).a: $(objects)
+$(objects): | $(obj)/
+$(deps):;
+-include $(deps)
+endif
+endef
+
+define expand-program
+ifneq ($($(program)-objs),)
+objects	:= $(addprefix $(hostobj)/,$($(program)-objs))
+libs	:= $(basename $(filter %.a,$($(program)-objs)))
+deps	:= $(patsubst %.o,%.d,$(filter %.o,$(objects)))
+
+$(hostobj)/$(program): $(objects)
+$(objects): | $(hostobj)/
+$(deps):
+-include $(deps)
+
+$(call add-libs,$(libs))
+endif
+endef
+
+define expand-subdir
+$(foreach var,$(filter %-y,$(.VARIABLES)),$(eval $(var) :=))
+
+src	:= $(SRC)/$(subdir)
+objsub	:= $(subst 3rdparty/,,$(subdir))
+hostobj	:= $(OBJ)/host/$(objsub)
+obj	:= $(OBJ)/$(objsub)
+
+$(src)/Makefile:;
+include $(src)/Makefile
+
+ifneq ($(hostprogs-y),)
+output	:= $(addprefix $(hostobj)/,$(hostprogs-y))
+objects	:= $(addsuffix .o,$(output))
+deps	:= $(addsuffix .d,$(output))
+
+$(objects): | $(hostobj)/
+$(deps):;
+-include $(deps)
+
+$(call add-programs,$(hostprogs-y))
+endif
+
+ifneq ($(obj-y),)
+objects	:= $(addprefix $(obj)/,$(obj-y))
+libs	:= $(basename $(filter %.a,$(obj-y)))
+deps	:= $(patsubst %.o,%.d,$(filter %.o,$(objects)))
+
+$(OBJ)/scp.elf: $(objects)
+$(objects): | $(obj)/
+$(deps):;
+-include $(deps)
+
+$(call add-libs,$(libs))
+endif
+
+ifneq ($(test-y),)
+output	:= $(addprefix $(hostobj)/,$(test-y))
+objects	:= $(addsuffix .o,$(output))
+results	:= $(addsuffix .test,$(output))
+deps	:= $(addsuffix .d,$(output))
+
+check: $(results)
+$(output): $(OBJ)/host/lib/libcrust.a $(OBJ)/host/unity/libunity.a
+$(objects): | $(hostobj)/
+$(deps):;
+-include $(deps)
+endif
+
+$(call add-subdirs,$(addprefix $(subdir)/,$(subdirs-y)))
+endef

@@ -36,6 +36,7 @@ CFLAGS		 = -Os -pipe -std=c11 \
 		   $(WARNINGS)
 CPPFLAGS	 = -DDEBUG=$(if $(filter-out 0,$(DEBUG)),1,0) \
 		   -DTEST=$(if $(filter-out 0,$(TEST)),1,0) \
+		   -I$(OBJ)/include \
 		   -nostdinc \
 		   -Werror=missing-include-dirs
 LDFLAGS		 = -nostdlib \
@@ -50,79 +51,25 @@ HOSTCC		 = cc
 HOSTCFLAGS	 = -fno-builtin \
 		   -O2 -pipe -std=c11 \
 		   $(WARNINGS)
-HOSTCPPFLAGS	 = -D_XOPEN_SOURCE=700
+HOSTCPPFLAGS	 = -D_XOPEN_SOURCE=700 \
+		   -I$(OBJ)/include
 HOSTLDFLAGS	 =
 HOSTLIBS	 =
 
-platdir		 = platform/$(CONFIG_PLATFORM)
+MAKEFLAGS	+= -r
 
-generated	 = $(OBJ)/include/config.h
+###############################################################################
 
 files		 = $(sort $(wildcard $(foreach x,$2,$(1:%=$(SRC)/%/$x))))
-incdirs		 = $(addprefix -I,$(sort $(OBJ)/include $(wildcard $1)))
-headers		 = $(call files,$1,*.h */*.h *.S) $(generated)
-sources		 = $(call files,$1,*.c *.S)
-objdirs		 = $(sort $(patsubst %/,%,$(dir $1)))
-objects		 = $(patsubst $(SRC)$2/%,$(OBJ)$3/%$4,$(basename $1))
-
-format-filter	 = $(filter-out $(OBJ)/% %.S,$1)
-formatheaders	 = $(call headers,include/* platform/*/include)
-formatsources	 = $(call sources,common drivers/* lib platform/* test tools)
-formatfiles	 = $(call format-filter,$(formatheaders) $(formatsources))
-
-fwincbase	 = $(platdir)/include include/*
-fwincdirs	 = $(call incdirs,$(fwincbase))
-fwheaders	 = $(call headers,$(fwincbase))
-fwsources	 = $(call sources,common drivers/* lib $(platdir))
-fwobjects	 = $(call objects,$(fwsources),,,.o)
-fwobjdirs	 = $(call objdirs,$(fwobjects))
-fwfiles		 = $(addprefix $(OBJ)/,scp.bin scp.elf scp.map)
-
-libincbase	 = include/lib
-libincdirs	 = $(call incdirs,$(libincbase))
-libheaders	 = $(call headers,$(libincbase))
-libsources	 = $(call files,lib,*.c)
-libobjects	 = $(call objects,$(libsources),,/host,.o)
-libobjdirs	 = $(call objdirs,$(libobjects))
-library		 = $(OBJ)/host/lib/libcrust.a
-
-testincbase	 = 3rdparty/unity include/lib
-testincdirs	 = $(call incdirs,$(testincbase))
-testheaders	 = $(call headers,$(testincbase))
-testsources	 = $(call sources,test)
-testobjects	 = $(call objects,$(testsources),,/host,.o)
-testobjdirs	 = $(call objdirs,$(testobjects) $(unityobjects))
-tests		 = $(basename $(testobjects))
-testresults	 = $(addsuffix .test,$(tests))
-
-toolincbase	 = $(platdir)/include include/lib
-toolincdirs	 = $(call incdirs,$(toolincbase))
-toolheaders	 = $(call headers,$(toolincbase))
-toolsources	 = $(call sources,tools)
-toolobjects	 = $(call objects,$(toolsources),,/host,.o)
-toolobjdirs	 = $(call objdirs,$(toolobjects))
-tools		 = $(basename $(toolobjects))
-
-unitysources	 = $(call sources,3rdparty/unity)
-unityobjects	 = $(call objects,$(unitysources),/3rdparty,/host/test,.o)
-
-allobjdirs	 = $(OBJ) $(OBJ)/include $(fwobjdirs) $(libobjdirs) \
-		   $(testobjdirs) $(toolobjdirs)
-
-ifeq ($(MAKECMDGOALS),)
-include $(OBJ)/config.mk
-else
-ifneq ($(filter-out %clean %config %format,$(MAKECMDGOALS)),)
-include $(OBJ)/config.mk
-endif
-endif
+formatdirs	 = common drivers/* include/* lib platform/* test tools
+formatfiles	 = $(call files,$(formatdirs),*.c *.h */*.h)
 
 M := @$(if $(filter-out 0,$(V)),:,printf '  %-7s %s\n')
 Q :=  $(if $(filter-out 0,$(V)),,@)
 
-all: $(fwfiles) $(tests) $(tools)
+all: firmware tools
 
-check: $(testresults)
+check:
 
 check-format: $(formatfiles)
 	$(Q) uncrustify -c $(SRC)/.uncrustify -l C -q --check $^
@@ -136,73 +83,90 @@ clean:
 distclean:
 	$(Q) rm -fr $(OBJ) .config
 
-firmware: $(fwfiles)
+firmware: $(OBJ)/scp.bin $(OBJ)/scp.elf $(OBJ)/scp.map
 
 format: $(formatfiles)
 	$(Q) uncrustify -c $(SRC)/.uncrustify -l C -q --no-backup $^
 
 test: check
 
-tools: $(tools)
+tools:
 
-$(allobjdirs):
+%/:
 	$(Q) mkdir -p $@
 
-$(OBJ)/%.bin: $(OBJ)/%.elf | $(OBJ)
+$(OBJ)/scp.bin: $(OBJ)/scp.elf
 	$(M) OBJCOPY $@
 	$(Q) $(OBJCOPY) -O binary -S --reverse-bytes 4 $< $@
 
-$(OBJ)/%.elf $(OBJ)/%.map: $(OBJ)/%.ld $(fwobjects) | $(OBJ)
+$(OBJ)/scp.elf: $(OBJ)/scp.ld
 	$(M) CCLD $@
-	$(Q) $(CC) $(CFLAGS) $(LDFLAGS) \
-		-Wl,-Map,$(OBJ)/$*.map -o $(OBJ)/$*.elf -T $^
+	$(Q) $(CC) $(CFLAGS) $(LDFLAGS) -Wl,-Map,$(OBJ)/scp.map -o $@ -T $^
 
-$(OBJ)/%.ld: $(SRC)/scripts/%.ld.S $(fwheaders) | $(OBJ)
+$(OBJ)/scp.ld: $(SRC)/scripts/scp.ld.S | $(OBJ)/
 	$(M) CPP $@
-	$(Q) $(CPP) $(CPPFLAGS) $(fwincdirs) -o $@ -P $<
+	$(Q) $(CPP) $(CPPFLAGS) -MMD -MF $@.d -MT $@ -o $@ -P $<
 
-$(OBJ)/%.o: $(SRC)/%.c $(fwheaders) | $(fwobjdirs)
-	$(M) CC $@
-	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
+$(OBJ)/scp.ld.d:;
 
-$(OBJ)/%.o: $(SRC)/%.S $(fwheaders) | $(fwobjdirs)
-	$(M) CC $@
-	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
+-include $(OBJ)/scp.ld.d
 
-$(OBJ)/config.mk: .config | $(OBJ)
+$(OBJ)/scp.map: $(OBJ)/scp.elf;
+
+$(OBJ)/config.mk: .config $(OBJ)/include/config.h | $(OBJ)/
 	$(Q) sed 's/#.*$$//;s/="\(.*\)"$$/=\1/' $< > $@
 
-$(OBJ)/include/config.h: .config | $(OBJ)/include
+$(OBJ)/include/config.h: .config | $(OBJ)/include/
 	$(Q) sed -n 's/#.*$$//;s/^\([^=]\+\)=\(.*\)$$/#define \1 \2/p' $< > $@
 
-$(library): $(libobjects) | $(libobjdirs)
+$(OBJ)/%.a:
+	$(M) AR $@
+	$(Q) $(AR) rcs $@ $^
+
+$(OBJ)/%.o: $(SRC)/%.c
+	$(M) CC $@
+	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) -MMD -c -o $@ $<
+
+$(OBJ)/%.o: $(SRC)/%.S
+	$(M) CC $@
+	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) -MMD -c -o $@ $<
+
+$(OBJ)/host/%: $(OBJ)/host/%.o
+	$(M) HOSTLD $@
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLIBS)
+
+$(OBJ)/host/%.a:
 	$(M) HOSTAR $@
 	$(Q) $(HOSTAR) rcs $@ $^
 
-$(OBJ)/host/lib/%.o: $(SRC)/lib/%.c $(libheaders) | $(libobjdirs)
+$(OBJ)/host/%.o: $(SRC)/%.c
 	$(M) HOSTCC $@
-	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(libincdirs) -c -o $@ $<
+	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) -MMD -c -o $@ $<
+
+$(OBJ)/host/%.o: $(SRC)/3rdparty/%.c
+	$(M) HOSTCC $@
+	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) -MMD -c -o $@ $<
 
 $(OBJ)/host/test/%.test: $(OBJ)/host/test/%
 	$(M) TEST $@
 	$(Q) $< > $@.tmp && mv -f $@.tmp $@ || { cat $@.tmp; rm -f $@.tmp; }
 
-$(OBJ)/host/test/%: $(OBJ)/host/test/%.o $(unityobjects) $(library)
-	$(M) HOSTLD $@
-	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLIBS)
+$(SRC)/Makefile:;
 
-$(OBJ)/host/test/%.o: $(SRC)/3rdparty/%.c $(testheaders) | $(testobjdirs)
-	$(M) HOSTCC $@
-	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(testincdirs) -c -o $@ $<
+ifeq ($(MAKECMDGOALS),)
+include $(OBJ)/config.mk
+else
+ifneq ($(filter-out %clean %config %format,$(MAKECMDGOALS)),)
+include $(OBJ)/config.mk
+endif
+endif
 
-$(OBJ)/host/test/%.o: $(SRC)/test/%.c $(testheaders) | $(testobjdirs)
-	$(M) HOSTCC $@
-	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(testincdirs) -c -o $@ $<
+include $(SRC)/scripts/Makefile.build
 
-$(OBJ)/host/tools/%: $(SRC)/tools/%.c $(toolheaders) | $(toolobjdirs)
-	$(M) HOSTCC $@
-	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(HOSTLDFLAGS) \
-		$(toolincdirs) -o $@ $< $(HOSTLIBS)
+$(call add-headers,$(OBJ)/scp.elf,include/*)
+$(call add-headers,$(OBJ)/host/test/%.o,3rdparty/unity include/lib)
+$(call add-headers,$(OBJ)/host/tools/%.o,include/lib)
+$(call add-subdirs,3rdparty common drivers lib platform test tools)
 
 .PHONY: all check check-format clean distclean firmware format test tools
 .SECONDARY:
