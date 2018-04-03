@@ -12,7 +12,7 @@
 #include <util.h>
 
 #define SUNXI_CCU_DRVDATA \
-	(uintptr_t)&(struct sunxi_ccu_clock[])
+	(uintptr_t)(struct sunxi_ccu_clock[])
 
 struct sunxi_ccu_clock {
 	/** Generic clock information shared by all drivers. */
