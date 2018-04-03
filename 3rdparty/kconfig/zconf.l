@@ -387,8 +387,20 @@ void zconf_initscan(const char *name)
 
 void zconf_nextfile(const char *name)
 {
+	char path[PATH_MAX], *slash;
+	if (strlen(current_file->name) >= PATH_MAX) {
+		fprintf(stderr, "can't source %s: path too long\n", name);
+		exit(1);
+	}
+	strcpy(path, current_file->name);
+	slash = strrchr(path, '/');
+	if (!slash || strlen(name) >= PATH_MAX - (slash - path) - 1) {
+		fprintf(stderr, "can't source %s: path too long\n", name);
+		exit(1);
+	}
+	strcpy(slash + 1, name);
 	struct file *iter;
-	struct file *file = file_lookup(name);
+	struct file *file = file_lookup(path);
 	struct buffer *buf = xmalloc(sizeof(*buf));
 	memset(buf, 0, sizeof(*buf));
 
