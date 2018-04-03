@@ -33,6 +33,7 @@ CFLAGS		 = -Os -pipe -std=c11 \
 		   $(WARNINGS)
 CPPFLAGS	 = -DDEBUG=$(if $(filter-out 0,$(DEBUG)),1,0) \
 		   -DTEST=$(if $(filter-out 0,$(TEST)),1,0) \
+		   -include config.h \
 		   -nostdinc \
 		   -Werror=missing-include-dirs
 LDFLAGS		 = -nostdlib \
