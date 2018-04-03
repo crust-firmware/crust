@@ -91,6 +91,7 @@ static struct device ccu = {
 			.reset = CCU_RESET_PIO,
 		},
 	},
+	.subdev_count = CCU_CLOCK_COUNT,
 };
 
 static struct device msgbox = {
@@ -197,6 +198,7 @@ static struct device r_ccu = {
 			.p    = BITFIELD(16, 2),
 		},
 	},
+	.subdev_count = R_CCU_CLOCK_COUNT,
 };
 
 static struct device r_i2c = {
