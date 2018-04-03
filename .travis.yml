@@ -33,6 +33,8 @@ matrix:
             git clone -q https://github.com/uncrustify/uncrustify
           fi
         - git -C uncrustify rev-parse HEAD
+        - sed -i 's/chunk_is_token(next, CT_SEMICOLON))$/!prev \&\& &/'
+            uncrustify/src/combine.cpp
         - mkdir -p uncrustify/build
         - (cd uncrustify/build && cmake -DCMAKE_INSTALL_PREFIX=$PWD
             -DCMAKE_C_COMPILER=gcc-7 -DCMAKE_CXX_COMPILER=g++-7 ..)
