@@ -21,6 +21,7 @@
 #define R_CCU_CLOCK_R_I2C     9
 #define R_CCU_CLOCK_R_TWD     10
 #define R_CCU_CLOCK_R_CIR_MOD 11
+#define R_CCU_CLOCK_COUNT     12
 
 #define R_CCU_CLOCK_AHB0_REG  0x0000
 #define R_CCU_CLOCK_APB0_REG  0x000c
