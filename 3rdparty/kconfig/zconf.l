@@ -307,10 +307,15 @@ void zconf_initscan(const char *name)
 	current_file->lineno = 1;
 }
 
+#include <libgen.h>
+
 void zconf_nextfile(const char *name)
 {
+	char dir[PATH_MAX], path[PATH_MAX];
+	strcpy(dir, current_file->name);
+	sprintf(path, "%s/%s", dirname(dir), name);
 	struct file *iter;
-	struct file *file = file_lookup(name);
+	struct file *file = file_lookup(path);
 	struct buffer *buf = xmalloc(sizeof(*buf));
 	memset(buf, 0, sizeof(*buf));
 
