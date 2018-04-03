@@ -4,15 +4,12 @@
 # SPDX-License-Identifier: GPL-2.0
 #
 
-# We need this in case it is exported in the user's environment.
-unexport CONFIG_
-
 silent := $(if $(filter-out 0,$(V)),,-s)
 
 # These targets map 1:1 to the command line options of 'conf'.
 simple-targets := \
 	alldefconfig allmodconfig allnoconfig allyesconfig defconfig \
-	listnewconfig oldconfig olddefconfig randconfig silentoldconfig
+	listnewconfig oldconfig olddefconfig randconfig
 
 $(simple-targets): $(hostobj)/conf
 	$(Q) $< $(silent) --$@ $(SRC)/Kconfig
@@ -28,11 +25,6 @@ savedefconfig: $(hostobj)/conf
 
 nconfig: $(hostobj)/nconf
 	$(Q) $< $(silent) $(SRC)/Kconfig
-
-silentoldconfig: $(OBJ)/include/config/
-silentoldconfig: export KCONFIG_AUTOCONFIG = $(OBJ)/include/config/auto.conf
-silentoldconfig: export KCONFIG_AUTOHEADER = $(OBJ)/include/config.h
-silentoldconfig: export KCONFIG_TRISTATE   = $(OBJ)/include/config/tristate.conf
 
 hostprogs-y += conf nconf
 conf-objs := zconf.tab.o

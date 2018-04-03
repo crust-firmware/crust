@@ -95,8 +95,12 @@ tools:
 
 $(OBJ)/include/config.h: $(OBJ)/include/config/auto.conf;
 
-$(OBJ)/include/config/auto.conf: .config
-	$(Q) $(MAKE) -f $(SRC)/Makefile silentoldconfig
+$(OBJ)/include/config/auto.conf: $(OBJ)/host/kconfig/conf .config | $(OBJ)/include/config/
+	$(Q) env \
+		KCONFIG_AUTOCONFIG=$(OBJ)/include/config/auto.conf \
+		KCONFIG_AUTOHEADER=$(OBJ)/include/config.h \
+		KCONFIG_TRISTATE=$(OBJ)/include/config/tristate.conf \
+		$< --silentoldconfig $(SRC)/Kconfig
 
 $(OBJ)/include/config/auto.conf.cmd: $(OBJ)/include/config/auto.conf;
 
