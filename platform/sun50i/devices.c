@@ -11,6 +11,7 @@
 #include <i2c/sun6i-a31-i2c.h>
 #include <irqchip/sun4i-intc.h>
 #include <msgbox/sunxi-msgbox.h>
+#include <regulator/axp803.h>
 #include <regulator/sy8106a.h>
 #include <timer/sun8i-r_timer.h>
 #include <watchdog/sunxi-twd.h>
@@ -19,6 +20,9 @@
 #include <platform/irq.h>
 #include <platform/r_ccu.h>
 
+#if CONFIG_REGULATOR_AXP803
+static struct device axp803 __device;
+#endif
 static struct device ccu      __device;
 static struct device msgbox   __device;
 static struct device pio      __device;
@@ -30,6 +34,37 @@ static struct device r_timer0 __device;
 static struct device r_twd    __device;
 #if CONFIG_REGULATOR_SY8106A
 static struct device sy8106a __device;
+#endif
+
+#if CONFIG_REGULATOR_AXP803
+static struct device axp803 = {
+	.name    = "axp803",
+	.drv     = &axp803_driver.drv,
+	.drvdata = AXP803_DRVDATA {
+		[AXP803_REGL_DCDC1] = 3300,
+		[AXP803_REGL_DCDC2] = 1100,
+		/* DCDC3 is polyphased with DCDC2. */
+		/* DCDC4 is not connected. */
+		[AXP803_REGL_DCDC5] = 1500,
+		[AXP803_REGL_DCDC6] = 1100,
+		[AXP803_REGL_ALDO1] = 2800,
+		[AXP803_REGL_ALDO2] = 3300,
+		[AXP803_REGL_ALDO3] = 3000,
+		[AXP803_REGL_DLDO1] = 3300,
+		[AXP803_REGL_DLDO2] = 3600,
+		[AXP803_REGL_DLDO3] = 2800,
+		[AXP803_REGL_DLDO4] = 3300,
+		[AXP803_REGL_ELDO1] = 1800,
+		/* ELDO2 is not connected. */
+		[AXP803_REGL_ELDO3] = 1800,
+		[AXP803_REGL_FLDO1] = 1200,
+		[AXP803_REGL_FLDO2] = 1100,
+		/* GPIO0 is not connected. */
+		/* GPIO1 is not connected. */
+	},
+	.bus  = &r_i2c,
+	.addr = 0x34,
+};
 #endif
 
 static struct device ccu = {
