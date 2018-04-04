@@ -1,6 +1,7 @@
 ---
 env:
   matrix:
+    - BOARD=orangepi_pc2
     - BOARD=orangepi_win
     - BOARD=orangepi_zero_plus
 
