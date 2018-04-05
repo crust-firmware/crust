@@ -238,7 +238,8 @@ scpi_init(void)
 {
 	int err;
 
-	scpi_msgbox = dm_get_by_class(DM_CLASS_MSGBOX);
+	if ((scpi_msgbox = dm_get_by_class(DM_CLASS_MSGBOX)) == NULL)
+		panic("SCPI: No message box available");
 	/* Non-secure client channel. */
 	if ((err = msgbox_enable(scpi_msgbox, SCPI_CLIENT_NS,
 	                         scpi_receive_message)))
