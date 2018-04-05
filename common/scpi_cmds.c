@@ -37,6 +37,26 @@ struct scpi_cmd {
 	uint8_t   flags;
 };
 
+static const uint32_t scpi_error_map[] = {
+	SCPI_OK,        /* SUCCESS */
+	SCPI_E_BUSY,    /* EAGAIN */
+	SCPI_E_BUSY,    /* EBUSY */
+	SCPI_E_PARAM,   /* EEXIST */
+	SCPI_E_PARAM,   /* EINVAL */
+	SCPI_E_DEVICE,  /* EIO */
+	SCPI_E_SUPPORT, /* ENOBUS */
+	SCPI_E_SUPPORT, /* ENODEV */
+	SCPI_E_SUPPORT, /* ENOTSUP */
+	SCPI_E_ACCESS,  /* EPERM */
+	SCPI_E_RANGE,   /* ERANGE */
+};
+
+static uint32_t __const
+scpi_map_error(int err)
+{
+	return scpi_error_map[-err];
+}
+
 /*
  * Handler/payload data for SCPI_CMD_GET_SCP_CAP: Get SCP capability.
  */
