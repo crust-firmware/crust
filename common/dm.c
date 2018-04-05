@@ -55,27 +55,31 @@ device_probe(struct device *dev)
 struct device *
 dm_get_by_class(uint32_t class)
 {
-	for (struct device *dev = device_list; dev < device_list_end; ++dev) {
+	struct device *dev;
+
+	for (dev = device_list; dev < device_list_end; ++dev) {
 		if (!(dev->flags & DEVICE_FLAG_RUNNING))
 			continue;
 		if (dev->drv->class == class)
 			return dev;
 	}
 
-	panic("dm: No device for class %u", class);
+	return NULL;
 }
 
 struct device *
 dm_get_by_name(const char *name)
 {
-	for (struct device *dev = device_list; dev < device_list_end; ++dev) {
+	struct device *dev;
+
+	for (dev = device_list; dev < device_list_end; ++dev) {
 		if (!(dev->flags & DEVICE_FLAG_RUNNING))
 			continue;
 		if (!strcmp(dev->name, name))
 			return dev;
 	}
 
-	panic("dm: Device %s not found", name);
+	return NULL;
 }
 
 void
