@@ -14,6 +14,8 @@
 extern struct device device_list[];
 extern struct device device_list_end[];
 
+static uint8_t total_subdevs[DM_CLASS_COUNT];
+
 static int
 device_probe(struct device *dev)
 {
@@ -38,9 +40,18 @@ device_probe(struct device *dev)
 	if (dev->supplydev && (err = device_probe(dev->supplydev)))
 		return err;
 
+	/* Tell the device the index of its first subdevice. */
+	dev->subdev_index = total_subdevs[dev->drv->class];
+
 	/* Probe the device itself, and report any errors. */
 	if ((err = dev->drv->probe(dev)) == SUCCESS) {
 		dev->flags |= DEVICE_FLAG_RUNNING;
+		/* If the driver's probe function did not provide the number of
+		 * subdevices, assume the default number of 1. */
+		if (dev->subdev_count == 0)
+			dev->subdev_count = 1;
+		/* Update the total number of subdevices for this class. */
+		total_subdevs[dev->drv->class] += dev->subdev_count;
 		debug("dm: Probed %s", dev->name);
 	} else if (err == ENODEV) {
 		dev->flags |= DEVICE_FLAG_MISSING;

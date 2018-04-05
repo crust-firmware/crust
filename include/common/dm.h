@@ -26,6 +26,7 @@ enum {
 	DM_CLASS_REGULATOR,
 	DM_CLASS_TIMER,
 	DM_CLASS_WATCHDOG,
+	DM_CLASS_COUNT,
 };
 
 struct driver;
@@ -57,8 +58,13 @@ struct device {
 	const uint8_t              irq;
 	/** A supplydev-specific power supply identifier. */
 	const uint8_t              supply;
-	/** Flags describing about this device's state. */
+	/** Flags describing this device's state. */
 	uint8_t                    flags;
+	/** The number of subdevices (channels, etc.) within this device.
+	 * Subdevice-aware drivers should update this in the probe function. */
+	uint8_t                    subdev_count;
+	/** The index within the class of this device's first subdevice. */
+	uint8_t                    subdev_index;
 };
 
 struct driver {
