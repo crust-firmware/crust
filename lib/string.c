@@ -9,6 +9,7 @@
 #undef memcpy
 #undef strcmp
 #undef strlen
+#undef strncpy
 
 void *
 memcpy(void *restrict dest, const void *restrict src, size_t n)
@@ -42,4 +43,18 @@ strlen(const char *s)
 		++len;
 
 	return len;
+}
+
+char *
+strncpy(char *restrict dest, const char *restrict src, size_t n)
+{
+	char *d       = dest;
+	const char *s = src;
+
+	while (n-- > 0) {
+		*d++ = *s;
+		s   += *s != 0;
+	}
+
+	return dest;
 }

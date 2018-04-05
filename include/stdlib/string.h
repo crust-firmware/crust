@@ -11,5 +11,6 @@
 void *memcpy(void *restrict dest, const void *restrict src, size_t n);
 int strcmp(const char *a, const char *b);
 size_t strlen(const char *s);
+char *strncpy(char *restrict dest, const char *restrict src, size_t n);
 
 #endif /* STDLIB_STRING_H */
