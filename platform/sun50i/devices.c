@@ -11,6 +11,7 @@
 #include <i2c/sun6i-a31-i2c.h>
 #include <irqchip/sun4i-intc.h>
 #include <msgbox/sunxi-msgbox.h>
+#include <regulator/axp803.h>
 #include <timer/sun8i-r_timer.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/ccu.h>
@@ -18,6 +19,7 @@
 #include <platform/irq.h>
 #include <platform/r_ccu.h>
 
+static struct device axp803   __device;
 static struct device ccu      __device;
 static struct device msgbox   __device;
 static struct device pio      __device;
@@ -27,6 +29,13 @@ static struct device r_intc   __device;
 static struct device r_pio    __device;
 static struct device r_timer0 __device;
 static struct device r_twd    __device;
+
+static struct device axp803 = {
+	.name = "axp803",
+	.drv  = &axp803_driver.drv,
+	.bus  = &r_i2c,
+	.addr = 0x34,
+};
 
 static struct device ccu = {
 	.name    = "ccu",
