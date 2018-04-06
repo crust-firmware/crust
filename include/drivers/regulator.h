@@ -36,7 +36,6 @@ struct regulator_info {
 };
 
 struct regulator_driver_ops {
-	uint8_t                (*get_count)(struct device *dev);
 	struct regulator_info *(*get_info)(struct device *dev, uint8_t id);
 	int                    (*get_state)(struct device *dev, uint8_t id);
 	int                    (*read_raw)(struct device *dev, uint8_t id,
@@ -81,20 +80,6 @@ static inline int
 regulator_enable(struct device *dev, uint8_t id)
 {
 	return REGULATOR_OPS(dev)->set_state(dev, id, true);
-}
-
-/**
- * Get the number of regulator channels within a device.
- *
- * This function has no defined errors.
- *
- * @param dev   A device containing one or more regulators.
- * @return      The number of regulators controlled by this device.
- */
-static inline uint8_t
-regulator_get_count(struct device *dev)
-{
-	return REGULATOR_OPS(dev)->get_count(dev);
 }
 
 /**

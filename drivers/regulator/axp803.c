@@ -423,12 +423,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 };
 
-static uint8_t
-axp803_get_count(struct device *dev __unused)
-{
-	return AXP803_REGL_COUNT;
-}
-
 static struct regulator_info *
 axp803_get_info(struct device *dev __unused, uint8_t id)
 {
@@ -515,6 +509,8 @@ axp803_probe(struct device *dev)
 	if ((err = regulator_set_defaults(dev, (uint16_t *)dev->drvdata)))
 		return err;
 
+	dev->subdev_count = AXP803_REGL_COUNT;
+
 	return SUCCESS;
 }
 
@@ -525,7 +521,6 @@ const struct regulator_driver axp803_driver = {
 		.probe = axp803_probe,
 	},
 	.ops = {
-		.get_count = axp803_get_count,
 		.get_info  = axp803_get_info,
 		.get_state = axp803_get_state,
 		.read_raw  = axp803_read_raw,
