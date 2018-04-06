@@ -31,12 +31,6 @@ static struct regulator_info sy8106a_regulator_info = {
 	.flags = REGL_READABLE,
 };
 
-static uint8_t
-sy8106a_get_count(struct device *dev __unused)
-{
-	return REGULATOR_COUNT;
-}
-
 static struct regulator_info *
 sy8106a_get_info(struct device *dev __unused, uint8_t id __unused)
 {
@@ -102,6 +96,8 @@ sy8106a_probe(struct device *dev)
 	if ((err = regulator_set_defaults(dev, &default_value)))
 		return err;
 
+	dev->subdev_count = REGULATOR_COUNT;
+
 	return SUCCESS;
 }
 
@@ -112,7 +108,6 @@ const struct regulator_driver sy8106a_driver = {
 		.probe = sy8106a_probe,
 	},
 	.ops = {
-		.get_count = sy8106a_get_count,
 		.get_info  = sy8106a_get_info,
 		.get_state = sy8106a_get_state,
 		.read_raw  = sy8106a_read_raw,

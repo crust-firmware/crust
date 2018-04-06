@@ -48,11 +48,9 @@ regulator_get_value(struct device *dev, uint8_t id, uint16_t *value)
 int
 regulator_set_defaults(struct device *dev, uint16_t *values)
 {
-	const struct regulator_driver_ops *ops = REGULATOR_OPS(dev);
-	int     err;
-	uint8_t count = ops->get_count(dev);
+	int err;
 
-	for (uint8_t id = 0; id < count; ++id) {
+	for (uint8_t id = 0; id < dev->subdev_count; ++id) {
 		if (values[id] > 0) {
 			if ((err = regulator_set_value(dev, id, values[id])))
 				return err;
