@@ -8,6 +8,7 @@
 #include <css.h>
 #include <debug.h>
 #include <dm.h>
+#include <dvfs.h>
 #include <scpi.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -80,6 +81,10 @@ static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
 	BITMAP_BIT(SCPI_CMD_SET_CSS_PWR) |
 	BITMAP_BIT(SCPI_CMD_GET_CSS_PWR) |
 	BITMAP_BIT(SCPI_CMD_SET_SYS_PWR) |
+	BITMAP_BIT(SCPI_CMD_GET_DVFS_CAP) |
+	BITMAP_BIT(SCPI_CMD_GET_DVFS_INFO) |
+	BITMAP_BIT(SCPI_CMD_SET_DVFS) |
+	BITMAP_BIT(SCPI_CMD_GET_DVFS) |
 	BITMAP_BIT(SCPI_CMD_GET_CLOCK_CAP) |
 	BITMAP_BIT(SCPI_CMD_GET_CLOCK_INFO) |
 	BITMAP_BIT(SCPI_CMD_SET_CLOCK) |
@@ -177,6 +182,86 @@ scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
 
 	/* Since there's no PMIC or wakeup source support yet, always reset. */
 	system_reset();
+}
+
+/*
+ * Handler/payload data for SCPI_CMD_GET_DVFS_CAP: Get DVFS capability.
+ */
+uint32_t
+scpi_cmd_get_dvfs_cap_handler(uint32_t *rx_payload __unused,
+                              uint32_t *tx_payload, uint16_t *tx_size)
+{
+	tx_payload[0] = dm_count_subdevs_by_class(DM_CLASS_DVFS);
+	*tx_size      = 1;
+
+	return SCPI_OK;
+}
+
+/*
+ * Handler/payload data for SCPI_CMD_GET_DVFS_INFO: Get DVFS info.
+ */
+uint32_t
+scpi_cmd_get_dvfs_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
+                               uint16_t *tx_size)
+{
+	struct device    *dev;
+	struct dvfs_info *info;
+	uint8_t id;
+	uint8_t index = rx_payload[0] & BITMASK(0, 8);
+
+	if ((dev = dm_get_subdev_by_index(DM_CLASS_DVFS, index, &id)) == NULL)
+		return SCPI_E_PARAM;
+	if ((info = dvfs_get_info(dev, id)) == NULL)
+		return SCPI_E_PARAM;
+
+	tx_payload[0] = index | info->opp_count << 8 | info->latency << 16;
+	for (uint8_t i = 0; i < info->opp_count; ++i) {
+		tx_payload[2 * i + 1] = info->opps[i].rate * 1000000;
+		tx_payload[2 * i + 2] = info->opps[i].voltage;
+	}
+	*tx_size = sizeof(uint32_t) * (2 * info->opp_count + 1);
+
+	assert(*tx_size <= SCPI_PAYLOAD_SIZE);
+
+	return SCPI_OK;
+}
+
+/*
+ * Handler/payload data for SCPI_CMD_SET_DVFS: Set DVFS.
+ */
+uint32_t
+scpi_cmd_set_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
+                          uint16_t *tx_size __unused)
+{
+	struct device *dev;
+	uint8_t id;
+	uint8_t index = (rx_payload[0] >> 0) & BITMASK(0, 8);
+	uint8_t opp   = (rx_payload[0] >> 8) & BITMASK(0, 8);
+
+	if ((dev = dm_get_subdev_by_index(DM_CLASS_DVFS, index, &id)) == NULL)
+		return SCPI_E_PARAM;
+
+	return scpi_map_error(dvfs_set_opp(dev, id, opp));
+}
+
+/*
+ * Handler/payload data for SCPI_CMD_GET_DVFS: Get DVFS.
+ */
+uint32_t
+scpi_cmd_get_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload,
+                          uint16_t *tx_size)
+{
+	struct device *dev;
+	uint8_t id;
+	uint8_t index = rx_payload[0] & BITMASK(0, 8);
+
+	if ((dev = dm_get_subdev_by_index(DM_CLASS_DVFS, index, &id)) == NULL)
+		return SCPI_E_PARAM;
+
+	tx_payload[0] = dvfs_get_opp(dev, id);
+	*tx_size      = sizeof(uint8_t);
+
+	return SCPI_OK;
 }
 
 /*
@@ -293,6 +378,21 @@ static const struct scpi_cmd scpi_cmds[] = {
 		.handler = scpi_cmd_set_sys_power_handler,
 		.rx_size = sizeof(uint8_t),
 		.flags   = FLAG_SECURE_ONLY,
+	},
+	[SCPI_CMD_GET_DVFS_CAP] = {
+		.handler = scpi_cmd_get_dvfs_cap_handler,
+	},
+	[SCPI_CMD_GET_DVFS_INFO] = {
+		.handler = scpi_cmd_get_dvfs_info_handler,
+		.rx_size = sizeof(uint8_t),
+	},
+	[SCPI_CMD_SET_DVFS] = {
+		.handler = scpi_cmd_set_dvfs_handler,
+		.rx_size = sizeof(uint16_t),
+	},
+	[SCPI_CMD_GET_DVFS] = {
+		.handler = scpi_cmd_get_dvfs_handler,
+		.rx_size = sizeof(uint8_t),
 	},
 	[SCPI_CMD_GET_CLOCK_CAP] = {
 		.handler = scpi_cmd_get_clock_cap_handler,
