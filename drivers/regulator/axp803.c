@@ -512,7 +512,7 @@ axp803_probe(struct device *dev)
 		return err;
 	if ((reg & IC_TYPE_MASK) != IC_TYPE_VALUE)
 		return ENODEV;
-	if (regulator_set_defaults(dev, (uint16_t *)dev->drvdata))
+	if ((err = regulator_set_defaults(dev, (uint16_t *)dev->drvdata)))
 		return err;
 
 	return SUCCESS;
