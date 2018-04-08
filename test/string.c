@@ -92,6 +92,39 @@ test_strlen(void)
 	TEST_ASSERT_EQUAL(0, strlen(""));
 }
 
+static void
+test_strncpy(void)
+{
+	char dest10[10];
+	char dest16[16];
+	char dest20[20];
+	const char *expected10 = "test sourc";
+	const char *expected16 = "test source str";
+	const char *expected20 = "test source str\0\0\0\0";
+	const char *src        = "test source str";
+
+	memset(dest10, 0xff, sizeof(dest10));
+	strncpy(dest10, src, sizeof(dest10));
+	TEST_ASSERT_EQUAL_UINT8_ARRAY(expected10, dest10, sizeof(dest10));
+
+	memset(dest16, 0xff, sizeof(dest16));
+	strncpy(dest16, src, sizeof(dest16));
+	TEST_ASSERT_EQUAL_UINT8_ARRAY(expected16, dest16, sizeof(dest16));
+
+	memset(dest20, 0xff, sizeof(dest20));
+	strncpy(dest20, src, sizeof(dest20));
+	TEST_ASSERT_EQUAL_UINT8_ARRAY(expected20, dest20, sizeof(dest20));
+
+	char zero = '\0';
+	char output[50];
+	char zeroes[50];
+
+	memset(output, 0xaa, sizeof(output));
+	memset(zeroes, 0x00, sizeof(zeroes));
+	strncpy(output, &zero, sizeof(output));
+	TEST_ASSERT_EQUAL_UINT8_ARRAY(zeroes, output, sizeof(output));
+}
+
 int
 main(void)
 {
@@ -99,5 +132,6 @@ main(void)
 	RUN_TEST(test_memcpy);
 	RUN_TEST(test_strcmp);
 	RUN_TEST(test_strlen);
+	RUN_TEST(test_strncpy);
 	return UNITY_END();
 }
