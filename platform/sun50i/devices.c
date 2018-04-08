@@ -43,10 +43,11 @@ static struct device axp803 = {
 	.drvdata = AXP803_DRVDATA {
 		[AXP803_REGL_DCDC1] = 3300,
 		[AXP803_REGL_DCDC2] = 1100,
-		/* DCDC3 is polyphased with DCDC2. */
+		[AXP803_REGL_DCDC3] = 1100,
 		/* DCDC4 is not connected. */
 		[AXP803_REGL_DCDC5] = 1500,
 		[AXP803_REGL_DCDC6] = 1100,
+		/* DC1SW is not connected. */
 		[AXP803_REGL_ALDO1] = 2800,
 		[AXP803_REGL_ALDO2] = 3300,
 		[AXP803_REGL_ALDO3] = 3000,
@@ -57,7 +58,7 @@ static struct device axp803 = {
 		[AXP803_REGL_ELDO1] = 1800,
 		/* ELDO2 is not connected. */
 		[AXP803_REGL_ELDO3] = 1800,
-		[AXP803_REGL_FLDO1] = 1200,
+		/* FLDO1 is connected but not used. */
 		[AXP803_REGL_FLDO2] = 1100,
 		/* GPIO0 is not connected. */
 		/* GPIO1 is not connected. */
