@@ -53,8 +53,15 @@ regulator_set_defaults(struct device *dev, uint16_t *values)
 	uint8_t count = ops->get_count(dev);
 
 	for (uint8_t id = 0; id < count; ++id) {
-		if ((err = regulator_set_value(dev, id, values[id])))
-			return err;
+		if (values[id] > 0) {
+			if ((err = regulator_set_value(dev, id, values[id])))
+				return err;
+			if ((err = regulator_enable(dev, id)))
+				return err;
+		} else {
+			if ((err = regulator_disable(dev, id)))
+				return err;
+		}
 	}
 
 	return SUCCESS;
