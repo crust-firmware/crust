@@ -47,6 +47,8 @@ struct device {
 	uintptr_t                  drvdata;
 	/** The controller for the bus this device is connected to. */
 	struct device *const       bus;
+	/** The clocks utilized by this device. */
+	struct clock_handle *const clocks;
 	/** The GPIO pins utilized by this device. */
 	struct gpio_handle        *gpio_pins;
 	/** The controller for this device's clock. */
@@ -156,6 +158,14 @@ struct device *dm_next_subdev(struct device *dev, uint8_t *id);
  * panic.
  */
 void dm_init(void);
+
+/**
+ * Set up the clocks specified for a device.
+ *
+ * @param dev       The device referencing the clocks to initialize.
+ * @param num_pins  The number of clocks utilized by the device.
+ */
+int dm_setup_clocks(struct device *dev, uint8_t num_clocks);
 
 /**
  * Set the mode of the GPIO pins specified for a device.

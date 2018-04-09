@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
+#include <clock.h>
 #include <debug.h>
 #include <dm.h>
 #include <error.h>
@@ -140,6 +141,28 @@ dm_init(void)
 {
 	for (struct device *dev = device_list; dev < device_list_end; ++dev)
 		device_probe(dev);
+}
+
+int
+dm_setup_clocks(struct device *dev, uint8_t num_clocks)
+{
+	struct clock_handle *clocks = dev->clocks;
+	int err;
+
+	for (uint8_t i = 0; i < num_clocks; ++i) {
+		struct device *clockdev = clocks[i].dev;
+		uint8_t id = clocks[i].id;
+
+		/* Probe to ensure clock controller's driver is loaded. */
+		if ((err = device_probe(clockdev)))
+			return err;
+
+		/* Enable each clock used by the device. */
+		if ((err = clock_enable(clockdev, id)))
+			return err;
+	}
+
+	return SUCCESS;
 }
 
 int
