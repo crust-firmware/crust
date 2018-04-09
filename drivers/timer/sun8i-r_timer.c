@@ -73,7 +73,7 @@ sun8i_r_timer_probe(struct device *dev)
 	int err;
 	uintptr_t index = dev->drvdata;
 
-	if ((err = clock_enable(dev->clockdev, dev->clock)))
+	if ((err = dm_setup_clocks(dev, 1)))
 		return err;
 
 	/* Stop the timer and set it to 24MHz one-shot mode. */

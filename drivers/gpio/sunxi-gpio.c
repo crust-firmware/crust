@@ -69,7 +69,7 @@ sunxi_gpio_probe(struct device *dev)
 {
 	int err;
 
-	if ((err = clock_enable(dev->clockdev, dev->clock)))
+	if ((err = dm_setup_clocks(dev, 1)))
 		return err;
 
 	/* Disable and clear all IRQs. */
