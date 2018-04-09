@@ -50,7 +50,7 @@ struct device {
 	/** The clocks utilized by this device. */
 	struct clock_handle *const clocks;
 	/** The GPIO pins utilized by this device. */
-	struct gpio_handle        *gpio_pins;
+	struct gpio_handle *const  pins;
 	/** The controller for this device's clock. */
 	struct device *const       clockdev;
 	/** The controller for this device's IRQ. */
@@ -170,7 +170,7 @@ int dm_setup_clocks(struct device *dev, uint8_t num_clocks);
 /**
  * Set the mode of the GPIO pins specified for a device.
  *
- * @param dev       The device containing the GPIO pins to initialize.
+ * @param dev       The device referencing the GPIO pins to initialize.
  * @param num_pins  The number of pins utilized by the device.
  */
 int dm_setup_pins(struct device *dev, uint8_t num_pins);
