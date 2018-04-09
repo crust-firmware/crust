@@ -169,7 +169,7 @@ sunxi_msgbox_probe(struct device *dev)
 	/* Ensure a handler array was allocated. */
 	assert(dev->drvdata);
 
-	if ((err = clock_enable(dev->clockdev, dev->clock)))
+	if ((err = dm_setup_clocks(dev, 1)))
 		return err;
 
 	/* Drain all messages (required to clear interrupts). */

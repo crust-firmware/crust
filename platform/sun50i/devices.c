@@ -96,23 +96,21 @@ static struct device ccu = {
 };
 
 static struct device msgbox = {
-	.name     = "msgbox",
-	.regs     = DEV_MSGBOX,
-	.drv      = &sunxi_msgbox_driver.drv,
-	.drvdata  = SUNXI_MSGBOX_DRVDATA { 0 },
-	.clockdev = &ccu,
-	.clock    = CCU_CLOCK_MSGBOX,
-	.irqdev   = &r_intc,
-	.irq      = IRQ_MSGBOX,
+	.name    = "msgbox",
+	.regs    = DEV_MSGBOX,
+	.drv     = &sunxi_msgbox_driver.drv,
+	.drvdata = SUNXI_MSGBOX_DRVDATA { 0 },
+	.clocks  = CLOCK_PARENT(ccu, CCU_CLOCK_MSGBOX),
+	.irqdev  = &r_intc,
+	.irq     = IRQ_MSGBOX,
 };
 
 static struct device pio = {
-	.name     = "pio",
-	.regs     = DEV_PIO,
-	.drv      = &sunxi_gpio_driver.drv,
-	.drvdata  = BITMASK(1, 7), /**< Physically implemented ports (1-7). */
-	.clockdev = &ccu,
-	.clock    = CCU_CLOCK_PIO,
+	.name    = "pio",
+	.regs    = DEV_PIO,
+	.drv     = &sunxi_gpio_driver.drv,
+	.drvdata = BITMASK(1, 7), /**< Physically implemented ports (1-7). */
+	.clocks  = CLOCK_PARENT(ccu, CCU_CLOCK_PIO),
 };
 
 static struct device r_ccu = {
@@ -203,17 +201,16 @@ static struct device r_ccu = {
 };
 
 static struct device r_i2c = {
-	.name = "r_i2c",
-	.regs = DEV_R_I2C,
-	.drv  = &sun6i_a31_i2c_driver.drv,
-	.pins = GPIO_PINS(I2C_NUM_PINS) {
+	.name   = "r_i2c",
+	.regs   = DEV_R_I2C,
+	.drv    = &sun6i_a31_i2c_driver.drv,
+	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_I2C),
+	.pins   = GPIO_PINS(I2C_NUM_PINS) {
 		{ &r_pio, 0, 3 },
 		{ &r_pio, 1, 3 },
 	},
-	.clockdev = &r_ccu,
-	.clock    = R_CCU_CLOCK_R_I2C,
-	.irqdev   = &r_intc,
-	.irq      = IRQ_R_I2C,
+	.irqdev = &r_intc,
+	.irq    = IRQ_R_I2C,
 };
 
 static struct device r_intc = {
@@ -224,33 +221,30 @@ static struct device r_intc = {
 };
 
 static struct device r_pio = {
-	.name     = "r_pio",
-	.regs     = DEV_R_PIO,
-	.drv      = &sunxi_gpio_driver.drv,
-	.drvdata  = BIT(0), /**< Physically implemented ports (0). */
-	.clockdev = &r_ccu,
-	.clock    = R_CCU_CLOCK_R_PIO,
+	.name    = "r_pio",
+	.regs    = DEV_R_PIO,
+	.drv     = &sunxi_gpio_driver.drv,
+	.drvdata = BIT(0), /**< Physically implemented ports (0). */
+	.clocks  = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_PIO),
 };
 
 static struct device r_timer0 = {
-	.name     = "r_timer0",
-	.regs     = DEV_R_TIMER,
-	.drv      = &sun8i_r_timer_driver.drv,
-	.drvdata  = 0, /**< Timer index within the device. */
-	.clockdev = &r_ccu,
-	.clock    = R_CCU_CLOCK_R_TIMER,
-	.irqdev   = &r_intc,
-	.irq      = IRQ_R_TIMER0,
+	.name    = "r_timer0",
+	.regs    = DEV_R_TIMER,
+	.drv     = &sun8i_r_timer_driver.drv,
+	.drvdata = 0, /**< Timer index within the device. */
+	.clocks  = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_TIMER),
+	.irqdev  = &r_intc,
+	.irq     = IRQ_R_TIMER0,
 };
 
 static struct device r_twd = {
-	.name     = "r_twd",
-	.regs     = DEV_R_TWD,
-	.drv      = &sunxi_twd_driver.drv,
-	.clockdev = &r_ccu,
-	.clock    = R_CCU_CLOCK_R_TWD,
-	.irqdev   = &r_intc,
-	.irq      = IRQ_R_TWD,
+	.name   = "r_twd",
+	.regs   = DEV_R_TWD,
+	.drv    = &sunxi_twd_driver.drv,
+	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_TWD),
+	.irqdev = &r_intc,
+	.irq    = IRQ_R_TWD,
 };
 
 #if CONFIG_REGULATOR_SY8106A
