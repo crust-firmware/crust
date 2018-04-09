@@ -51,16 +51,12 @@ struct device {
 	struct clock_handle *const clocks;
 	/** The GPIO pins utilized by this device. */
 	struct gpio_handle *const  pins;
-	/** The controller for this device's clock. */
-	struct device *const       clockdev;
 	/** The controller for this device's IRQ. */
 	struct device *const       irqdev;
 	/** The controller for this device's power supply (regulator). */
 	struct device *const       supplydev;
 	/** A bus-specific address/port (if this device is on a bus). */
 	const uint8_t              addr;
-	/** A clockdev-specific clock identifier. */
-	const uint8_t              clock;
 	/** An irqdev-specific IRQ number. */
 	const uint8_t              irq;
 	/** A supplydev-specific power supply identifier. */
