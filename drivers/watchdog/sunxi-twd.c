@@ -57,6 +57,11 @@ sunxi_twd_enable(struct device *dev, uint32_t timeout)
 static int
 sunxi_twd_probe(struct device *dev)
 {
+	int err;
+
+	if ((err = dm_setup_clocks(dev, 1)))
+		return err;
+
 	/* Disable watchdog. */
 	sunxi_twd_disable(dev);
 
