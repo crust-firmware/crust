@@ -11,11 +11,9 @@
 #include <regulator.h>
 #include <regulator/sy8106a.h>
 
-#define REGULATOR_COUNT 1
-
-#define VOUT_SEL_REG    0x01
-#define VOUT_COM_REG    0x02
-#define SYS_STATUS_REG  0x06
+#define VOUT_SEL_REG   0x01
+#define VOUT_COM_REG   0x02
+#define SYS_STATUS_REG 0x06
 
 static struct regulator_info sy8106a_regulator_info = {
 	.name      = "vout",
@@ -34,7 +32,7 @@ static struct regulator_info sy8106a_regulator_info = {
 static struct regulator_info *
 sy8106a_get_info(struct device *dev __unused, uint8_t id __unused)
 {
-	assert(id < REGULATOR_COUNT);
+	assert(id < SY8106A_REGL_COUNT);
 
 	return &sy8106a_regulator_info;
 }
@@ -96,7 +94,7 @@ sy8106a_probe(struct device *dev)
 	if ((err = regulator_set_defaults(dev, &default_value)))
 		return err;
 
-	dev->subdev_count = REGULATOR_COUNT;
+	dev->subdev_count = SY8106A_REGL_COUNT;
 
 	return SUCCESS;
 }
