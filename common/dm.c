@@ -40,8 +40,6 @@ device_probe(struct device *dev)
 	/* Probe all devices this device depends on. */
 	if (dev->bus && (err = device_probe(dev->bus)))
 		return err;
-	if (dev->clockdev && (err = device_probe(dev->clockdev)))
-		return err;
 	if (dev->irqdev && (err = device_probe(dev->irqdev)))
 		return err;
 	if (dev->supplydev && (err = device_probe(dev->supplydev)))
