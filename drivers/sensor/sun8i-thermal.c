@@ -21,49 +21,53 @@
 
 #define THS_FILTER_CONTROL_REG 0x70
 
+#if CONFIG_SOC_H5
+#define HAVE_THS_CPU1
+#endif
+
 struct sun8i_thermal_sensor_info {
 	struct   sensor_info info;
 	const uint16_t       address;
 };
 
 enum {
-	THS0,
-	THS1,
-	THS2,
-	SENSOR_COUNT
+	THS_CPU0,
+#if defined(HAVE_THS_CPU1)
+	THS_CPU1,
+#endif
+	THS_SENSOR_COUNT,
 };
 
-static struct sun8i_thermal_sensor_info thermal_sensors[SENSOR_COUNT] = {
-	[THS0] = {
+static struct sun8i_thermal_sensor_info thermal_sensors[THS_SENSOR_COUNT] = {
+	[THS_CPU0] = {
 		.info = {
-			.name       = "ths0",
+			.name = "ths-cpu0",
+#if CONFIG_SOC_A64
 			.offset     = 254300,
 			.multiplier = -117,
+#else
+			.offset     = 223000,
+			.multiplier = -119,
+#endif
 		},
 		.address = THS0_DATA_REG,
 	},
-	[THS1] = {
+#if defined(HAVE_THS_CPU1)
+	[THS_CPU1] = {
 		.info = {
-			.name       = "ths1",
-			.offset     = 254300,
-			.multiplier = -117,
+			.name       = "ths-cpu1",
+			.offset     = 259000,
+			.multiplier = -145,
 		},
 		.address = THS1_DATA_REG,
 	},
-	[THS2] = {
-		.info = {
-			.name       = "ths2",
-			.offset     = 254300,
-			.multiplier = -117,
-		},
-		.address = THS2_DATA_REG,
-	},
+#endif
 };
 
 static struct sensor_info *
 sun8i_thermal_get_info(struct device *dev __unused, uint8_t id)
 {
-	assert(id < SENSOR_COUNT);
+	assert(id < THS_SENSOR_COUNT);
 
 	return &thermal_sensors[id].info;
 }
@@ -90,9 +94,12 @@ sun8i_thermal_probe(struct device *dev)
 
 	/* Start calibration. */
 	mmio_write32(dev->regs + THS_CTL_REG1, BIT(17));
+#if CONFIG_SOC_A64
+	/* FIXME: This hangs on the H5. */
 	while (mmio_read32(dev->regs + THS_CTL_REG1) & BIT(17)) {
 		/* Wait for for calibration to clear. */
 	}
+#endif
 
 	/* Set aquire times to 0.1ms. */
 	mmio_write32(dev->regs + THS_CTL_REG0, 0x257);
@@ -106,7 +113,7 @@ sun8i_thermal_probe(struct device *dev)
 	mmio_write32(dev->regs + THS_CTL_REG2,
 	             reg | BIT(0) | BIT(1) | BIT(2));
 
-	dev->subdev_count = SENSOR_COUNT;
+	dev->subdev_count = THS_SENSOR_COUNT;
 
 	return SUCCESS;
 }
