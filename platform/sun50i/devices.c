@@ -22,7 +22,7 @@
 #include <platform/r_ccu.h>
 
 #if CONFIG_REGULATOR_AXP803
-static struct device axp803 __device;
+static struct device axp803_regulator __device;
 #endif
 static struct device ccu      __device;
 static struct device msgbox   __device;
@@ -39,9 +39,9 @@ static struct device sy8106a __device;
 static struct device ths __device;
 
 #if CONFIG_REGULATOR_AXP803
-static struct device axp803 = {
-	.name    = "axp803",
-	.drv     = &axp803_driver.drv,
+static struct device axp803_regulator = {
+	.name    = "axp803-regulator",
+	.drv     = &axp803_regulator_driver.drv,
 	.drvdata = AXP803_DRVDATA {
 		[AXP803_REGL_DCDC1] = 3300,
 		[AXP803_REGL_DCDC2] = 1100,
