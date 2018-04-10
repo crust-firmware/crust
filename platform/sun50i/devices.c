@@ -12,6 +12,7 @@
 #include <irqchip/sun4i-intc.h>
 #include <mfd/axp803.h>
 #include <msgbox/sunxi-msgbox.h>
+#include <pmic/axp803.h>
 #include <regulator/axp803.h>
 #include <regulator/sy8106a.h>
 #include <sensor/sun8i-thermal.h>
@@ -22,6 +23,9 @@
 #include <platform/irq.h>
 #include <platform/r_ccu.h>
 
+#if CONFIG_PMIC_AXP803
+static struct device axp803_pmic __device;
+#endif
 #if CONFIG_REGULATOR_AXP803
 static struct device axp803_regulator __device;
 #endif
@@ -38,6 +42,17 @@ static struct device r_twd    __device;
 static struct device sy8106a __device;
 #endif
 static struct device ths __device;
+
+#if CONFIG_PMIC_AXP803
+static struct device axp803_pmic = {
+	.name   = "axp803-pmic",
+	.drv    = &axp803_pmic_driver.drv,
+	.bus    = &r_i2c,
+	.addr   = AXP803_I2C_ADDRESS,
+	.irqdev = &r_intc,
+	.irq    = IRQ_NMI,
+};
+#endif
 
 #if CONFIG_REGULATOR_AXP803
 static struct device axp803_regulator = {
