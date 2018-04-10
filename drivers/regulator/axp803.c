@@ -421,7 +421,7 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 };
 
 static struct regulator_info *
-axp803_get_info(struct device *dev __unused, uint8_t id)
+axp803_regulator_get_info(struct device *dev __unused, uint8_t id)
 {
 	assert(id < AXP803_REGL_COUNT);
 
@@ -429,7 +429,7 @@ axp803_get_info(struct device *dev __unused, uint8_t id)
 }
 
 static int
-axp803_get_state(struct device *dev, uint8_t id)
+axp803_regulator_get_state(struct device *dev, uint8_t id)
 {
 	int     err;
 	uint8_t reg;
@@ -444,7 +444,7 @@ axp803_get_state(struct device *dev, uint8_t id)
 }
 
 static int
-axp803_read_raw(struct device *dev, uint8_t id, uint32_t *raw)
+axp803_regulator_read_raw(struct device *dev, uint8_t id, uint32_t *raw)
 {
 	int     err;
 	uint8_t reg;
@@ -460,7 +460,7 @@ axp803_read_raw(struct device *dev, uint8_t id, uint32_t *raw)
 }
 
 static int
-axp803_set_state(struct device *dev, uint8_t id, bool enabled)
+axp803_regulator_set_state(struct device *dev, uint8_t id, bool enabled)
 {
 	int     err;
 	uint8_t reg;
@@ -477,7 +477,7 @@ axp803_set_state(struct device *dev, uint8_t id, bool enabled)
 }
 
 static int
-axp803_write_raw(struct device *dev, uint8_t id, uint32_t raw)
+axp803_regulator_write_raw(struct device *dev, uint8_t id, uint32_t raw)
 {
 	uint8_t regaddr = axp803_regulators[id].value_register;
 
@@ -492,7 +492,7 @@ axp803_write_raw(struct device *dev, uint8_t id, uint32_t raw)
 }
 
 static int
-axp803_probe(struct device *dev)
+axp_regulator_probe(struct device *dev)
 {
 	int err;
 
@@ -508,17 +508,17 @@ axp803_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct regulator_driver axp803_driver = {
+const struct regulator_driver axp803_regulator_driver = {
 	.drv = {
-		.name  = "axp803",
+		.name  = "axp803-regulator",
 		.class = DM_CLASS_REGULATOR,
-		.probe = axp803_probe,
+		.probe = axp_regulator_probe,
 	},
 	.ops = {
-		.get_info  = axp803_get_info,
-		.get_state = axp803_get_state,
-		.read_raw  = axp803_read_raw,
-		.set_state = axp803_set_state,
-		.write_raw = axp803_write_raw,
+		.get_info  = axp803_regulator_get_info,
+		.get_state = axp803_regulator_get_state,
+		.read_raw  = axp803_regulator_read_raw,
+		.set_state = axp803_regulator_set_state,
+		.write_raw = axp803_regulator_write_raw,
 	},
 };
