@@ -7,6 +7,7 @@
 #define COMMON_SYSTEM_POWER_H
 
 #include <compiler.h>
+#include <stdbool.h>
 
 /**
  * Possible system power states, matching those defined in the SCPI protocol.
@@ -18,8 +19,33 @@ enum {
 };
 
 /**
+ * Check if the system is in a simulated off state.
+ */
+bool system_is_off(void) __pure;
+
+/**
+ * Check if the system is suspended.
+ */
+bool system_is_suspended(void) __pure;
+
+/**
  * Reset the SoC, including all CPU cores and internal peripheral devices.
  */
 noreturn void system_reset(void);
+
+/**
+ * Shutdown the SoC, turn off all voltage domains, and shutdown the PMIC.
+ */
+void system_shutdown(void);
+
+/**
+ * Suspend the SoC and external voltage domains.
+ */
+void system_suspend(void);
+
+/**
+ * Wake up the SoC and external voltage domains, and resume CSS execution.
+ */
+void system_wakeup(void);
 
 #endif /* COMMON_SYSTEM_POWER_H */
