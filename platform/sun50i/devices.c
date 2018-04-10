@@ -13,6 +13,7 @@
 #include <msgbox/sunxi-msgbox.h>
 #include <regulator/axp803.h>
 #include <regulator/sy8106a.h>
+#include <sensor/sun8i-thermal.h>
 #include <timer/sun8i-r_timer.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/ccu.h>
@@ -35,6 +36,7 @@ static struct device r_twd    __device;
 #if CONFIG_REGULATOR_SY8106A
 static struct device sy8106a __device;
 #endif
+static struct device ths __device;
 
 #if CONFIG_REGULATOR_AXP803
 static struct device axp803 = {
@@ -277,3 +279,13 @@ static struct device sy8106a = {
 	.addr    = SY8106A_I2C_ADDRESS,
 };
 #endif
+
+static struct device ths = {
+	.name   = "ths",
+	.regs   = DEV_THS,
+	.drv    = &sun8i_thermal_driver.drv,
+	.clocks = CLOCK_PARENTS(2) {
+		{ .dev = &ccu, .id = CCU_CLOCK_THS },
+		{ .dev = &ccu, .id = CCU_CLOCK_THS_MOD },
+	},
+};
