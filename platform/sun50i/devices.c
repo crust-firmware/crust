@@ -91,6 +91,27 @@ static struct device ccu = {
 			.gate  = CCU_GATE_PIO,
 			.reset = CCU_RESET_PIO,
 		},
+		[CCU_CLOCK_THS] = {
+			.info = {
+				.name  = "ths",
+				.flags = CLK_FIXED,
+			},
+			.gate  = CCU_GATE_THS,
+			.reset = CCU_RESET_THS,
+		},
+		[CCU_CLOCK_THS_MOD] = {
+			.info = {
+				.name     = "ths_mod",
+				.max_rate = 6000000,
+			},
+			.parents = CLOCK_PARENTS(4) {
+				{ .dev = &r_ccu, .id = R_CCU_CLOCK_OSC24M },
+			},
+			.gate = BITMAP_INDEX(CCU_CLOCK_THS_REG / 4, 31),
+			.reg  = CCU_CLOCK_THS_REG,
+			.mux  = BITFIELD(24, 2),
+			.p    = BITFIELD(0, 2),
+		},
 	},
 	.subdev_count = CCU_CLOCK_COUNT,
 };

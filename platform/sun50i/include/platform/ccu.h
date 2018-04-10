@@ -12,7 +12,11 @@
 #define CCU_CLOCK_PLL_PERIPH0 0
 #define CCU_CLOCK_MSGBOX      1
 #define CCU_CLOCK_PIO         2
-#define CCU_CLOCK_COUNT       3
+#define CCU_CLOCK_THS         3
+#define CCU_CLOCK_THS_MOD     4
+#define CCU_CLOCK_COUNT       5
+
+#define CCU_CLOCK_THS_REG     0x0074
 
 #define CCU_GATE_BASE         (0x0060 / sizeof(uint32_t))
 
