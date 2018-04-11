@@ -6,6 +6,7 @@
 #ifndef COMMON_CSS_H
 #define COMMON_CSS_H
 
+#include <compiler.h>
 #include <stdint.h>
 
 /**
@@ -27,7 +28,7 @@ uint8_t css_get_css_state(void);
  *
  * The number returned cannot be greater than 8.
  */
-uint8_t css_get_cluster_count(void);
+uint8_t css_get_cluster_count(void) __const;
 
 /**
  * Get the state of a cluster.
@@ -43,7 +44,7 @@ uint8_t css_get_cluster_state(uint8_t cluster);
  *
  * @param cluster The index of the cluster.
  */
-uint8_t css_get_core_count(uint8_t cluster);
+uint8_t css_get_core_count(uint8_t cluster) __const;
 
 /**
  * Get the state of a CPU core.
