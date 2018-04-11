@@ -37,10 +37,8 @@ main(void)
 	/* Do this last, as it tells SCPI clients we are finished booting. */
 	scpi_init();
 
-	/* Process work queue. */
 	while (true) {
+		/* Process work queue ad infinitum. */
 		process_work();
-
-		/* TODO: Enter sleep state */
 	}
 }
