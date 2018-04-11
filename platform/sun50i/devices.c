@@ -10,6 +10,7 @@
 #include <gpio/sunxi-gpio.h>
 #include <i2c/sun6i-a31-i2c.h>
 #include <irqchip/sun4i-intc.h>
+#include <mfd/axp803.h>
 #include <msgbox/sunxi-msgbox.h>
 #include <regulator/axp803.h>
 #include <regulator/sy8106a.h>
@@ -66,7 +67,7 @@ static struct device axp803 = {
 		/* GPIO1 is not connected. */
 	},
 	.bus  = &r_i2c,
-	.addr = 0x34,
+	.addr = AXP803_I2C_ADDRESS,
 };
 #endif
 

@@ -11,8 +11,6 @@
 #define AXP803_DRVDATA \
 	(uintptr_t)(uint16_t[AXP803_REGL_COUNT])
 
-#define AXP803_I2C_ADDRESS 0x34
-
 enum {
 	AXP803_REGL_DCDC1,
 	AXP803_REGL_DCDC2,
