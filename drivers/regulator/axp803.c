@@ -9,11 +9,8 @@
 #include <limits.h>
 #include <mmio.h>
 #include <regulator.h>
+#include <mfd/axp803.h>
 #include <regulator/axp803.h>
-
-#define IC_TYPE_REG           0x03
-#define IC_TYPE_MASK          0xcf
-#define IC_TYPE_VALUE         0x41
 
 #define OUTPUT_POWER_CONTROL1 0x10
 #define OUTPUT_POWER_CONTROL2 0x12
@@ -497,15 +494,12 @@ axp803_write_raw(struct device *dev, uint8_t id, uint32_t raw)
 static int
 axp803_probe(struct device *dev)
 {
-	int     err;
-	uint8_t reg;
+	int err;
 
 	if ((err = i2c_probe(dev->bus, dev->addr)))
 		return err;
-	if ((err = i2c_read_reg(dev->bus, dev->addr, IC_TYPE_REG, &reg)))
+	if ((err = axp803_match_type(dev)))
 		return err;
-	if ((reg & IC_TYPE_MASK) != IC_TYPE_VALUE)
-		return ENODEV;
 	if ((err = regulator_set_defaults(dev, (uint16_t *)dev->drvdata)))
 		return err;
 
