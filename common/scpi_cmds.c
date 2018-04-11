@@ -132,6 +132,9 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
 	if (css_state != POWER_STATE_ON &&
 	    css_set_css_state(css_state))
 		return SCPI_E_DEVICE;
+	/* Turning everything off means system suspend. */
+	if (css_state == POWER_STATE_OFF)
+		system_suspend();
 
 	return SCPI_OK;
 }
@@ -175,13 +178,16 @@ scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
 {
 	uint8_t system_state = rx_payload[0] & BITMASK(0, 8);
 
-	if (system_state != SYSTEM_POWER_STATE_SHUTDOWN &&
-	    system_state != SYSTEM_POWER_STATE_REBOOT &&
-	    system_state != SYSTEM_POWER_STATE_RESET)
+	if (system_state == SYSTEM_POWER_STATE_REBOOT ||
+	    system_state == SYSTEM_POWER_STATE_RESET)
+		system_reset();
+
+	if (system_state != SYSTEM_POWER_STATE_SHUTDOWN)
 		return SCPI_E_PARAM;
 
-	/* Since there's no PMIC or wakeup source support yet, always reset. */
-	system_reset();
+	system_shutdown();
+
+	return SCPI_OK;
 }
 
 /*
