@@ -67,19 +67,19 @@ sun4i_intc_enable(struct device *dev, uint8_t irq, callback_t *fn, void *param)
 static void
 sun4i_intc_irq(struct device *dev)
 {
+	struct handler *vector;
 	uint8_t irq;
 
 	/* Get current IRQ. */
-	while ((irq = mmio_read32(dev->regs + INTC_VECTOR_REG) >> 2)) {
-		struct handler *vector = get_vector(dev, irq);
+	irq    = mmio_read32(dev->regs + INTC_VECTOR_REG) >> 2;
+	vector = get_vector(dev, irq);
 
-		/* Call the registered callback. */
-		assert(vector->fn != NULL);
-		vector->fn(vector->param);
+	/* Call the registered callback. */
+	assert(vector->fn != NULL);
+	vector->fn(vector->param);
 
-		/* Clear the IRQ pending status. */
-		mmio_setbits32(dev->regs + INTC_IRQ_PEND_REG, BIT(irq));
-	}
+	/* Clear the IRQ pending status. */
+	mmio_setbits32(dev->regs + INTC_IRQ_PEND_REG, BIT(irq));
 }
 
 static int
