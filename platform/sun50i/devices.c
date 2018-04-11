@@ -79,7 +79,7 @@ static struct device axp803_regulator = {
 		/* GPIO1 is not connected. */
 	},
 	.bus  = &r_i2c,
-	.addr = 0x34,
+	.addr = AXP803_I2C_ADDRESS,
 };
 #endif
 
