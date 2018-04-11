@@ -157,6 +157,13 @@ css_get_core_state(uint8_t cluster, uint8_t core)
 }
 
 int
+css_set_css_state(uint8_t state __unused)
+{
+	/* Nothing to do. */
+	return SUCCESS;
+}
+
+int
 css_set_cluster_state(uint8_t cluster, uint8_t state)
 {
 	uint8_t current_state = css_get_cluster_state(cluster);
