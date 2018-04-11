@@ -9,6 +9,7 @@
 #include <dm.h>
 #include <scpi.h>
 #include <stdbool.h>
+#include <system_power.h>
 #include <test.h>
 #include <watchdog.h>
 #include <work.h>
@@ -33,6 +34,11 @@ main(void)
 		watchdog_enable(watchdog, WDOG_TIMEOUT);
 		info("Trusted watchdog enabled");
 	}
+
+	if ((enable_temperature_polling()))
+		warn("Unable to enable periodic temperature polling.");
+	else
+		info("Periodic temperature polling enabled.");
 
 	/* Do this last, as it tells SCPI clients we are finished booting. */
 	scpi_init();
