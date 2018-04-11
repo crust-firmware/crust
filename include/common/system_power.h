@@ -22,4 +22,15 @@ enum {
  */
 noreturn void system_reset(void);
 
+/**
+ * Shutdown the SoC, disable all CCU devices, turn off all voltage regulators,
+ * and shutdown the PMIC.
+ */
+void system_shutdown(void);
+
+/**
+ * Suspend the SoC and the PMIC.
+ */
+void system_suspend(void);
+
 #endif /* COMMON_SYSTEM_POWER_H */

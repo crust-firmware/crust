@@ -514,9 +514,9 @@ axp803_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct regulator_driver axp803_driver = {
+const struct regulator_driver axp803_regulator_driver = {
 	.drv = {
-		.name  = "axp803",
+		.name  = "axp803-regulator",
 		.class = DM_CLASS_REGULATOR,
 		.probe = axp803_probe,
 	},

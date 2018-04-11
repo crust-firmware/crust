@@ -11,6 +11,7 @@
 #include <i2c/sun6i-a31-i2c.h>
 #include <irqchip/sun4i-intc.h>
 #include <msgbox/sunxi-msgbox.h>
+#include <pmic/axp803.h>
 #include <regulator/axp803.h>
 #include <regulator/sy8106a.h>
 #include <sensor/sun8i-thermal.h>
@@ -21,8 +22,11 @@
 #include <platform/irq.h>
 #include <platform/r_ccu.h>
 
+#if CONFIG_PMIC_AXP803
+static struct device axp803_pmic __device;
+#endif
 #if CONFIG_REGULATOR_AXP803
-static struct device axp803 __device;
+static struct device axp803_regulator __device;
 #endif
 static struct device ccu      __device;
 static struct device msgbox   __device;
@@ -38,10 +42,19 @@ static struct device sy8106a __device;
 #endif
 static struct device ths __device;
 
+#if CONFIG_PMIC_AXP803
+static struct device axp803_pmic = {
+	.name = "axp803-pmic",
+	.drv  = &axp803_pmic_driver.drv,
+	.bus  = &r_i2c,
+	.addr = AXP803_I2C_ADDRESS,
+};
+#endif
+
 #if CONFIG_REGULATOR_AXP803
-static struct device axp803 = {
-	.name    = "axp803",
-	.drv     = &axp803_driver.drv,
+static struct device axp803_regulator = {
+	.name    = "axp803-regulator",
+	.drv     = &axp803_regulator_driver.drv,
 	.drvdata = AXP803_DRVDATA {
 		[AXP803_REGL_DCDC1] = 3300,
 		[AXP803_REGL_DCDC2] = 1100,
@@ -66,7 +79,7 @@ static struct device axp803 = {
 		/* GPIO1 is not connected. */
 	},
 	.bus  = &r_i2c,
-	.addr = 0x34,
+	.addr = AXP803_I2C_ADDRESS,
 };
 #endif
 
