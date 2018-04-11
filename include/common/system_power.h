@@ -22,4 +22,12 @@ enum {
  */
 noreturn void system_reset(void);
 
+/**
+ * Enable periodic temperature polling and take action if an unsafe operating
+ * temperature is reached.
+ *
+ * @return An define error code indicating the success of the operation.
+ */
+int enable_temperature_polling(void);
+
 #endif /* COMMON_SYSTEM_POWER_H */
