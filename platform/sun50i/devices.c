@@ -14,6 +14,7 @@
 #include <mfd/axp803.h>
 #include <msgbox/sunxi-msgbox.h>
 #include <pmic/axp803.h>
+#include <pmic/dummy.h>
 #include <regulator/axp803.h>
 #include <regulator/sy8106a.h>
 #include <sensor/sun8i-thermal.h>
@@ -30,8 +31,11 @@ static struct device axp803_pmic __device;
 #if CONFIG_REGULATOR_AXP803
 static struct device axp803_regulator __device;
 #endif
-static struct device ccu      __device;
-static struct device cpux     __device;
+static struct device ccu  __device;
+static struct device cpux __device;
+#if !CONFIG_PMIC_AXP803
+static struct device dummy_pmic __device;
+#endif
 static struct device msgbox   __device;
 static struct device pio      __device;
 static struct device r_ccu    __device;
@@ -147,6 +151,17 @@ static struct device cpux = {
 	.supply    = SY8106A_REGL_VOUT,
 #endif
 };
+
+#if !CONFIG_PMIC_AXP803
+static struct device dummy_pmic = {
+	.name = "dummy-pmic",
+	.drv  = &dummy_pmic_driver.drv,
+#if CONFIG_REGULATOR_SY8106A
+	.supplydev = &sy8106a,
+	.supply    = SY8106A_REGL_VOUT,
+#endif
+};
+#endif
 
 static struct device msgbox = {
 	.name    = "msgbox",
