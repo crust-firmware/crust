@@ -216,8 +216,8 @@ scpi_cmd_get_dvfs_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 
 	tx_payload[0] = index | info->opp_count << 8 | info->latency << 16;
 	for (uint8_t i = 0; i < info->opp_count; ++i) {
-		tx_payload[2 * i + 1] = info->opps[i].rate * 1000000;
-		tx_payload[2 * i + 2] = info->opps[i].voltage;
+		tx_payload[2 * i + 1] = info->opp_table[i].rate * 1000000;
+		tx_payload[2 * i + 2] = info->opp_table[i].voltage;
 	}
 	*tx_size = sizeof(uint32_t) * (2 * info->opp_count + 1);
 
