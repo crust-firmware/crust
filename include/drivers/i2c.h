@@ -21,10 +21,10 @@ enum {
 };
 
 struct i2c_driver_ops {
-	int (*read)(struct device *dev, uint8_t *data);
-	int (*start)(struct device *dev, uint8_t addr, uint8_t direction);
-	int (*stop)(struct device *dev);
-	int (*write)(struct device *dev, uint8_t data);
+	int  (*read)(struct device *dev, uint8_t *data);
+	int  (*start)(struct device *dev, uint8_t addr, uint8_t direction);
+	void (*stop)(struct device *dev);
+	int  (*write)(struct device *dev, uint8_t data);
 };
 
 struct i2c_driver {
