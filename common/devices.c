@@ -10,8 +10,7 @@
 struct device r_intc __device;
 
 struct device r_intc = {
-	.name    = "r_intc",
-	.regs    = DEV_R_INTC,
-	.drv     = &sun4i_intc_driver.drv,
-	.drvdata = SUN4I_INTC_DRVDATA { { 0 } },
+	.name = "r_intc",
+	.regs = DEV_R_INTC,
+	.drv  = &sun4i_intc_driver.drv,
 };
