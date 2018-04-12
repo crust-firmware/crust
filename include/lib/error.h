@@ -6,16 +6,14 @@
 #ifndef LIB_ERROR_H
 #define LIB_ERROR_H
 
-#define SUCCESS 0     /**< The operation succeeded. */
-#define EAGAIN  (-1)  /**< Try again immediately. */
-#define EBUSY   (-2)  /**< Try again later. */
-#define EEXIST  (-3)  /**< The object already exists. */
-#define EINVAL  (-4)  /**< The argument to the function was invalid. */
-#define EIO     (-5)  /**< Communication with the hardware failed. */
-#define ENOBUS  (-6)  /**< The bus for this device does not exist. */
-#define ENODEV  (-7)  /**< The device does not exist. */
-#define ENOTSUP (-8)  /**< The operation is not supported. */
-#define EPERM   (-9)  /**< The operation is not permitted. */
-#define ERANGE  (-10) /**< The argument to the function was out of range. */
+#define SUCCESS 0    /**< The operation succeeded. */
+#define EBUSY   (-1) /**< Try again later. */
+#define EEXIST  (-2) /**< The object already exists. */
+#define EINVAL  (-3) /**< The argument to the function was invalid. */
+#define EIO     (-4) /**< Communication with the hardware failed. */
+#define ENODEV  (-5) /**< The device does not exist. */
+#define ENOTSUP (-6) /**< The operation is not supported. */
+#define EPERM   (-7) /**< The operation is not permitted. */
+#define ERANGE  (-8) /**< The argument to the function was out of range. */
 
 #endif /* LIB_ERROR_H */
