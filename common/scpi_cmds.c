@@ -33,9 +33,9 @@ struct scpi_cmd {
 	/** Fixed reply payload. */
 	uint32_t *tx_payload;
 	/** Expected size of received payload. */
-	uint16_t  rx_size;
+	uint8_t   rx_size;
 	/** Size of fixed reply payload, if present. */
-	uint16_t  tx_size;
+	uint8_t   tx_size;
 	/** Any combination of flags from above, if applicable. */
 	uint8_t   flags;
 };
