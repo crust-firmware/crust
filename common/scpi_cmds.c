@@ -9,6 +9,7 @@
 #include <debug.h>
 #include <dm.h>
 #include <dvfs.h>
+#include <error.h>
 #include <scpi.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -28,7 +29,7 @@ enum {
 
 struct scpi_cmd {
 	/** Handler that can process a message and create a dynamic reply. */
-	uint32_t  (*handler)(uint32_t *rx_payload, uint32_t *tx_payload,
+	int       (*handler)(uint32_t *rx_payload, uint32_t *tx_payload,
 	                     uint16_t *tx_size);
 	/** Fixed reply payload. */
 	uint32_t *tx_payload;
@@ -105,11 +106,12 @@ static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
  * highest power level. This ensures no power domain is turned on before its
  * parent, and no power domain is turned off before any of its children.
  */
-uint32_t
+int
 scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
                              uint32_t *tx_payload __unused,
                              uint16_t *tx_size __unused)
 {
+	int err;
 	uint32_t descriptor    = rx_payload[0];
 	uint8_t  core          = (descriptor >> 0x00) & BITMASK(0, 4);
 	uint8_t  cluster       = (descriptor >> 0x04) & BITMASK(0, 4);
@@ -120,18 +122,18 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
 	/* Do not check if the CSS should be turned on, as receiving this
 	 * command from an ARM CPU via PSCI implies that it is already on. */
 	if (cluster_state == POWER_STATE_ON &&
-	    css_set_cluster_state(cluster, cluster_state))
-		return SCPI_E_DEVICE;
-	if (css_set_core_state(cluster, core, core_state))
-		return SCPI_E_DEVICE;
+	    (err = css_set_cluster_state(cluster, cluster_state)))
+		return err;
+	if ((err = css_set_core_state(cluster, core, core_state)))
+		return err;
 	if (cluster_state != POWER_STATE_ON &&
-	    css_set_cluster_state(cluster, cluster_state))
-		return SCPI_E_DEVICE;
+	    (err = css_set_cluster_state(cluster, cluster_state)))
+		return err;
 	if (css_state != POWER_STATE_ON &&
-	    css_set_css_state(css_state))
-		return SCPI_E_DEVICE;
+	    (err = css_set_css_state(css_state)))
+		return err;
 
-	return SCPI_OK;
+	return SUCCESS;
 }
 
 /*
@@ -142,7 +144,7 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
 #define CLUSTER_ID(x)          ((x) & BITMASK(0, 4))
 #define CLUSTER_POWER_STATE(x) (((x) & BITMASK(0, 4)) << 4)
 #define CORE_POWER_STATES(x)   ((x) << 8)
-uint32_t
+int
 scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload __unused,
                              uint32_t *tx_payload, uint16_t *tx_size)
 {
@@ -160,13 +162,13 @@ scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload __unused,
 	}
 	*tx_size = clusters * sizeof(descriptor);
 
-	return SCPI_OK;
+	return SUCCESS;
 }
 
 /*
  * Handler/payload data for SCPI_CMD_SET_SYS_PWR: Set system power state.
  */
-uint32_t
+int
 scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
                                uint32_t *tx_payload __unused,
                                uint16_t *tx_size __unused)
@@ -176,7 +178,7 @@ scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
 	if (system_state != SYSTEM_POWER_STATE_SHUTDOWN &&
 	    system_state != SYSTEM_POWER_STATE_REBOOT &&
 	    system_state != SYSTEM_POWER_STATE_RESET)
-		return SCPI_E_PARAM;
+		return EINVAL;
 
 	/* Since there's no PMIC or wakeup source support yet, always reset. */
 	system_reset();
@@ -185,20 +187,20 @@ scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
 /*
  * Handler/payload data for SCPI_CMD_GET_DVFS_CAP: Get DVFS capability.
  */
-uint32_t
+int
 scpi_cmd_get_dvfs_cap_handler(uint32_t *rx_payload __unused,
                               uint32_t *tx_payload, uint16_t *tx_size)
 {
 	tx_payload[0] = dm_count_subdevs_by_class(DM_CLASS_DVFS);
 	*tx_size      = 1;
 
-	return SCPI_OK;
+	return SUCCESS;
 }
 
 /*
  * Handler/payload data for SCPI_CMD_GET_DVFS_INFO: Get DVFS info.
  */
-uint32_t
+int
 scpi_cmd_get_dvfs_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                                uint16_t *tx_size)
 {
@@ -208,7 +210,7 @@ scpi_cmd_get_dvfs_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	uint8_t index = rx_payload[0] & BITMASK(0, 8);
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_DVFS, index, &id)) == NULL)
-		return SCPI_E_PARAM;
+		return EINVAL;
 
 	info = dvfs_get_info(dev, id);
 	tx_payload[0] = index | info->opp_count << 8 | info->latency << 16;
@@ -220,13 +222,13 @@ scpi_cmd_get_dvfs_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 
 	assert(*tx_size <= SCPI_PAYLOAD_SIZE);
 
-	return SCPI_OK;
+	return SUCCESS;
 }
 
 /*
  * Handler/payload data for SCPI_CMD_SET_DVFS: Set DVFS.
  */
-uint32_t
+int
 scpi_cmd_set_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
                           uint16_t *tx_size __unused)
 {
@@ -236,15 +238,15 @@ scpi_cmd_set_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
 	uint8_t opp   = (rx_payload[0] >> 8) & BITMASK(0, 8);
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_DVFS, index, &id)) == NULL)
-		return SCPI_E_PARAM;
+		return EINVAL;
 
-	return scpi_map_error(dvfs_set_opp(dev, id, opp));
+	return dvfs_set_opp(dev, id, opp);
 }
 
 /*
  * Handler/payload data for SCPI_CMD_GET_DVFS: Get DVFS.
  */
-uint32_t
+int
 scpi_cmd_get_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                           uint16_t *tx_size)
 {
@@ -253,31 +255,31 @@ scpi_cmd_get_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	uint8_t index = rx_payload[0] & BITMASK(0, 8);
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_DVFS, index, &id)) == NULL)
-		return SCPI_E_PARAM;
+		return EINVAL;
 
 	tx_payload[0] = dvfs_get_opp(dev, id);
 	*tx_size      = sizeof(uint8_t);
 
-	return SCPI_OK;
+	return SUCCESS;
 }
 
 /*
  * Handler/payload data for SCPI_CMD_GET_CLOCK_CAP: Get clock capability.
  */
-uint32_t
+int
 scpi_cmd_get_clock_cap_handler(uint32_t *rx_payload __unused,
                                uint32_t *tx_payload, uint16_t *tx_size)
 {
 	tx_payload[0] = dm_count_subdevs_by_class(DM_CLASS_CLOCK);
 	*tx_size      = 2;
 
-	return SCPI_OK;
+	return SUCCESS;
 }
 
 /*
  * Handler/payload data for SCPI_CMD_GET_CLOCK_INFO: Get clock info.
  */
-uint32_t
+int
 scpi_cmd_get_clock_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                                 uint16_t *tx_size)
 {
@@ -287,7 +289,7 @@ scpi_cmd_get_clock_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	uint8_t index = rx_payload[0] & BITMASK(0, 8);
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
-		return SCPI_E_PARAM;
+		return EINVAL;
 
 	info = clock_get_info(dev, id);
 	tx_payload[0] = index | (info->flags & CLK_SCPI_MASK) << 16;
@@ -296,13 +298,13 @@ scpi_cmd_get_clock_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	strncpy((char *)&tx_payload[3], info->name, 20);
 	*tx_size = 32;
 
-	return SCPI_OK;
+	return SUCCESS;
 }
 
 /*
  * Handler/payload data for SCPI_CMD_SET_CLOCK: Set clock value.
  */
-uint32_t
+int
 scpi_cmd_set_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
                            uint16_t *tx_size __unused)
 {
@@ -312,17 +314,17 @@ scpi_cmd_set_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
 	uint32_t rate  = rx_payload[1];
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
-		return SCPI_E_PARAM;
+		return EINVAL;
 	if (!(clock_get_info(dev, id)->flags & CLK_WRITABLE))
-		return SCPI_E_ACCESS;
+		return EPERM;
 
-	return scpi_map_error(clock_set_rate(dev, id, rate));
+	return clock_set_rate(dev, id, rate);
 }
 
 /*
  * Handler/payload data for SCPI_CMD_GET_CLOCK: Get clock value.
  */
-uint32_t
+int
 scpi_cmd_get_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                            uint16_t *tx_size)
 {
@@ -333,16 +335,16 @@ scpi_cmd_get_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	uint32_t rate;
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
-		return SCPI_E_PARAM;
+		return EINVAL;
 	if (!(clock_get_info(dev, id)->flags & CLK_READABLE))
-		return SCPI_E_ACCESS;
+		return EPERM;
 	if ((err = clock_get_rate(dev, id, &rate)))
-		return scpi_map_error(err);
+		return err;
 
 	tx_payload[0] = rate;
 	*tx_size      = sizeof(rate);
 
-	return SCPI_OK;
+	return SUCCESS;
 }
 
 /*
@@ -438,8 +440,9 @@ scpi_handle_cmd(uint8_t client, struct scpi_msg *rx_msg,
 		memcpy(&tx_msg->payload, cmd->tx_payload, cmd->tx_size);
 	} else if (cmd->handler) {
 		/* Run the handler for this command to make a response. */
-		tx_msg->status = cmd->handler(rx_msg->payload, tx_msg->payload,
-		                              &tx_msg->size);
+		int err = cmd->handler(rx_msg->payload, tx_msg->payload,
+		                       &tx_msg->size);
+		tx_msg->status = scpi_map_error(err);
 	} else {
 		warn("SCPI: Unknown command %u", rx_msg->command);
 	}
