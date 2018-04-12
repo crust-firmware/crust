@@ -40,7 +40,7 @@ struct scpi_cmd {
 	uint8_t   flags;
 };
 
-static const uint32_t scpi_error_map[] = {
+static const uint8_t scpi_error_map[] = {
 	SCPI_OK,        /* SUCCESS */
 	SCPI_E_BUSY,    /* EBUSY */
 	SCPI_E_PARAM,   /* EEXIST */
