@@ -60,4 +60,14 @@ sensor_get_info(struct device *dev, uint8_t id)
  */
 int sensor_get_value(struct device *dev, uint8_t id, uint32_t *value);
 
+/**
+ * Polls all sensors belonging to a device and verifies that temperature is
+ * within defined range. Enables DVFS or panics if the device temperature is
+ * outside of the safe operating range.
+ *
+ * @param param A void pointer to the device containing the sensor to use for
+ *              periodic readings.
+ */
+void sensor_poll_temp(void *param);
+
 #endif /* DRIVERS_SENSOR_H */
