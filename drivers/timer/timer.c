@@ -13,7 +13,7 @@
 #include <work.h>
 #include <platform/time.h>
 
-#define MAX_PERIODIC_ITEMS 1
+#define MAX_PERIODIC_ITEMS 2
 
 static struct handler periodic_work_items[MAX_PERIODIC_ITEMS];
 static struct device *timer;
