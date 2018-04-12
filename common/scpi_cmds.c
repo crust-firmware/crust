@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <dvfs.h>
 #include <error.h>
+#include <monitoring.h>
 #include <scpi.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -245,6 +246,8 @@ scpi_cmd_set_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_DVFS, index, &id)) == NULL)
 		return EINVAL;
+	if (system_is_throttled())
+		return EPERM;
 
 	return dvfs_set_opp(dev, id, opp);
 }
