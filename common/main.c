@@ -7,6 +7,7 @@
 #include <console.h>
 #include <debug.h>
 #include <dm.h>
+#include <monitoring.h>
 #include <scpi.h>
 #include <stdbool.h>
 #include <test.h>
@@ -27,6 +28,7 @@ main(void)
 	console_init(DEV_UART0);
 	dm_init();
 	run_tests();
+	start_monitoring();
 
 	/* Enable watchdog. */
 	if ((watchdog = dm_first_dev_by_class(DM_CLASS_WATCHDOG))) {
