@@ -54,20 +54,6 @@ static const uint8_t power_switch_on_sequence[] = {
 static uint32_t rvba[CLUSTER_MAX];
 
 /**
- * Spin until the bits in a register match an expected mask.
- *
- * @param address The address of the MMIO register.
- * @param mask    The bits that must all be set in the register.
- */
-static void
-poll_bits(uintptr_t address, uint32_t mask)
-{
-	while ((mmio_read32(address) & mask) != mask) {
-		/* Wait for the bits to go high. */
-	}
-}
-
-/**
  * Enable or disable power to a core or cluster power domain. The power switch
  * for core 0 controls power to the entire cluster. Other core switches control
  * only that core.
@@ -204,22 +190,23 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 		}
 	} else if (state == POWER_STATE_OFF) {
 		/* Wait for all CPUs to be idle. */
-		poll_bits(DEV_CPUCFG +
-		          CPUCFG_CPU_STATUS_REG(cluster), BITMASK(16, 4));
+		mmio_poll32(DEV_CPUCFG +
+		            CPUCFG_CPU_STATUS_REG(cluster), BITMASK(16, 4));
 		/* Save the power-on reset vector base address from core 0. */
 		rvba[cluster] = mmio_read32(DEV_CPUCFG +
 		                            CPUCFG_RVBAR_LO_REG(cluster, 0));
 		/* Assert L2FLUSHREQ to clean the cluster L2 cache. */
 		mmio_setbits32(DEV_CPUCFG + CPUCFG_GENERAL_CTRL_REG, BIT(8));
 		/* Wait for L2FLUSHDONE to go high. */
-		poll_bits(DEV_CPUCFG + CPUCFG_L2_STATUS_REG, BIT(10));
+		mmio_poll32(DEV_CPUCFG + CPUCFG_L2_STATUS_REG, BIT(10));
 		/* Deassert L2FLUSHREQ. */
 		mmio_clearbits32(DEV_CPUCFG + CPUCFG_GENERAL_CTRL_REG, BIT(8));
 		/* Remove the cluster from coherency (assert ACINACTM). */
 		mmio_setbits32(DEV_CPUCFG +
 		               CPUCFG_CLUSTER_CTRL1_REG(cluster), BIT(0));
 		/* Wait for the cluster (L2 cache) to be idle. */
-		poll_bits(DEV_CPUCFG + CPUCFG_CPU_STATUS_REG(cluster), BIT(0));
+		mmio_poll32(DEV_CPUCFG +
+		            CPUCFG_CPU_STATUS_REG(cluster), BIT(0));
 		/* Assert all cluster resets (active-low). */
 		mmio_write32(DEV_CPUCFG + CPUCFG_RESET_CTRL_REG(cluster), 0);
 		/* Assert an undocumented reset bit (active-low). */
@@ -279,8 +266,8 @@ css_set_core_state(uint8_t cluster, uint8_t core, uint8_t state)
 		mmio_setbits32(DEV_CPUCFG + CPUCFG_DEBUG_REG, BIT(core));
 	} else if (state == POWER_STATE_OFF) {
 		/* Wait for the core to be in WFI and ready to shut down. */
-		poll_bits(DEV_CPUCFG +
-		          CPUCFG_CPU_STATUS_REG(cluster), BIT(16 + core));
+		mmio_poll32(DEV_CPUCFG +
+		            CPUCFG_CPU_STATUS_REG(cluster), BIT(16 + core));
 		/* Deassert DBGPWRDUP (prevent debug access to the core). */
 		mmio_clearbits32(DEV_CPUCFG + CPUCFG_DEBUG_REG, BIT(core));
 		/* Core 0 does not have a separate power domain. */
