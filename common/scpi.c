@@ -142,7 +142,7 @@ scpi_create_message(uint8_t client, uint8_t command, uint32_t *payload,
 
 	/* Ensure there is space to put the created message. */
 	if (buffer == NULL)
-		return EAGAIN;
+		return EBUSY;
 
 	/* Create the message header. */
 	buffer->mem.tx_msg.command = command;
