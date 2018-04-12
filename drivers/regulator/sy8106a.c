@@ -4,6 +4,7 @@
  */
 
 #include <debug.h>
+#include <delay.h>
 #include <error.h>
 #include <i2c.h>
 #include <limits.h>
@@ -71,8 +72,13 @@ sy8106a_set_state(struct device *dev, uint8_t id __unused, bool enabled)
 	if ((err = i2c_read_reg(dev->bus, dev->addr, VOUT_COM_REG, &reg)))
 		return err;
 	reg = enabled ? reg & ~BIT(0) : reg | BIT(0);
+	if ((err = i2c_write_reg(dev->bus, dev->addr, VOUT_COM_REG, reg)))
+		return err;
+	/* Wait for the regulator to start up (5 ms). */
+	if (enabled)
+		udelay(5000);
 
-	return i2c_write_reg(dev->bus, dev->addr, VOUT_COM_REG, reg);
+	return SUCCESS;
 }
 
 static int
