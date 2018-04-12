@@ -28,9 +28,6 @@ device_probe(struct device *dev)
 {
 	int err;
 
-	assert(dev->drv);
-	assert(dev->drv->probe);
-
 	/* Skip already-probed devices. */
 	if (device_is_running(dev))
 		return SUCCESS;
@@ -69,8 +66,6 @@ device_probe(struct device *dev)
 uint8_t
 dm_count_subdevs_by_class(uint32_t class)
 {
-	assert(class < DM_CLASS_COUNT);
-
 	return total_subdevs[class];
 }
 
