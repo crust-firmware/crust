@@ -73,12 +73,10 @@ struct device {
 };
 
 struct driver {
-	/** A unique name for this driver. */
-	const char *const name;
 	/** One of the enumerated driver classes. */
-	const uint32_t    class;
+	const uint32_t class;
 	/** A function called to detect and initialize new devices. */
-	int               (*probe)(struct device *dev);
+	int            (*probe)(struct device *dev);
 };
 
 /**

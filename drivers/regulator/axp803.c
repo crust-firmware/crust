@@ -516,7 +516,6 @@ axp803_probe(struct device *dev)
 
 const struct regulator_driver axp803_driver = {
 	.drv = {
-		.name  = "axp803",
 		.class = DM_CLASS_REGULATOR,
 		.probe = axp803_probe,
 	},
