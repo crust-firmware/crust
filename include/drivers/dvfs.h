@@ -16,7 +16,7 @@
 	(&container_of((dev)->drv, struct dvfs_driver, drv)->ops)
 
 struct dvfs_opp {
-	const uint32_t rate;    /**< Clock rate in Hz. */
+	const uint16_t rate;    /**< Clock rate in MHz. */
 	const uint16_t voltage; /**< Supply voltage in mV. */
 };
 
