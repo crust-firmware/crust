@@ -32,7 +32,7 @@ css_get_css_state(void)
  * Generic implementation used when no platform support is available. Assume
  * the minimum possible number of clusters is present.
  */
-uint8_t __weak
+uint8_t __const __weak
 css_get_cluster_count(void)
 {
 	/* Assume the CSS contains a single cluster with a single core. */
@@ -58,7 +58,7 @@ css_get_cluster_state(uint8_t cluster __unused)
  * Generic implementation used when no platform support is available. Assume
  * the minimum possible number of cores is present in each cluster.
  */
-uint8_t __weak
+uint8_t __const __weak
 css_get_core_count(uint8_t cluster __unused)
 {
 	/* Assume the CSS contains a single cluster with a single core. */

@@ -38,8 +38,4 @@ irqchip_enable(struct device *dev, uint8_t irq, callback_t *fn, void *param)
 	return IRQCHIP_OPS(dev)->enable(dev, irq, fn, param);
 }
 
-void irqchip_irq(void);
-
-int irqchip_register_device(struct device *dev);
-
 #endif /* DRIVERS_IRQCHIP_H */

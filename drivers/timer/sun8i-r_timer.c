@@ -98,7 +98,6 @@ sun8i_r_timer_probe(struct device *dev)
 
 const struct timer_driver sun8i_r_timer_driver = {
 	.drv = {
-		.name  = "sunxi-r_timer",
 		.class = DM_CLASS_TIMER,
 		.probe = sun8i_r_timer_probe,
 	},

@@ -105,7 +105,7 @@ set_power_switch(uint8_t cluster, uint8_t core, bool enable)
 	}
 }
 
-uint8_t
+uint8_t __const
 css_get_cluster_count(void)
 {
 	return CLUSTER_MAX;
@@ -130,7 +130,7 @@ css_get_cluster_state(uint8_t cluster)
 	return POWER_STATE_ON;
 }
 
-uint8_t
+uint8_t __const
 css_get_core_count(uint8_t cluster __unused)
 {
 	return CORE_MAX;

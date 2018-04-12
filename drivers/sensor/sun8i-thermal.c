@@ -85,7 +85,6 @@ sun8i_thermal_read_raw(struct device *dev, uint8_t id, uint32_t *raw)
 static int
 sun8i_thermal_probe(struct device *dev)
 {
-	uint32_t reg;
 	int err;
 
 	/* Set up two clocks for the thermal sensor. */
@@ -108,10 +107,12 @@ sun8i_thermal_probe(struct device *dev)
 	/* Enable filter, average over 8 values. */
 	mmio_write32(dev->regs + THS_FILTER_CONTROL_REG, 0x06);
 
-	/* Enable measurement for the CPU sensor and both GPU sensors. */
-	reg = mmio_read32(dev->regs + THS_CTL_REG2);
-	mmio_write32(dev->regs + THS_CTL_REG2,
-	             reg | BIT(0) | BIT(1) | BIT(2));
+	/* Enable measurement for all available sensors. */
+	mmio_setbits32(dev->regs + THS_CTL_REG2, BIT(THS_CPU0)
+#if defined(HAVE_THS_CPU1)
+	               | BIT(THS_CPU1)
+#endif
+	);
 
 	dev->subdev_count = THS_SENSOR_COUNT;
 
@@ -120,7 +121,6 @@ sun8i_thermal_probe(struct device *dev)
 
 const struct sensor_driver sun8i_thermal_driver = {
 	.drv = {
-		.name  = "sun8i_thermal",
 		.class = DM_CLASS_SENSOR,
 		.probe = sun8i_thermal_probe,
 	},
