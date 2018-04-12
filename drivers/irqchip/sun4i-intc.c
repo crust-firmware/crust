@@ -94,7 +94,6 @@ sun4i_intc_probe(struct device *dev)
 
 const struct irqchip_driver sun4i_intc_driver = {
 	.drv = {
-		.name  = "sun4i-intc",
 		.class = DM_CLASS_IRQCHIP,
 		.probe = sun4i_intc_probe,
 	},
