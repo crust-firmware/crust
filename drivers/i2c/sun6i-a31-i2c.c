@@ -131,17 +131,14 @@ sun6i_a31_i2c_start(struct device *dev, uint8_t addr, uint8_t direction)
 	return SUCCESS;
 }
 
-static int
+static void
 sun6i_a31_i2c_stop(struct device *dev)
 {
 	/* Send a stop condition. */
 	mmio_setbits32(dev->regs + I2C_CTRL_REG, BIT(4) | BIT(3));
 
 	/* Wait for the bus to go idle. */
-	if (!sun6i_a31_i2c_wait_idle(dev))
-		return EIO;
-
-	return SUCCESS;
+	sun6i_a31_i2c_wait_idle(dev);
 }
 
 static int
