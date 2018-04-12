@@ -23,7 +23,7 @@ struct dvfs_opp {
 struct dvfs_info {
 	const uint16_t         latency;   /**< Worst switching time in μs. */
 	const uint8_t          opp_count; /**< Number of operating points. */
-	const struct dvfs_opp *opps;      /**< Table of operating points. */
+	const struct dvfs_opp *opp_table; /**< Table of operating points. */
 };
 
 struct dvfs_driver_ops {
