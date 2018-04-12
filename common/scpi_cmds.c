@@ -42,12 +42,10 @@ struct scpi_cmd {
 
 static const uint32_t scpi_error_map[] = {
 	SCPI_OK,        /* SUCCESS */
-	SCPI_E_BUSY,    /* EAGAIN */
 	SCPI_E_BUSY,    /* EBUSY */
 	SCPI_E_PARAM,   /* EEXIST */
 	SCPI_E_PARAM,   /* EINVAL */
 	SCPI_E_DEVICE,  /* EIO */
-	SCPI_E_SUPPORT, /* ENOBUS */
 	SCPI_E_SUPPORT, /* ENODEV */
 	SCPI_E_SUPPORT, /* ENOTSUP */
 	SCPI_E_ACCESS,  /* EPERM */
