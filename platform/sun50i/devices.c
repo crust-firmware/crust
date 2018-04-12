@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
+#include <devices.h>
 #include <dm.h>
 #include <i2c.h>
 #include <util.h>
@@ -34,7 +35,6 @@ static struct device msgbox   __device;
 static struct device pio      __device;
 static struct device r_ccu    __device;
 static struct device r_i2c    __device;
-static struct device r_intc   __device;
 static struct device r_pio    __device;
 static struct device r_timer0 __device;
 static struct device r_twd    __device;
@@ -255,13 +255,6 @@ static struct device r_i2c = {
 	},
 	.irqdev = &r_intc,
 	.irq    = IRQ_R_I2C,
-};
-
-static struct device r_intc = {
-	.name    = "r_intc",
-	.regs    = DEV_R_INTC,
-	.drv     = &sun4i_intc_driver.drv,
-	.drvdata = SUN4I_INTC_DRVDATA { { 0 } },
 };
 
 static struct device r_pio = {
