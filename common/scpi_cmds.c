@@ -209,9 +209,8 @@ scpi_cmd_get_dvfs_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_DVFS, index, &id)) == NULL)
 		return SCPI_E_PARAM;
-	if ((info = dvfs_get_info(dev, id)) == NULL)
-		return SCPI_E_PARAM;
 
+	info = dvfs_get_info(dev, id);
 	tx_payload[0] = index | info->opp_count << 8 | info->latency << 16;
 	for (uint8_t i = 0; i < info->opp_count; ++i) {
 		tx_payload[2 * i + 1] = info->opps[i].rate * 1000000;
@@ -289,9 +288,8 @@ scpi_cmd_get_clock_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
 		return SCPI_E_PARAM;
-	if ((info = clock_get_info(dev, id)) == NULL)
-		return SCPI_E_PARAM;
 
+	info = clock_get_info(dev, id);
 	tx_payload[0] = index | (info->flags & CLK_SCPI_MASK) << 16;
 	tx_payload[1] = info->min_rate;
 	tx_payload[2] = info->max_rate;
@@ -308,17 +306,14 @@ uint32_t
 scpi_cmd_set_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
                            uint16_t *tx_size __unused)
 {
-	struct clock_info *info;
-	struct device     *dev;
+	struct device *dev;
 	uint8_t  id;
 	uint8_t  index = rx_payload[0] & BITMASK(0, 8);
 	uint32_t rate  = rx_payload[1];
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
 		return SCPI_E_PARAM;
-	if ((info = clock_get_info(dev, id)) == NULL)
-		return SCPI_E_PARAM;
-	if (!(info->flags & CLK_WRITABLE))
+	if (!(clock_get_info(dev, id)->flags & CLK_WRITABLE))
 		return SCPI_E_ACCESS;
 
 	return scpi_map_error(clock_set_rate(dev, id, rate));
@@ -331,8 +326,7 @@ uint32_t
 scpi_cmd_get_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                            uint16_t *tx_size)
 {
-	struct clock_info *info;
-	struct device     *dev;
+	struct device *dev;
 	int      err;
 	uint8_t  id;
 	uint8_t  index = rx_payload[0] & BITMASK(0, 8);
@@ -340,9 +334,7 @@ scpi_cmd_get_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
 		return SCPI_E_PARAM;
-	if ((info = clock_get_info(dev, id)) == NULL)
-		return SCPI_E_PARAM;
-	if (!(info->flags & CLK_READABLE))
+	if (!(clock_get_info(dev, id)->flags & CLK_READABLE))
 		return SCPI_E_ACCESS;
 	if ((err = clock_get_rate(dev, id, &rate)))
 		return scpi_map_error(err);
