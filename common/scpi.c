@@ -114,7 +114,7 @@ scpi_send_message(void *param)
 	/* Wait for any previous message to be acknowledged, with a timeout. */
 	while (msgbox_tx_pending(scpi_msgbox, buffer->client)) {
 		if (wallclock_read() >= timeout) {
-			warn("SCPI.%u: Channel busy, message dropped", client);
+			warn("SCPI.%u: Channel busy", client);
 			scpi_free_buffer(buffer);
 			return;
 		}
@@ -125,7 +125,7 @@ scpi_send_message(void *param)
 
 	/* Notify the client that the message has been sent. */
 	if ((err = msgbox_send(scpi_msgbox, client, SCPI_VIRTUAL_CHANNEL)))
-		error("SCPI.%u: Error sending reply: %d", client, err);
+		error("SCPI.%u: Send error: %d", client, err);
 
 	/* Mark the buffer as no longer in use. */
 	scpi_free_buffer(buffer);
@@ -216,7 +216,7 @@ scpi_receive_message(struct device *dev __unused, uint8_t client, uint32_t msg)
 	/* Ensure there is a place to put the received message. */
 	buffer = scpi_alloc_buffer(client);
 	if (buffer == NULL) {
-		error("SCPI.%u: Buffer busy, message dropped", client);
+		error("SCPI.%u: No free buffer", client);
 		return;
 	}
 
@@ -238,7 +238,7 @@ scpi_init(void)
 	int err;
 
 	if ((scpi_msgbox = dm_first_dev_by_class(DM_CLASS_MSGBOX)) == NULL)
-		panic("SCPI: No message box available");
+		panic("SCPI: No message box device");
 	/* Non-secure client channel. */
 	if ((err = msgbox_enable(scpi_msgbox, SCPI_CLIENT_NS,
 	                         scpi_receive_message)))
