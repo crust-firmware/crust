@@ -207,7 +207,6 @@ scpi_receive_message(struct device *dev __unused, uint8_t client, uint32_t msg)
 	struct scpi_buffer *buffer;
 	struct scpi_msg    *rx_msg = &SCPI_MEM_AREA(client).rx_msg;
 
-	assert(dev == scpi_msgbox);
 	assert(client == SCPI_CLIENT_NS || client == SCPI_CLIENT_SECURE);
 
 	/* Do not try to parse messages sent with a different protocol. */
