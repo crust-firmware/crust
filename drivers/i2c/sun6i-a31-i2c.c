@@ -190,7 +190,6 @@ sun6i_a31_i2c_probe(struct device *dev)
 
 const struct i2c_driver sun6i_a31_i2c_driver = {
 	.drv = {
-		.name  = "sun6i-a31-i2c",
 		.class = DM_CLASS_I2C,
 		.probe = sun6i_a31_i2c_probe,
 	},

@@ -73,7 +73,6 @@ sunxi_twd_probe(struct device *dev)
 
 const struct watchdog_driver sunxi_twd_driver = {
 	.drv = {
-		.name  = "sunxi-twd",
 		.class = DM_CLASS_WATCHDOG,
 		.probe = sunxi_twd_probe,
 	},

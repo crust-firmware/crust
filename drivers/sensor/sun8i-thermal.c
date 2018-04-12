@@ -121,7 +121,6 @@ sun8i_thermal_probe(struct device *dev)
 
 const struct sensor_driver sun8i_thermal_driver = {
 	.drv = {
-		.name  = "sun8i_thermal",
 		.class = DM_CLASS_SENSOR,
 		.probe = sun8i_thermal_probe,
 	},

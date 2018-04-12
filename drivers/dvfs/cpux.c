@@ -117,7 +117,6 @@ cpux_probe(struct device *dev)
 
 const struct dvfs_driver cpux_driver = {
 	.drv = {
-		.name  = "cpux",
 		.class = DM_CLASS_DVFS,
 		.probe = cpux_probe,
 	},
