@@ -20,10 +20,6 @@ delay_cycles(uint32_t cycles)
 {
 	uint64_t start = wallclock_read();
 
-	/* If no wallclock driver is loaded, the read value won't change. */
-	if (start == 0)
-		return;
-
 	while (wallclock_read() < start + cycles) {
 		/* Wait for time to pass. */
 	}
