@@ -5,7 +5,6 @@
 
 #include <devices.h>
 #include <dm.h>
-#include <i2c.h>
 #include <util.h>
 #include <clock/sunxi-ccu.h>
 #include <dvfs/cpux.h>

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#include <clock.h>
 #include <delay.h>
 #include <dm.h>
 #include <error.h>

@@ -3,14 +3,15 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#include <clock.h>
 #include <delay.h>
 #include <dm.h>
 #include <error.h>
-#include <gpio.h>
 #include <i2c.h>
 #include <mmio.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <util.h>
+#include <i2c/sun6i-a31-i2c.h>
 
 #define I2C_ADDR_REG  0x00
 #define I2C_XADDR_REG 0x04
