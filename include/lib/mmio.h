@@ -39,4 +39,12 @@ mmio_setbits32(uintptr_t addr, uint32_t set)
 	mmio_write32(addr, mmio_read32(addr) | set);
 }
 
+/**
+ * Spin until all bits in a mask are set in a register.
+ *
+ * @param addr The address of the MMIO register.
+ * @param mask The bits that must all be set in the register.
+ */
+void mmio_poll32(uintptr_t addr, uint32_t mask);
+
 #endif /* LIB_MMIO_H */

@@ -16,14 +16,14 @@
 	(&container_of((dev)->drv, struct dvfs_driver, drv)->ops)
 
 struct dvfs_opp {
-	const uint32_t rate;    /**< Clock rate in Hz. */
+	const uint16_t rate;    /**< Clock rate in MHz. */
 	const uint16_t voltage; /**< Supply voltage in mV. */
 };
 
 struct dvfs_info {
 	const uint16_t         latency;   /**< Worst switching time in μs. */
 	const uint8_t          opp_count; /**< Number of operating points. */
-	const struct dvfs_opp *opps;      /**< Table of operating points. */
+	const struct dvfs_opp *opp_table; /**< Table of operating points. */
 };
 
 struct dvfs_driver_ops {
