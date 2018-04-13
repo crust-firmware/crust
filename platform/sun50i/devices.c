@@ -145,11 +145,10 @@ static struct device msgbox = {
 };
 
 static struct device pio = {
-	.name    = "pio",
-	.regs    = DEV_PIO,
-	.drv     = &sunxi_gpio_driver.drv,
-	.drvdata = BITMASK(1, 7), /**< Physically implemented ports (1-7). */
-	.clocks  = CLOCK_PARENT(ccu, CCU_CLOCK_PIO),
+	.name   = "pio",
+	.regs   = DEV_PIO,
+	.drv    = &sunxi_gpio_driver.drv,
+	.clocks = CLOCK_PARENT(ccu, CCU_CLOCK_PIO),
 };
 
 static struct device r_ccu = {
@@ -258,11 +257,10 @@ static struct device r_i2c = {
 };
 
 static struct device r_pio = {
-	.name    = "r_pio",
-	.regs    = DEV_R_PIO,
-	.drv     = &sunxi_gpio_driver.drv,
-	.drvdata = BIT(0), /**< Physically implemented ports (0). */
-	.clocks  = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_PIO),
+	.name   = "r_pio",
+	.regs   = DEV_R_PIO,
+	.drv    = &sunxi_gpio_driver.drv,
+	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_PIO),
 };
 
 static struct device r_timer0 = {
