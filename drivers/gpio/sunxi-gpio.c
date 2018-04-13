@@ -3,11 +3,9 @@
  * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
  */
 
-#include <clock.h>
 #include <dm.h>
 #include <error.h>
 #include <gpio.h>
-#include <irqchip.h>
 #include <mmio.h>
 #include <stdbool.h>
 #include <stddef.h>
