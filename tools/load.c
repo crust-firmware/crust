@@ -14,57 +14,34 @@
 #include <sys/stat.h>
 
 #include <config.h>
+#include <mmio.h>
+#include <util.h>
 #include <platform/devices.h>
 #include <platform/memory.h>
 
-#define BIT(n)            (1U << (n))
-
-#define PAGE_BASE(addr)   ((addr) & ~(PAGE_SIZE - 1))
-#define PAGE_OFFSET(addr) ((addr) & (PAGE_SIZE - 1))
-#ifndef PAGE_SIZE
-#define PAGE_SIZE         0x1000
+#ifndef PAGESIZE
+#define PAGESIZE          0x1000
 #endif
+#define PAGE_BASE(addr)   ((addr) & ~(PAGESIZE - 1))
+#define PAGE_OFFSET(addr) ((addr) & (PAGESIZE - 1))
 
 #define SRAM_ARM_OFFSET   0x40000
 
 static inline uint32_t
-mmio_read32(char *addr)
-{
-	return *(volatile uint32_t *)addr;
-}
-
-static inline void
-mmio_write32(char *addr, uint32_t value)
-{
-	*(volatile uint32_t *)addr = value;
-}
-
-static inline void
-mmio_clearbits32(char *addr, uint32_t clear)
-{
-	mmio_write32(addr, mmio_read32(addr) & ~clear);
-}
-
-static inline uint32_t
-mmio_getbits32(char *addr, uint32_t get)
+mmio_getbits32(uintptr_t addr, uint32_t get)
 {
 	return mmio_read32(addr) & get;
-}
-
-static inline void
-mmio_setbits32(char *addr, uint32_t set)
-{
-	mmio_write32(addr, mmio_read32(addr) | set);
 }
 
 int
 main(int argc, char *argv[])
 {
 	struct stat st;
-	char *cpu;
-	char *file;
-	char *sram;
-	int   fd;
+	char     *file;
+	char     *sram;
+	int       fd;
+	uintptr_t r_cpucfg;
+	void     *r_cpucfg_map;
 
 	if (argc < 2 || strcmp("--help", argv[1]) == 0) {
 		puts("ARISC firmware loader for " CONFIG_PLATFORM);
@@ -77,28 +54,30 @@ main(int argc, char *argv[])
 		perror("Failed to open /dev/mem");
 		return EXIT_FAILURE;
 	}
-	cpu = mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
-	           PAGE_BASE(DEV_R_CPUCFG));
-	if (cpu == MAP_FAILED) {
+	r_cpucfg_map = mmap(NULL, PAGESIZE, PROT_READ | PROT_WRITE, MAP_SHARED,
+	                    fd, PAGE_BASE(DEV_R_CPUCFG));
+	if (r_cpucfg_map == MAP_FAILED) {
 		perror("Failed to mmap R_CPUCFG");
 		return EXIT_FAILURE;
 	}
 	sram = mmap(NULL, VECTORS_SIZE + FIRMWARE_SIZE, PROT_READ | PROT_WRITE,
-	            MAP_SHARED, fd, SRAM_ARM_OFFSET + VECTORS_BASE);
+	            MAP_SHARED, fd, SRAM_ARM_OFFSET + PAGE_BASE(VECTORS_BASE));
 	if (sram == MAP_FAILED) {
 		perror("Failed to mmap SRAM A2");
 		return EXIT_FAILURE;
 	}
 	close(fd);
 
+	r_cpucfg = (uintptr_t)r_cpucfg_map + PAGE_OFFSET(DEV_R_CPUCFG);
+
 	if (strcmp("--reset", argv[1]) == 0) {
-		if (!mmio_getbits32(cpu + PAGE_OFFSET(DEV_R_CPUCFG), BIT(0))) {
+		if (!mmio_getbits32(r_cpucfg, BIT(0))) {
 			puts("ARISC is already in reset");
 			return EXIT_SUCCESS;
 		}
 		puts("Asserting ARISC reset");
-		mmio_clearbits32(cpu + PAGE_OFFSET(DEV_R_CPUCFG), BIT(0));
-		if (mmio_getbits32(cpu + PAGE_OFFSET(DEV_R_CPUCFG), BIT(0))) {
+		mmio_clearbits32(r_cpucfg, BIT(0));
+		if (mmio_getbits32(r_cpucfg, BIT(0))) {
 			puts("Failed to assert ARISC reset");
 			return EXIT_FAILURE;
 		}
@@ -130,8 +109,8 @@ main(int argc, char *argv[])
 	close(fd);
 
 	puts("Asserting ARISC reset");
-	mmio_clearbits32(cpu + PAGE_OFFSET(DEV_R_CPUCFG), BIT(0));
-	if (mmio_getbits32(cpu + PAGE_OFFSET(DEV_R_CPUCFG), BIT(0))) {
+	mmio_clearbits32(r_cpucfg, BIT(0));
+	if (mmio_getbits32(r_cpucfg, BIT(0))) {
 		puts("Failed to assert ARISC reset");
 		return EXIT_FAILURE;
 	}
@@ -140,14 +119,14 @@ main(int argc, char *argv[])
 	memcpy(sram, file, st.st_size);
 	msync(sram, st.st_size, MS_SYNC);
 	puts("Deasserting ARISC reset");
-	mmio_setbits32(cpu + PAGE_OFFSET(DEV_R_CPUCFG), BIT(0));
-	if (!mmio_getbits32(cpu + PAGE_OFFSET(DEV_R_CPUCFG), BIT(0))) {
+	mmio_setbits32(r_cpucfg, BIT(0));
+	if (!mmio_getbits32(r_cpucfg, BIT(0))) {
 		puts("Failed to deassert ARISC reset");
 		return EXIT_FAILURE;
 	}
 
-	munmap(cpu, PAGE_SIZE);
 	munmap(file, st.st_size);
+	munmap(r_cpucfg_map, PAGESIZE);
 	munmap(sram, VECTORS_SIZE + FIRMWARE_SIZE);
 
 	return EXIT_SUCCESS;
