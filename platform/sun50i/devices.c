@@ -13,6 +13,7 @@
 #include <irqchip/sun4i-intc.h>
 #include <irqchip/sunxi-gpio.h>
 #include <mfd/axp803.h>
+#include <misc/gpio-button.h>
 #include <msgbox/sunxi-msgbox.h>
 #include <pmic/axp803.h>
 #include <pmic/dummy.h>
@@ -39,9 +40,12 @@ static struct device dummy_pmic __device;
 #endif
 static struct device msgbox __device;
 static struct device pio    __device;
-static struct device r_ccu  __device;
-static struct device r_i2c  __device;
-static struct device r_pio  __device;
+#if CONFIG_GPIO_BUTTON
+static struct device power_button __device;
+#endif
+static struct device r_ccu __device;
+static struct device r_i2c __device;
+static struct device r_pio __device;
 static struct device r_pio_irqchip __device;
 static struct device r_timer0 __device;
 static struct device r_twd    __device;
@@ -185,6 +189,21 @@ static struct device pio = {
 	.drv    = &sunxi_gpio_driver.drv,
 	.clocks = CLOCK_PARENT(ccu, CCU_CLOCK_PIO),
 };
+
+#if CONFIG_GPIO_BUTTON
+static struct device power_button = {
+	.name = "power-button",
+	.drv  = &gpio_button_driver,
+	.irq  = IRQ_HANDLE {
+		.dev  = &r_pio_irqchip,
+		.irq  = SUNXI_GPIO_IRQ(0, CONFIG_GPIO_BUTTON_PIN),
+		.mode = SUNXI_GPIO_IRQ_MODE_FALLING_EDGE,
+	},
+	.pins = GPIO_PINS(1) {
+		{ &r_pio, SUNXI_GPIO_PIN(0, CONFIG_GPIO_BUTTON_PIN), 6 },
+	},
+};
+#endif
 
 static struct device r_ccu = {
 	.name    = "r_ccu",
