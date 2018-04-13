@@ -6,7 +6,6 @@
 #include <debug.h>
 #include <dm.h>
 #include <error.h>
-#include <irqchip.h>
 #include <mmio.h>
 #include <msgbox.h>
 #include <stdbool.h>
@@ -181,8 +180,7 @@ sunxi_msgbox_probe(struct device *dev)
 	mmio_write32(dev->regs + IRQ_EN_REG, 0);
 	mmio_write32(dev->regs + IRQ_STATUS_REG, BITMASK(0, 16));
 
-	if ((err = irqchip_enable(dev->irqdev, dev->irq,
-	                          sunxi_msgbox_irq, dev)))
+	if ((err = dm_setup_irq(dev, sunxi_msgbox_irq)))
 		return err;
 
 	return SUCCESS;

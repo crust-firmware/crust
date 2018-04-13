@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <util.h>
+#include <work.h>
 
 #define __device __attribute__((section(".device"), used))
 
@@ -52,16 +53,14 @@ struct device {
 	struct device *const       bus;
 	/** The clocks utilized by this device. */
 	struct clock_handle *const clocks;
+	/** The IRQ line connected to this device. */
+	struct irq_handle *const   irq;
 	/** The GPIO pins utilized by this device. */
 	struct gpio_handle *const  pins;
-	/** The controller for this device's IRQ. */
-	struct device *const       irqdev;
 	/** The controller for this device's power supply (regulator). */
 	struct device *const       supplydev;
 	/** A bus-specific address/port (if this device is on a bus). */
 	const uint8_t              addr;
-	/** An irqdev-specific IRQ number. */
-	const uint8_t              irq;
 	/** A supplydev-specific power supply identifier. */
 	const uint8_t              supply;
 	/** Flags describing this device's state. */
@@ -163,6 +162,14 @@ void dm_init(void);
  * @param num_clocks The number of clocks utilized by the device.
  */
 int dm_setup_clocks(struct device *dev, uint8_t num_clocks);
+
+/**
+ * Set up the IRQ lines used by a device.
+ *
+ * @param dev   The device referencing the IRQs to initialize.
+ * @param fn    The function to call when an IRQ is received.
+ */
+int dm_setup_irq(struct device *dev, callback_t *fn);
 
 /**
  * Set the mode of the GPIO pins specified for a device.

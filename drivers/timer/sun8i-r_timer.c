@@ -6,7 +6,6 @@
 #include <delay.h>
 #include <dm.h>
 #include <error.h>
-#include <irqchip.h>
 #include <mmio.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -84,8 +83,7 @@ sun8i_r_timer_probe(struct device *dev)
 	mmio_write32(dev->regs + IRQ_STATUS_REG, BIT(index));
 
 	/* Register and enable the IRQ at the interrupt controller. */
-	if ((err = irqchip_enable(dev->irqdev, dev->irq,
-	                          sun8i_r_timer_irq, dev)))
+	if ((err = dm_setup_irq(dev, sun8i_r_timer_irq)))
 		return err;
 
 	/* Register this device with the timer framework. */
