@@ -245,11 +245,11 @@ static struct device r_i2c = {
 	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_I2C),
 	.pins   = GPIO_PINS(I2C_NUM_PINS) {
 #if CONFIG_SOC_A64
-		{ &r_pio, 0, 3 },
-		{ &r_pio, 1, 3 },
+		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 3 },
+		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 3 },
 #else
-		{ &r_pio, 0, 2 },
-		{ &r_pio, 1, 2 },
+		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 2 },
+		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 2 },
 #endif
 	},
 	.irqdev = &r_intc,
