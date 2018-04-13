@@ -11,6 +11,7 @@
 #include <gpio/sunxi-gpio.h>
 #include <i2c/sun6i-a31-i2c.h>
 #include <irqchip/sun4i-intc.h>
+#include <irqchip/sunxi-gpio.h>
 #include <mfd/axp803.h>
 #include <msgbox/sunxi-msgbox.h>
 #include <pmic/axp803.h>
@@ -36,11 +37,12 @@ static struct device cpux __device;
 #if !CONFIG_PMIC_AXP803
 static struct device dummy_pmic __device;
 #endif
-static struct device msgbox   __device;
-static struct device pio      __device;
-static struct device r_ccu    __device;
-static struct device r_i2c    __device;
-static struct device r_pio    __device;
+static struct device msgbox __device;
+static struct device pio    __device;
+static struct device r_ccu  __device;
+static struct device r_i2c  __device;
+static struct device r_pio  __device;
+static struct device r_pio_irqchip __device;
 static struct device r_timer0 __device;
 static struct device r_twd    __device;
 #if CONFIG_REGULATOR_SY8106A
@@ -296,6 +298,17 @@ static struct device r_pio = {
 	.regs   = DEV_R_PIO,
 	.drv    = &sunxi_gpio_driver.drv,
 	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_PIO),
+};
+
+static struct device r_pio_irqchip = {
+	.name   = "r_pio_irqchip",
+	.regs   = DEV_R_PIO,
+	.drv    = &sunxi_gpio_irqchip_driver.drv,
+	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_PIO),
+	.irq    = IRQ_HANDLE {
+		.dev = &r_intc,
+		.irq = IRQ_R_PIO_PL,
+	},
 };
 
 static struct device r_timer0 = {
