@@ -161,8 +161,8 @@ void dm_init(void);
 /**
  * Set up the clocks specified for a device.
  *
- * @param dev       The device referencing the clocks to initialize.
- * @param num_pins  The number of clocks utilized by the device.
+ * @param dev        The device referencing the clocks to initialize.
+ * @param num_clocks The number of clocks utilized by the device.
  */
 int dm_setup_clocks(struct device *dev, uint8_t num_clocks);
 
