@@ -50,12 +50,14 @@ static struct device ths __device;
 
 #if CONFIG_PMIC_AXP803
 static struct device axp803_pmic = {
-	.name   = "axp803-pmic",
-	.drv    = &axp803_pmic_driver.drv,
-	.bus    = &r_i2c,
-	.addr   = AXP803_I2C_ADDRESS,
-	.irqdev = &r_intc,
-	.irq    = IRQ_NMI,
+	.name = "axp803-pmic",
+	.drv  = &axp803_pmic_driver.drv,
+	.bus  = &r_i2c,
+	.addr = AXP803_I2C_ADDRESS,
+	.irq  = IRQ_HANDLE {
+		.dev = &r_intc,
+		.irq = IRQ_NMI,
+	},
 };
 #endif
 
@@ -169,8 +171,10 @@ static struct device msgbox = {
 	.drv     = &sunxi_msgbox_driver.drv,
 	.drvdata = SUNXI_MSGBOX_DRVDATA { 0 },
 	.clocks  = CLOCK_PARENT(ccu, CCU_CLOCK_MSGBOX),
-	.irqdev  = &r_intc,
-	.irq     = IRQ_MSGBOX,
+	.irq     = IRQ_HANDLE {
+		.dev = &r_intc,
+		.irq = IRQ_MSGBOX,
+	},
 };
 
 static struct device pio = {
@@ -272,7 +276,11 @@ static struct device r_i2c = {
 	.regs   = DEV_R_I2C,
 	.drv    = &sun6i_a31_i2c_driver.drv,
 	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_I2C),
-	.pins   = GPIO_PINS(I2C_NUM_PINS) {
+	.irq    = IRQ_HANDLE {
+		.dev = &r_intc,
+		.irq = IRQ_R_I2C,
+	},
+	.pins = GPIO_PINS(I2C_NUM_PINS) {
 #if CONFIG_SOC_A64
 		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 3 },
 		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 3 },
@@ -281,8 +289,6 @@ static struct device r_i2c = {
 		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 2 },
 #endif
 	},
-	.irqdev = &r_intc,
-	.irq    = IRQ_R_I2C,
 };
 
 static struct device r_pio = {
@@ -298,8 +304,10 @@ static struct device r_timer0 = {
 	.drv     = &sun8i_r_timer_driver.drv,
 	.drvdata = 0, /**< Timer index within the device. */
 	.clocks  = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_TIMER),
-	.irqdev  = &r_intc,
-	.irq     = IRQ_R_TIMER0,
+	.irq     = IRQ_HANDLE {
+		.dev = &r_intc,
+		.irq = IRQ_R_TIMER0,
+	},
 };
 
 static struct device r_twd = {
@@ -307,8 +315,10 @@ static struct device r_twd = {
 	.regs   = DEV_R_TWD,
 	.drv    = &sunxi_twd_driver.drv,
 	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_TWD),
-	.irqdev = &r_intc,
-	.irq    = IRQ_R_TWD,
+	.irq    = IRQ_HANDLE {
+		.dev = &r_intc,
+		.irq = IRQ_R_TWD,
+	},
 };
 
 #if CONFIG_REGULATOR_SY8106A

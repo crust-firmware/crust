@@ -7,7 +7,6 @@
 #include <dm.h>
 #include <error.h>
 #include <i2c.h>
-#include <irqchip.h>
 #include <pmic.h>
 #include <system_power.h>
 #include <mfd/axp803.h>
@@ -118,7 +117,7 @@ axp803_pmic_probe(struct device *dev)
 		return err;
 
 	/* Register the NMI IRQ handler. */
-	return irqchip_enable(dev->irqdev, dev->irq, axp803_pmic_irq, dev);
+	return dm_setup_irq(dev, axp803_pmic_irq);
 }
 
 const struct pmic_driver axp803_pmic_driver = {

@@ -8,6 +8,7 @@
 #include <dm.h>
 #include <error.h>
 #include <gpio.h>
+#include <irqchip.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -36,8 +37,6 @@ device_probe(struct device *dev)
 
 	/* Probe all devices this device depends on. */
 	if (dev->bus && (err = device_probe(dev->bus)))
-		return err;
-	if (dev->irqdev && (err = device_probe(dev->irqdev)))
 		return err;
 	if (dev->supplydev && (err = device_probe(dev->supplydev)))
 		return err;
@@ -154,6 +153,26 @@ dm_setup_clocks(struct device *dev, uint8_t num_clocks)
 	}
 
 	return SUCCESS;
+}
+
+int
+dm_setup_irq(struct device *dev, callback_t *fn)
+{
+	struct device     *irqchip;
+	struct irq_handle *handle = dev->irq;
+	int err;
+
+	/* Replace the irqchip reference with a link to the child device. */
+	irqchip     = handle->dev;
+	handle->dev = dev;
+	/* Put the function reference in the handle. */
+	handle->fn = fn;
+
+	/* Probe to ensure the interrupt controller's driver is loaded. */
+	if ((err = device_probe(irqchip)))
+		return err;
+
+	return irqchip_enable(irqchip, handle);
 }
 
 int
