@@ -13,3 +13,11 @@ mmio_poll32(uintptr_t addr, uint32_t mask)
 		/* Wait for the bits to go high. */
 	}
 }
+
+void
+mmio_pollzero32(uintptr_t addr, uint32_t mask)
+{
+	while ((mmio_read32(addr) & mask) != 0) {
+		/* Wait for the bits to go low. */
+	}
+}

@@ -47,4 +47,12 @@ mmio_setbits32(uintptr_t addr, uint32_t set)
  */
 void mmio_poll32(uintptr_t addr, uint32_t mask);
 
+/**
+ * Spin until all bits in a mask are cleared in a register.
+ *
+ * @param addr The address of the MMIO register.
+ * @param mask The bits that must all be cleared in the register.
+ */
+void mmio_pollzero32(uintptr_t addr, uint32_t mask);
+
 #endif /* LIB_MMIO_H */
