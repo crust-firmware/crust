@@ -14,13 +14,12 @@
 #define BYTES_PER_ROW  16
 #define BYTES_PER_WORD sizeof(uint32_t)
 
-static char *prefixes[] = {
+static char *prefixes[LOG_LEVELS] = {
 	"PANIC:\t ",
 	"ERROR:\t ",
 	"WARNING: ",
 	"INFO:\t ",
 	"DEBUG:\t ",
-	"TEST:\t ",
 };
 
 static void print_decimal(char sign, int width, bool zero, uint32_t num);
