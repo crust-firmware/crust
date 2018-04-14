@@ -198,10 +198,13 @@ $(objdir)/host/test/%.o: $(srcdir)/test/%.c $(testheaders) | $(testobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(testincdirs) -c -o $@ $<
 
-$(objdir)/host/tools/%: $(srcdir)/tools/%.c $(toolheaders) | $(toolobjdirs)
+$(objdir)/host/tools/%: $(objdir)/host/tools/%.o $(library)
+	$(M) HOSTLD $@
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLIBS)
+
+$(objdir)/host/tools/%.o: $(srcdir)/tools/%.c $(toolheaders) | $(toolobjdirs)
 	$(M) HOSTCC $@
-	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(HOSTLDFLAGS) \
-		$(toolincdirs) -o $@ $< $(HOSTLIBS)
+	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(toolincdirs) -c -o $@ $<
 
 .PHONY: all check check-format clean distclean firmware format test tools
 .SECONDARY:
