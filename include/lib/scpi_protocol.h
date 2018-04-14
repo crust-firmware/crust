@@ -107,9 +107,15 @@ enum {
  * swapping needed in command implementations.
  */
 struct scpi_msg {
+#ifdef __or1k__
 	uint16_t size;
 	uint8_t  sender;
 	uint8_t  command;
+#else
+	uint8_t  command;
+	uint8_t  sender;
+	uint16_t size;
+#endif
 	uint32_t status;
 	uint32_t payload[SCPI_PAYLOAD_WORDS];
 };
