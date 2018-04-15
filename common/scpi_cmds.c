@@ -10,6 +10,7 @@
 #include <dvfs.h>
 #include <error.h>
 #include <monitoring.h>
+#include <regulator.h>
 #include <scpi.h>
 #include <sensor.h>
 #include <stdbool.h>
@@ -89,6 +90,10 @@ static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
 	BIT(SCPI_CMD_GET_CLOCK_INFO) |
 	BIT(SCPI_CMD_SET_CLOCK) |
 	BIT(SCPI_CMD_GET_CLOCK) |
+	BIT(SCPI_CMD_GET_PSU_CAP) |
+	BIT(SCPI_CMD_GET_PSU_INFO) |
+	BIT(SCPI_CMD_SET_PSU) |
+	BIT(SCPI_CMD_GET_PSU) |
 	BIT(SCPI_CMD_GET_SENSOR_CAP) |
 	BIT(SCPI_CMD_GET_SENSOR_INFO) |
 	BIT(SCPI_CMD_GET_SENSOR),
@@ -360,6 +365,90 @@ scpi_cmd_get_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 }
 
 /*
+ * Handler/payload data for SCPI_CMD_GET_PSU_CAP: Get power supply capability.
+ */
+int
+scpi_cmd_get_psu_cap_handler(uint32_t *rx_payload __unused,
+                             uint32_t *tx_payload, uint16_t *tx_size)
+{
+	tx_payload[0] = dm_count_subdevs_by_class(DM_CLASS_REGULATOR);
+	*tx_size      = 2;
+
+	return SUCCESS;
+}
+
+/*
+ * Handler/payload data for SCPI_CMD_GET_PSU_INFO: Get power supply info.
+ */
+int
+scpi_cmd_get_psu_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
+                              uint16_t *tx_size)
+{
+	struct regulator_info *info;
+	struct device *dev;
+	uint8_t  id;
+	uint16_t index = rx_payload[0] & BITMASK(0, 16);
+
+	if (!(dev = dm_get_subdev_by_index(DM_CLASS_REGULATOR, index, &id)))
+		return EINVAL;
+
+	info = regulator_get_info(dev, id);
+	tx_payload[0] = index | (info->flags) << 16;
+	tx_payload[1] = info->min_value;
+	tx_payload[2] = info->max_value;
+	strncpy((char *)&tx_payload[3], info->name, 20);
+	*tx_size = 32;
+
+	return SUCCESS;
+}
+
+/*
+ * Handler/payload data for SCPI_CMD_SET_PSU: Set power supply.
+ */
+int
+scpi_cmd_set_psu_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
+                         uint16_t *tx_size __unused)
+{
+	struct device *dev;
+	uint8_t  id;
+	uint8_t  index = rx_payload[0] & BITMASK(0, 16);
+	uint32_t value = rx_payload[1];
+
+	if (!(dev = dm_get_subdev_by_index(DM_CLASS_REGULATOR, index, &id)))
+		return EINVAL;
+	if (!(regulator_get_info(dev, id)->flags & REGL_WRITABLE))
+		return EPERM;
+
+	return regulator_set_value(dev, id, value);
+}
+
+/*
+ * Handler/payload data for SCPI_CMD_GET_PSU: Get power supply.
+ */
+int
+scpi_cmd_get_psu_handler(uint32_t *rx_payload, uint32_t *tx_payload,
+                         uint16_t *tx_size)
+{
+	struct device *dev;
+	int      err;
+	uint8_t  id;
+	uint8_t  index = rx_payload[0] & BITMASK(0, 16);
+	uint16_t value;
+
+	if (!(dev = dm_get_subdev_by_index(DM_CLASS_REGULATOR, index, &id)))
+		return EINVAL;
+	if (!(regulator_get_info(dev, id)->flags & REGL_READABLE))
+		return EPERM;
+	if ((err = regulator_get_value(dev, id, &value)))
+		return err;
+
+	tx_payload[0] = value;
+	*tx_size      = sizeof(value);
+
+	return SUCCESS;
+}
+
+/*
  * Handler/payload data for SCPI_CMD_GET_SENSOR_CAP: Get sensor capability.
  */
 int
@@ -472,6 +561,21 @@ static const struct scpi_cmd scpi_cmds[] = {
 	},
 	[SCPI_CMD_GET_CLOCK] = {
 		.handler = scpi_cmd_get_clock_handler,
+		.rx_size = sizeof(uint16_t),
+	},
+	[SCPI_CMD_GET_PSU_CAP] = {
+		.handler = scpi_cmd_get_psu_cap_handler,
+	},
+	[SCPI_CMD_GET_PSU_INFO] = {
+		.handler = scpi_cmd_get_psu_info_handler,
+		.rx_size = sizeof(uint16_t),
+	},
+	[SCPI_CMD_SET_PSU] = {
+		.handler = scpi_cmd_set_psu_handler,
+		.rx_size = 2 * sizeof(uint32_t),
+	},
+	[SCPI_CMD_GET_PSU] = {
+		.handler = scpi_cmd_get_psu_handler,
 		.rx_size = sizeof(uint16_t),
 	},
 	[SCPI_CMD_GET_SENSOR_CAP] = {
