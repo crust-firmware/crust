@@ -102,7 +102,7 @@ sun8i_thermal_probe(struct device *dev)
 	}
 #endif
 
-	/* Set aquire times to 0.1ms. */
+	/* Set acquire times to 0.1ms. */
 	mmio_write32(dev->regs + THS_CTL_REG0, 0x257);
 	mmio_write32(dev->regs + THS_CTL_REG2, 0x257 << 16);
 
