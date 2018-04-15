@@ -15,10 +15,25 @@
 #define SENSOR_OPS(dev) \
 	(&container_of((dev)->drv, struct sensor_driver, drv)->ops)
 
+enum {
+	SENSOR_CLASS_TEMPERATURE,
+	SENSOR_CLASS_VOLTAGE,
+	SENSOR_CLASS_CURRENT,
+	SENSOR_CLASS_POWER,
+	SENSOR_CLASS_ENERGY,
+};
+
+enum {
+	SENSOR_PERIODIC = BIT(0),
+	SENSOR_BOUNDS   = BIT(1),
+};
+
 struct sensor_info {
 	const char *const name;       /**< Name exported to SCPI. */
 	const int32_t     offset;     /**< Additive factor in millicelsius.*/
 	const int32_t     multiplier; /**< Multiplicative factor. */
+	const uint8_t     class;      /**< Sensor class (measured unit). */
+	const uint8_t     flags;      /**< Sensor trigger flags. */
 };
 
 struct sensor_driver_ops {

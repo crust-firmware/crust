@@ -49,6 +49,7 @@ static struct sun8i_thermal_sensor_info thermal_sensors[THS_SENSOR_COUNT] = {
 			.offset     = 223000,
 			.multiplier = -119,
 #endif
+			.class = SENSOR_CLASS_TEMPERATURE,
 		},
 		.address = THS0_DATA_REG,
 	},
@@ -58,6 +59,7 @@ static struct sun8i_thermal_sensor_info thermal_sensors[THS_SENSOR_COUNT] = {
 			.name       = "ths-cpu1",
 			.offset     = 259000,
 			.multiplier = -145,
+			.class      = SENSOR_CLASS_TEMPERATURE,
 		},
 		.address = THS1_DATA_REG,
 	},
