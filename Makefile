@@ -119,7 +119,7 @@ endif
 M := @$(if $(filter-out 0,$(V)),:,printf '  %-7s %s\n')
 Q :=  $(if $(filter-out 0,$(V)),,@)
 
-all: $(fwfiles) $(tests) $(tools)
+all: $(fwfiles) $(tests)
 
 check: $(testresults)
 
