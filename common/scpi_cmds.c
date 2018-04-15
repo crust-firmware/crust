@@ -11,6 +11,7 @@
 #include <error.h>
 #include <monitoring.h>
 #include <scpi.h>
+#include <sensor.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -87,7 +88,10 @@ static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
 	BIT(SCPI_CMD_GET_CLOCK_CAP) |
 	BIT(SCPI_CMD_GET_CLOCK_INFO) |
 	BIT(SCPI_CMD_SET_CLOCK) |
-	BIT(SCPI_CMD_GET_CLOCK),
+	BIT(SCPI_CMD_GET_CLOCK) |
+	BIT(SCPI_CMD_GET_SENSOR_CAP) |
+	BIT(SCPI_CMD_GET_SENSOR_INFO) |
+	BIT(SCPI_CMD_GET_SENSOR),
 	/* Commands enabled 1. */
 	0,
 	/* Commands enabled 2. */
@@ -356,6 +360,67 @@ scpi_cmd_get_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 }
 
 /*
+ * Handler/payload data for SCPI_CMD_GET_SENSOR_CAP: Get sensor capability.
+ */
+int
+scpi_cmd_get_sensor_cap_handler(uint32_t *rx_payload __unused,
+                                uint32_t *tx_payload, uint16_t *tx_size)
+{
+	tx_payload[0] = dm_count_subdevs_by_class(DM_CLASS_SENSOR);
+	*tx_size      = 2;
+
+	return SUCCESS;
+}
+
+/*
+ * Handler/payload data for SCPI_CMD_GET_SENSOR_INFO: Get sensor info.
+ */
+int
+scpi_cmd_get_sensor_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
+                                 uint16_t *tx_size)
+{
+	struct sensor_info *info;
+	struct device *dev;
+	uint8_t  id;
+	uint16_t index = rx_payload[0] & BITMASK(0, 16);
+
+	if (!(dev = dm_get_subdev_by_index(DM_CLASS_SENSOR, index, &id)))
+		return EINVAL;
+
+	info = sensor_get_info(dev, id);
+	tx_payload[0] = index | (info->class) << 16 | (info->flags) << 24;
+	strncpy((char *)&tx_payload[1], info->name, 20);
+	*tx_size = 24;
+
+	return SUCCESS;
+}
+
+/*
+ * Handler/payload data for SCPI_CMD_GET_SENSOR: Get sensor value.
+ */
+int
+scpi_cmd_get_sensor_handler(uint32_t *rx_payload, uint32_t *tx_payload,
+                            uint16_t *tx_size)
+{
+	struct device *dev;
+	int      err;
+	uint8_t  id;
+	uint16_t index = rx_payload[0] & BITMASK(0, 16);
+	uint32_t value;
+
+	if (!(dev = dm_get_subdev_by_index(DM_CLASS_SENSOR, index, &id)))
+		return EINVAL;
+	if ((err = sensor_get_value(dev, id, &value)))
+		return err;
+
+	tx_payload[0] = value;
+	tx_payload[1] = 0;
+	*tx_size      = 8;
+
+	return SUCCESS;
+}
+
+/*
  * The list of supported SCPI commands.
  */
 static const struct scpi_cmd scpi_cmds[] = {
@@ -407,6 +472,17 @@ static const struct scpi_cmd scpi_cmds[] = {
 	},
 	[SCPI_CMD_GET_CLOCK] = {
 		.handler = scpi_cmd_get_clock_handler,
+		.rx_size = sizeof(uint16_t),
+	},
+	[SCPI_CMD_GET_SENSOR_CAP] = {
+		.handler = scpi_cmd_get_sensor_cap_handler,
+	},
+	[SCPI_CMD_GET_SENSOR_INFO] = {
+		.handler = scpi_cmd_get_sensor_info_handler,
+		.rx_size = sizeof(uint16_t),
+	},
+	[SCPI_CMD_GET_SENSOR] = {
+		.handler = scpi_cmd_get_sensor_handler,
 		.rx_size = sizeof(uint16_t),
 	},
 };
