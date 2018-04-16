@@ -97,6 +97,7 @@ enum {
 	TEST_DVFS_CMDS,
 	TEST_DVFS_INFO,
 	TEST_DVFS_CTRL,
+	TEST_TEMPERATURE,
 	TEST_COUNT,
 };
 
@@ -179,6 +180,7 @@ static const char *const test_names[TEST_COUNT] = {
 	"DVFS commands",
 	"DVFS info",
 	"DVFS control",
+	"Temperautre"
 };
 
 /** A bitmap of attempted tests. */
@@ -649,6 +651,44 @@ try_dvfs(void)
 	}
 }
 
+/*
+ * Test: Temperature.
+ */
+static void
+try_temperature(void)
+{
+	uint64_t temp;
+	struct scpi_msg msg;
+
+	test_begin(TEST_TEMPERATURE);
+
+	scpi_prepare_msg(&msg, SCPI_CMD_GET_SENSOR_CAP);
+	test_send_request(&msg);
+	test_assert(msg.size == 2);
+
+	scpi_prepare_msg(&msg, SCPI_CMD_GET_SENSOR_INFO);
+	test_send_request(&msg);
+	test_assert(msg.size == 6);
+
+	temp = ((uint64_t)msg.payload[1] << 32) | msg.payload[2];
+	test_assert(temp < 100);
+	test_assert(msg.payload);
+
+	scpi_prepare_msg(&msg, SCPI_CMD_GET_SENSOR);
+	test_send_request(&msg);
+	test_assert(msg.size == 10);
+
+	scpi_prepare_msg(&msg, SCPI_CMD_CFG_SENSOR_PERIOD);
+	test_send_request(&msg);
+	test_assert(msg.size == 8);
+
+	scpi_prepare_msg(&msg, SCPI_CMD_CFG_SENSOR_BOUNDS);
+	test_send_request(&msg);
+	test_assert(msg.size == 20);
+
+	test_complete(TEST_TEMPERATURE);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -698,6 +738,7 @@ main(int argc, char *argv[])
 	try_boot();
 	try_css_power();
 	try_dvfs();
+	try_temperature();
 
 	/* Display a summary of the tests. */
 	test_summary();
