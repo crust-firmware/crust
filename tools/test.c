@@ -26,6 +26,10 @@
 #include <platform/devices.h>
 #include <platform/memory.h>
 
+/* SCPI device (clock/power supply) flags. */
+#define FLAG_READABLE               BIT(0)
+#define FLAG_WRITABLE               BIT(1)
+
 /* Simplified version of the message box register definitions. This tool only
  * uses virtual channel 1 (hardware channels 2/3). */
 #define MSGBOX_LOCAL_IRQ_STATUS_REG 0x0070
@@ -93,6 +97,10 @@ enum {
 	TEST_BOOT,
 	TEST_INTERRUPT,
 	TEST_SCP_CAP,
+	TEST_CLOCK_CAP,
+	TEST_CLOCK_CMDS,
+	TEST_CLOCK_INFO,
+	TEST_CLOCK_CTRL,
 	TEST_CSS_INFO,
 	TEST_DVFS_CAP,
 	TEST_DVFS_CMDS,
@@ -176,6 +184,10 @@ static const char *const test_names[TEST_COUNT] = {
 	"Boot",
 	"Interrupt",
 	"SCP capability",
+	"Clock capability",
+	"Clock commands",
+	"Clock info",
+	"Clock control",
 	"CSS info",
 	"DVFS capability",
 	"DVFS commands",
@@ -575,6 +587,120 @@ try_boot(void)
 }
 
 /*
+ * Test: Clocks.
+ */
+static void
+try_clocks(void)
+{
+	struct scpi_msg msg;
+	uint16_t clocks = 0;
+
+	/* Skip this test if the required commands are not available. */
+	if (!scpi_has_command(SCPI_CMD_GET_CLOCK_CAP))
+		return;
+
+	/* Get the number of clocks. */
+	test_begin(TEST_CLOCK_CAP);
+	scpi_prepare_msg(&msg, SCPI_CMD_GET_CLOCK_CAP);
+	test_send_request(&msg);
+	test_assert(msg.status == SCPI_OK);
+	test_assert(msg.size == 2);
+	clocks = ((uint16_t *)msg.payload)[0];
+	test_complete(TEST_CLOCK_CAP);
+
+	/* If the firmware has clocks, it must fully support clock control. */
+	if (clocks > 0) {
+		test_begin(TEST_CLOCK_CMDS);
+		test_assert(scpi_has_command(SCPI_CMD_GET_CLOCK_INFO));
+		test_assert(scpi_has_command(SCPI_CMD_SET_CLOCK));
+		test_assert(scpi_has_command(SCPI_CMD_GET_CLOCK));
+		test_complete(TEST_CLOCK_CMDS);
+	}
+
+	for (volatile uint16_t i = 0; i < clocks; ++i) {
+		uint8_t  flags;
+		uint32_t max_rate, min_rate;
+
+		test_begin(TEST_CLOCK_INFO);
+		scpi_prepare_msg(&msg, SCPI_CMD_GET_CLOCK_INFO);
+		/* Send the clock ID. */
+		msg.size = 2;
+		((uint16_t *)msg.payload)[0] = i;
+		test_send_request(&msg);
+		test_assert(msg.status == SCPI_OK);
+		test_assert(msg.size >= 12);
+		/* Assert that we got the same ID back. */
+		test_assert(((uint16_t *)msg.payload)[0] == i);
+		/* Assert that there are no reserved flags. */
+		flags = ((uint16_t *)msg.payload)[1];
+		test_assert((flags & ~(FLAG_READABLE | FLAG_WRITABLE)) == 0);
+		/* Assert that the minimum and maximum rates make sense. */
+		min_rate = ((uint32_t *)msg.payload)[1];
+		max_rate = ((uint32_t *)msg.payload)[2];
+		test_assert(max_rate >= min_rate);
+		test_complete(TEST_CLOCK_INFO);
+
+		/* Try setting both the minimum and maximum rates. */
+		test_begin(TEST_CLOCK_CTRL);
+		scpi_prepare_msg(&msg, SCPI_CMD_SET_CLOCK);
+		msg.size = 8;
+		((uint32_t *)msg.payload)[0] = i;
+		((uint32_t *)msg.payload)[1] = min_rate;
+		test_send_request(&msg);
+		/* Assert that the firmware respects its permission flags. */
+		if (!(flags & FLAG_WRITABLE)) {
+			test_assert(msg.status == SCPI_E_ACCESS);
+		} else {
+			/* Set the clock may still fail if it is in use. */
+			test_assert(msg.status == SCPI_OK ||
+			            msg.status == SCPI_E_ACCESS);
+		}
+		test_assert(msg.size == 0);
+
+		scpi_prepare_msg(&msg, SCPI_CMD_SET_CLOCK);
+		msg.size = 8;
+		((uint32_t *)msg.payload)[0] = i;
+		((uint32_t *)msg.payload)[1] = max_rate;
+		test_send_request(&msg);
+		/* Assert that the firmware respects its permission flags. */
+		if (!(flags & FLAG_WRITABLE)) {
+			test_assert(msg.status == SCPI_E_ACCESS);
+		} else {
+			/* Set the clock may still fail if it is in use. */
+			test_assert(msg.status == SCPI_OK ||
+			            msg.status == SCPI_E_ACCESS);
+		}
+		test_assert(msg.size == 0);
+
+		/* Read back clock rate and ensure it is in range. */
+		scpi_prepare_msg(&msg, SCPI_CMD_GET_CLOCK);
+		msg.size = 2;
+		((uint16_t *)msg.payload)[0] = i;
+		test_send_request(&msg);
+		/* Assert that the firmware respects its permission flags. */
+		if (!(flags & FLAG_READABLE)) {
+			test_assert(msg.status == SCPI_E_ACCESS);
+			test_complete(TEST_CLOCK_CTRL);
+			continue;
+		}
+		test_assert(msg.status == SCPI_OK);
+		test_assert(msg.size == 4);
+		test_assert(((uint32_t *)msg.payload)[0] >= min_rate);
+		test_assert(((uint32_t *)msg.payload)[0] <= max_rate);
+		test_complete(TEST_CLOCK_CTRL);
+	}
+
+	/* Test the failure case of sending an invalid clock ID. */
+	test_begin(TEST_CLOCK_INFO);
+	scpi_prepare_msg(&msg, SCPI_CMD_GET_CLOCK_INFO);
+	msg.size = 2;
+	((uint16_t *)msg.payload)[0] = clocks;
+	test_send_request(&msg);
+	test_assert(msg.status == SCPI_E_PARAM);
+	test_complete(TEST_CLOCK_INFO);
+}
+
+/*
  * Test: CSS power.
  */
 static void
@@ -730,6 +856,7 @@ main(int argc, char *argv[])
 
 	/* Run all tests. */
 	try_boot();
+	try_clocks();
 	try_css_power();
 	try_dvfs();
 
