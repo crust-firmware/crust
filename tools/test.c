@@ -92,6 +92,7 @@ enum {
 enum {
 	TEST_BOOT,
 	TEST_INTERRUPT,
+	TEST_SCP_CAP,
 	TEST_CSS_INFO,
 	TEST_DVFS_CAP,
 	TEST_DVFS_CMDS,
@@ -174,6 +175,7 @@ static uint32_t scpi_commands_available;
 static const char *const test_names[TEST_COUNT] = {
 	"Boot",
 	"Interrupt",
+	"SCP capability",
 	"CSS info",
 	"DVFS capability",
 	"DVFS commands",
@@ -528,6 +530,7 @@ try_boot(void)
 	struct scpi_msg msg;
 	long boot_time;
 
+	/* Seeing "SCP ready" means the firmware booted successfully. */
 	log(LOG_INFO, "Waiting for firmware...");
 	test_begin(TEST_BOOT);
 	scpi_prepare_msg(&msg, SCPI_CMD_SCP_READY);
@@ -535,20 +538,40 @@ try_boot(void)
 	log(LOG_INFO, "Firmware booted in %ld ns", boot_time);
 	test_complete(TEST_BOOT);
 
+	/* Send an invalid command to test basic message processing. */
 	test_begin(TEST_INTERRUPT);
+	scpi_prepare_msg(&msg, 0);
+	test_send_request(&msg);
+	test_assert(msg.status == SCPI_E_SUPPORT);
+	test_assert(msg.size == 0);
+
+	/* Send a valid command with the wrong payload size. */
+	scpi_prepare_msg(&msg, SCPI_CMD_GET_SCP_CAP);
+	msg.size = 4;
+	test_send_request(&msg);
+	test_assert(msg.status == SCPI_E_SIZE);
+	test_assert(msg.size == 0);
+	test_complete(TEST_INTERRUPT);
+
+	/* Query the firmware's capabilities. Save the resulting set of
+	 * supported commands in a global variable for later use. */
+	test_begin(TEST_SCP_CAP);
 	scpi_prepare_msg(&msg, SCPI_CMD_GET_SCP_CAP);
 	test_send_request(&msg);
 	test_assert(msg.status == SCPI_OK);
 	test_assert(msg.size == 28);
-	test_assert(msg.payload[0] == (1 << 16 | 2));
-	test_assert(msg.payload[1] == (SCPI_PAYLOAD_SIZE << 16 |
-	                               SCPI_PAYLOAD_SIZE));
-	scpi_commands_available = msg.payload[3];
+	/* The supported SCPI standard must be revision 1.2. */
+	test_assert(((uint16_t *)msg.payload)[0] == 2);
+	test_assert(((uint16_t *)msg.payload)[1] == 1);
+	/* The supported payload size must match the header definitions. */
+	test_assert(((uint16_t *)msg.payload)[2] == SCPI_PAYLOAD_SIZE);
+	test_assert(((uint16_t *)msg.payload)[3] == SCPI_PAYLOAD_SIZE);
+	scpi_commands_available = ((uint32_t *)msg.payload)[3];
 	/* Ensure the supported commands word is sane (that the firmware claims
 	 * to support the commands we just sent). */
 	test_assert(scpi_has_command(SCPI_CMD_SCP_READY));
 	test_assert(scpi_has_command(SCPI_CMD_GET_SCP_CAP));
-	test_complete(TEST_INTERRUPT);
+	test_complete(TEST_SCP_CAP);
 }
 
 /*
