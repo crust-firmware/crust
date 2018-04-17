@@ -97,6 +97,7 @@ enum {
 	TEST_DVFS_CMDS,
 	TEST_DVFS_INFO,
 	TEST_DVFS_CTRL,
+	TEST_CLOCK_FREQ,
 	TEST_COUNT,
 };
 
@@ -179,6 +180,7 @@ static const char *const test_names[TEST_COUNT] = {
 	"DVFS commands",
 	"DVFS info",
 	"DVFS control",
+	"Clock frequency"
 };
 
 /** A bitmap of attempted tests. */
@@ -649,6 +651,28 @@ try_dvfs(void)
 	}
 }
 
+/*
+ * Test: Clock frequency.
+ */
+static void
+try_clock(void)
+{
+	struct scpi_msg msg;
+
+	test_begin(TEST_CLOCK_FREQ);
+	scpi_prepare_msg(&msg, SCPI_CMD_SET_CLOCK);
+	test_send_request(&msg);
+	test_assert(msg.size == 8);
+
+	scpi_prepare_msg(&msg, SCPI_CMD_GET_CLOCK);
+	test_send_request(&msg);
+	test_assert(msg.size == 6);
+
+	test_complete(TEST_CSS_INFO);
+}
+
+
+
 int
 main(int argc, char *argv[])
 {
@@ -698,6 +722,7 @@ main(int argc, char *argv[])
 	try_boot();
 	try_css_power();
 	try_dvfs();
+	try_clock();
 
 	/* Display a summary of the tests. */
 	test_summary();
