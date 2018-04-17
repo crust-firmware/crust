@@ -607,7 +607,7 @@ static void
 try_dvfs(void)
 {
 	struct scpi_msg msg;
-	uint8_t domains, opps;
+	uint8_t domains = 0, opps;
 
 	/* Skip this test if the required commands are not available. */
 	if (!scpi_has_command(SCPI_CMD_GET_DVFS_CAP))
@@ -672,6 +672,15 @@ try_dvfs(void)
 		}
 		test_complete(TEST_DVFS_CTRL);
 	}
+
+	/* Test the failure case of sending an invalid domain ID. */
+	test_begin(TEST_DVFS_INFO);
+	scpi_prepare_msg(&msg, SCPI_CMD_GET_DVFS_INFO);
+	msg.size = 1;
+	((uint8_t *)msg.payload)[0] = domains;
+	test_send_request(&msg);
+	test_assert(msg.status == SCPI_E_PARAM);
+	test_complete(TEST_DVFS_INFO);
 }
 
 int
