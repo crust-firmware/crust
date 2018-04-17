@@ -106,6 +106,7 @@ enum {
 	TEST_DVFS_CMDS,
 	TEST_DVFS_INFO,
 	TEST_DVFS_CTRL,
+	TEST_SYS_POWER,
 	TEST_COUNT,
 };
 
@@ -193,6 +194,7 @@ static const char *const test_names[TEST_COUNT] = {
 	"DVFS commands",
 	"DVFS info",
 	"DVFS control",
+	"System power",
 };
 
 /** A bitmap of attempted tests. */
@@ -809,6 +811,32 @@ try_dvfs(void)
 	test_complete(TEST_DVFS_INFO);
 }
 
+/*
+ * Test: System power.
+ */
+static void
+try_sys_power(void)
+{
+	struct scpi_msg msg;
+
+	/* Positive tests would reset the machine; only test failure cases. */
+	test_begin(TEST_SYS_POWER);
+	scpi_prepare_msg(&msg, SCPI_CMD_SET_SYS_PWR);
+	msg.size = 1;
+	/* 4 is not a valid system power state. */
+	((uint8_t *)msg.payload)[0] = 4;
+	test_send_request(&msg);
+	test_assert(msg.status == SCPI_E_PARAM);
+
+	scpi_prepare_msg(&msg, SCPI_CMD_SET_SYS_PWR);
+	msg.size = 1;
+	/* 20 is not a valid system power state. */
+	((uint8_t *)msg.payload)[0] = 20;
+	test_send_request(&msg);
+	test_assert(msg.status == SCPI_E_PARAM);
+	test_complete(TEST_SYS_POWER);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -859,6 +887,7 @@ main(int argc, char *argv[])
 	try_clocks();
 	try_css_power();
 	try_dvfs();
+	try_sys_power();
 
 	/* Display a summary of the tests. */
 	test_summary();
