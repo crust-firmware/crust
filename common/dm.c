@@ -30,7 +30,7 @@ device_probe(struct device *dev)
 	int err;
 
 	/* Skip already-probed devices. */
-	if (device_is_running(dev))
+	if (dev->flags & DEVICE_FLAG_RUNNING)
 		return SUCCESS;
 	if (dev->flags & DEVICE_FLAG_MISSING)
 		return ENODEV;
@@ -41,14 +41,16 @@ device_probe(struct device *dev)
 	if (dev->supplydev && (err = device_probe(dev->supplydev)))
 		return err;
 
-	/* Initialize the device with the default number of subdevices. */
-	dev->subdev_count = 1;
 	/* Tell the device the index of its first subdevice. */
 	dev->subdev_index = total_subdevs[dev->drv->class];
 
 	/* Probe the device itself, and report any errors. */
 	if ((err = dev->drv->probe(dev)) == SUCCESS) {
 		dev->flags |= DEVICE_FLAG_RUNNING;
+		/* If the driver's probe function did not provide the number of
+		 * subdevices, assume the default number of 1. */
+		if (dev->subdev_count == 0)
+			dev->subdev_count = 1;
 		/* Update the total number of subdevices for this class. */
 		total_subdevs[dev->drv->class] += dev->subdev_count;
 		debug("dm: Probed %s", dev->name);
