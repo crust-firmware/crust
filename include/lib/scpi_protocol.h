@@ -117,7 +117,11 @@ struct scpi_msg {
 	uint16_t size;
 #endif
 	uint32_t status;
+#ifdef __or1k__
 	uint32_t payload[SCPI_PAYLOAD_WORDS];
+#else
+	uint8_t  payload[SCPI_PAYLOAD_SIZE];
+#endif
 };
 
 #endif /* COMMON_SCPI_PROTOCOL_H */
