@@ -393,10 +393,6 @@ scpi_send_request(struct scpi_msg *msg, struct scpi_call_times *times)
 		    sender, msg->sender);
 		return false;
 	}
-	if (unlikely(msg->status != SCPI_OK)) {
-		log(LOG_ERR, "SCPI call failed with status %u", msg->status);
-		return false;
-	}
 
 	return true;
 }
@@ -542,6 +538,7 @@ try_boot(void)
 	test_begin(TEST_INTERRUPT);
 	scpi_prepare_msg(&msg, SCPI_CMD_GET_SCP_CAP);
 	test_send_request(&msg);
+	test_assert(msg.status == SCPI_OK);
 	test_assert(msg.size == 28);
 	test_assert(msg.payload[0] == (1 << 16 | 2));
 	test_assert(msg.payload[1] == (SCPI_PAYLOAD_SIZE << 16 |
@@ -569,6 +566,7 @@ try_css_power(void)
 	test_begin(TEST_CSS_INFO);
 	scpi_prepare_msg(&msg, SCPI_CMD_GET_CSS_PWR);
 	test_send_request(&msg);
+	test_assert(msg.status == SCPI_OK);
 	/* Assert that there is at least one cluster. */
 	test_assert(msg.size >= 2);
 	/* Each descriptor is 2 bytes long. */
@@ -596,6 +594,7 @@ try_dvfs(void)
 	test_begin(TEST_DVFS_CAP);
 	scpi_prepare_msg(&msg, SCPI_CMD_GET_DVFS_CAP);
 	test_send_request(&msg);
+	test_assert(msg.status == SCPI_OK);
 	test_assert(msg.size == 1);
 	domains = ((uint8_t *)msg.payload)[0];
 	test_complete(TEST_DVFS_CAP);
@@ -616,6 +615,7 @@ try_dvfs(void)
 		msg.size = 1;
 		((uint8_t *)msg.payload)[0] = i;
 		test_send_request(&msg);
+		test_assert(msg.status == SCPI_OK);
 		test_assert(msg.size >= 4);
 		/* Assert that we got the same ID back. */
 		assert(((uint8_t *)msg.payload)[0] == i);
@@ -635,6 +635,7 @@ try_dvfs(void)
 			((uint8_t *)msg.payload)[0] = i;
 			((uint8_t *)msg.payload)[1] = j;
 			test_send_request(&msg);
+			test_assert(msg.status == SCPI_OK);
 			test_assert(msg.size == 0);
 
 			/* Read back the OPP index and ensure it matches. */
@@ -642,6 +643,7 @@ try_dvfs(void)
 			msg.size = 1;
 			((uint8_t *)msg.payload)[0] = i;
 			test_send_request(&msg);
+			test_assert(msg.status == SCPI_OK);
 			test_assert(msg.size == 1);
 			test_assert(((uint8_t *)msg.payload)[0] == j);
 		}
