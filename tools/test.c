@@ -618,7 +618,7 @@ try_dvfs(void)
 		test_assert(msg.status == SCPI_OK);
 		test_assert(msg.size >= 4);
 		/* Assert that we got the same ID back. */
-		assert(((uint8_t *)msg.payload)[0] == i);
+		test_assert(((uint8_t *)msg.payload)[0] == i);
 		/* Get the number of operating performance points. */
 		opps = ((uint8_t *)msg.payload)[1];
 		/* Ensure the number of OPPs matches the message size. */
