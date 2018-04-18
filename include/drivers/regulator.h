@@ -16,9 +16,10 @@
 	(&container_of((dev)->drv, struct regulator_driver, drv)->ops)
 
 enum {
-	REGL_READABLE = BIT(0), /**< Regulator is readable via SCPI. */
-	REGL_WRITABLE = BIT(1), /**< Regulator is writable via SCPI. */
-	REGL_CRITICAL = BIT(4), /**< Regulator cannot be disabled. */
+	REGL_READABLE  = BIT(0), /**< Regulator is readable via SCPI. */
+	REGL_WRITABLE  = BIT(1), /**< Regulator is writable via SCPI. */
+	REGL_CRITICAL  = BIT(4), /**< Regulator cannot be disabled. */
+	REGL_SCPI_MASK = REGL_READABLE | REGL_WRITABLE,
 };
 
 struct regulator_range {
