@@ -47,7 +47,7 @@ static const uint16_t cpux_pll_factors[OPP_COUNT] = {
 };
 
 static struct dvfs_info cpux_dvfs_info = {
-	.latency   = 16384, /* 16 ms */
+	.latency   = 2500, /* 2.5 ms */
 	.opp_count = OPP_COUNT,
 	.opp_table = cpux_opp_table,
 };
