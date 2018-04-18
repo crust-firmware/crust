@@ -45,6 +45,9 @@
 #define MSGBOX_RX_MSG_DATA_REG      0x018c
 #define MSGBOX_TX_MSG_DATA_REG      0x0188
 
+#define SENSOR_CLASS_TEMPERATURE    0
+#define SENSOR_CLASS_COUNT          5
+
 /* PAGESIZE is not defined on architectures with variable-sized pages. Assume
  * 4k pages if the size is unknown. */
 #ifndef PAGESIZE
@@ -110,6 +113,10 @@ enum {
 	TEST_PSU_CMDS,
 	TEST_PSU_INFO,
 	TEST_PSU_CTRL,
+	TEST_SENSOR_CAP,
+	TEST_SENSOR_CMDS,
+	TEST_SENSOR_INFO,
+	TEST_SENSOR_READ,
 	TEST_SYS_POWER,
 	TEST_COUNT,
 };
@@ -202,6 +209,10 @@ static const char *const test_names[TEST_COUNT] = {
 	"PSU commands",
 	"PSU info",
 	"PSU control",
+	"Sensor capability",
+	"Sensor commands",
+	"Sensor info",
+	"Sensor read",
 	"System power",
 };
 
@@ -930,6 +941,75 @@ try_psus(void)
 }
 
 /*
+ * Test: Sensors.
+ */
+static void
+try_sensors(void)
+{
+	struct scpi_msg msg;
+	uint16_t sensors = 0;
+
+	/* Skip this test if the required commands are not available. */
+	if (!scpi_has_command(SCPI_CMD_GET_SENSOR_CAP))
+		return;
+
+	/* Get the number of sensors. */
+	test_begin(TEST_SENSOR_CAP);
+	scpi_prepare_msg(&msg, SCPI_CMD_GET_SENSOR_CAP);
+	test_send_request(&msg);
+	test_assert(msg.status == SCPI_OK);
+	test_assert(msg.size == 2);
+	sensors = ((uint16_t *)msg.payload)[0];
+	test_complete(TEST_SENSOR_CAP);
+
+	/* If the firmware has clocks, it must fully support clock control. */
+	if (sensors > 0) {
+		test_begin(TEST_SENSOR_CMDS);
+		test_assert(scpi_has_command(SCPI_CMD_GET_SENSOR_INFO));
+		test_assert(scpi_has_command(SCPI_CMD_GET_SENSOR));
+		test_complete(TEST_SENSOR_CMDS);
+	}
+
+	for (volatile uint16_t i = 0; i < sensors; ++i) {
+		uint8_t  class;
+		uint32_t value;
+
+		test_begin(TEST_SENSOR_INFO);
+		scpi_prepare_msg(&msg, SCPI_CMD_GET_SENSOR_INFO);
+		/* Send the sensor ID. */
+		msg.size = 2;
+		((uint16_t *)msg.payload)[0] = i;
+		test_send_request(&msg);
+		test_assert(msg.status == SCPI_OK);
+		test_assert(msg.size >= 4);
+		/* Assert that we got the same ID back. */
+		test_assert(((uint16_t *)msg.payload)[0] == i);
+		/* Assert that the class is valid. */
+		class = ((uint8_t *)msg.payload)[2];
+		test_assert(class < SENSOR_CLASS_COUNT);
+		/* Assert that the triggers are valid. */
+		test_assert((msg.payload[3] & ~(BIT(0) | BIT(1))) == 0);
+		test_complete(TEST_SENSOR_INFO);
+
+		/* Check the current value for sanity. */
+		test_begin(TEST_SENSOR_READ);
+		scpi_prepare_msg(&msg, SCPI_CMD_GET_SENSOR);
+		msg.size = 2;
+		((uint16_t *)msg.payload)[0] = i;
+		test_send_request(&msg);
+		test_assert(msg.status == SCPI_OK);
+		test_assert(msg.size == 8);
+		value = ((uint32_t *)msg.payload)[0];
+		/* Ensure temperature readings are below 100°C. */
+		if (class == SENSOR_CLASS_TEMPERATURE)
+			test_assert(value < 100000);
+		/* The firmware does not support more than 32-bit output. */
+		test_assert(((uint32_t *)msg.payload)[1] == 0);
+		test_complete(TEST_SENSOR_READ);
+	}
+}
+
+/*
  * Test: System power.
  */
 static void
@@ -1006,6 +1086,7 @@ main(int argc, char *argv[])
 	try_css_power();
 	try_dvfs();
 	try_psus();
+	try_sensors();
 	try_sys_power();
 
 	/* Display a summary of the tests. */
