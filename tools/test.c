@@ -106,6 +106,10 @@ enum {
 	TEST_DVFS_CMDS,
 	TEST_DVFS_INFO,
 	TEST_DVFS_CTRL,
+	TEST_PSU_CAP,
+	TEST_PSU_CMDS,
+	TEST_PSU_INFO,
+	TEST_PSU_CTRL,
 	TEST_SYS_POWER,
 	TEST_COUNT,
 };
@@ -194,6 +198,10 @@ static const char *const test_names[TEST_COUNT] = {
 	"DVFS commands",
 	"DVFS info",
 	"DVFS control",
+	"PSU capability",
+	"PSU commands",
+	"PSU info",
+	"PSU control",
 	"System power",
 };
 
@@ -812,6 +820,116 @@ try_dvfs(void)
 }
 
 /*
+ * Test: Power supplies.
+ */
+static void
+try_psus(void)
+{
+	struct scpi_msg msg;
+	uint16_t psus = 0;
+
+	/* Skip this test if the required commands are not available. */
+	if (!scpi_has_command(SCPI_CMD_GET_PSU_CAP))
+		return;
+
+	/* Get the number of clocks. */
+	test_begin(TEST_PSU_CAP);
+	scpi_prepare_msg(&msg, SCPI_CMD_GET_PSU_CAP);
+	test_send_request(&msg);
+	test_assert(msg.status == SCPI_OK);
+	test_assert(msg.size == 2);
+	psus = ((uint16_t *)msg.payload)[0];
+	test_complete(TEST_PSU_CAP);
+
+	/* If the firmware has clocks, it must fully support clock control. */
+	if (psus > 0) {
+		test_begin(TEST_PSU_CMDS);
+		test_assert(scpi_has_command(SCPI_CMD_GET_PSU_INFO));
+		test_assert(scpi_has_command(SCPI_CMD_SET_PSU));
+		test_assert(scpi_has_command(SCPI_CMD_GET_PSU));
+		test_complete(TEST_PSU_CMDS);
+	}
+
+	for (volatile uint16_t i = 0; i < psus; ++i) {
+		uint8_t  flags;
+		uint32_t min_voltage, max_voltage, voltage;
+
+		test_begin(TEST_PSU_INFO);
+		scpi_prepare_msg(&msg, SCPI_CMD_GET_PSU_INFO);
+		/* Send the PSU ID. */
+		msg.size = 2;
+		((uint16_t *)msg.payload)[0] = i;
+		test_send_request(&msg);
+		test_assert(msg.status == SCPI_OK);
+		test_assert(msg.size >= 12);
+		/* Assert that we got the same ID back. */
+		test_assert(((uint16_t *)msg.payload)[0] == i);
+		/* Assert that there are no reserved flags. */
+		flags = ((uint16_t *)msg.payload)[1];
+		test_assert((flags & ~(FLAG_READABLE | FLAG_WRITABLE)) == 0);
+		/* Assert that the minimum and maximum voltages make sense. */
+		min_voltage = ((uint32_t *)msg.payload)[1];
+		max_voltage = ((uint32_t *)msg.payload)[2];
+		test_assert(max_voltage >= min_voltage);
+		test_complete(TEST_PSU_INFO);
+
+		/* Set an invalid value (over the maximum). */
+		scpi_prepare_msg(&msg, SCPI_CMD_SET_PSU);
+		msg.size = 8;
+		((uint32_t *)msg.payload)[0] = i;
+		((uint32_t *)msg.payload)[1] = max_voltage + 1000;
+		test_send_request(&msg);
+		/* Assert that the firmware respects its permission flags. */
+		if (flags & FLAG_WRITABLE)
+			test_assert(msg.status == SCPI_E_RANGE);
+		else
+			test_assert(msg.status == SCPI_E_ACCESS);
+		test_assert(msg.size == 0);
+
+		/* Get the current value, for setting below. */
+		test_begin(TEST_PSU_CTRL);
+		scpi_prepare_msg(&msg, SCPI_CMD_GET_PSU);
+		msg.size = 2;
+		((uint16_t *)msg.payload)[0] = i;
+		test_send_request(&msg);
+		/* Assert that the firmware respects its permission flags. */
+		if (!(flags & FLAG_READABLE)) {
+			test_assert(msg.status == SCPI_E_ACCESS);
+			test_complete(TEST_PSU_CTRL);
+			continue;
+		}
+		test_assert(msg.status == SCPI_OK);
+		test_assert(msg.size == 4);
+		voltage = ((uint32_t *)msg.payload)[0];
+		test_assert(voltage >= min_voltage);
+		test_assert(voltage <= max_voltage);
+
+		/* Setting arbitrary values is unsafe; set what was read. */
+		scpi_prepare_msg(&msg, SCPI_CMD_SET_PSU);
+		msg.size = 8;
+		((uint32_t *)msg.payload)[0] = i;
+		((uint32_t *)msg.payload)[1] = voltage;
+		test_send_request(&msg);
+		/* Assert that the firmware respects its permission flags. */
+		if (flags & FLAG_WRITABLE)
+			test_assert(msg.status == SCPI_OK);
+		else
+			test_assert(msg.status == SCPI_E_ACCESS);
+		test_assert(msg.size == 0);
+		test_complete(TEST_PSU_CTRL);
+	}
+
+	/* Test the failure case of sending an invalid PSU ID. */
+	test_begin(TEST_PSU_INFO);
+	scpi_prepare_msg(&msg, SCPI_CMD_GET_PSU_INFO);
+	msg.size = 2;
+	((uint16_t *)msg.payload)[0] = psus;
+	test_send_request(&msg);
+	test_assert(msg.status == SCPI_E_PARAM);
+	test_complete(TEST_PSU_INFO);
+}
+
+/*
  * Test: System power.
  */
 static void
@@ -887,6 +1005,7 @@ main(int argc, char *argv[])
 	try_clocks();
 	try_css_power();
 	try_dvfs();
+	try_psus();
 	try_sys_power();
 
 	/* Display a summary of the tests. */
