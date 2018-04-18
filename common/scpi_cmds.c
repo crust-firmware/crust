@@ -477,7 +477,8 @@ scpi_cmd_get_sensor_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 		return EINVAL;
 
 	info = sensor_get_info(dev, id);
-	tx_payload[0] = index | (info->class) << 16 | (info->flags) << 24;
+	tx_payload[0] = index | (info->class) << 16 |
+	                (info->flags & SENSOR_SCPI_MASK) << 24;
 	strncpy((char *)&tx_payload[1], info->name, 20);
 	*tx_size = 24;
 

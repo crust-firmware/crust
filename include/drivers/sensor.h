@@ -24,8 +24,9 @@ enum {
 };
 
 enum {
-	SENSOR_PERIODIC = BIT(0),
-	SENSOR_BOUNDS   = BIT(1),
+	SENSOR_PERIODIC  = BIT(0),
+	SENSOR_BOUNDS    = BIT(1),
+	SENSOR_SCPI_MASK = SENSOR_PERIODIC | SENSOR_BOUNDS,
 };
 
 struct sensor_info {
