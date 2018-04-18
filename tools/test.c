@@ -555,22 +555,11 @@ test_summary(void)
 }
 
 /*
- * Test: SCP ready and SCP capability.
+ * Test: Basic commands (SCP capability).
  */
 static void
-try_boot(void)
+try_basic(void)
 {
-	struct scpi_msg msg;
-	long boot_time;
-
-	/* Seeing "SCP ready" means the firmware booted successfully. */
-	log(LOG_INFO, "Waiting for firmware...");
-	test_begin(TEST_BOOT);
-	scpi_prepare_msg(&msg, SCPI_CMD_SCP_READY);
-	test_serve_reply(&msg, &boot_time);
-	log(LOG_INFO, "Firmware booted in %ld ns", boot_time);
-	test_complete(TEST_BOOT);
-
 	/* Send an invalid command to test basic message processing. */
 	test_begin(TEST_INTERRUPT);
 	scpi_prepare_msg(&msg, 0);
@@ -605,6 +594,24 @@ try_boot(void)
 	test_assert(scpi_has_command(SCPI_CMD_SCP_READY));
 	test_assert(scpi_has_command(SCPI_CMD_GET_SCP_CAP));
 	test_complete(TEST_SCP_CAP);
+}
+
+/*
+ * Test: Boot (SCP ready).
+ */
+static void
+try_boot(void)
+{
+	struct scpi_msg msg;
+	long boot_time;
+
+	/* Seeing "SCP ready" means the firmware booted successfully. */
+	log(LOG_INFO, "Waiting for firmware...");
+	test_begin(TEST_BOOT);
+	scpi_prepare_msg(&msg, SCPI_CMD_SCP_READY);
+	test_serve_reply(&msg, &boot_time);
+	log(LOG_INFO, "Firmware booted in %ld ns", boot_time);
+	test_complete(TEST_BOOT);
 }
 
 /*
@@ -1082,6 +1089,7 @@ main(int argc, char *argv[])
 
 	/* Run all tests. */
 	try_boot();
+	try_basic();
 	try_clocks();
 	try_css_power();
 	try_dvfs();
