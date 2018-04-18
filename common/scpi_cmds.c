@@ -393,7 +393,7 @@ scpi_cmd_get_psu_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 		return EINVAL;
 
 	info = regulator_get_info(dev, id);
-	tx_payload[0] = index | (info->flags) << 16;
+	tx_payload[0] = index | (info->flags & REGL_SCPI_MASK) << 16;
 	tx_payload[1] = info->min_value;
 	tx_payload[2] = info->max_value;
 	strncpy((char *)&tx_payload[3], info->name, 20);
@@ -443,7 +443,7 @@ scpi_cmd_get_psu_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 		return err;
 
 	tx_payload[0] = value;
-	*tx_size      = sizeof(value);
+	*tx_size      = sizeof(tx_payload[0]);
 
 	return SUCCESS;
 }
