@@ -560,6 +560,8 @@ test_summary(void)
 static void
 try_basic(void)
 {
+	struct scpi_msg msg;
+
 	/* Send an invalid command to test basic message processing. */
 	test_begin(TEST_INTERRUPT);
 	scpi_prepare_msg(&msg, 0);
