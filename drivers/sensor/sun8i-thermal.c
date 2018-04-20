@@ -66,6 +66,17 @@ static struct sun8i_thermal_sensor_info thermal_sensors[THS_SENSOR_COUNT] = {
 #endif
 };
 
+static void
+sun8i_thermal_enable(struct device *dev)
+{
+	/* Enable measurement for all available sensors. */
+	mmio_setbits32(dev->regs + THS_CTL_REG2, BIT(THS_CPU0)
+#if defined(HAVE_THS_CPU1)
+	               | BIT(THS_CPU1)
+#endif
+	);
+}
+
 static struct sensor_info *
 sun8i_thermal_get_info(struct device *dev __unused, uint8_t id)
 {
@@ -78,6 +89,8 @@ static int
 sun8i_thermal_read_raw(struct device *dev, uint8_t id, uint32_t *raw)
 {
 	uint16_t addr = thermal_sensors[id].address;
+
+	sun8i_thermal_enable(dev);
 
 	*raw = mmio_read32(dev->regs + addr) & BITMASK(0, 12);
 
@@ -109,12 +122,7 @@ sun8i_thermal_probe(struct device *dev)
 	/* Enable filter, average over 8 values. */
 	mmio_write32(dev->regs + THS_FILTER_CONTROL_REG, 0x06);
 
-	/* Enable measurement for all available sensors. */
-	mmio_setbits32(dev->regs + THS_CTL_REG2, BIT(THS_CPU0)
-#if defined(HAVE_THS_CPU1)
-	               | BIT(THS_CPU1)
-#endif
-	);
+	sun8i_thermal_enable(dev);
 
 	dev->subdev_count = THS_SENSOR_COUNT;
 
