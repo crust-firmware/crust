@@ -168,7 +168,7 @@ sun6i_a31_i2c_probe(struct device *dev)
 	if ((err = dm_setup_pins(dev, I2C_NUM_PINS)))
 		return err;
 
-	/* Set I2C bus clock divider for 100 KHz operation. */
+	/* Set I2C bus clock divider for 400 KHz operation. */
 	mmio_write32(dev->regs + I2C_CCR_REG, 0x00000011);
 
 	/* Clear slave address (this driver only supports master mode). */
