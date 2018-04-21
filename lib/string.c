@@ -4,6 +4,7 @@
  */
 
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 
 #undef memcpy
@@ -54,6 +55,20 @@ strncpy(char *restrict dest, const char *restrict src, size_t n)
 	while (n-- > 0) {
 		*d++ = *s;
 		s   += *s != 0;
+	}
+
+	return dest;
+}
+
+char *
+strncpy_swap(char *restrict dest, const char *restrict src, size_t n)
+{
+	uintptr_t   d = (uintptr_t)dest;
+	const char *s = src;
+
+	while (n-- > 0) {
+		*(char *)(d++ ^ 3) = *s;
+		s += *s != 0;
 	}
 
 	return dest;
