@@ -312,7 +312,7 @@ scpi_cmd_get_clock_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	tx_payload[0] = index | (info->flags & CLK_SCPI_MASK) << 16;
 	tx_payload[1] = info->min_rate;
 	tx_payload[2] = info->max_rate;
-	strncpy((char *)&tx_payload[3], info->name, 20);
+	strncpy_swap((char *)&tx_payload[3], info->name, 20);
 	*tx_size = 32;
 
 	return SUCCESS;
@@ -396,7 +396,7 @@ scpi_cmd_get_psu_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	tx_payload[0] = index | (info->flags & REGL_SCPI_MASK) << 16;
 	tx_payload[1] = info->min_value;
 	tx_payload[2] = info->max_value;
-	strncpy((char *)&tx_payload[3], info->name, 20);
+	strncpy_swap((char *)&tx_payload[3], info->name, 20);
 	*tx_size = 32;
 
 	return SUCCESS;
@@ -479,7 +479,7 @@ scpi_cmd_get_sensor_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	info = sensor_get_info(dev, id);
 	tx_payload[0] = index | (info->class) << 16 |
 	                (info->flags & SENSOR_SCPI_MASK) << 24;
-	strncpy((char *)&tx_payload[1], info->name, 20);
+	strncpy_swap((char *)&tx_payload[1], info->name, 20);
 	*tx_size = 24;
 
 	return SUCCESS;
