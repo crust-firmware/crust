@@ -115,7 +115,7 @@ static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
  * highest power level. This ensures no power domain is turned on before its
  * parent, and no power domain is turned off before any of its children.
  */
-int
+static int
 scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
                              uint32_t *tx_payload __unused,
                              uint16_t *tx_size __unused)
@@ -156,7 +156,7 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
 #define CLUSTER_ID(x)          ((x) & BITMASK(0, 4))
 #define CLUSTER_POWER_STATE(x) (((x) & BITMASK(0, 4)) << 4)
 #define CORE_POWER_STATES(x)   ((x) << 8)
-int
+static int
 scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload __unused,
                              uint32_t *tx_payload, uint16_t *tx_size)
 {
@@ -180,7 +180,7 @@ scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload __unused,
 /*
  * Handler/payload data for SCPI_CMD_SET_SYS_PWR: Set system power state.
  */
-int
+static int
 scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
                                uint32_t *tx_payload __unused,
                                uint16_t *tx_size __unused)
@@ -202,7 +202,7 @@ scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
 /*
  * Handler/payload data for SCPI_CMD_GET_DVFS_CAP: Get DVFS capability.
  */
-int
+static int
 scpi_cmd_get_dvfs_cap_handler(uint32_t *rx_payload __unused,
                               uint32_t *tx_payload, uint16_t *tx_size)
 {
@@ -215,7 +215,7 @@ scpi_cmd_get_dvfs_cap_handler(uint32_t *rx_payload __unused,
 /*
  * Handler/payload data for SCPI_CMD_GET_DVFS_INFO: Get DVFS info.
  */
-int
+static int
 scpi_cmd_get_dvfs_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                                uint16_t *tx_size)
 {
@@ -243,7 +243,7 @@ scpi_cmd_get_dvfs_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 /*
  * Handler/payload data for SCPI_CMD_SET_DVFS: Set DVFS.
  */
-int
+static int
 scpi_cmd_set_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
                           uint16_t *tx_size __unused)
 {
@@ -263,7 +263,7 @@ scpi_cmd_set_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
 /*
  * Handler/payload data for SCPI_CMD_GET_DVFS: Get DVFS.
  */
-int
+static int
 scpi_cmd_get_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                           uint16_t *tx_size)
 {
@@ -283,7 +283,7 @@ scpi_cmd_get_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 /*
  * Handler/payload data for SCPI_CMD_GET_CLOCK_CAP: Get clock capability.
  */
-int
+static int
 scpi_cmd_get_clock_cap_handler(uint32_t *rx_payload __unused,
                                uint32_t *tx_payload, uint16_t *tx_size)
 {
@@ -296,7 +296,7 @@ scpi_cmd_get_clock_cap_handler(uint32_t *rx_payload __unused,
 /*
  * Handler/payload data for SCPI_CMD_GET_CLOCK_INFO: Get clock info.
  */
-int
+static int
 scpi_cmd_get_clock_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                                 uint16_t *tx_size)
 {
@@ -321,7 +321,7 @@ scpi_cmd_get_clock_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 /*
  * Handler/payload data for SCPI_CMD_SET_CLOCK: Set clock value.
  */
-int
+static int
 scpi_cmd_set_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
                            uint16_t *tx_size __unused)
 {
@@ -341,7 +341,7 @@ scpi_cmd_set_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
 /*
  * Handler/payload data for SCPI_CMD_GET_CLOCK: Get clock value.
  */
-int
+static int
 scpi_cmd_get_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                            uint16_t *tx_size)
 {
@@ -367,7 +367,7 @@ scpi_cmd_get_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 /*
  * Handler/payload data for SCPI_CMD_GET_PSU_CAP: Get power supply capability.
  */
-int
+static int
 scpi_cmd_get_psu_cap_handler(uint32_t *rx_payload __unused,
                              uint32_t *tx_payload, uint16_t *tx_size)
 {
@@ -380,7 +380,7 @@ scpi_cmd_get_psu_cap_handler(uint32_t *rx_payload __unused,
 /*
  * Handler/payload data for SCPI_CMD_GET_PSU_INFO: Get power supply info.
  */
-int
+static int
 scpi_cmd_get_psu_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                               uint16_t *tx_size)
 {
@@ -405,7 +405,7 @@ scpi_cmd_get_psu_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 /*
  * Handler/payload data for SCPI_CMD_SET_PSU: Set power supply.
  */
-int
+static int
 scpi_cmd_set_psu_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
                          uint16_t *tx_size __unused)
 {
@@ -425,7 +425,7 @@ scpi_cmd_set_psu_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
 /*
  * Handler/payload data for SCPI_CMD_GET_PSU: Get power supply.
  */
-int
+static int
 scpi_cmd_get_psu_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                          uint16_t *tx_size)
 {
@@ -451,7 +451,7 @@ scpi_cmd_get_psu_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 /*
  * Handler/payload data for SCPI_CMD_GET_SENSOR_CAP: Get sensor capability.
  */
-int
+static int
 scpi_cmd_get_sensor_cap_handler(uint32_t *rx_payload __unused,
                                 uint32_t *tx_payload, uint16_t *tx_size)
 {
@@ -464,7 +464,7 @@ scpi_cmd_get_sensor_cap_handler(uint32_t *rx_payload __unused,
 /*
  * Handler/payload data for SCPI_CMD_GET_SENSOR_INFO: Get sensor info.
  */
-int
+static int
 scpi_cmd_get_sensor_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                                  uint16_t *tx_size)
 {
@@ -488,7 +488,7 @@ scpi_cmd_get_sensor_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 /*
  * Handler/payload data for SCPI_CMD_GET_SENSOR: Get sensor value.
  */
-int
+static int
 scpi_cmd_get_sensor_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                             uint16_t *tx_size)
 {
