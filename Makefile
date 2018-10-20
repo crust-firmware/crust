@@ -25,10 +25,12 @@ CFLAGS		 = -Os -pipe -std=c11 \
 		   -flto \
 		   -fno-asynchronous-unwind-tables \
 		   -fno-common \
+		   -fno-pie \
 		   -fomit-frame-pointer \
 		   -funsigned-char \
 		   -g$(if $(filter-out 0,$(DEBUG)),gdb,0) \
 		   -mdelay -mhard-mul -msoft-float \
+		   -static \
 		   -Wa,--fatal-warnings \
 		   $(WARNINGS)
 CPPFLAGS	 = -DDEBUG=$(if $(filter-out 0,$(DEBUG)),1,0) \
@@ -40,6 +42,7 @@ LDFLAGS		 = -nostdlib \
 		   -Wl,--build-id=none \
 		   -Wl,--fatal-warnings \
 		   -Wl,--gc-sections \
+		   -Wl,--no-dynamic-linker \
 		   -Wl,--no-undefined
 
 HOSTAR		 = ar
