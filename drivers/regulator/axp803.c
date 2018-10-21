@@ -500,10 +500,9 @@ axp_regulator_probe(struct device *dev)
 		return err;
 	if ((err = axp803_match_type(dev)))
 		return err;
+	dev->subdev_count = AXP803_REGL_COUNT;
 	if ((err = regulator_set_defaults(dev, (uint16_t *)dev->drvdata)))
 		return err;
-
-	dev->subdev_count = AXP803_REGL_COUNT;
 
 	return SUCCESS;
 }
