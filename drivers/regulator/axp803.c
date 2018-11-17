@@ -5,10 +5,10 @@
 
 #include <debug.h>
 #include <error.h>
-#include <i2c.h>
 #include <limits.h>
 #include <mmio.h>
 #include <regulator.h>
+#include <rsb.h>
 #include <mfd/axp803.h>
 #include <regulator/axp803.h>
 
@@ -436,7 +436,7 @@ axp803_regulator_get_state(struct device *dev, uint8_t id)
 	uint8_t regaddr = axp803_regulators[id].enable_register;
 	uint8_t regmask = axp803_regulators[id].enable_mask;
 
-	if ((err = i2c_read_reg(dev->bus, dev->addr, regaddr, &reg)))
+	if ((err = rsb_read(dev->bus, dev->addr, regaddr, &reg)))
 		return err;
 
 	/* GPIO LDOs have their status bit inverted. */
@@ -451,7 +451,7 @@ axp803_regulator_read_raw(struct device *dev, uint8_t id, uint32_t *raw)
 	uint8_t regaddr = axp803_regulators[id].value_register;
 	uint8_t regmask = axp803_regulators[id].status_mask;
 
-	if ((err = i2c_read_reg(dev->bus, dev->addr, regaddr, &reg)))
+	if ((err = rsb_read(dev->bus, dev->addr, regaddr, &reg)))
 		return err;
 	/* Mask out a possible status bit. */
 	*raw = reg & ~regmask;
@@ -467,13 +467,13 @@ axp803_regulator_set_state(struct device *dev, uint8_t id, bool enabled)
 	uint8_t regaddr = axp803_regulators[id].enable_register;
 	uint8_t regmask = axp803_regulators[id].enable_mask;
 
-	if ((err = i2c_read_reg(dev->bus, dev->addr, regaddr, &reg)))
+	if ((err = rsb_read(dev->bus, dev->addr, regaddr, &reg)))
 		return err;
 	/* GPIO LDOs have their status bit inverted. */
 	enabled ^= (id >= AXP803_REGL_GPIO0);
 	reg      = enabled ? reg | regmask : reg & ~regmask;
 
-	return i2c_write_reg(dev->bus, dev->addr, regaddr, reg);
+	return rsb_write(dev->bus, dev->addr, regaddr, reg);
 }
 
 static int
@@ -488,7 +488,7 @@ axp803_regulator_write_raw(struct device *dev, uint8_t id, uint32_t raw)
 	if (id == AXP803_REGL_DC1SW)
 		return SUCCESS;
 
-	return i2c_write_reg(dev->bus, dev->addr, regaddr, raw);
+	return rsb_write(dev->bus, dev->addr, regaddr, raw);
 }
 
 static int
@@ -496,10 +496,9 @@ axp_regulator_probe(struct device *dev)
 {
 	int err;
 
-	if ((err = i2c_probe(dev->bus, dev->addr)))
+	if ((err = axp803_init_once(dev)))
 		return err;
-	if ((err = axp803_match_type(dev)))
-		return err;
+
 	dev->subdev_count = AXP803_REGL_COUNT;
 	if ((err = regulator_set_defaults(dev, (uint16_t *)dev->drvdata)))
 		return err;

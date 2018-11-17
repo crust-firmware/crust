@@ -6,8 +6,8 @@
 #include <debug.h>
 #include <dm.h>
 #include <error.h>
-#include <i2c.h>
 #include <pmic.h>
+#include <rsb.h>
 #include <system_power.h>
 #include <mfd/axp803.h>
 #include <pmic/axp803.h>
@@ -42,9 +42,9 @@ axp803_pmic_irq(void *param)
 	uint8_t reg;
 
 	/* IRQ register 5 is the only one with enabled IRQs. */
-	if ((err = i2c_read_reg(dev->bus, dev->addr, IRQ_STATUS_REG5, &reg)))
+	if ((err = rsb_read(dev->bus, dev->addr, IRQ_STATUS_REG5, &reg)))
 		panic("%s: Cannot read NMI status: %d", dev->name, err);
-	if ((err = i2c_write_reg(dev->bus, dev->addr, IRQ_STATUS_REG5, reg)))
+	if ((err = rsb_write(dev->bus, dev->addr, IRQ_STATUS_REG5, reg)))
 		panic("%s: Cannot clear NMI 0x%02x: %d", dev->name, reg, err);
 
 	/* Reset on long press, otherwise wake the system. */
@@ -89,25 +89,23 @@ axp803_pmic_probe(struct device *dev)
 	int     err;
 	uint8_t addr = dev->addr;
 
-	if ((err = i2c_probe(bus, dev->addr)))
-		return err;
-	if ((err = axp803_match_type(dev)))
+	if ((err = axp803_init_once(dev)))
 		return err;
 
 	/* Set up the power button. */
-	if ((err = i2c_write_reg(bus, addr, POK_CTRL_REG, BIT(4))))
+	if ((err = rsb_write(bus, addr, POK_CTRL_REG, BIT(4))))
 		return err;
 
 	/* Set up IRQs; disable all but the relevant ones. */
 	for (uint8_t reg = IRQ_ENABLE_REG1; reg <= IRQ_ENABLE_REG6; ++reg) {
 		uint8_t data = reg == IRQ_ENABLE_REG5 ? WANTED_IRQS : 0;
-		if ((err = i2c_write_reg(bus, addr, reg, data)))
+		if ((err = rsb_write(bus, addr, reg, data)))
 			return err;
 	}
 
 	/* Now clear all IRQs. */
 	for (uint8_t reg = IRQ_STATUS_REG1; reg <= IRQ_STATUS_REG6; ++reg) {
-		if ((err = i2c_write_reg(bus, addr, reg, BITMASK(0, 8))))
+		if ((err = rsb_write(bus, addr, reg, BITMASK(0, 8))))
 			return err;
 	}
 
