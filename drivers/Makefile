@@ -12,6 +12,7 @@ obj-y += mfd/
 obj-y += misc/
 obj-y += msgbox/
 obj-y += pmic/
+obj-y += rsb/
 obj-y += regulator/
 obj-y += sensor/
 obj-y += timer/
