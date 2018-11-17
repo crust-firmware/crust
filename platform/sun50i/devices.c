@@ -19,6 +19,7 @@
 #include <pmic/dummy.h>
 #include <regulator/axp803.h>
 #include <regulator/sy8106a.h>
+#include <rsb/sunxi-rsb.h>
 #include <sensor/sun8i-thermal.h>
 #include <timer/sun8i-r_timer.h>
 #include <watchdog/sunxi-twd.h>
@@ -44,9 +45,14 @@ static struct device pio    __device;
 static struct device power_button __device;
 #endif
 static struct device r_ccu __device;
+#if CONFIG_SOC_H5
 static struct device r_i2c __device;
+#endif
 static struct device r_pio __device;
 static struct device r_pio_irqchip __device;
+#if CONFIG_SOC_A64
+static struct device r_rsb __device;
+#endif
 static struct device r_timer0 __device;
 static struct device r_twd    __device;
 #if CONFIG_REGULATOR_SY8106A
@@ -58,8 +64,8 @@ static struct device ths __device;
 static struct device axp803_pmic = {
 	.name = "axp803-pmic",
 	.drv  = &axp803_pmic_driver.drv,
-	.bus  = &r_i2c,
-	.addr = AXP803_I2C_ADDRESS,
+	.bus  = &r_rsb,
+	.addr = AXP803_RSB_RTADDR,
 	.irq  = IRQ_HANDLE {
 		.dev = &r_intc,
 		.irq = IRQ_NMI,
@@ -94,8 +100,8 @@ static struct device axp803_regulator = {
 		/* GPIO0 is not connected. */
 		/* GPIO1 is not connected. */
 	},
-	.bus  = &r_i2c,
-	.addr = AXP803_I2C_ADDRESS,
+	.bus  = &r_rsb,
+	.addr = AXP803_RSB_RTADDR,
 };
 #endif
 
@@ -300,6 +306,7 @@ static struct device r_ccu = {
 	.subdev_count = R_CCU_CLOCK_COUNT,
 };
 
+#if CONFIG_SOC_H5
 static struct device r_i2c = {
 	.name   = "r_i2c",
 	.regs   = DEV_R_I2C,
@@ -310,15 +317,11 @@ static struct device r_i2c = {
 		.irq = IRQ_R_I2C,
 	},
 	.pins = GPIO_PINS(I2C_NUM_PINS) {
-#if CONFIG_SOC_A64
-		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 3 },
-		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 3 },
-#else
-		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 2 },
-		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 2 },
-#endif
+		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 2 }, /* On H5 */
+		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 2 }, /* On H5 */
 	},
 };
+#endif
 
 static struct device r_pio = {
 	.name   = "r_pio",
@@ -337,6 +340,23 @@ static struct device r_pio_irqchip = {
 		.irq = IRQ_R_PIO_PL,
 	},
 };
+
+#if CONFIG_SOC_A64
+static struct device r_rsb = {
+	.name   = "r_rsb",
+	.regs   = DEV_R_RSB,
+	.drv    = &sunxi_rsb_driver.drv,
+	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_RSB),
+	.irq    = IRQ_HANDLE {
+		.dev = &r_intc,
+		.irq = IRQ_R_RSB,
+	},
+	.pins = GPIO_PINS(RSB_NUM_PINS) {
+		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 2 },
+		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 2 },
+	},
+};
+#endif
 
 static struct device r_timer0 = {
 	.name    = "r_timer0",

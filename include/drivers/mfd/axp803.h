@@ -9,19 +9,21 @@
 #include <dm.h>
 #include <stdint.h>
 
-#define AXP803_I2C_ADDRESS 0x34
+#define AXP803_RSB_HWADDR 0x03a3
+#define AXP803_RSB_RTADDR 0x2d
 
 /**
- * Check if a device is an AXP803 PMIC.
+ * Initialize an AXP803 PMIC.
  *
  * This function may fail with:
  *  EIO    There was a problem communicating with the hardware.
- *  ENODEV The device is not an AXP803 PMIC.
+ *  ENODEV No AXP803 PMIC was found.
  *
  * @param dev  The device to check.
- * @return     Zero if this device is an AXP803; any other value if it is not.
+ * @return     Zero if an AXP803 is present and successfully initialized; any
+ *             other value if it is not.
  */
-int axp803_match_type(struct device *dev);
+int axp803_init_once(struct device *dev);
 
 /**
  * Set one or more bits in a register in the AXP803 PMIC.
