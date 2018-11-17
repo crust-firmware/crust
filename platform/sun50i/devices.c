@@ -259,6 +259,14 @@ static struct device r_ccu = {
 			.gate      = R_CCU_GATE_R_TIMER,
 			.reset     = R_CCU_RESET_R_TIMER,
 		},
+#if CONFIG_SOC_A64
+		[R_CCU_CLOCK_R_RSB] = {
+			.info.name = "r_rsb",
+			.parents   = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_APB0),
+			.gate      = R_CCU_GATE_R_RSB,
+			.reset     = R_CCU_RESET_R_RSB,
+		},
+#endif
 		[R_CCU_CLOCK_R_UART] = {
 			.info.name = "r_uart",
 			.parents   = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_APB0),
