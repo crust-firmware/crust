@@ -31,7 +31,8 @@ CFLAGS		 = -Os -pipe -std=c11 \
 		   -fomit-frame-pointer \
 		   -funsigned-char \
 		   -g$(if $(filter-out 0,$(DEBUG)),gdb,0) \
-		   -mhard-mul $(if $(HAVE_GCC9),-msext -msfimm -mshftimm) \
+		   -mhard-mul -msoft-div \
+		   $(if $(HAVE_GCC9),-msext -msfimm -mshftimm) \
 		   -static \
 		   -Wa,--fatal-warnings \
 		   $(WARNINGS)
