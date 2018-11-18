@@ -12,6 +12,7 @@
 	.section .data.\name, "aw", @progbits
 	.global \name
 	.type \name, %object
+	.align 4
 \name:
 	.endm
 
