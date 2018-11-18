@@ -109,6 +109,7 @@ conversion:
 			print_string("0x");
 			width = 2 * sizeof(arg);
 			zero  = true;
+		/* falls through */
 		case 'x':
 			print_hex(width, zero, arg);
 			break;
