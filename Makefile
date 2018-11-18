@@ -9,6 +9,8 @@ CC		 = $(CROSS_COMPILE)gcc
 CPP		 = $(CROSS_COMPILE)cpp
 OBJCOPY		 = $(CROSS_COMPILE)objcopy
 
+HAVE_GCC9	:= $(findstring version 9,$(shell $(CC) -v 2>&1;:))
+
 WARNINGS	 = -Wall -Wextra -Wformat=2 -Wpedantic -Wshadow \
 		   -Werror=implicit-function-declaration \
 		   -Werror=implicit-int \
@@ -29,7 +31,7 @@ CFLAGS		 = -Os -pipe -std=c11 \
 		   -fomit-frame-pointer \
 		   -funsigned-char \
 		   -g$(if $(filter-out 0,$(DEBUG)),gdb,0) \
-		   -mdelay -mhard-mul -msoft-float \
+		   -mhard-mul $(if $(HAVE_GCC9),-msext -msfimm -mshftimm) \
 		   -static \
 		   -Wa,--fatal-warnings \
 		   $(WARNINGS)
