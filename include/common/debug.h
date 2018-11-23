@@ -15,12 +15,15 @@
 #define LOG_STRING_INFO    "\x04"
 #define LOG_STRING_DEBUG   "\x05"
 
-#if DEBUG
-#define assert(e)          ((void)((e) || \
-	                           (panic("Assertion failed: %s (%s:%d)", #e, \
-	                                  __FILE__, __LINE__), 0)))
+#if CONFIG_ASSERT
+#if CONFIG_ASSERT_VERBOSE
+#define assert(e) ((void)((e) || (panic("Assertion failed: %s (%s:%d)", #e, \
+	                                __FILE__, __LINE__), 0)))
 #else
-#define assert(e)          ((void)0)
+#define assert(e) ((void)((e) || (panic("Assertion failed: %d", __LINE__), 0)))
+#endif
+#else
+#define assert(e) ((void)0)
 #endif
 
 enum {
@@ -40,7 +43,7 @@ noreturn void panic(const char *fmt, ...) __printf(1, 2);
 #define error(...) log(LOG_STRING_ERROR __VA_ARGS__)
 #define warn(...)  log(LOG_STRING_WARNING __VA_ARGS__)
 #define info(...)  log(LOG_STRING_INFO __VA_ARGS__)
-#if DEBUG
+#if CONFIG_DEBUG_LOG
 #define debug(...) log(LOG_STRING_DEBUG __VA_ARGS__)
 #else
 #define debug(...) ((void)0)

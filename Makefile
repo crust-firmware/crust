@@ -27,7 +27,7 @@ COMMON_CFLAGS	 = -Os -pipe -std=c11 \
 		   -fno-builtin \
 		   -fno-common \
 		   -fvar-tracking-assignments \
-		   -ggdb \
+		   -g$(if $(CONFIG_DEBUG_INFO),gdb,0) \
 		   -Wall -Wextra -Wformat=2 -Wpedantic -Wshadow \
 		   -Werror=implicit-function-declaration \
 		   -Werror=implicit-int \
@@ -51,7 +51,6 @@ CFLAGS		 = $(COMMON_CFLAGS) \
 		   $(if $(HAVE_GCC9),-msext -msfimm -mshftimm) \
 		   -static
 CPPFLAGS	 = $(COMMON_CPPFLAGS) \
-		   -DDEBUG=$(if $(filter-out 0,$(DEBUG)),1,0) \
 		   -I$(SRC)/include/common \
 		   -I$(SRC)/include/drivers \
 		   -I$(SRC)/include/stdlib \

@@ -7,3 +7,43 @@ mainmenu "Crust Firmware Configuration"
 
 source "platform/Kconfig"
 source "drivers/Kconfig"
+
+menu "Debugging options"
+
+config ASSERT
+	bool "Enable runtime assertion checking"
+	default y
+	help
+		Enable assert() logic to validate assumptions and find
+		bugs at runtime. If in doubt, say Y.
+
+config ASSERT_VERBOSE
+	bool "Report information about failed assertions"
+	depends on ASSERT
+	help
+		When an assertion fails, print detailed information
+		about it to the console. This includes the expression
+		that was checked, as well as the file and line number of
+		the call to assert().
+
+		Enabling this option makes it significantly easier to
+		find the code that triggered an assertion failure. Note
+		that this option significantly increases the size of the
+		final firmware binary. If in doubt, say N.
+
+config DEBUG_INFO
+	bool "Compile the firmware with debug info"
+	default y
+	help
+		When compiling the firmware, generate debug information
+		for use with gdb. These are stripped out of the final
+		firmware binary, so this option does not affect the
+		loaded firmware size. If in doubt, say Y.
+
+config DEBUG_LOG
+	bool "Print additional debug-level log messages"
+	help
+		This enables the debug() logging macro to print verbose
+		informational messages that may aid in debugging.
+
+endmenu
