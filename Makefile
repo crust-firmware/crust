@@ -164,7 +164,7 @@ $(OBJ)/include/config.h: .config | $(OBJ)/include
 
 $(library): $(libobjects) | $(libobjdirs)
 	$(M) HOSTAR $@
-	$(Q) $(HOSTAR) rcs $@ $^
+	$(Q) $(HOSTAR) Drcs $@ $^
 
 $(OBJ)/lib/%.o: $(SRC)/lib/%.c $(libheaders) | $(libobjdirs)
 	$(M) HOSTCC $@
