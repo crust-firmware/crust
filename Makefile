@@ -13,9 +13,19 @@ CC		 = $(CROSS_COMPILE)gcc
 CPP		 = $(CROSS_COMPILE)cpp
 OBJCOPY		 = $(CROSS_COMPILE)objcopy
 
+HOSTAR		 = ar
+HOSTCC		 = cc
+
 HAVE_GCC9	:= $(findstring version 9,$(shell $(CC) -v 2>&1;:))
 
-WARNINGS	 = -Wall -Wextra -Wformat=2 -Wpedantic -Wshadow \
+COMMON_CFLAGS	 = -Os -pipe -std=c11 \
+		   -fdata-sections \
+		   -ffunction-sections \
+		   -fno-builtin \
+		   -fno-common \
+		   -fvar-tracking-assignments \
+		   -ggdb \
+		   -Wall -Wextra -Wformat=2 -Wpedantic -Wshadow \
 		   -Werror=implicit-function-declaration \
 		   -Werror=implicit-int \
 		   -Werror=pointer-arith \
@@ -24,22 +34,17 @@ WARNINGS	 = -Wall -Wextra -Wformat=2 -Wpedantic -Wshadow \
 		   -Werror=vla \
 		   -Wno-missing-field-initializers
 
-CFLAGS		 = -Os -pipe -std=c11 \
-		   -fdata-sections \
+CFLAGS		 = $(COMMON_CFLAGS) \
 		   -ffreestanding \
-		   -ffunction-sections \
 		   -flto \
 		   -fno-asynchronous-unwind-tables \
-		   -fno-common \
 		   -fno-pie \
 		   -fomit-frame-pointer \
 		   -funsigned-char \
-		   -g$(if $(filter-out 0,$(DEBUG)),gdb,0) \
 		   -mhard-mul -msoft-div \
 		   $(if $(HAVE_GCC9),-msext -msfimm -mshftimm) \
 		   -static \
-		   -Wa,--fatal-warnings \
-		   $(WARNINGS)
+		   -Wa,--fatal-warnings
 CPPFLAGS	 = -DDEBUG=$(if $(filter-out 0,$(DEBUG)),1,0) \
 		   -include config.h \
 		   -nostdinc \
@@ -52,11 +57,7 @@ LDFLAGS		 = -nostdlib \
 		   -Wl,--no-dynamic-linker \
 		   -Wl,--no-undefined
 
-HOSTAR		 = ar
-HOSTCC		 = cc
-HOSTCFLAGS	 = -fno-builtin \
-		   -O2 -pipe -std=c11 \
-		   $(WARNINGS)
+HOSTCFLAGS	 = $(COMMON_CFLAGS)
 HOSTCPPFLAGS	 = -D_XOPEN_SOURCE=700
 HOSTLDFLAGS	 =
 HOSTLIBS	 =
