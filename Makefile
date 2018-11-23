@@ -117,12 +117,11 @@ unityobjects	 = $(call objects,$(unitysources),,.o)
 allobjdirs	 = $(OBJ) $(OBJ)/include $(TGT) \
 		   $(fwobjdirs) $(libobjdirs) $(testobjdirs) $(toolobjdirs)
 
-ifeq ($(MAKECMDGOALS),)
-include $(OBJ)/config.mk
-else
-ifneq ($(filter-out %clean %clobber %config %format,$(MAKECMDGOALS)),)
-include $(OBJ)/config.mk
-endif
+.DEFAULT_GOAL	:= all
+GOALS		:= $(if $(MAKECMDGOALS),$(MAKECMDGOALS),$(.DEFAULT_GOAL))
+
+ifneq ($(filter-out %clean %clobber %config %format,$(GOALS)),)
+  include $(OBJ)/config.mk
 endif
 
 M := @$(if $(filter-out 0,$(V)),:,exec printf '  %-7s %s\n')
