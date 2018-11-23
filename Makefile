@@ -171,9 +171,9 @@ $(OBJ)/lib/%.o: $(SRC)/lib/%.c $(libheaders) | $(libobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(libincdirs) -c -o $@ $<
 
-$(OBJ)/test/%.test: $(OBJ)/test/%
+$(OBJ)/test/%.test: $(SRC)/scripts/test.sh $(OBJ)/test/%
 	$(M) TEST $@
-	$(Q) $< > $@.tmp && mv -f $@.tmp $@ || { cat $@.tmp; rm -f $@.tmp; }
+	$(Q) $^ $@
 
 $(OBJ)/test/%: $(OBJ)/test/%.o $(unityobjects) $(library)
 	$(M) HOSTLD $@
