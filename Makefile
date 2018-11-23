@@ -68,7 +68,7 @@ incdirs		 = $(addprefix -I,$(sort $(objdir)/include $(wildcard $1)))
 headers		 = $(call files,$1,*.h */*.h *.S) $(generated)
 sources		 = $(call files,$1,*.c *.S)
 objdirs		 = $(sort $(patsubst %/,%,$(dir $1)))
-objects		 = $(patsubst $(srcdir)$2/%,$(objdir)$3/%$4,$(basename $1))
+objects		 = $(patsubst $(srcdir)/%,$(objdir)$2/%$3,$(basename $1))
 
 format-filter	 = $(filter-out $(objdir)/% %.S,$1)
 formatheaders	 = $(call headers,include/* platform/*/include)
@@ -79,7 +79,7 @@ fwincbase	 = $(platdir)/include include/*
 fwincdirs	 = $(call incdirs,$(fwincbase))
 fwheaders	 = $(call headers,$(fwincbase))
 fwsources	 = $(call sources,common drivers/* lib $(platdir))
-fwobjects	 = $(call objects,$(fwsources),,/scp,.o)
+fwobjects	 = $(call objects,$(fwsources),/scp,.o)
 fwobjdirs	 = $(call objdirs,$(fwobjects))
 fwfiles		 = $(addprefix $(objdir)/scp/,scp.bin scp.elf scp.map)
 
@@ -87,7 +87,7 @@ libincbase	 = include/lib
 libincdirs	 = $(call incdirs,$(libincbase))
 libheaders	 = $(call headers,$(libincbase))
 libsources	 = $(call files,lib,*.c)
-libobjects	 = $(call objects,$(libsources),,,.o)
+libobjects	 = $(call objects,$(libsources),,.o)
 libobjdirs	 = $(call objdirs,$(libobjects))
 library		 = $(objdir)/lib/libcrust.a
 
@@ -95,7 +95,7 @@ testincbase	 = 3rdparty/unity include/lib
 testincdirs	 = $(call incdirs,$(testincbase))
 testheaders	 = $(call headers,$(testincbase))
 testsources	 = $(call sources,test)
-testobjects	 = $(call objects,$(testsources),,,.o)
+testobjects	 = $(call objects,$(testsources),,.o)
 testobjdirs	 = $(call objdirs,$(testobjects) $(unityobjects))
 tests		 = $(basename $(testobjects))
 testresults	 = $(addsuffix .test,$(tests))
@@ -104,12 +104,12 @@ toolincbase	 = $(platdir)/include include/lib
 toolincdirs	 = $(call incdirs,$(toolincbase))
 toolheaders	 = $(call headers,$(toolincbase))
 toolsources	 = $(call sources,tools)
-toolobjects	 = $(call objects,$(toolsources),,,.o)
+toolobjects	 = $(call objects,$(toolsources),,.o)
 toolobjdirs	 = $(call objdirs,$(toolobjects))
 tools		 = $(basename $(toolobjects))
 
 unitysources	 = $(call sources,3rdparty/unity)
-unityobjects	 = $(call objects,$(unitysources),,,.o)
+unityobjects	 = $(call objects,$(unitysources),,.o)
 
 allobjdirs	 = $(objdir) $(objdir)/include $(objdir)/scp \
 		   $(fwobjdirs) $(libobjdirs) $(testobjdirs) $(toolobjdirs)
