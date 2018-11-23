@@ -16,6 +16,9 @@ OBJCOPY		 = $(CROSS_COMPILE)objcopy
 HOSTAR		 = ar
 HOSTCC		 = cc
 
+LEX		 = lex
+YACC		 = yacc
+
 HAVE_GCC9	:= $(findstring version 9,$(shell $(CC) -v 2>&1;:))
 
 COMMON_CFLAGS	 = -Os -pipe -std=c11 \
@@ -143,6 +146,14 @@ $(OBJ)/%.o: $(OBJ)/%.c
 $(OBJ)/%.o: $(SRC)/%.c
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) -MMD -c -o $@ $<
+
+$(OBJ)/%.lex.c: $(SRC)/%.l
+	$(M) LEX $@
+	$(Q) $(LEX) -o $@ $<
+
+$(OBJ)/%.tab.c $(OBJ)/%.tab.h: $(SRC)/%.y
+	$(M) YACC $@
+	$(Q) $(YACC) -d -t -o $@ $<
 
 $(TGT)/%.bin: $(TGT)/%.elf
 	$(M) OBJCOPY $@
