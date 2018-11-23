@@ -117,7 +117,7 @@ allobjdirs	 = $(objdir) $(objdir)/include $(objdir)/scp \
 ifeq ($(MAKECMDGOALS),)
 include $(objdir)/config.mk
 else
-ifneq ($(filter-out %clean %config %format,$(MAKECMDGOALS)),)
+ifneq ($(filter-out %clean %clobber %config %format,$(MAKECMDGOALS)),)
 include $(objdir)/config.mk
 endif
 endif
@@ -133,6 +133,9 @@ check-format: $(formatfiles)
 	$(Q) uncrustify -c $(srcdir)/.uncrustify -l C -q --check $^
 
 clean:
+	$(Q) rm -fr $(objdir)/scp
+
+clobber:
 	$(Q) rm -fr $(objdir)
 
 %_defconfig:
@@ -214,6 +217,6 @@ $(objdir)/tools/%.o: $(srcdir)/tools/%.c $(toolheaders) | $(toolobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(toolincdirs) -c -o $@ $<
 
-.PHONY: all check check-format clean distclean firmware format test tools
+.PHONY: all check check-format clean clobber distclean firmware format test tools
 .SECONDARY:
 .SUFFIXES:
