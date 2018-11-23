@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
+SRC		 = .
+OBJ		 = build
+
 CROSS_COMPILE	?= or1k-linux-musl-
 AR		 = $(CROSS_COMPILE)ar
 CC		 = $(CROSS_COMPILE)gcc
@@ -57,20 +60,18 @@ HOSTCPPFLAGS	 = -D_XOPEN_SOURCE=700
 HOSTLDFLAGS	 =
 HOSTLIBS	 =
 
-srcdir		 = .
-objdir		 = build
 platdir		 = platform/$(CONFIG_PLATFORM)
 
-generated	 = $(objdir)/include/config.h
+generated	 = $(OBJ)/include/config.h
 
-files		 = $(sort $(wildcard $(foreach x,$2,$(1:%=$(srcdir)/%/$x))))
-incdirs		 = $(addprefix -I,$(sort $(objdir)/include $(wildcard $1)))
+files		 = $(sort $(wildcard $(foreach x,$2,$(1:%=$(SRC)/%/$x))))
+incdirs		 = $(addprefix -I,$(sort $(OBJ)/include $(wildcard $1)))
 headers		 = $(call files,$1,*.h */*.h *.S) $(generated)
 sources		 = $(call files,$1,*.c *.S)
 objdirs		 = $(sort $(patsubst %/,%,$(dir $1)))
-objects		 = $(patsubst $(srcdir)/%,$(objdir)$2/%$3,$(basename $1))
+objects		 = $(patsubst $(SRC)/%,$(OBJ)$2/%$3,$(basename $1))
 
-format-filter	 = $(filter-out $(objdir)/% %.S,$1)
+format-filter	 = $(filter-out $(OBJ)/% %.S,$1)
 formatheaders	 = $(call headers,include/* platform/*/include)
 formatsources	 = $(call sources,common drivers/* lib platform/* test tools)
 formatfiles	 = $(call format-filter,$(formatheaders) $(formatsources))
@@ -81,7 +82,7 @@ fwheaders	 = $(call headers,$(fwincbase))
 fwsources	 = $(call sources,common drivers/* lib $(platdir))
 fwobjects	 = $(call objects,$(fwsources),/scp,.o)
 fwobjdirs	 = $(call objdirs,$(fwobjects))
-fwfiles		 = $(addprefix $(objdir)/scp/,scp.bin scp.elf scp.map)
+fwfiles		 = $(addprefix $(OBJ)/scp/,scp.bin scp.elf scp.map)
 
 libincbase	 = include/lib
 libincdirs	 = $(call incdirs,$(libincbase))
@@ -89,7 +90,7 @@ libheaders	 = $(call headers,$(libincbase))
 libsources	 = $(call files,lib,*.c)
 libobjects	 = $(call objects,$(libsources),,.o)
 libobjdirs	 = $(call objdirs,$(libobjects))
-library		 = $(objdir)/lib/libcrust.a
+library		 = $(OBJ)/lib/libcrust.a
 
 testincbase	 = 3rdparty/unity include/lib
 testincdirs	 = $(call incdirs,$(testincbase))
@@ -111,14 +112,14 @@ tools		 = $(basename $(toolobjects))
 unitysources	 = $(call sources,3rdparty/unity)
 unityobjects	 = $(call objects,$(unitysources),,.o)
 
-allobjdirs	 = $(objdir) $(objdir)/include $(objdir)/scp \
+allobjdirs	 = $(OBJ) $(OBJ)/include $(OBJ)/scp \
 		   $(fwobjdirs) $(libobjdirs) $(testobjdirs) $(toolobjdirs)
 
 ifeq ($(MAKECMDGOALS),)
-include $(objdir)/config.mk
+include $(OBJ)/config.mk
 else
 ifneq ($(filter-out %clean %clobber %config %format,$(MAKECMDGOALS)),)
-include $(objdir)/config.mk
+include $(OBJ)/config.mk
 endif
 endif
 
@@ -130,22 +131,22 @@ all: $(fwfiles) $(tests)
 check: $(testresults)
 
 check-format: $(formatfiles)
-	$(Q) uncrustify -c $(srcdir)/.uncrustify -l C -q --check $^
+	$(Q) uncrustify -c $(SRC)/.uncrustify -l C -q --check $^
 
 clean:
-	$(Q) rm -fr $(objdir)/scp
+	$(Q) rm -fr $(OBJ)/scp
 
 clobber:
-	$(Q) rm -fr $(objdir)
+	$(Q) rm -fr $(OBJ)
 
 %_defconfig:
-	$(Q) cp -f $(srcdir)/board/$* .config
+	$(Q) cp -f $(SRC)/board/$* .config
 
 distclean:
-	$(Q) rm -fr $(objdir) .config
+	$(Q) rm -fr $(OBJ) .config
 
 format: $(formatfiles)
-	$(Q) uncrustify -c $(srcdir)/.uncrustify -l C -q --no-backup $^
+	$(Q) uncrustify -c $(SRC)/.uncrustify -l C -q --no-backup $^
 
 scp: $(fwfiles)
 
@@ -154,64 +155,64 @@ tools: $(tools)
 $(allobjdirs):
 	$(Q) mkdir -p $@
 
-$(objdir)/scp/scp.bin: $(objdir)/scp/scp.elf | $(objdir)/scp
+$(OBJ)/scp/scp.bin: $(OBJ)/scp/scp.elf | $(OBJ)/scp
 	$(M) OBJCOPY $@
 	$(Q) $(OBJCOPY) -O binary -S --reverse-bytes 4 $< $@
 
-$(objdir)/scp/scp.elf: $(objdir)/scp/scp.ld $(fwobjects) | $(objdir)/scp
+$(OBJ)/scp/scp.elf: $(OBJ)/scp/scp.ld $(fwobjects) | $(OBJ)/scp
 	$(M) CCLD $@
 	$(Q) $(CC) $(CFLAGS) $(LDFLAGS) \
-		-Wl,-Map,$(objdir)/scp/$*.map -o $@ -T $^
+		-Wl,-Map,$(OBJ)/scp/$*.map -o $@ -T $^
 
-$(objdir)/scp/scp.ld: $(srcdir)/scripts/scp.ld.S $(fwheaders) | $(objdir)/scp
+$(OBJ)/scp/scp.ld: $(SRC)/scripts/scp.ld.S $(fwheaders) | $(OBJ)/scp
 	$(M) CPP $@
 	$(Q) $(CPP) $(CPPFLAGS) $(fwincdirs) -o $@ -P $<
 
-$(objdir)/scp/scp.map: $(objdir)/scp/scp.elf;
+$(OBJ)/scp/scp.map: $(OBJ)/scp/scp.elf;
 
-$(objdir)/scp/%.o: $(srcdir)/%.c $(fwheaders) | $(fwobjdirs)
+$(OBJ)/scp/%.o: $(SRC)/%.c $(fwheaders) | $(fwobjdirs)
 	$(M) CC $@
 	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
 
-$(objdir)/scp/%.o: $(srcdir)/%.S $(fwheaders) | $(fwobjdirs)
+$(OBJ)/scp/%.o: $(SRC)/%.S $(fwheaders) | $(fwobjdirs)
 	$(M) CC $@
 	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
 
-$(objdir)/config.mk: .config | $(objdir)
+$(OBJ)/config.mk: .config | $(OBJ)
 	$(Q) sed 's/#.*$$//;s/="\(.*\)"$$/=\1/' $< > $@
 
-$(objdir)/include/config.h: .config | $(objdir)/include
+$(OBJ)/include/config.h: .config | $(OBJ)/include
 	$(Q) sed -n 's/#.*$$//;s/^\([^=]\+\)=\(.*\)$$/#define \1 \2/p' $< > $@
 
 $(library): $(libobjects) | $(libobjdirs)
 	$(M) HOSTAR $@
 	$(Q) $(HOSTAR) rcs $@ $^
 
-$(objdir)/lib/%.o: $(srcdir)/lib/%.c $(libheaders) | $(libobjdirs)
+$(OBJ)/lib/%.o: $(SRC)/lib/%.c $(libheaders) | $(libobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(libincdirs) -c -o $@ $<
 
-$(objdir)/test/%.test: $(objdir)/test/%
+$(OBJ)/test/%.test: $(OBJ)/test/%
 	$(M) TEST $@
 	$(Q) $< > $@.tmp && mv -f $@.tmp $@ || { cat $@.tmp; rm -f $@.tmp; }
 
-$(objdir)/test/%: $(objdir)/test/%.o $(unityobjects) $(library)
+$(OBJ)/test/%: $(OBJ)/test/%.o $(unityobjects) $(library)
 	$(M) HOSTLD $@
 	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLIBS)
 
-$(objdir)/3rdparty/%.o: $(srcdir)/3rdparty/%.c $(testheaders) | $(testobjdirs)
+$(OBJ)/3rdparty/%.o: $(SRC)/3rdparty/%.c $(testheaders) | $(testobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(testincdirs) -c -o $@ $<
 
-$(objdir)/test/%.o: $(srcdir)/test/%.c $(testheaders) | $(testobjdirs)
+$(OBJ)/test/%.o: $(SRC)/test/%.c $(testheaders) | $(testobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(testincdirs) -c -o $@ $<
 
-$(objdir)/tools/%: $(objdir)/tools/%.o $(library)
+$(OBJ)/tools/%: $(OBJ)/tools/%.o $(library)
 	$(M) HOSTLD $@
 	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLIBS)
 
-$(objdir)/tools/%.o: $(srcdir)/tools/%.c $(toolheaders) | $(toolobjdirs)
+$(OBJ)/tools/%.o: $(SRC)/tools/%.c $(toolheaders) | $(toolobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(toolincdirs) -c -o $@ $<
 
