@@ -79,23 +79,23 @@ fwincbase	 = $(platdir)/include include/*
 fwincdirs	 = $(call incdirs,$(fwincbase))
 fwheaders	 = $(call headers,$(fwincbase))
 fwsources	 = $(call sources,common drivers/* lib $(platdir))
-fwobjects	 = $(call objects,$(fwsources),,,.o)
+fwobjects	 = $(call objects,$(fwsources),,/scp,.o)
 fwobjdirs	 = $(call objdirs,$(fwobjects))
-fwfiles		 = $(addprefix $(objdir)/,scp.bin scp.elf scp.map)
+fwfiles		 = $(addprefix $(objdir)/scp/,scp.bin scp.elf scp.map)
 
 libincbase	 = include/lib
 libincdirs	 = $(call incdirs,$(libincbase))
 libheaders	 = $(call headers,$(libincbase))
 libsources	 = $(call files,lib,*.c)
-libobjects	 = $(call objects,$(libsources),,/host,.o)
+libobjects	 = $(call objects,$(libsources),,,.o)
 libobjdirs	 = $(call objdirs,$(libobjects))
-library		 = $(objdir)/host/lib/libcrust.a
+library		 = $(objdir)/lib/libcrust.a
 
 testincbase	 = 3rdparty/unity include/lib
 testincdirs	 = $(call incdirs,$(testincbase))
 testheaders	 = $(call headers,$(testincbase))
 testsources	 = $(call sources,test)
-testobjects	 = $(call objects,$(testsources),,/host,.o)
+testobjects	 = $(call objects,$(testsources),,,.o)
 testobjdirs	 = $(call objdirs,$(testobjects) $(unityobjects))
 tests		 = $(basename $(testobjects))
 testresults	 = $(addsuffix .test,$(tests))
@@ -104,15 +104,15 @@ toolincbase	 = $(platdir)/include include/lib
 toolincdirs	 = $(call incdirs,$(toolincbase))
 toolheaders	 = $(call headers,$(toolincbase))
 toolsources	 = $(call sources,tools)
-toolobjects	 = $(call objects,$(toolsources),,/host,.o)
+toolobjects	 = $(call objects,$(toolsources),,,.o)
 toolobjdirs	 = $(call objdirs,$(toolobjects))
 tools		 = $(basename $(toolobjects))
 
 unitysources	 = $(call sources,3rdparty/unity)
-unityobjects	 = $(call objects,$(unitysources),/3rdparty,/host/test,.o)
+unityobjects	 = $(call objects,$(unitysources),,,.o)
 
-allobjdirs	 = $(objdir) $(objdir)/include $(fwobjdirs) $(libobjdirs) \
-		   $(testobjdirs) $(toolobjdirs)
+allobjdirs	 = $(objdir) $(objdir)/include $(objdir)/scp \
+		   $(fwobjdirs) $(libobjdirs) $(testobjdirs) $(toolobjdirs)
 
 ifeq ($(MAKECMDGOALS),)
 include $(objdir)/config.mk
@@ -153,24 +153,26 @@ tools: $(tools)
 $(allobjdirs):
 	$(Q) mkdir -p $@
 
-$(objdir)/%.bin: $(objdir)/%.elf | $(objdir)
+$(objdir)/scp/scp.bin: $(objdir)/scp/scp.elf | $(objdir)/scp
 	$(M) OBJCOPY $@
 	$(Q) $(OBJCOPY) -O binary -S --reverse-bytes 4 $< $@
 
-$(objdir)/%.elf $(objdir)/%.map: $(objdir)/%.ld $(fwobjects) | $(objdir)
+$(objdir)/scp/scp.elf: $(objdir)/scp/scp.ld $(fwobjects) | $(objdir)/scp
 	$(M) CCLD $@
 	$(Q) $(CC) $(CFLAGS) $(LDFLAGS) \
-		-Wl,-Map,$(objdir)/$*.map -o $(objdir)/$*.elf -T $^
+		-Wl,-Map,$(objdir)/scp/$*.map -o $@ -T $^
 
-$(objdir)/%.ld: $(srcdir)/scripts/%.ld.S $(fwheaders) | $(objdir)
+$(objdir)/scp/scp.ld: $(srcdir)/scripts/scp.ld.S $(fwheaders) | $(objdir)/scp
 	$(M) CPP $@
 	$(Q) $(CPP) $(CPPFLAGS) $(fwincdirs) -o $@ -P $<
 
-$(objdir)/%.o: $(srcdir)/%.c $(fwheaders) | $(fwobjdirs)
+$(objdir)/scp/scp.map: $(objdir)/scp/scp.elf;
+
+$(objdir)/scp/%.o: $(srcdir)/%.c $(fwheaders) | $(fwobjdirs)
 	$(M) CC $@
 	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
 
-$(objdir)/%.o: $(srcdir)/%.S $(fwheaders) | $(fwobjdirs)
+$(objdir)/scp/%.o: $(srcdir)/%.S $(fwheaders) | $(fwobjdirs)
 	$(M) CC $@
 	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
 
@@ -184,31 +186,31 @@ $(library): $(libobjects) | $(libobjdirs)
 	$(M) HOSTAR $@
 	$(Q) $(HOSTAR) rcs $@ $^
 
-$(objdir)/host/lib/%.o: $(srcdir)/lib/%.c $(libheaders) | $(libobjdirs)
+$(objdir)/lib/%.o: $(srcdir)/lib/%.c $(libheaders) | $(libobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(libincdirs) -c -o $@ $<
 
-$(objdir)/host/test/%.test: $(objdir)/host/test/%
+$(objdir)/test/%.test: $(objdir)/test/%
 	$(M) TEST $@
 	$(Q) $< > $@.tmp && mv -f $@.tmp $@ || { cat $@.tmp; rm -f $@.tmp; }
 
-$(objdir)/host/test/%: $(objdir)/host/test/%.o $(unityobjects) $(library)
+$(objdir)/test/%: $(objdir)/test/%.o $(unityobjects) $(library)
 	$(M) HOSTLD $@
 	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLIBS)
 
-$(objdir)/host/test/%.o: $(srcdir)/3rdparty/%.c $(testheaders) | $(testobjdirs)
+$(objdir)/3rdparty/%.o: $(srcdir)/3rdparty/%.c $(testheaders) | $(testobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(testincdirs) -c -o $@ $<
 
-$(objdir)/host/test/%.o: $(srcdir)/test/%.c $(testheaders) | $(testobjdirs)
+$(objdir)/test/%.o: $(srcdir)/test/%.c $(testheaders) | $(testobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(testincdirs) -c -o $@ $<
 
-$(objdir)/host/tools/%: $(objdir)/host/tools/%.o $(library)
+$(objdir)/tools/%: $(objdir)/tools/%.o $(library)
 	$(M) HOSTLD $@
 	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLIBS)
 
-$(objdir)/host/tools/%.o: $(srcdir)/tools/%.c $(toolheaders) | $(toolobjdirs)
+$(objdir)/tools/%.o: $(srcdir)/tools/%.c $(toolheaders) | $(toolobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(toolincdirs) -c -o $@ $<
 
