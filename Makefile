@@ -125,8 +125,8 @@ include $(OBJ)/config.mk
 endif
 endif
 
-M := @$(if $(filter-out 0,$(V)),:,printf '  %-7s %s\n')
-Q :=  $(if $(filter-out 0,$(V)),,@)
+M := @$(if $(filter-out 0,$(V)),:,exec printf '  %-7s %s\n')
+Q :=  $(if $(filter-out 0,$(V)),,@)exec
 
 all: $(fwfiles) $(tests)
 
