@@ -1,7 +1,7 @@
 /*
  * Copyright © 2016, ARM Limited and Contributors. All rights reserved.
  * Copyright © 2017-2018 The Crust Firmware Authors.
- * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
+ * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
 #include <debug.h>

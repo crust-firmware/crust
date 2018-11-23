@@ -1,7 +1,7 @@
 /*
  * Copyright © 2014-2017, ARM Limited and Contributors. All rights reserved.
  * Copyright © 2017-2018 The Crust Firmware Authors.
- * SPDX-License-Identifier: (BSD-3-Clause OR GPL-2.0)
+ * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
 #ifndef COMMON_SCPI_PROTOCOL_H
