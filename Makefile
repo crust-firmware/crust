@@ -79,8 +79,13 @@ HOSTLDLIBS	 =
 GOALS		:= $(if $(MAKECMDGOALS),$(MAKECMDGOALS),$(.DEFAULT_GOAL))
 MAKEFLAGS	+= -Rr
 
+export KCONFIG_AUTOCONFIG := $(OBJ)/include/config/auto.conf
+export KCONFIG_AUTOHEADER := $(OBJ)/include/config.h
+export KCONFIG_TRISTATE   := $(OBJ)/include/config/tristate.conf
+
 ifneq ($(filter-out %clean %clobber %config %format,$(GOALS)),)
-  include $(OBJ)/config.mk
+  include $(OBJ)/include/config/auto.conf
+  include $(OBJ)/include/config/auto.conf.cmd
 endif
 
 include $(SRC)/scripts/Makefile.format
@@ -103,26 +108,19 @@ clean:
 clobber:
 	$(Q) rm -fr $(OBJ)
 
-%_defconfig:
-	$(Q) cp -f $(SRC)/board/$* .config
-
 distclean:
-	$(Q) rm -fr $(OBJ) .config
+	$(Q) rm -fr $(OBJ) ..config* .config*
 
 scp: $(TGT)/scp.bin $(TGT)/scp.elf $(TGT)/scp.map
 
 tools: $(tools-all)
 
+.config:;
+
 %/.:
 	$(Q) mkdir -p $*
 
 %.d:;
-
-$(OBJ)/config.mk: .config $(OBJ)/include/config.h | $(OBJ)/.
-	$(Q) sed 's/#.*$$//;s/="\(.*\)"$$/=\1/' $< > $@
-
-$(OBJ)/include/config.h: .config | $(OBJ)/include/.
-	$(Q) sed -n 's/#.*$$//;s/^\([^=]\+\)=\(.*\)$$/#define \1 \2/p' $< > $@
 
 $(OBJ)/%.test: $(SRC)/scripts/test.sh $(OBJ)/%
 	$(M) TEST $@
@@ -154,6 +152,14 @@ $(OBJ)/%.lex.c: $(SRC)/%.l
 $(OBJ)/%.tab.c $(OBJ)/%.tab.h: $(SRC)/%.y
 	$(M) YACC $@
 	$(Q) $(YACC) -d -t -o $@ $<
+
+$(OBJ)/include/config.h: $(OBJ)/include/config/auto.conf;
+
+$(OBJ)/include/config/auto.conf: $(OBJ)/3rdparty/kconfig/conf .config
+	$(M) GEN $@
+	$(Q) $< --syncconfig $(SRC)/Kconfig
+
+$(OBJ)/include/config/auto.conf.cmd: $(OBJ)/include/config/auto.conf;
 
 $(TGT)/%.bin: $(TGT)/%.elf
 	$(M) OBJCOPY $@

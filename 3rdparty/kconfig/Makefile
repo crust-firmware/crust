@@ -43,6 +43,9 @@ config: $(obj)/conf
 defconfig: $(obj)/conf
 	$(Q) $< $(silent) --defconfig=$(SRC)/configs/$@ $(SRC)/Kconfig
 
+%_defconfig: $(obj)/conf
+	$(Q) $< $(silent) --defconfig=$(SRC)/configs/$@ $(SRC)/Kconfig
+
 nconfig: $(obj)/nconf
 	$(Q) $< $(silent) $(SRC)/Kconfig
 

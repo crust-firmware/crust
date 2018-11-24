@@ -3,4 +3,4 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
-obj-$(CONFIG_PLATFORM_SUN50I:1=y) += sun50i/
+obj-$(CONFIG_PLATFORM_SUN50I) += sun50i/

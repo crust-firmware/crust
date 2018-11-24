@@ -5,5 +5,5 @@
 
 obj-y += regulator.o
 
-obj-y += axp803.o
-obj-y += sy8106a.o
+obj-$(CONFIG_REGULATOR_AXP803)  += axp803.o
+obj-$(CONFIG_REGULATOR_SY8106A) += sy8106a.o

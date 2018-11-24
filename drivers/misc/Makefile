@@ -3,4 +3,4 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
-obj-y += gpio-button.o
+obj-$(CONFIG_GPIO_BUTTON) += gpio-button.o
