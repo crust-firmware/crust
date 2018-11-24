@@ -1,0 +1,22 @@
+#
+# Copyright © 2017-2018 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+config PLATFORM
+	string
+	default "sun50i" if PLATFORM_SUN50I
+
+choice
+	prompt "Platform selection"
+
+config PLATFORM_SUN50I
+	bool "sun50i (A64/H5)"
+
+endchoice
+
+if PLATFORM_SUN50I
+
+source "sun50i/Kconfig"
+
+endif

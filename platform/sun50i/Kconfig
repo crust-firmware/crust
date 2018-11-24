@@ -1,0 +1,20 @@
+#
+# Copyright © 2017-2018 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+config SOC
+	string
+	default "A64" if SOC_A64
+	default "H5" if SOC_H5
+
+choice
+	prompt "SoC"
+
+config SOC_A64
+	bool "A64"
+
+config SOC_H5
+	bool "H5"
+
+endchoice

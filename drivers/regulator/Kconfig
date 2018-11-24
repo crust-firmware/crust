@@ -1,0 +1,14 @@
+#
+# Copyright © 2017-2018 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+menu "Voltage and current regulators"
+
+config REGULATOR_AXP803
+	bool "X-Powers AXP803 voltage regulators"
+
+config REGULATOR_SY8106A
+	bool "Silergy SY8106A voltage regulator"
+
+endmenu
