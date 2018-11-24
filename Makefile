@@ -33,6 +33,8 @@ COMMON_CFLAGS	 = -Os -pipe -std=c11 \
 		   -Werror=strict-prototypes \
 		   -Werror=vla \
 		   -Wno-missing-field-initializers
+COMMON_CPPFLAGS	 = -I$(OBJ)/include \
+		   -I$(SRC)/include/lib
 
 AFLAGS		 = -Wa,--fatal-warnings
 CFLAGS		 = $(COMMON_CFLAGS) \
@@ -45,7 +47,12 @@ CFLAGS		 = $(COMMON_CFLAGS) \
 		   -mhard-mul -msoft-div \
 		   $(if $(HAVE_GCC9),-msext -msfimm -mshftimm) \
 		   -static
-CPPFLAGS	 = -DDEBUG=$(if $(filter-out 0,$(DEBUG)),1,0) \
+CPPFLAGS	 = $(COMMON_CPPFLAGS) \
+		   -DDEBUG=$(if $(filter-out 0,$(DEBUG)),1,0) \
+		   -I$(SRC)/include/common \
+		   -I$(SRC)/include/drivers \
+		   -I$(SRC)/include/stdlib \
+		   -I$(SRC)/platform/$(CONFIG_PLATFORM)/include \
 		   -include config.h \
 		   -nostdinc \
 		   -Werror=missing-include-dirs
@@ -58,75 +65,34 @@ LDFLAGS		 = -nostdlib \
 		   -Wl,--no-undefined
 
 HOSTCFLAGS	 = $(COMMON_CFLAGS)
-HOSTCPPFLAGS	 = -D_XOPEN_SOURCE=700
+HOSTCPPFLAGS	 = $(COMMON_CPPFLAGS) \
+		   -D_XOPEN_SOURCE=700
 HOSTLDFLAGS	 =
 HOSTLDLIBS	 =
 
-platdir		 = platform/$(CONFIG_PLATFORM)
-
-generated	 = $(OBJ)/include/config.h
-
-files		 = $(sort $(wildcard $(foreach x,$2,$(1:%=$(SRC)/%/$x))))
-incdirs		 = $(addprefix -I,$(sort $(OBJ)/include $(wildcard $1)))
-headers		 = $(call files,$1,*.h */*.h *.S) $(generated)
-sources		 = $(call files,$1,*.c *.S)
-objdirs		 = $(sort $(patsubst %/,%,$(dir $1)))
-objects		 = $(patsubst $(SRC)/%,$(OBJ)$2/%$3,$(basename $1))
-
-fwincbase	 = $(platdir)/include include/*
-fwincdirs	 = $(call incdirs,$(fwincbase))
-fwheaders	 = $(call headers,$(fwincbase))
-fwsources	 = $(call sources,common drivers/* lib $(platdir))
-fwobjects	 = $(call objects,$(fwsources),/scp,.o)
-fwobjdirs	 = $(call objdirs,$(fwobjects))
-fwfiles		 = $(addprefix $(TGT)/,scp.bin scp.elf scp.map)
-
-libincbase	 = include/lib
-libincdirs	 = $(call incdirs,$(libincbase))
-libheaders	 = $(call headers,$(libincbase))
-libsources	 = $(call files,lib,*.c)
-libobjects	 = $(call objects,$(libsources),,.o)
-libobjdirs	 = $(call objdirs,$(libobjects))
-library		 = $(OBJ)/lib/libcrust.a
-
-testincbase	 = 3rdparty/unity include/lib
-testincdirs	 = $(call incdirs,$(testincbase))
-testheaders	 = $(call headers,$(testincbase))
-testsources	 = $(call sources,test)
-testobjects	 = $(call objects,$(testsources),,.o)
-testobjdirs	 = $(call objdirs,$(testobjects) $(unityobjects))
-tests		 = $(basename $(testobjects))
-testresults	 = $(addsuffix .test,$(tests))
-
-toolincbase	 = $(platdir)/include include/lib
-toolincdirs	 = $(call incdirs,$(toolincbase))
-toolheaders	 = $(call headers,$(toolincbase))
-toolsources	 = $(call sources,tools)
-toolobjects	 = $(call objects,$(toolsources),,.o)
-toolobjdirs	 = $(call objdirs,$(toolobjects))
-tools		 = $(basename $(toolobjects))
-
-unitysources	 = $(call sources,3rdparty/unity)
-unityobjects	 = $(call objects,$(unitysources),,.o)
-
-allobjdirs	 = $(OBJ) $(OBJ)/include $(TGT) \
-		   $(fwobjdirs) $(libobjdirs) $(testobjdirs) $(toolobjdirs)
+###############################################################################
 
 .DEFAULT_GOAL	:= all
 GOALS		:= $(if $(MAKECMDGOALS),$(MAKECMDGOALS),$(.DEFAULT_GOAL))
+MAKEFLAGS	+= -Rr
 
 ifneq ($(filter-out %clean %clobber %config %format,$(GOALS)),)
   include $(OBJ)/config.mk
 endif
 
 include $(SRC)/scripts/Makefile.format
+include $(SRC)/scripts/Makefile.kbuild
+
+$(call descend,3rdparty common drivers lib platform scripts test tools)
+
+###############################################################################
 
 M := @$(if $(filter-out 0,$(V)),:,exec printf '  %-7s %s\n')
 Q :=  $(if $(filter-out 0,$(V)),,@)exec
 
-all: $(fwfiles) $(tests)
+all: scp $(test-all)
 
-check: $(testresults)
+check: $(test-all:%=%.test)
 
 clean:
 	$(Q) rm -fr $(TGT)
@@ -140,73 +106,69 @@ clobber:
 distclean:
 	$(Q) rm -fr $(OBJ) .config
 
-scp: $(fwfiles)
+scp: $(TGT)/scp.bin $(TGT)/scp.elf $(TGT)/scp.map
 
-tools: $(tools)
+tools: $(tools-all)
 
-$(allobjdirs):
-	$(Q) mkdir -p $@
+%/.:
+	$(Q) mkdir -p $*
 
-$(OBJ)/config.mk: .config | $(OBJ)
+%.d:;
+
+$(OBJ)/config.mk: .config $(OBJ)/include/config.h | $(OBJ)/.
 	$(Q) sed 's/#.*$$//;s/="\(.*\)"$$/=\1/' $< > $@
 
-$(OBJ)/include/config.h: .config | $(OBJ)/include
+$(OBJ)/include/config.h: .config | $(OBJ)/include/.
 	$(Q) sed -n 's/#.*$$//;s/^\([^=]\+\)=\(.*\)$$/#define \1 \2/p' $< > $@
 
-$(library): $(libobjects) | $(libobjdirs)
-	$(M) HOSTAR $@
-	$(Q) $(HOSTAR) Drcs $@ $^
-
-$(OBJ)/lib/%.o: $(SRC)/lib/%.c $(libheaders) | $(libobjdirs)
-	$(M) HOSTCC $@
-	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(libincdirs) -c -o $@ $<
-
-$(OBJ)/test/%.test: $(SRC)/scripts/test.sh $(OBJ)/test/%
+$(OBJ)/%.test: $(SRC)/scripts/test.sh $(OBJ)/%
 	$(M) TEST $@
 	$(Q) $^ $@
 
-$(OBJ)/test/%: $(OBJ)/test/%.o $(unityobjects) $(library)
+$(OBJ)/%: $(OBJ)/%.o
 	$(M) HOSTLD $@
 	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLDLIBS)
 
-$(OBJ)/3rdparty/%.o: $(SRC)/3rdparty/%.c $(testheaders) | $(testobjdirs)
+$(test-all): $(OBJ)/lib.a $(OBJ)/3rdparty/unity/unity.o
+$(tools-all): $(OBJ)/lib.a
+
+$(OBJ)/lib.a:
+	$(M) HOSTAR $@
+	$(Q) $(HOSTAR) Drcs $@ $^
+
+$(OBJ)/%.o: $(OBJ)/%.c
 	$(M) HOSTCC $@
-	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(testincdirs) -c -o $@ $<
+	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) -MMD -c -o $@ $<
 
-$(OBJ)/test/%.o: $(SRC)/test/%.c $(testheaders) | $(testobjdirs)
+$(OBJ)/%.o: $(SRC)/%.c
 	$(M) HOSTCC $@
-	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(testincdirs) -c -o $@ $<
+	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) -MMD -c -o $@ $<
 
-$(OBJ)/tools/%: $(OBJ)/tools/%.o $(library)
-	$(M) HOSTLD $@
-	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLDLIBS)
-
-$(OBJ)/tools/%.o: $(SRC)/tools/%.c $(toolheaders) | $(toolobjdirs)
-	$(M) HOSTCC $@
-	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(toolincdirs) -c -o $@ $<
-
-$(TGT)/scp.bin: $(TGT)/scp.elf | $(TGT)
+$(TGT)/%.bin: $(TGT)/%.elf
 	$(M) OBJCOPY $@
 	$(Q) $(OBJCOPY) -O binary -S --reverse-bytes 4 $< $@
 
-$(TGT)/scp.elf: $(TGT)/scp.ld $(fwobjects) | $(TGT)
-	$(M) CCLD $@
-	$(Q) $(CC) $(CFLAGS) $(LDFLAGS) \
-		-Wl,-Map,$(TGT)/$*.map -o $@ -T $^
+$(TGT)/%.elf $(TGT)/%.map: $(TGT)/scripts/%.ld $(obj-all) $(TGT)/lib.a
+	$(M) LD $@
+	$(Q) $(CC) $(CFLAGS) $(LDFLAGS) -Wl,-Map,$(TGT)/$*.map -o $@ -T $^
 
-$(TGT)/scp.ld: $(SRC)/scripts/scp.ld.S $(fwheaders) | $(TGT)
+$(TGT)/%.ld: $(SRC)/%.ld.S
 	$(M) CPP $@
-	$(Q) $(CPP) $(CPPFLAGS) $(fwincdirs) -o $@ -P $<
+	$(Q) $(CPP) $(CPPFLAGS) -MMD -MF $@.d -MT $@ -P -o $@ $<
 
-$(TGT)/scp.map: $(TGT)/scp.elf;
+$(TGT)/lib.a:
+	$(M) AR $@
+	$(Q) $(AR) Drcs $@ $^
 
-$(TGT)/%.o: $(SRC)/%.c $(fwheaders) | $(fwobjdirs)
+$(TGT)/%.o: $(SRC)/%.c
 	$(M) CC $@
-	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(AFLAGS) $(fwincdirs) -c -o $@ $<
+	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(AFLAGS) -MMD -c -o $@ $<
 
-$(TGT)/%.o: $(SRC)/%.S $(fwheaders) | $(fwobjdirs)
+$(TGT)/%.o: $(SRC)/%.S
 	$(M) AS $@
-	$(Q) $(CC) $(CPPFLAGS) $(AFLAGS) $(fwincdirs) -c -o $@ $<
+	$(Q) $(CC) $(CPPFLAGS) $(AFLAGS) -MMD -c -o $@ $<
+
+$(SRC)/Makefile:;
 
 .PHONY: all check clean clobber distclean scp tools
 .SECONDARY:

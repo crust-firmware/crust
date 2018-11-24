@@ -1,0 +1,207 @@
+#
+# Copyright © 2017-2018 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+#
+# Variables for use in included Makefiles
+#
+src		 = $(SRC)/$(subdir)
+obj		 = $(OBJ)/$(subdir)
+tgt		 = $(TGT)/$(subdir)
+
+#
+# Variables for use in the main Makefile
+#
+hostprogs-all	:=
+lib-all		:=
+obj-all		:=
+test-all	:=
+tools-all	:=
+
+#
+# Internal variables
+#
+dir_AFLAGS	 = $(asflags-y)
+dir_CFLAGS	 = $(ccflags-y)
+dir_CPPFLAGS	 = $(cppflags-y)
+dir_LDFLAGS	 = $(ldflags-y)
+dir_HOSTAFLAGS	 = $(asflags-y)
+dir_HOSTCFLAGS	 = $(ccflags-y)
+dir_HOSTCPPFLAGS = $(cppflags-y)
+dir_HOSTLDFLAGS	 = $(ldflags-y)
+
+flags		 = AFLAGS CFLAGS CPPFLAGS LDFLAGS LDLIBS
+flags_object	:= $(filter-out LD%,$(flags))
+flags_program	:= $(filter LD%,$(flags))
+flags_script	:= $(filter CPP%,$(flags))
+
+vars		 = hostprogs lib obj test tools
+
+#
+# Defined functions and procedures (those starting with '_' are internal)
+#
+
+#
+# Adds compiler/linker flags to the target-specific variables for this file.
+# Pass $(flags_object) or $(flags_program) for the flags list, as appropriate.
+#
+# $1: File name (no path)
+# $2: List of flags
+#
+host_file_flags   = $(foreach f,$(2:%=HOST%),$(call _file_flag, $(obj),$1,$f))
+target_file_flags = $(foreach f,$2,$(call _file_flag,$(tgt),$1,$f))
+
+#
+# Internal helper to add target-specific variables. $(eval) provides the
+# necessary eager binding. Also avoids adding blank/whitespace variables.
+#
+# $1: Directory
+# $2: File name
+# $3: Flag name
+#
+_file_flag = $(if $(strip $(dir_$3)$($3_$2)), \
+                  $(eval $1/$2: $3 += $(dir_$3) $($3_$2)))
+
+#
+# Adds the necessary dependencies and flags for a list of host object files.
+#
+# $1: List of object file names (no path)
+#
+host_objects = $(foreach object,$1,$(eval $(value _host_object)))
+define _host_object
+  $(call host_file_flags,$(object),$(flags_object))
+  $(obj)/$(object): | $(obj)/.
+  -include $(obj)/$(object:.o=.d)
+endef
+
+#
+# Adds the necessary dependencies and flags for a list of host programs.
+#
+# $1: List of program names (no path)
+#
+host_programs = $(foreach program,$1,$(eval $(value _host_program)))
+define _host_program
+  $(call host_file_flags,$(program),$(flags_program))
+  ifeq ($($(program)-objs),)
+    $(program)-objs := $(program).o
+  endif
+  $(obj)/$(program): $($(program)-objs:%=$(obj)/%) | $(obj)/.
+  $(call host_objects,$($(program)-objs))
+endef
+
+#
+# Includes a list of object files in the main static library (both host and
+# target versions). Also adds the necessary dependencies and flags for each
+# object file.
+#
+# $1: List of object file names (no path)
+#
+library_objects = $(foreach object,$1,$(eval $(value _library_object)))
+define _library_object
+  # Add the host version of this library object
+  $(OBJ)/lib.a: $(obj)/$(object)
+  $(call host_objects,$(object))
+  # Add the target version of this library object
+  $(TGT)/lib.a: $(tgt)/$(object)
+  $(call target_objects,$(object))
+endef
+
+#
+# Adds the necessary dependencies and flags for a list of linker scripts.
+#
+# $1: List of linker script file names (no path)
+#
+linker_scripts = $(foreach script,$1,$(eval $(value _linker_script)))
+define _linker_script
+  $(call target_file_flags,$(script),$(flags_script))
+  $(tgt)/$(script): | $(tgt)/.
+  -include $(tgt)/$(script).d
+endef
+
+#
+# Adds the necessary dependencies and flags for a list of target object files.
+#
+# $1: List of object file names (no path)
+#
+target_objects = $(foreach object,$1,$(eval $(value _target_object)))
+define _target_object
+  $(call target_file_flags,$(object),$(flags_object))
+  $(tgt)/$(object): | $(tgt)/.
+  -include $(tgt)/$(object:.o=.d)
+endef
+
+#
+# Descend into each of a list of directories. For every directory entered,
+# recursively read and evaluate rules from its Makefile.
+#
+# $1: List of directories (relative to the root of the source tree)
+#
+descend = $(foreach subdir,$1,$(eval $(value _descend)))
+define _descend
+  # Clear all per-directory variables
+  $(foreach var,$(filter %-objs %-y,$(.VARIABLES)),$(eval $(var) :=))
+
+  # Read the Makefile in this directory
+  $(src)/Makefile:;
+  include $(src)/Makefile
+
+  # Filter out directory dependencies
+  dirs-y	:= $(filter %/,$(foreach var,$(vars),$($(var)-y)))
+  hostprogs-y	:= $(filter-out %/,$(hostprogs-y))
+  lib-y		:= $(filter-out %/,$(lib-y))
+  obj-y		:= $(filter-out %/,$(obj-y))
+  test-y	:= $(filter-out %/,$(test-y))
+  tools-y	:= $(filter-out %/,$(tools-y))
+
+  # Combine all sources of flags
+  asflags-y	+= $(parent-asflags) $(subdir-asflags-y)
+  ccflags-y	+= $(parent-ccflags) $(subdir-ccflags-y)
+  cppflags-y	+= $(parent-cppflags) $(subdir-cppflags-y)
+  ldflags-y	+= $(parent-ldflags) $(subdir-ldflags-y)
+
+  # Handle file rules
+  $(call host_programs,  $(hostprogs-y))
+  $(call library_objects,$(lib-y))
+  $(call target_objects, $(obj-y))
+  $(call host_programs,  $(test-y))
+  $(call host_programs,  $(tools-y))
+
+  # Accumulate file names (library objects are handled above)
+  hostprogs-all	+= $(hostprogs-y:%=$(obj)/%)
+  obj-all	+= $(obj-y:%=$(tgt)/%)
+  test-all	+= $(test-y:%=$(obj)/%)
+  tools-all	+= $(tools-y:%=$(obj)/%)
+
+  # Push recursive flags
+  $(subdir)-asflags	:= $(parent-asflags)
+  $(subdir)-ccflags	:= $(parent-ccflags)
+  $(subdir)-cppflags	:= $(parent-cppflags)
+  $(subdir)-ldflags	:= $(parent-ldflags)
+  parent-asflags	+= $(subdir-asflags-y)
+  parent-ccflags	+= $(subdir-ccflags-y)
+  parent-cppflags	+= $(subdir-cppflags-y)
+  parent-ldflags	+= $(subdir-ldflags-y)
+
+  # Recursively descend into sub-directories
+  $(call descend,$(dirs-y:%/=$(subdir)/%))
+
+  # Pop recursive flags
+  parent-asflags	:= $($(subdir)-asflags)
+  parent-ccflags	:= $($(subdir)-ccflags)
+  parent-cppflags	:= $($(subdir)-cppflags)
+  parent-ldflags	:= $($(subdir)-ldflags)
+
+  # Clear this directory's flags
+  ifneq ($(filter undefine,$(.FEATURES)),)
+    undefine $(subdir)-asflags
+    undefine $(subdir)-ccflags
+    undefine $(subdir)-cppflags
+    undefine $(subdir)-ldflags
+  else
+    $(subdir)-asflags	:=
+    $(subdir)-ccflags	:=
+    $(subdir)-cppflags	:=
+    $(subdir)-ldflags	:=
+  endif
+endef
