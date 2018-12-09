@@ -144,10 +144,10 @@ clobber:
 distclean:
 	$(Q) rm -fr $(objdir) .config
 
-firmware: $(fwfiles)
-
 format: $(formatfiles)
 	$(Q) uncrustify -c $(srcdir)/.uncrustify -l C -q --no-backup $^
+
+scp: $(fwfiles)
 
 tools: $(tools)
 
@@ -215,6 +215,6 @@ $(objdir)/tools/%.o: $(srcdir)/tools/%.c $(toolheaders) | $(toolobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(toolincdirs) -c -o $@ $<
 
-.PHONY: all check check-format clean clobber distclean firmware format tools
+.PHONY: all check check-format clean clobber distclean format scp tools
 .SECONDARY:
 .SUFFIXES:
