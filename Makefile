@@ -5,6 +5,7 @@
 
 SRC		 = .
 OBJ		 = build
+TGT		 = $(OBJ)/scp
 
 CROSS_COMPILE	?= or1k-linux-musl-
 AR		 = $(CROSS_COMPILE)ar
@@ -82,7 +83,7 @@ fwheaders	 = $(call headers,$(fwincbase))
 fwsources	 = $(call sources,common drivers/* lib $(platdir))
 fwobjects	 = $(call objects,$(fwsources),/scp,.o)
 fwobjdirs	 = $(call objdirs,$(fwobjects))
-fwfiles		 = $(addprefix $(OBJ)/scp/,scp.bin scp.elf scp.map)
+fwfiles		 = $(addprefix $(TGT)/,scp.bin scp.elf scp.map)
 
 libincbase	 = include/lib
 libincdirs	 = $(call incdirs,$(libincbase))
@@ -112,7 +113,7 @@ tools		 = $(basename $(toolobjects))
 unitysources	 = $(call sources,3rdparty/unity)
 unityobjects	 = $(call objects,$(unitysources),,.o)
 
-allobjdirs	 = $(OBJ) $(OBJ)/include $(OBJ)/scp \
+allobjdirs	 = $(OBJ) $(OBJ)/include $(TGT) \
 		   $(fwobjdirs) $(libobjdirs) $(testobjdirs) $(toolobjdirs)
 
 ifeq ($(MAKECMDGOALS),)
@@ -134,7 +135,7 @@ check-format: $(formatfiles)
 	$(Q) uncrustify -c $(SRC)/.uncrustify -l C -q --check $^
 
 clean:
-	$(Q) rm -fr $(OBJ)/scp
+	$(Q) rm -fr $(TGT)
 
 clobber:
 	$(Q) rm -fr $(OBJ)
@@ -155,26 +156,26 @@ tools: $(tools)
 $(allobjdirs):
 	$(Q) mkdir -p $@
 
-$(OBJ)/scp/scp.bin: $(OBJ)/scp/scp.elf | $(OBJ)/scp
+$(TGT)/scp.bin: $(TGT)/scp.elf | $(TGT)
 	$(M) OBJCOPY $@
 	$(Q) $(OBJCOPY) -O binary -S --reverse-bytes 4 $< $@
 
-$(OBJ)/scp/scp.elf: $(OBJ)/scp/scp.ld $(fwobjects) | $(OBJ)/scp
+$(TGT)/scp.elf: $(TGT)/scp.ld $(fwobjects) | $(TGT)
 	$(M) CCLD $@
 	$(Q) $(CC) $(CFLAGS) $(LDFLAGS) \
-		-Wl,-Map,$(OBJ)/scp/$*.map -o $@ -T $^
+		-Wl,-Map,$(TGT)/$*.map -o $@ -T $^
 
-$(OBJ)/scp/scp.ld: $(SRC)/scripts/scp.ld.S $(fwheaders) | $(OBJ)/scp
+$(TGT)/scp.ld: $(SRC)/scripts/scp.ld.S $(fwheaders) | $(TGT)
 	$(M) CPP $@
 	$(Q) $(CPP) $(CPPFLAGS) $(fwincdirs) -o $@ -P $<
 
-$(OBJ)/scp/scp.map: $(OBJ)/scp/scp.elf;
+$(TGT)/scp.map: $(TGT)/scp.elf;
 
-$(OBJ)/scp/%.o: $(SRC)/%.c $(fwheaders) | $(fwobjdirs)
+$(TGT)/%.o: $(SRC)/%.c $(fwheaders) | $(fwobjdirs)
 	$(M) CC $@
 	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
 
-$(OBJ)/scp/%.o: $(SRC)/%.S $(fwheaders) | $(fwobjdirs)
+$(TGT)/%.o: $(SRC)/%.S $(fwheaders) | $(fwobjdirs)
 	$(M) CC $@
 	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
 
