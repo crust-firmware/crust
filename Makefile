@@ -156,29 +156,6 @@ tools: $(tools)
 $(allobjdirs):
 	$(Q) mkdir -p $@
 
-$(TGT)/scp.bin: $(TGT)/scp.elf | $(TGT)
-	$(M) OBJCOPY $@
-	$(Q) $(OBJCOPY) -O binary -S --reverse-bytes 4 $< $@
-
-$(TGT)/scp.elf: $(TGT)/scp.ld $(fwobjects) | $(TGT)
-	$(M) CCLD $@
-	$(Q) $(CC) $(CFLAGS) $(LDFLAGS) \
-		-Wl,-Map,$(TGT)/$*.map -o $@ -T $^
-
-$(TGT)/scp.ld: $(SRC)/scripts/scp.ld.S $(fwheaders) | $(TGT)
-	$(M) CPP $@
-	$(Q) $(CPP) $(CPPFLAGS) $(fwincdirs) -o $@ -P $<
-
-$(TGT)/scp.map: $(TGT)/scp.elf;
-
-$(TGT)/%.o: $(SRC)/%.c $(fwheaders) | $(fwobjdirs)
-	$(M) CC $@
-	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
-
-$(TGT)/%.o: $(SRC)/%.S $(fwheaders) | $(fwobjdirs)
-	$(M) CC $@
-	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
-
 $(OBJ)/config.mk: .config | $(OBJ)
 	$(Q) sed 's/#.*$$//;s/="\(.*\)"$$/=\1/' $< > $@
 
@@ -216,6 +193,29 @@ $(OBJ)/tools/%: $(OBJ)/tools/%.o $(library)
 $(OBJ)/tools/%.o: $(SRC)/tools/%.c $(toolheaders) | $(toolobjdirs)
 	$(M) HOSTCC $@
 	$(Q) $(HOSTCC) $(HOSTCPPFLAGS) $(HOSTCFLAGS) $(toolincdirs) -c -o $@ $<
+
+$(TGT)/scp.bin: $(TGT)/scp.elf | $(TGT)
+	$(M) OBJCOPY $@
+	$(Q) $(OBJCOPY) -O binary -S --reverse-bytes 4 $< $@
+
+$(TGT)/scp.elf: $(TGT)/scp.ld $(fwobjects) | $(TGT)
+	$(M) CCLD $@
+	$(Q) $(CC) $(CFLAGS) $(LDFLAGS) \
+		-Wl,-Map,$(TGT)/$*.map -o $@ -T $^
+
+$(TGT)/scp.ld: $(SRC)/scripts/scp.ld.S $(fwheaders) | $(TGT)
+	$(M) CPP $@
+	$(Q) $(CPP) $(CPPFLAGS) $(fwincdirs) -o $@ -P $<
+
+$(TGT)/scp.map: $(TGT)/scp.elf;
+
+$(TGT)/%.o: $(SRC)/%.c $(fwheaders) | $(fwobjdirs)
+	$(M) CC $@
+	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
+
+$(TGT)/%.o: $(SRC)/%.S $(fwheaders) | $(fwobjdirs)
+	$(M) CC $@
+	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
 
 .PHONY: all check check-format clean clobber distclean format scp tools
 .SECONDARY:
