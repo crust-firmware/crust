@@ -60,7 +60,7 @@ LDFLAGS		 = -nostdlib \
 HOSTCFLAGS	 = $(COMMON_CFLAGS)
 HOSTCPPFLAGS	 = -D_XOPEN_SOURCE=700
 HOSTLDFLAGS	 =
-HOSTLIBS	 =
+HOSTLDLIBS	 =
 
 platdir		 = platform/$(CONFIG_PLATFORM)
 
@@ -176,7 +176,7 @@ $(OBJ)/test/%.test: $(SRC)/scripts/test.sh $(OBJ)/test/%
 
 $(OBJ)/test/%: $(OBJ)/test/%.o $(unityobjects) $(library)
 	$(M) HOSTLD $@
-	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLIBS)
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLDLIBS)
 
 $(OBJ)/3rdparty/%.o: $(SRC)/3rdparty/%.c $(testheaders) | $(testobjdirs)
 	$(M) HOSTCC $@
@@ -188,7 +188,7 @@ $(OBJ)/test/%.o: $(SRC)/test/%.c $(testheaders) | $(testobjdirs)
 
 $(OBJ)/tools/%: $(OBJ)/tools/%.o $(library)
 	$(M) HOSTLD $@
-	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLIBS)
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLDLIBS)
 
 $(OBJ)/tools/%.o: $(SRC)/tools/%.c $(toolheaders) | $(toolobjdirs)
 	$(M) HOSTCC $@
