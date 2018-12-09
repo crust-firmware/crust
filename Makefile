@@ -34,6 +34,7 @@ COMMON_CFLAGS	 = -Os -pipe -std=c11 \
 		   -Werror=vla \
 		   -Wno-missing-field-initializers
 
+AFLAGS		 = -Wa,--fatal-warnings
 CFLAGS		 = $(COMMON_CFLAGS) \
 		   -ffreestanding \
 		   -flto \
@@ -43,8 +44,7 @@ CFLAGS		 = $(COMMON_CFLAGS) \
 		   -funsigned-char \
 		   -mhard-mul -msoft-div \
 		   $(if $(HAVE_GCC9),-msext -msfimm -mshftimm) \
-		   -static \
-		   -Wa,--fatal-warnings
+		   -static
 CPPFLAGS	 = -DDEBUG=$(if $(filter-out 0,$(DEBUG)),1,0) \
 		   -include config.h \
 		   -nostdinc \
@@ -211,11 +211,11 @@ $(TGT)/scp.map: $(TGT)/scp.elf;
 
 $(TGT)/%.o: $(SRC)/%.c $(fwheaders) | $(fwobjdirs)
 	$(M) CC $@
-	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
+	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(AFLAGS) $(fwincdirs) -c -o $@ $<
 
 $(TGT)/%.o: $(SRC)/%.S $(fwheaders) | $(fwobjdirs)
-	$(M) CC $@
-	$(Q) $(CC) $(CPPFLAGS) $(CFLAGS) $(fwincdirs) -c -o $@ $<
+	$(M) AS $@
+	$(Q) $(CC) $(CPPFLAGS) $(AFLAGS) $(fwincdirs) -c -o $@ $<
 
 .PHONY: all check check-format clean clobber distclean format scp tools
 .SECONDARY:
