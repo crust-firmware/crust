@@ -1,9 +1,12 @@
 ---
 env:
   matrix:
-    - BOARD=orangepi_pc2
-    - BOARD=orangepi_win
-    - BOARD=orangepi_zero_plus
+      # Generic
+    - CONFIGS="allnoconfig allyesconfig defconfig randconfig randconfig randconfig"
+      # A64
+    - CONFIGS="orangepi_win_defconfig"
+      # H5
+    - CONFIGS="orangepi_pc2_defconfig orangepi_win_defconfig orangepi_zero_plus_defconfig"
 
 language: c
 
@@ -44,10 +47,28 @@ matrix:
       script:
         - make check-format
         - codespell -i 0 -q 4 $(git ls-files)
+    - env:
+        - BUILD_TYPE=out-of-tree
+      script:
+        - set -e
+        - cd /tmp
+        - cp $TRAVIS_BUILD_DIR/Makefile .
+        - make SRC=$TRAVIS_BUILD_DIR OBJ=$HOME/build defconfig
+        - make SRC=$TRAVIS_BUILD_DIR OBJ=$HOME/build -j$(nproc) V=1 all check
+        - or1k-linux-musl-size $HOME/build/scp/scp.elf
+        - grep __bss_end $HOME/build/scp/scp.map
+        - sha256sum -b $HOME/build/scp/scp.bin
 
 script:
-  - make ${BOARD}_defconfig
-  - make DEBUG=0 V=1 all check
-  - make clean
-  - make DEBUG=1 V=1 all check
+  - |-
+    set -e
+    for config in ${CONFIGS}; do
+      echo ========== begin $config ==========
+      make "$config"
+      make -j$(nproc) TGT="\$(OBJ)/$config" V=1 scp
+      or1k-linux-musl-size build/$config/scp.elf
+      grep __bss_end build/$config/scp.map
+      sha256sum -b build/$config/scp.bin
+      echo ========== end $config ==========
+    done
 ...
