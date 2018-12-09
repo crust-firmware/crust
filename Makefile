@@ -8,7 +8,7 @@ OBJ		 = build
 TGT		 = $(OBJ)/scp
 
 CROSS_COMPILE	?= or1k-linux-musl-
-AR		 = $(CROSS_COMPILE)ar
+AR		 = $(CROSS_COMPILE)gcc-ar
 CC		 = $(CROSS_COMPILE)gcc
 CPP		 = $(CROSS_COMPILE)cpp
 OBJCOPY		 = $(CROSS_COMPILE)objcopy
