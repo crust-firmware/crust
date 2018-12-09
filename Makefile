@@ -73,11 +73,6 @@ sources		 = $(call files,$1,*.c *.S)
 objdirs		 = $(sort $(patsubst %/,%,$(dir $1)))
 objects		 = $(patsubst $(SRC)/%,$(OBJ)$2/%$3,$(basename $1))
 
-format-filter	 = $(filter-out $(OBJ)/% %.S,$1)
-formatheaders	 = $(call headers,include/* platform/*/include)
-formatsources	 = $(call sources,common drivers/* lib platform/* test tools)
-formatfiles	 = $(call format-filter,$(formatheaders) $(formatsources))
-
 fwincbase	 = $(platdir)/include include/*
 fwincdirs	 = $(call incdirs,$(fwincbase))
 fwheaders	 = $(call headers,$(fwincbase))
@@ -124,15 +119,14 @@ ifneq ($(filter-out %clean %clobber %config %format,$(GOALS)),)
   include $(OBJ)/config.mk
 endif
 
+include $(SRC)/scripts/Makefile.format
+
 M := @$(if $(filter-out 0,$(V)),:,exec printf '  %-7s %s\n')
 Q :=  $(if $(filter-out 0,$(V)),,@)exec
 
 all: $(fwfiles) $(tests)
 
 check: $(testresults)
-
-check-format: $(formatfiles)
-	$(Q) uncrustify -c $(SRC)/.uncrustify -l C -q --check $^
 
 clean:
 	$(Q) rm -fr $(TGT)
@@ -145,9 +139,6 @@ clobber:
 
 distclean:
 	$(Q) rm -fr $(OBJ) .config
-
-format: $(formatfiles)
-	$(Q) uncrustify -c $(SRC)/.uncrustify -l C -q --no-backup $^
 
 scp: $(fwfiles)
 
@@ -217,6 +208,6 @@ $(TGT)/%.o: $(SRC)/%.S $(fwheaders) | $(fwobjdirs)
 	$(M) AS $@
 	$(Q) $(CC) $(CPPFLAGS) $(AFLAGS) $(fwincdirs) -c -o $@ $<
 
-.PHONY: all check check-format clean clobber distclean format scp tools
+.PHONY: all check clean clobber distclean scp tools
 .SECONDARY:
 .SUFFIXES:

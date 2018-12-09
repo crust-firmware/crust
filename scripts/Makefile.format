@@ -1,0 +1,18 @@
+#
+# Copyright © 2017-2018 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+find_files	 = $(sort $(wildcard $(foreach X,$2,$(1:%=$(SRC)/%/$X))))
+
+format_dirs	:= common drivers/* include/* lib platform/* test tools
+format_globs	:= *.c *.h */*.h */*/*.h
+format_files	:= $(call find_files,$(format_dirs),$(format_globs))
+
+check-format: $(format_files)
+	$(Q) uncrustify -c $(SRC)/.uncrustify -l C -q --check $^
+
+format: $(format_files)
+	$(Q) uncrustify -c $(SRC)/.uncrustify -l C -q --no-backup $^
+
+.PHONY: check-format format
