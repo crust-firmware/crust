@@ -6,7 +6,6 @@
 $(call linker_scripts,crust.ld)
 
 obj-y += console.o
-obj-y += css.o
 obj-y += debug.o
 obj-y += delay.o
 obj-y += devices.o

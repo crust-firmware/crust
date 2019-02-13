@@ -4,6 +4,7 @@
 #
 
 obj-y += clock/
+obj-y += css/
 obj-y += dvfs/
 obj-y += gpio/
 obj-$(CONFIG_I2C) += i2c/
