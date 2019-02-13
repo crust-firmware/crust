@@ -110,7 +110,7 @@ clobber:
 distclean:
 	$(Q) rm -fr $(OBJ) ..config* .config*
 
-scp: $(TGT)/scp.bin $(TGT)/scp.elf $(TGT)/scp.map
+scp: $(TGT)/scp.bin
 
 tools: $(tools-all)
 
