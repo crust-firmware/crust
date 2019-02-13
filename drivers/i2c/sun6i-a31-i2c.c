@@ -43,14 +43,14 @@ sun6i_a31_i2c_wait_idle(struct device *dev)
 	/* With a single master on the bus, this should only take one cycle. */
 	int timeout = 2;
 
-	while (mmio_read32(dev->regs + I2C_CTRL_REG) & (BIT(5) | BIT(4))) {
+	while (mmio_read_32(dev->regs + I2C_CTRL_REG) & (BIT(5) | BIT(4))) {
 		/* 10μs is one 100kHz bus cycle. */
 		udelay(10);
 		if (timeout-- == 0)
 			return false;
 	}
 
-	return mmio_read32(dev->regs + I2C_STAT_REG) == IDLE;
+	return mmio_read_32(dev->regs + I2C_STAT_REG) == IDLE;
 }
 
 static bool
@@ -59,7 +59,7 @@ sun6i_a31_i2c_wait_start(struct device *dev)
 	/* With a single master on the bus, this should only take one cycle. */
 	int timeout = 2;
 
-	while (mmio_read32(dev->regs + I2C_CTRL_REG) & BIT(5)) {
+	while (mmio_read_32(dev->regs + I2C_CTRL_REG) & BIT(5)) {
 		/* 10μs is one 100kHz bus cycle. */
 		udelay(10);
 		if (timeout-- == 0)
@@ -75,28 +75,28 @@ sun6i_a31_i2c_wait_state(struct device *dev, uint8_t state)
 	/* Wait for up to 8 transfer cycles, one ACK, and one extra cycle. */
 	int timeout = 10;
 
-	while (!(mmio_read32(dev->regs + I2C_CTRL_REG) & BIT(3))) {
+	while (!(mmio_read_32(dev->regs + I2C_CTRL_REG) & BIT(3))) {
 		/* 10μs is one 100kHz bus cycle. */
 		udelay(10);
 		if (timeout-- == 0)
 			return false;
 	}
 
-	return mmio_read32(dev->regs + I2C_STAT_REG) == state;
+	return mmio_read_32(dev->regs + I2C_STAT_REG) == state;
 }
 
 static int
 sun6i_a31_i2c_read(struct device *dev, uint8_t *data)
 {
 	/* Disable sending an ACK and trigger a state change. */
-	mmio_clearsetbits32(dev->regs + I2C_CTRL_REG, BIT(2), BIT(3));
+	mmio_clrset_32(dev->regs + I2C_CTRL_REG, BIT(2), BIT(3));
 
 	/* Wait for data to arrive. */
 	if (!sun6i_a31_i2c_wait_state(dev, DATA_RX_NACK))
 		return EIO;
 
 	/* Read the data. */
-	*data = mmio_read32(dev->regs + I2C_DATA_REG);
+	*data = mmio_read_32(dev->regs + I2C_DATA_REG);
 
 	return SUCCESS;
 }
@@ -104,11 +104,11 @@ sun6i_a31_i2c_read(struct device *dev, uint8_t *data)
 static int
 sun6i_a31_i2c_start(struct device *dev, uint8_t addr, uint8_t direction)
 {
-	uint8_t init_state = mmio_read32(dev->regs + I2C_STAT_REG);
+	uint8_t init_state = mmio_read_32(dev->regs + I2C_STAT_REG);
 	uint8_t state;
 
 	/* Send a start condition. */
-	mmio_setbits32(dev->regs + I2C_CTRL_REG, BIT(5) | BIT(3));
+	mmio_set_32(dev->regs + I2C_CTRL_REG, BIT(5) | BIT(3));
 
 	/* Wait for the start condition to be sent. */
 	if (!sun6i_a31_i2c_wait_start(dev))
@@ -121,8 +121,8 @@ sun6i_a31_i2c_start(struct device *dev, uint8_t addr, uint8_t direction)
 		return EIO;
 
 	/* Write the address and direction, then trigger a state change. */
-	mmio_write32(dev->regs + I2C_DATA_REG, (addr << 1) | direction);
-	mmio_setbits32(dev->regs + I2C_CTRL_REG, BIT(3));
+	mmio_write_32(dev->regs + I2C_DATA_REG, (addr << 1) | direction);
+	mmio_set_32(dev->regs + I2C_CTRL_REG, BIT(3));
 
 	/* Check for address acknowledgement. */
 	state = direction == I2C_WRITE ? ADDR_WRITE_TX_ACK : ADDR_READ_TX_ACK;
@@ -136,7 +136,7 @@ static void
 sun6i_a31_i2c_stop(struct device *dev)
 {
 	/* Send a stop condition. */
-	mmio_setbits32(dev->regs + I2C_CTRL_REG, BIT(4) | BIT(3));
+	mmio_set_32(dev->regs + I2C_CTRL_REG, BIT(4) | BIT(3));
 
 	/* Wait for the bus to go idle. */
 	sun6i_a31_i2c_wait_idle(dev);
@@ -146,8 +146,8 @@ static int
 sun6i_a31_i2c_write(struct device *dev, uint8_t data)
 {
 	/* Write data, then trigger a state change. */
-	mmio_write32(dev->regs + I2C_DATA_REG, data);
-	mmio_setbits32(dev->regs + I2C_CTRL_REG, BIT(3));
+	mmio_write_32(dev->regs + I2C_DATA_REG, data);
+	mmio_set_32(dev->regs + I2C_CTRL_REG, BIT(3));
 
 	/* Wait for data to be sent. */
 	if (!sun6i_a31_i2c_wait_state(dev, DATA_TX_ACK))
@@ -169,18 +169,18 @@ sun6i_a31_i2c_probe(struct device *dev)
 		return err;
 
 	/* Set I2C bus clock divider for 400 KHz operation. */
-	mmio_write32(dev->regs + I2C_CCR_REG, 0x00000011);
+	mmio_write_32(dev->regs + I2C_CCR_REG, 0x00000011);
 
 	/* Clear slave address (this driver only supports master mode). */
-	mmio_write32(dev->regs + I2C_ADDR_REG, 0);
-	mmio_write32(dev->regs + I2C_XADDR_REG, 0);
+	mmio_write_32(dev->regs + I2C_ADDR_REG, 0);
+	mmio_write_32(dev->regs + I2C_XADDR_REG, 0);
 
 	/* Enable I2C bus and stop any current transaction. Disable interrupts
 	 * and don't send an ACK for received bytes. */
-	mmio_write32(dev->regs + I2C_CTRL_REG, BIT(6) | BIT(4));
+	mmio_write_32(dev->regs + I2C_CTRL_REG, BIT(6) | BIT(4));
 
 	/* Soft reset the controller. */
-	mmio_setbits32(dev->regs + I2C_SRST_REG, BIT(0));
+	mmio_set_32(dev->regs + I2C_SRST_REG, BIT(0));
 
 	/* Wait for the bus to go idle. */
 	if (!sun6i_a31_i2c_wait_idle(dev))

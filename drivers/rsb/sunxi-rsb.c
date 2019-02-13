@@ -29,13 +29,14 @@ static int sunxi_rsb_set_rate(struct device *dev, uint32_t rate);
 static int
 sunxi_rsb_do_command(struct device *dev, uint32_t addr, uint32_t cmd)
 {
-	mmio_write32(dev->regs + RSB_CMD_REG, cmd);
-	mmio_write32(dev->regs + RSB_SADDR_REG, addr);
-	mmio_write32(dev->regs + RSB_CTRL_REG, BIT(7));
+	mmio_write_32(dev->regs + RSB_CMD_REG, cmd);
+	mmio_write_32(dev->regs + RSB_SADDR_REG, addr);
+	mmio_write_32(dev->regs + RSB_CTRL_REG, BIT(7));
 
-	mmio_pollzero32(dev->regs + RSB_CTRL_REG, BIT(7));
+	mmio_pollz_32(dev->regs + RSB_CTRL_REG, BIT(7));
 
-	return mmio_read32(dev->regs + RSB_STAT_REG) == BIT(0) ? SUCCESS : EIO;
+	return mmio_read_32(dev->regs + RSB_STAT_REG) == BIT(0)
+	       ? SUCCESS : EIO;
 }
 
 static int
@@ -45,9 +46,9 @@ sunxi_rsb_init_pmic(struct device *dev, uint32_t addr, uint8_t reg,
 	int err;
 
 	/* Switch the PMIC to RSB mode. */
-	mmio_write32(dev->regs + RSB_PMCR_REG,
-	             BIT(31) | data << 16 | reg << 8 | I2C_BCAST_ADDR);
-	mmio_pollzero32(dev->regs + RSB_PMCR_REG, BIT(31));
+	mmio_write_32(dev->regs + RSB_PMCR_REG,
+	              BIT(31) | data << 16 | reg << 8 | I2C_BCAST_ADDR);
+	mmio_pollz_32(dev->regs + RSB_PMCR_REG, BIT(31));
 
 	/* Raise the clock to 3MHz. */
 	if ((err = sunxi_rsb_set_rate(dev, 3000000)))
@@ -62,12 +63,12 @@ sunxi_rsb_read(struct device *dev, uint8_t addr, uint8_t reg, uint8_t *data)
 {
 	int err;
 
-	mmio_write32(dev->regs + RSB_ADDR_REG, reg);
+	mmio_write_32(dev->regs + RSB_ADDR_REG, reg);
 
 	if ((err = sunxi_rsb_do_command(dev, RSB_RTADDR(addr), RSB_RD8)))
 		return err;
 
-	*data = mmio_read32(dev->regs + RSB_DATA_REG);
+	*data = mmio_read_32(dev->regs + RSB_DATA_REG);
 
 	return SUCCESS;
 }
@@ -88,7 +89,7 @@ sunxi_rsb_set_rate(struct device *dev, uint32_t rate)
 		return ERANGE;
 
 	divider = dev_rate / rate - 1;
-	mmio_write32(dev->regs + RSB_CCR_REG, 1U << 8 | divider);
+	mmio_write_32(dev->regs + RSB_CCR_REG, 1U << 8 | divider);
 
 	return SUCCESS;
 }
@@ -96,8 +97,8 @@ sunxi_rsb_set_rate(struct device *dev, uint32_t rate)
 static int
 sunxi_rsb_write(struct device *dev, uint8_t addr, uint8_t reg, uint8_t data)
 {
-	mmio_write32(dev->regs + RSB_ADDR_REG, reg);
-	mmio_write32(dev->regs + RSB_DATA_REG, data);
+	mmio_write_32(dev->regs + RSB_ADDR_REG, reg);
+	mmio_write_32(dev->regs + RSB_DATA_REG, data);
 
 	return sunxi_rsb_do_command(dev, RSB_RTADDR(addr), RSB_WR8);
 }
@@ -113,8 +114,8 @@ sunxi_rsb_probe(struct device *dev)
 	if ((err = dm_setup_pins(dev, RSB_NUM_PINS)))
 		return err;
 
-	mmio_write32(dev->regs + RSB_CTRL_REG, BIT(0));
-	mmio_pollzero32(dev->regs + RSB_CTRL_REG, BIT(0));
+	mmio_write_32(dev->regs + RSB_CTRL_REG, BIT(0));
+	mmio_pollz_32(dev->regs + RSB_CTRL_REG, BIT(0));
 
 	/* Set the bus clock to a rate also compatible with I²C. */
 	if ((err = sunxi_rsb_set_rate(dev, 400000)))

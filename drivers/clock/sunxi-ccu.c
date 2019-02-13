@@ -124,7 +124,7 @@ sunxi_ccu_get_parent(struct device *dev, uint8_t id)
 	size_t index = 0;
 
 	if (BF_PRESENT(clock->mux)) {
-		uint32_t reg = mmio_read32(dev->regs + clock->reg);
+		uint32_t reg = mmio_read_32(dev->regs + clock->reg);
 		index = bitfield_get(reg, clock->mux);
 	}
 
@@ -148,7 +148,7 @@ sunxi_ccu_get_rate(struct device *dev, uint8_t id, uint32_t *rate)
 	/* Otherwise, the rate is the parent's rate divided by some factors. */
 	if ((err = clock_get_rate(parent->dev, parent->id, &tmp)))
 		return err;
-	reg   = mmio_read32(dev->regs + clock->reg);
+	reg   = mmio_read_32(dev->regs + clock->reg);
 	tmp  /= bitfield_get(reg, parent->vdiv) + 1;
 	tmp  /= bitfield_get(reg, clock->m) + 1;
 	tmp >>= bitfield_get(reg, clock->p);
@@ -197,23 +197,23 @@ sunxi_ccu_set_rate(struct device *dev, uint8_t id, uint32_t rate)
 		return SUCCESS;
 
 	/* Set the dividers for this clock. */
-	reg = old_reg = mmio_read32(dev->regs + clock->reg);
+	reg = old_reg = mmio_read_32(dev->regs + clock->reg);
 	reg = bitfield_set(reg, clock->parents[factors.mux].vdiv, factors.pd);
 	reg = bitfield_set(reg, clock->m, factors.m);
 	reg = bitfield_set(reg, clock->p, factors.p);
 	if (reg != old_reg) {
-		mmio_write32(dev->regs + clock->reg, reg);
+		mmio_write_32(dev->regs + clock->reg, reg);
 		udelay(1);
-		if (mmio_read32(dev->regs + clock->reg) != reg)
+		if (mmio_read_32(dev->regs + clock->reg) != reg)
 			return EIO;
 	}
 
 	/* Set the parent in the mux for this clock. */
 	reg = bitfield_set(reg, clock->mux, factors.mux);
 	if (reg != old_reg) {
-		mmio_write32(dev->regs + clock->reg, reg);
+		mmio_write_32(dev->regs + clock->reg, reg);
 		udelay(1);
-		if (mmio_read32(dev->regs + clock->reg) != reg)
+		if (mmio_read_32(dev->regs + clock->reg) != reg)
 			return EIO;
 	}
 

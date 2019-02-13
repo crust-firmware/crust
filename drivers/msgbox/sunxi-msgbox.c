@@ -58,7 +58,7 @@ sunxi_msgbox_peek_data(struct device *dev, uint8_t chan)
 {
 	uint32_t reg;
 
-	reg = mmio_read32(dev->regs + RX_MSG_STATUS_REG(chan));
+	reg = mmio_read_32(dev->regs + RX_MSG_STATUS_REG(chan));
 
 	return (reg & MSG_STATUS_MASK) > 0;
 }
@@ -70,7 +70,7 @@ sunxi_msgbox_disable(struct device *dev, uint8_t chan)
 	assert(get_handler(dev, chan) != NULL);
 
 	/* Disable the receive interrupt. */
-	mmio_clearbits32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
+	mmio_clr_32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
 
 	set_handler(dev, chan, NULL);
 
@@ -89,16 +89,16 @@ sunxi_msgbox_enable(struct device *dev, uint8_t chan,
 	set_handler(dev, chan, handler);
 
 	/* Ensure FIFO directions are set properly. */
-	mmio_clearsetbits32(dev->regs + CTRL_REG(chan),
-	                    CTRL_MASK(chan), CTRL_SET(chan));
+	mmio_clrset_32(dev->regs + CTRL_REG(chan),
+	               CTRL_MASK(chan), CTRL_SET(chan));
 
 	/* Clear existing messages in the receive FIFO. */
 	while (sunxi_msgbox_peek_data(dev, chan))
-		mmio_read32(dev->regs + RX_MSG_DATA_REG(chan));
+		mmio_read_32(dev->regs + RX_MSG_DATA_REG(chan));
 
 	/* Clear and enable the receive interrupt. */
-	mmio_setbits32(dev->regs + IRQ_STATUS_REG, RX_IRQ(chan));
-	mmio_setbits32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
+	mmio_set_32(dev->regs + IRQ_STATUS_REG, RX_IRQ(chan));
+	mmio_set_32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
 
 	return SUCCESS;
 }
@@ -110,7 +110,7 @@ sunxi_msgbox_send(struct device *dev, uint8_t chan, uint32_t msg)
 
 	if (sunxi_msgbox_tx_pending(dev, chan))
 		return EBUSY;
-	mmio_write32(dev->regs + TX_MSG_DATA_REG(chan), msg);
+	mmio_write_32(dev->regs + TX_MSG_DATA_REG(chan), msg);
 
 	return SUCCESS;
 }
@@ -122,7 +122,7 @@ sunxi_msgbox_tx_pending(struct device *dev, uint8_t chan)
 
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
-	reg = mmio_read32(dev->regs + REMOTE_IRQ_STATUS_REG);
+	reg = mmio_read_32(dev->regs + REMOTE_IRQ_STATUS_REG);
 
 	return reg & REMOTE_RX_IRQ(chan);
 }
@@ -146,16 +146,16 @@ sunxi_msgbox_irq(void *param)
 	struct device *dev = param;
 	uint32_t msg, reg;
 
-	reg = mmio_read32(dev->regs + IRQ_STATUS_REG);
+	reg = mmio_read_32(dev->regs + IRQ_STATUS_REG);
 	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; ++chan) {
 		if (!(reg & RX_IRQ(chan)))
 			continue;
 		while (sunxi_msgbox_peek_data(dev, chan)) {
-			msg = mmio_read32(dev->regs + RX_MSG_DATA_REG(chan));
+			msg = mmio_read_32(dev->regs + RX_MSG_DATA_REG(chan));
 			sunxi_msgbox_handle_msg(dev, chan, msg);
 		}
 		/* Clear the pending interrupt once the FIFO is empty. */
-		mmio_write32(dev->regs + IRQ_STATUS_REG, RX_IRQ(chan));
+		mmio_write_32(dev->regs + IRQ_STATUS_REG, RX_IRQ(chan));
 	}
 }
 
@@ -173,12 +173,12 @@ sunxi_msgbox_probe(struct device *dev)
 	/* Drain all messages (required to clear interrupts). */
 	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; ++chan) {
 		while (sunxi_msgbox_peek_data(dev, chan))
-			mmio_read32(dev->regs + RX_MSG_DATA_REG(chan));
+			mmio_read_32(dev->regs + RX_MSG_DATA_REG(chan));
 	}
 
 	/* Disable and clear all interrupts. */
-	mmio_write32(dev->regs + IRQ_EN_REG, 0);
-	mmio_write32(dev->regs + IRQ_STATUS_REG, BITMASK(0, 16));
+	mmio_write_32(dev->regs + IRQ_EN_REG, 0);
+	mmio_write_32(dev->regs + IRQ_STATUS_REG, BITMASK(0, 16));
 
 	if ((err = dm_setup_irq(dev, sunxi_msgbox_irq)))
 		return err;

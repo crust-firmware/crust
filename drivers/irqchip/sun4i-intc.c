@@ -29,7 +29,7 @@ sun4i_intc_enable(struct device *dev, struct irq_handle *handle)
 	dev->drvdata = (uintptr_t)handle;
 
 	/* Enable the IRQ. */
-	mmio_setbits32(dev->regs + INTC_EN_REG, BIT(handle->irq));
+	mmio_set_32(dev->regs + INTC_EN_REG, BIT(handle->irq));
 
 	return SUCCESS;
 }
@@ -39,7 +39,7 @@ sun4i_intc_irq(struct device *dev)
 {
 	struct irq_handle *handle = HANDLE_LIST(dev);
 	/* Get the number of the current IRQ. */
-	uint8_t irq = mmio_read32(dev->regs + INTC_VECTOR_REG) >> 2;
+	uint8_t irq = mmio_read_32(dev->regs + INTC_VECTOR_REG) >> 2;
 
 	/* Call the registered callback. */
 	while (handle != NULL) {
@@ -51,19 +51,19 @@ sun4i_intc_irq(struct device *dev)
 	}
 
 	/* Clear the IRQ pending status. */
-	mmio_setbits32(dev->regs + INTC_IRQ_PEND_REG, BIT(irq));
+	mmio_set_32(dev->regs + INTC_IRQ_PEND_REG, BIT(irq));
 }
 
 static int
 sun4i_intc_probe(struct device *dev)
 {
 	/* Clear the table base address (just return IRQ numbers). */
-	mmio_write32(dev->regs + INTC_BASE_ADDR_REG, 0);
+	mmio_write_32(dev->regs + INTC_BASE_ADDR_REG, 0);
 
 	/* Disable, unmask, and clear the status of all IRQs. */
-	mmio_write32(dev->regs + INTC_EN_REG, 0);
-	mmio_write32(dev->regs + INTC_MASK_REG, 0);
-	mmio_write32(dev->regs + INTC_IRQ_PEND_REG, ~0);
+	mmio_write_32(dev->regs + INTC_EN_REG, 0);
+	mmio_write_32(dev->regs + INTC_MASK_REG, 0);
+	mmio_write_32(dev->regs + INTC_IRQ_PEND_REG, ~0);
 
 	/* Enable the CPU external interrupt input. */
 	mtspr(SPR_SYS_SR_ADDR, SPR_SYS_SR_IEE_SET(mfspr(SPR_SYS_SR_ADDR), 1));

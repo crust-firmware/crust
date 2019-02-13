@@ -301,7 +301,7 @@ static void
 msgbox_ack(void)
 {
 	/* Clear the local message reception IRQ. */
-	mmio_write32(mbox + MSGBOX_LOCAL_IRQ_STATUS_REG, MSGBOX_LOCAL_RX_IRQ);
+	mmio_write_32(mbox + MSGBOX_LOCAL_IRQ_STATUS_REG, MSGBOX_LOCAL_RX_IRQ);
 }
 
 /**
@@ -313,14 +313,14 @@ msgbox_receive(void)
 	uint32_t msgs, reg;
 
 	/* Wait for a message reception IRQ. */
-	mmio_poll32(mbox + MSGBOX_LOCAL_IRQ_STATUS_REG, MSGBOX_LOCAL_RX_IRQ);
+	mmio_poll_32(mbox + MSGBOX_LOCAL_IRQ_STATUS_REG, MSGBOX_LOCAL_RX_IRQ);
 	/* Read the number of available messages. */
-	reg = mmio_read32(mbox + MSGBOX_RX_MSG_STATUS_REG);
+	reg = mmio_read_32(mbox + MSGBOX_RX_MSG_STATUS_REG);
 	if (unlikely((msgs = reg & MSGBOX_MSG_STATUS_MASK) > 1))
 		log(LOG_WARN, "Expected one message, received %u", msgs);
 	else if (unlikely(msgs == 0))
 		log(LOG_FATAL, "Received an IRQ, but no messages");
-	reg = mmio_read32(mbox + MSGBOX_RX_MSG_DATA_REG);
+	reg = mmio_read_32(mbox + MSGBOX_RX_MSG_DATA_REG);
 	if (unlikely(reg != SCPI_VIRTUAL_CHANNEL))
 		log(LOG_FATAL, "Expected SCPI, received protocol 0x%08x", reg);
 }
@@ -332,10 +332,10 @@ static void
 msgbox_send(void)
 {
 	/* Send the message. */
-	mmio_write32(mbox + MSGBOX_TX_MSG_DATA_REG, SCPI_VIRTUAL_CHANNEL);
+	mmio_write_32(mbox + MSGBOX_TX_MSG_DATA_REG, SCPI_VIRTUAL_CHANNEL);
 	/* Wait for the firmware to acknowledge the message. */
-	mmio_pollzero32(mbox + MSGBOX_ARISC_IRQ_STATUS_REG,
-	                MSGBOX_ARISC_RX_IRQ);
+	mmio_pollz_32(mbox + MSGBOX_ARISC_IRQ_STATUS_REG,
+	              MSGBOX_ARISC_RX_IRQ);
 }
 
 /**

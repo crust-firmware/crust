@@ -72,10 +72,10 @@ cpux_set_pll(struct device *dev, uint8_t opp)
 	uint32_t reg = cpux_pll_factors[opp] | PLL_ENABLE_BIT;
 
 	/* Change the PLL_CPUX multipliers, and enable the PLL. */
-	mmio_write32(dev->regs + PLL_CPUX_REG, reg);
+	mmio_write_32(dev->regs + PLL_CPUX_REG, reg);
 
 	/* Wait for the PLL to be stable. */
-	mmio_poll32(dev->regs + PLL_CPUX_REG, PLL_STABLE_BIT);
+	mmio_poll_32(dev->regs + PLL_CPUX_REG, PLL_STABLE_BIT);
 
 	return SUCCESS;
 }

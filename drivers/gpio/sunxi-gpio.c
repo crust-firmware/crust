@@ -35,7 +35,7 @@ sunxi_gpio_get_value(struct device *dev, uint8_t pin, bool *value)
 	uint8_t index = PIN_INDEX(pin);
 	uint8_t port  = PIN_PORT(pin);
 
-	*value = mmio_read32(dev->regs + DATA_REG(port)) & BIT(index);
+	*value = mmio_read_32(dev->regs + DATA_REG(port)) & BIT(index);
 
 	return SUCCESS;
 }
@@ -47,8 +47,8 @@ sunxi_gpio_set_mode(struct device *dev, uint8_t pin, uint8_t mode)
 	uint8_t port  = PIN_PORT(pin);
 
 	/* Set pin function configuration. */
-	mmio_clearsetbits32(dev->regs + CONFIG_REG(port, index),
-	                    CONFIG_MASK(index), mode << CONFIG_OFFSET(index));
+	mmio_clrset_32(dev->regs + CONFIG_REG(port, index),
+	               CONFIG_MASK(index), mode << CONFIG_OFFSET(index));
 
 	return SUCCESS;
 }
@@ -60,8 +60,8 @@ sunxi_gpio_set_value(struct device *dev, uint8_t pin, bool value)
 	uint8_t port  = PIN_PORT(pin);
 
 	/* Set the pin to the specified value. */
-	mmio_clearsetbits32(dev->regs + DATA_REG(port),
-	                    BIT(index), value << index);
+	mmio_clrset_32(dev->regs + DATA_REG(port),
+	               BIT(index), value << index);
 
 	return SUCCESS;
 }

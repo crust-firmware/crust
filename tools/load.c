@@ -27,12 +27,6 @@
 
 #define SRAM_ARM_OFFSET   0x40000
 
-static inline uint32_t
-mmio_getbits32(uintptr_t addr, uint32_t get)
-{
-	return mmio_read32(addr) & get;
-}
-
 int
 main(int argc, char *argv[])
 {
@@ -71,13 +65,13 @@ main(int argc, char *argv[])
 	r_cpucfg = (uintptr_t)r_cpucfg_map + PAGE_OFFSET(DEV_R_CPUCFG);
 
 	if (strcmp("--reset", argv[1]) == 0) {
-		if (!mmio_getbits32(r_cpucfg, BIT(0))) {
+		if (!mmio_get_32(r_cpucfg, BIT(0))) {
 			puts("ARISC is already in reset");
 			return EXIT_SUCCESS;
 		}
 		puts("Asserting ARISC reset");
-		mmio_clearbits32(r_cpucfg, BIT(0));
-		if (mmio_getbits32(r_cpucfg, BIT(0))) {
+		mmio_clr_32(r_cpucfg, BIT(0));
+		if (mmio_get_32(r_cpucfg, BIT(0))) {
 			puts("Failed to assert ARISC reset");
 			return EXIT_FAILURE;
 		}
@@ -109,8 +103,8 @@ main(int argc, char *argv[])
 	close(fd);
 
 	puts("Asserting ARISC reset");
-	mmio_clearbits32(r_cpucfg, BIT(0));
-	if (mmio_getbits32(r_cpucfg, BIT(0))) {
+	mmio_clr_32(r_cpucfg, BIT(0));
+	if (mmio_get_32(r_cpucfg, BIT(0))) {
 		puts("Failed to assert ARISC reset");
 		return EXIT_FAILURE;
 	}
@@ -119,8 +113,8 @@ main(int argc, char *argv[])
 	memcpy(sram, file, st.st_size);
 	msync(sram, st.st_size, MS_SYNC);
 	puts("Deasserting ARISC reset");
-	mmio_setbits32(r_cpucfg, BIT(0));
-	if (!mmio_getbits32(r_cpucfg, BIT(0))) {
+	mmio_set_32(r_cpucfg, BIT(0));
+	if (!mmio_get_32(r_cpucfg, BIT(0))) {
 		puts("Failed to deassert ARISC reset");
 		return EXIT_FAILURE;
 	}

@@ -19,12 +19,12 @@ wallclock_read(void)
 	uint32_t high_reg;
 	uint32_t low_reg;
 
-	mmio_setbits32(DEV_R_CPUCFG + CNT64_CTRL_REG, BIT(1));
-	while (mmio_read32(DEV_R_CPUCFG + CNT64_CTRL_REG) & BIT(1)) {
+	mmio_set_32(DEV_R_CPUCFG + CNT64_CTRL_REG, BIT(1));
+	while (mmio_read_32(DEV_R_CPUCFG + CNT64_CTRL_REG) & BIT(1)) {
 		/* Wait for the counter to latch. */
 	}
-	high_reg = mmio_read32(DEV_R_CPUCFG + CNT64_HIGH_REG);
-	low_reg  = mmio_read32(DEV_R_CPUCFG + CNT64_LOW_REG);
+	high_reg = mmio_read_32(DEV_R_CPUCFG + CNT64_HIGH_REG);
+	low_reg  = mmio_read_32(DEV_R_CPUCFG + CNT64_LOW_REG);
 
 	return ((uint64_t)high_reg << 32) | low_reg;
 }

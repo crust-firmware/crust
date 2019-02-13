@@ -39,12 +39,12 @@ sunxi_gpio_enable(struct device *dev, struct irq_handle *handle)
 	dev->drvdata = (uintptr_t)handle;
 
 	/* Set the IRQ mode. */
-	mmio_clearsetbits32(dev->regs + INT_CONFIG_REG(port, pin),
-	                    INT_CONFIG_MASK(pin),
-	                    handle->mode << INT_CONFIG_OFFSET(pin));
+	mmio_clrset_32(dev->regs + INT_CONFIG_REG(port, pin),
+	               INT_CONFIG_MASK(pin),
+	               handle->mode << INT_CONFIG_OFFSET(pin));
 
 	/* Enable the IRQ. */
-	mmio_setbits32(dev->regs + INT_CONTROL_REG(port), BIT(pin));
+	mmio_set_32(dev->regs + INT_CONTROL_REG(port), BIT(pin));
 
 	return SUCCESS;
 }
@@ -57,7 +57,7 @@ sunxi_gpio_irq(void *param)
 
 	for (size_t port = 0; port < MAX_PORTS; ++port) {
 		/* Check the status of the IRQs for this port. */
-		if ((reg = mmio_read32(dev->regs + INT_STATUS_REG(port))) == 0)
+		if (!(reg = mmio_read_32(dev->regs + INT_STATUS_REG(port))))
 			continue;
 
 		/* Call the registered callback for each pending IRQ. */
@@ -76,7 +76,7 @@ sunxi_gpio_irq(void *param)
 		}
 
 		/* Clear the handled pending IRQs for this port. */
-		mmio_write32(dev->regs + INT_STATUS_REG(port), reg);
+		mmio_write_32(dev->regs + INT_STATUS_REG(port), reg);
 	}
 }
 
@@ -90,8 +90,8 @@ sunxi_gpio_irqchip_probe(struct device *dev)
 
 	/* Disable and clear all IRQs. */
 	for (size_t port = 0; port < MAX_PORTS; ++port) {
-		mmio_write32(dev->regs + INT_CONTROL_REG(port), 0);
-		mmio_write32(dev->regs + INT_STATUS_REG(port), ~0);
+		mmio_write_32(dev->regs + INT_CONTROL_REG(port), 0);
+		mmio_write_32(dev->regs + INT_STATUS_REG(port), ~0);
 	}
 
 	return dm_setup_irq(dev, sunxi_gpio_irq);

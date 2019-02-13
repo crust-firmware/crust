@@ -46,7 +46,7 @@ bitmap_clear(uintptr_t base, uint32_t index)
 {
 	uintptr_t word = (uintptr_t)((uint32_t *)base + BITMAP_WORD(index));
 
-	mmio_clearbits32(word, BIT(BITMAP_BIT(index)));
+	mmio_clr_32(word, BIT(BITMAP_BIT(index)));
 }
 
 /**
@@ -60,7 +60,7 @@ bitmap_get(uintptr_t base, uint32_t index)
 {
 	uintptr_t word = (uintptr_t)((uint32_t *)base + BITMAP_WORD(index));
 
-	return mmio_read32(word) & BIT(BITMAP_BIT(index));
+	return mmio_read_32(word) & BIT(BITMAP_BIT(index));
 }
 
 /**
@@ -74,7 +74,7 @@ bitmap_set(uintptr_t base, uint32_t index)
 {
 	uintptr_t word = (uintptr_t)((uint32_t *)base + BITMAP_WORD(index));
 
-	mmio_setbits32(word, BIT(BITMAP_BIT(index)));
+	mmio_set_32(word, BIT(BITMAP_BIT(index)));
 }
 
 #endif /* LIB_BITMAP_H */

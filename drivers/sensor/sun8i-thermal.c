@@ -70,9 +70,9 @@ static void
 sun8i_thermal_enable(struct device *dev)
 {
 	/* Enable measurement for all available sensors. */
-	mmio_setbits32(dev->regs + THS_CTL_REG2, BIT(THS_CPU0)
+	mmio_set_32(dev->regs + THS_CTL_REG2, BIT(THS_CPU0)
 #if defined(HAVE_THS_CPU1)
-	               | BIT(THS_CPU1)
+	            | BIT(THS_CPU1)
 #endif
 	);
 }
@@ -92,7 +92,7 @@ sun8i_thermal_read_raw(struct device *dev, uint8_t id, uint32_t *raw)
 
 	sun8i_thermal_enable(dev);
 
-	*raw = mmio_read32(dev->regs + addr) & BITMASK(0, 12);
+	*raw = mmio_read_32(dev->regs + addr) & BITMASK(0, 12);
 
 	return SUCCESS;
 }
@@ -107,20 +107,20 @@ sun8i_thermal_probe(struct device *dev)
 		return err;
 
 	/* Start calibration. */
-	mmio_write32(dev->regs + THS_CTL_REG1, BIT(17));
+	mmio_write_32(dev->regs + THS_CTL_REG1, BIT(17));
 #if CONFIG_SOC_A64
 	/* FIXME: This hangs on the H5. */
-	while (mmio_read32(dev->regs + THS_CTL_REG1) & BIT(17)) {
+	while (mmio_read_32(dev->regs + THS_CTL_REG1) & BIT(17)) {
 		/* Wait for for calibration to clear. */
 	}
 #endif
 
 	/* Set acquire times to 0.1ms. */
-	mmio_write32(dev->regs + THS_CTL_REG0, 0x257);
-	mmio_write32(dev->regs + THS_CTL_REG2, 0x257 << 16);
+	mmio_write_32(dev->regs + THS_CTL_REG0, 0x257);
+	mmio_write_32(dev->regs + THS_CTL_REG2, 0x257 << 16);
 
 	/* Enable filter, average over 8 values. */
-	mmio_write32(dev->regs + THS_FILTER_CONTROL_REG, 0x06);
+	mmio_write_32(dev->regs + THS_FILTER_CONTROL_REG, 0x06);
 
 	sun8i_thermal_enable(dev);
 

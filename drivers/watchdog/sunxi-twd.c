@@ -22,14 +22,14 @@ sunxi_twd_restart(void *param)
 	struct device *dev = param;
 
 	/* Enable and perform restart. */
-	mmio_write32(dev->regs + TWD_RESTART_REG, TWD_RESTART_KEY | BIT(0));
+	mmio_write_32(dev->regs + TWD_RESTART_REG, TWD_RESTART_KEY | BIT(0));
 }
 
 static int
 sunxi_twd_disable(struct device *dev)
 {
 	/* Disable system reset, stop watchdog counter. */
-	mmio_clearsetbits32(dev->regs + TWD_CTRL_REG, BIT(9), BIT(1));
+	mmio_clrset_32(dev->regs + TWD_CTRL_REG, BIT(9), BIT(1));
 
 	/* Cancel TWD restart timer. */
 	return timer_cancel_periodic(sunxi_twd_restart, dev);
@@ -39,10 +39,10 @@ static int
 sunxi_twd_enable(struct device *dev, uint32_t timeout)
 {
 	/* Program interval until watchdog fires. */
-	mmio_write32(dev->regs + TWD_INTV_REG, timeout);
+	mmio_write_32(dev->regs + TWD_INTV_REG, timeout);
 
 	/* Resume watchdog counter, enable system reset. */
-	mmio_clearsetbits32(dev->regs + TWD_CTRL_REG, BIT(1), BIT(9));
+	mmio_clrset_32(dev->regs + TWD_CTRL_REG, BIT(1), BIT(9));
 
 	/* Register TWD restart timer. */
 	if (!timer_run_periodic(sunxi_twd_restart, dev)) {
@@ -65,7 +65,7 @@ sunxi_twd_probe(struct device *dev)
 	sunxi_twd_disable(dev);
 
 	/* Set counter clock source to OSC24M. */
-	mmio_setbits32(dev->regs + TWD_CTRL_REG, BIT(31));
+	mmio_set_32(dev->regs + TWD_CTRL_REG, BIT(31));
 
 	return SUCCESS;
 }
