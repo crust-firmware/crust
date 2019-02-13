@@ -15,7 +15,7 @@
  *
  * @param field The description of the bitfield.
  */
-#define BF_MASK(field)          BITMASK(BF_OFFSET(field), BF_WIDTH(field))
+#define BF_MASK(f)              ((BIT(BF_OFFSET(f)) - 1) << BF_WIDTH(f))
 
 /**
  * Extract the offset portion of a bitfield description.
@@ -64,7 +64,7 @@ typedef uint8_t bitfield_t;
 static inline uint8_t
 bitfield_get(uint32_t word, bitfield_t field)
 {
-	return (word >> BF_OFFSET(field)) & BITMASK(0, BF_WIDTH(field));
+	return (word >> BF_OFFSET(field)) & GENMASK(BF_WIDTH(field) - 1, 0);
 }
 
 /**
@@ -80,7 +80,7 @@ bitfield_set(uint32_t word, bitfield_t field, uint8_t value)
 		return word;
 
 	return (word & ~BF_MASK(field)) |
-	       ((value & BITMASK(0, BF_WIDTH(field))) << BF_OFFSET(field));
+	       ((value & GENMASK(BF_WIDTH(field) - 1, 0)) << BF_OFFSET(field));
 }
 
 #endif /* LIB_BITFIELD_H */

@@ -14,7 +14,8 @@
 
 #define INT_CONFIG_REG(port, pin) (0x0200 + 0x20 * (port) + ((pin) / 8) * 4)
 #define INT_CONFIG_OFFSET(pin)    (((pin) % 8) * 4)
-#define INT_CONFIG_MASK(pin)      BITMASK(INT_CONFIG_OFFSET(pin), 4)
+#define INT_CONFIG_MASK(pin)      GENMASK(INT_CONFIG_OFFSET(pin) + 3, \
+	                                  INT_CONFIG_OFFSET(pin))
 
 #define INT_CONTROL_REG(port)     (0x0210 + 0x20 * (port))
 

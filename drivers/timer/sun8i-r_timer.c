@@ -48,7 +48,7 @@ sun8i_r_timer_set_timeout(struct device *dev, uint32_t timeout)
 	mmio_write_32(dev->regs + INTERVAL_REG(index), timeout);
 	/* If the timer is paused (not stopped), also set the reload bit. */
 	mmio_set_32(dev->regs + CONTROL_REG(index),
-	            running ? BITMASK(0, 2) : BIT(0));
+	            running ? GENMASK(1, 0) : BIT(0));
 
 	return SUCCESS;
 }
@@ -76,7 +76,7 @@ sun8i_r_timer_probe(struct device *dev)
 
 	/* Stop the timer and set it to 24MHz one-shot mode. */
 	mmio_clrset_32(dev->regs + CONTROL_REG(index),
-	               BITMASK(0, 8), BIT(2) | BIT(7));
+	               GENMASK(7, 0), BIT(2) | BIT(7));
 
 	/* Enable and clear the IRQ. */
 	mmio_set_32(dev->regs + IRQ_EN_REG, BIT(index));

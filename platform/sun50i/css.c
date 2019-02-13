@@ -198,7 +198,7 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 	} else if (state == POWER_STATE_OFF) {
 		/* Wait for all CPUs to be idle. */
 		mmio_poll_32(DEV_CPUCFG +
-		             CPUCFG_CPU_STATUS_REG(cluster), BITMASK(16, 4));
+		             CPUCFG_CPU_STATUS_REG(cluster), GENMASK(19, 16));
 		/* Save the power-on reset vector base address from core 0. */
 		rvba[cluster] = mmio_read_32(DEV_CPUCFG +
 		                             CPUCFG_RVBAR_LO_REG(cluster, 0));

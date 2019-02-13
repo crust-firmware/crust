@@ -7,14 +7,15 @@
 #define LIB_UTIL_H
 
 #ifdef __ASSEMBLER__
-#define U(n)              (n)
+#define U(n)          (n)
 #else
-#define U(n)              (n ## U)
+#define U(n)          (n ## U)
 #endif
 
-#define ARRAY_SIZE(a)     (sizeof(a) / sizeof((a)[0]))
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
-#define BIT(n)            (U(1) << (n))
-#define BITMASK(off, len) ((BIT(len) - 1) << (off))
+#define BIT(n)        (U(1) << (n))
+
+#define GENMASK(h, l) ((U(0xffffffff) << (l)) & (U(0xffffffff) >> (31 - (h))))
 
 #endif /* LIB_UTIL_H */

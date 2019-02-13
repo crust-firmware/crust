@@ -122,11 +122,11 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
 {
 	int err;
 	uint32_t descriptor    = rx_payload[0];
-	uint8_t  core          = (descriptor >> 0x00) & BITMASK(0, 4);
-	uint8_t  cluster       = (descriptor >> 0x04) & BITMASK(0, 4);
-	uint8_t  core_state    = (descriptor >> 0x08) & BITMASK(0, 4);
-	uint8_t  cluster_state = (descriptor >> 0x0c) & BITMASK(0, 4);
-	uint8_t  css_state     = (descriptor >> 0x10) & BITMASK(0, 4);
+	uint8_t  core          = (descriptor >> 0x00) & GENMASK(3, 0);
+	uint8_t  cluster       = (descriptor >> 0x04) & GENMASK(3, 0);
+	uint8_t  core_state    = (descriptor >> 0x08) & GENMASK(3, 0);
+	uint8_t  cluster_state = (descriptor >> 0x0c) & GENMASK(3, 0);
+	uint8_t  css_state     = (descriptor >> 0x10) & GENMASK(3, 0);
 
 	/* Do not check if the CSS should be turned on, as receiving this
 	 * command from an ARM CPU via PSCI implies that it is already on. */
@@ -153,8 +153,8 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
  *
  * This gets the power states of all clusters and all cores they contain.
  */
-#define CLUSTER_ID(x)          ((x) & BITMASK(0, 4))
-#define CLUSTER_POWER_STATE(x) (((x) & BITMASK(0, 4)) << 4)
+#define CLUSTER_ID(x)          ((x) & GENMASK(3, 0))
+#define CLUSTER_POWER_STATE(x) (((x) & GENMASK(3, 0)) << 4)
 #define CORE_POWER_STATES(x)   ((x) << 8)
 static int
 scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload __unused,
@@ -185,7 +185,7 @@ scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
                                uint32_t *tx_payload __unused,
                                uint16_t *tx_size __unused)
 {
-	uint8_t system_state = rx_payload[0] & BITMASK(0, 8);
+	uint8_t system_state = rx_payload[0];
 
 	if (system_state == SYSTEM_POWER_STATE_REBOOT ||
 	    system_state == SYSTEM_POWER_STATE_RESET)
@@ -222,7 +222,7 @@ scpi_cmd_get_dvfs_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	struct device    *dev;
 	struct dvfs_info *info;
 	uint8_t id;
-	uint8_t index = rx_payload[0] & BITMASK(0, 8);
+	uint8_t index = rx_payload[0];
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_DVFS, index, &id)) == NULL)
 		return EINVAL;
@@ -249,8 +249,8 @@ scpi_cmd_set_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
 {
 	struct device *dev;
 	uint8_t id;
-	uint8_t index = (rx_payload[0] >> 0) & BITMASK(0, 8);
-	uint8_t opp   = (rx_payload[0] >> 8) & BITMASK(0, 8);
+	uint8_t index = rx_payload[0];
+	uint8_t opp   = rx_payload[0] >> 8;
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_DVFS, index, &id)) == NULL)
 		return EINVAL;
@@ -269,7 +269,7 @@ scpi_cmd_get_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 {
 	struct device *dev;
 	uint8_t id;
-	uint8_t index = rx_payload[0] & BITMASK(0, 8);
+	uint8_t index = rx_payload[0];
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_DVFS, index, &id)) == NULL)
 		return EINVAL;
@@ -303,7 +303,7 @@ scpi_cmd_get_clock_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	struct clock_info *info;
 	struct device     *dev;
 	uint8_t id;
-	uint8_t index = rx_payload[0] & BITMASK(0, 8);
+	uint8_t index = rx_payload[0];
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
 		return EINVAL;
@@ -327,7 +327,7 @@ scpi_cmd_set_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
 {
 	struct device *dev;
 	uint8_t  id;
-	uint8_t  index = rx_payload[0] & BITMASK(0, 8);
+	uint8_t  index = rx_payload[0];
 	uint32_t rate  = rx_payload[1];
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
@@ -348,7 +348,7 @@ scpi_cmd_get_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	struct device *dev;
 	int      err;
 	uint8_t  id;
-	uint8_t  index = rx_payload[0] & BITMASK(0, 8);
+	uint8_t  index = rx_payload[0];
 	uint32_t rate;
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
@@ -387,7 +387,7 @@ scpi_cmd_get_psu_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	struct regulator_info *info;
 	struct device *dev;
 	uint8_t  id;
-	uint16_t index = rx_payload[0] & BITMASK(0, 16);
+	uint16_t index = rx_payload[0];
 
 	if (!(dev = dm_get_subdev_by_index(DM_CLASS_REGULATOR, index, &id)))
 		return EINVAL;
@@ -411,7 +411,7 @@ scpi_cmd_set_psu_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
 {
 	struct device *dev;
 	uint8_t  id;
-	uint8_t  index = rx_payload[0] & BITMASK(0, 16);
+	uint8_t  index = rx_payload[0];
 	uint32_t value = rx_payload[1];
 
 	if (!(dev = dm_get_subdev_by_index(DM_CLASS_REGULATOR, index, &id)))
@@ -432,7 +432,7 @@ scpi_cmd_get_psu_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	struct device *dev;
 	int      err;
 	uint8_t  id;
-	uint8_t  index = rx_payload[0] & BITMASK(0, 16);
+	uint8_t  index = rx_payload[0];
 	uint16_t value;
 
 	if (!(dev = dm_get_subdev_by_index(DM_CLASS_REGULATOR, index, &id)))
@@ -471,7 +471,7 @@ scpi_cmd_get_sensor_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	struct sensor_info *info;
 	struct device *dev;
 	uint8_t  id;
-	uint16_t index = rx_payload[0] & BITMASK(0, 16);
+	uint16_t index = rx_payload[0];
 
 	if (!(dev = dm_get_subdev_by_index(DM_CLASS_SENSOR, index, &id)))
 		return EINVAL;
@@ -495,7 +495,7 @@ scpi_cmd_get_sensor_handler(uint32_t *rx_payload, uint32_t *tx_payload,
 	struct device *dev;
 	int      err;
 	uint8_t  id;
-	uint16_t index = rx_payload[0] & BITMASK(0, 16);
+	uint16_t index = rx_payload[0];
 	uint32_t value;
 
 	if (!(dev = dm_get_subdev_by_index(DM_CLASS_SENSOR, index, &id)))

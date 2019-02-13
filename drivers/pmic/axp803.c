@@ -105,13 +105,13 @@ axp803_pmic_probe(struct device *dev)
 
 	/* Now clear all IRQs. */
 	for (uint8_t reg = IRQ_STATUS_REG1; reg <= IRQ_STATUS_REG6; ++reg) {
-		if ((err = rsb_write(bus, addr, reg, BITMASK(0, 8))))
+		if ((err = rsb_write(bus, addr, reg, GENMASK(7, 0))))
 			return err;
 	}
 
 	/* Enable shutdown on PMIC overheat or >16 seconds button press;
 	 * remember previous voltages when waking up from suspend. */
-	if ((err = axp803_reg_setbits(dev, PIN_FUNCTION_REG, BITMASK(1, 3))))
+	if ((err = axp803_reg_setbits(dev, PIN_FUNCTION_REG, GENMASK(3, 1))))
 		return err;
 
 	/* Register the NMI IRQ handler. */

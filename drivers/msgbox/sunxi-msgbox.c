@@ -34,7 +34,7 @@
 
 #define RX_MSG_STATUS_REG(n)  (0x0140 + 0x8 * (n))
 #define TX_MSG_STATUS_REG(n)  (0x0144 + 0x8 * (n))
-#define MSG_STATUS_MASK       BITMASK(0, 3)
+#define MSG_STATUS_MASK       GENMASK(2, 0)
 
 #define RX_MSG_DATA_REG(n)    (0x0180 + 0x8 * (n))
 #define TX_MSG_DATA_REG(n)    (0x0184 + 0x8 * (n))
@@ -178,7 +178,7 @@ sunxi_msgbox_probe(struct device *dev)
 
 	/* Disable and clear all interrupts. */
 	mmio_write_32(dev->regs + IRQ_EN_REG, 0);
-	mmio_write_32(dev->regs + IRQ_STATUS_REG, BITMASK(0, 16));
+	mmio_write_32(dev->regs + IRQ_STATUS_REG, GENMASK(15, 0));
 
 	if ((err = dm_setup_irq(dev, sunxi_msgbox_irq)))
 		return err;

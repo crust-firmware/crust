@@ -92,7 +92,7 @@ sun8i_thermal_read_raw(struct device *dev, uint8_t id, uint32_t *raw)
 
 	sun8i_thermal_enable(dev);
 
-	*raw = mmio_read_32(dev->regs + addr) & BITMASK(0, 12);
+	*raw = mmio_read_32(dev->regs + addr) & GENMASK(11, 0);
 
 	return SUCCESS;
 }

@@ -14,7 +14,8 @@
 
 #define CONFIG_REG(port, index) (0x0000 + 0x24 * (port) + ((index) / 8) * 4)
 #define CONFIG_OFFSET(index)    (((pin) % 8) * 4)
-#define CONFIG_MASK(index)      BITMASK(CONFIG_OFFSET(index), 3)
+#define CONFIG_MASK(index)      GENMASK(CONFIG_OFFSET(index) + 2, \
+	                                CONFIG_OFFSET(index))
 
 #define DATA_REG(port)          (0x0010 + 0x24 * (port))
 
