@@ -4,4 +4,3 @@
 #
 
 hostprogs-y += kconfig/
-hostprogs-y += unity/
