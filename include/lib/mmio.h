@@ -1,6 +1,6 @@
 /*
  * Copyright © 2013-2014, ARM Limited and Contributors. All rights reserved.
- * Copyright © 2017-2018 The Crust Firmware Authors.
+ * Copyright © 2017-2019 The Crust Firmware Authors.
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
