@@ -164,7 +164,7 @@ $(TGT)/%.bin: $(TGT)/%.elf
 	$(M) OBJCOPY $@
 	$(Q) $(OBJCOPY) -O binary -S --reverse-bytes 4 $< $@
 
-$(TGT)/%.elf $(TGT)/%.map: $(TGT)/scripts/%.ld $(obj-all) $(TGT)/lib.a
+$(TGT)/%.elf $(TGT)/%.map: $(TGT)/common/crust.ld $(obj-all) $(TGT)/lib.a
 	$(M) LD $@
 	$(Q) $(CC) $(CFLAGS) $(LDFLAGS) -Wl,-Map,$(TGT)/$*.map -o $@ -T $^
 

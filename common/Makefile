@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
+$(call linker_scripts,crust.ld)
+
 obj-y += console.o
 obj-y += css.o
 obj-y += debug.o
