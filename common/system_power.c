@@ -11,7 +11,6 @@
 #include <error.h>
 #include <interrupts.h>
 #include <pmic.h>
-#include <regulator.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <system_power.h>
@@ -19,24 +18,6 @@
 
 static bool is_off;
 static bool is_suspended;
-
-static void
-disable_regulators(void)
-{
-	struct device *dev;
-	int     err;
-	uint8_t id;
-
-	/* Disable all external voltage regulators. */
-	for (dev = dm_get_subdev_by_index(DM_CLASS_REGULATOR, 0, &id);
-	     dev != NULL; dev = dm_next_subdev(dev, &id)) {
-		if ((err = regulator_disable(dev, id)) && err != EPERM) {
-			const char *name = regulator_get_info(dev, id)->name;
-			warn("Failed to turn off regulator %s.%s (%d)",
-			     dev->name, name, err);
-		}
-	}
-}
 
 bool __pure
 system_is_off(void)
@@ -72,8 +53,6 @@ void
 system_shutdown(void)
 {
 	struct device *pmic;
-
-	disable_regulators();
 
 	if ((pmic = dm_first_dev_by_class(DM_CLASS_PMIC)))
 		pmic_shutdown(pmic);
