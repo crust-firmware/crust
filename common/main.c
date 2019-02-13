@@ -41,6 +41,7 @@ main(void)
 
 			/* Perform 1Hz operations. */
 			poll_sensors();
+			watchdog_restart(&r_twd);
 		}
 		/* Perform every-iteration operations. */
 		process_work();

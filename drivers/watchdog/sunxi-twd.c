@@ -5,7 +5,6 @@
 
 #include <error.h>
 #include <mmio.h>
-#include <timer.h>
 #include <watchdog.h>
 #include <clock/sunxi-ccu.h>
 #include <irqchip/sun4i-intc.h>
@@ -20,10 +19,8 @@
 #define TWD_RESTART_KEY (0xD14 << 16)
 
 static void
-sunxi_twd_restart(void *param)
+sunxi_twd_restart(struct device *dev)
 {
-	struct device *dev = param;
-
 	/* Enable and perform restart. */
 	mmio_write_32(dev->regs + TWD_RESTART_REG, TWD_RESTART_KEY | BIT(0));
 }
@@ -34,8 +31,7 @@ sunxi_twd_disable(struct device *dev)
 	/* Disable system reset, stop watchdog counter. */
 	mmio_clrset_32(dev->regs + TWD_CTRL_REG, BIT(9), BIT(1));
 
-	/* Cancel TWD restart timer. */
-	return timer_cancel_periodic(sunxi_twd_restart, dev);
+	return SUCCESS;
 }
 
 static int
@@ -47,13 +43,10 @@ sunxi_twd_enable(struct device *dev, uint32_t timeout)
 	/* Resume watchdog counter, enable system reset. */
 	mmio_clrset_32(dev->regs + TWD_CTRL_REG, BIT(1), BIT(9));
 
-	/* Register TWD restart timer. */
-	if (!timer_run_periodic(sunxi_twd_restart, dev)) {
-		sunxi_twd_restart(dev);
-		return SUCCESS;
-	}
+	/* Start the counter rolling. */
+	sunxi_twd_restart(dev);
 
-	return EPERM;
+	return SUCCESS;
 }
 
 static int
@@ -81,6 +74,7 @@ static const struct watchdog_driver sunxi_twd_driver = {
 	.ops = {
 		.disable = sunxi_twd_disable,
 		.enable  = sunxi_twd_enable,
+		.restart = sunxi_twd_restart,
 	},
 };
 

@@ -14,8 +14,9 @@
 	(&container_of((dev)->drv, struct watchdog_driver, drv)->ops)
 
 struct watchdog_driver_ops {
-	int (*disable)(struct device *dev);
-	int (*enable)(struct device *dev, uint32_t timeout);
+	int  (*disable)(struct device *dev);
+	int  (*enable)(struct device *dev, uint32_t timeout);
+	void (*restart)(struct device *dev);
 };
 
 struct watchdog_driver {
@@ -44,6 +45,17 @@ static inline int
 watchdog_enable(struct device *dev, uint32_t timeout)
 {
 	return WATCHDOG_OPS(dev)->enable(dev, timeout);
+}
+
+/**
+ * Restart the watchdog. This must be called before the watchdog times out.
+ *
+ * @param dev The watchdog device.
+ */
+static inline void
+watchdog_restart(struct device *dev)
+{
+	WATCHDOG_OPS(dev)->restart(dev);
 }
 
 #endif /* DRIVERS_WATCHDOG_H */
