@@ -93,7 +93,7 @@ endif
 include $(SRC)/scripts/Makefile.format
 include $(SRC)/scripts/Makefile.kbuild
 
-$(call descend,3rdparty common drivers lib platform scripts tools)
+$(call descend,3rdparty common drivers lib scripts tools)
 
 ###############################################################################
 

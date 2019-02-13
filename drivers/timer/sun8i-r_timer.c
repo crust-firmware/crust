@@ -9,8 +9,10 @@
 #include <mmio.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <timer.h>
+#include <clock/sunxi-ccu.h>
+#include <irqchip/sun4i-intc.h>
 #include <timer/sun8i-r_timer.h>
+#include <platform/devices.h>
 
 #define IRQ_EN_REG      0x0000
 #define IRQ_STATUS_REG  0x0004
@@ -93,7 +95,7 @@ sun8i_r_timer_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct timer_driver sun8i_r_timer_driver = {
+static const struct timer_driver sun8i_r_timer_driver = {
 	.drv = {
 		.class = DM_CLASS_TIMER,
 		.probe = sun8i_r_timer_probe,
@@ -101,5 +103,17 @@ const struct timer_driver sun8i_r_timer_driver = {
 	.ops = {
 		.get_timeout = sun8i_r_timer_get_timeout,
 		.set_timeout = sun8i_r_timer_set_timeout,
+	},
+};
+
+struct device r_timer0 __device = {
+	.name    = "r_timer0",
+	.regs    = DEV_R_TIMER,
+	.drv     = &sun8i_r_timer_driver.drv,
+	.drvdata = 0, /**< Timer index within the device. */
+	.clocks  = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_TIMER),
+	.irq     = IRQ_HANDLE {
+		.dev = &r_intc,
+		.irq = IRQ_R_TIMER0,
 	},
 };

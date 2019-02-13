@@ -20,6 +20,6 @@
 #define SUNXI_MSGBOX_DRVDATA \
 	(uintptr_t)&(msgbox_handler *[SUNXI_MSGBOX_CHANS])
 
-extern const struct msgbox_driver sunxi_msgbox_driver;
+extern struct device msgbox;
 
 #endif /* DRIVERS_MSGBOX_SUNXI_MSGBOX_H */

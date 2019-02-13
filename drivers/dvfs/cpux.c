@@ -12,6 +12,9 @@
 #include <regulator.h>
 #include <stddef.h>
 #include <dvfs/cpux.h>
+#include <regulator/axp803.h>
+#include <regulator/sy8106a.h>
+#include <platform/devices.h>
 
 #define OPP_COUNT         ARRAY_SIZE(cpux_opp_table)
 
@@ -115,7 +118,7 @@ cpux_probe(struct device *dev)
 	return cpux_set_opp(dev, 0, OPP_COUNT - 1);
 }
 
-const struct dvfs_driver cpux_driver = {
+static const struct dvfs_driver cpux_driver = {
 	.drv = {
 		.class = DM_CLASS_DVFS,
 		.probe = cpux_probe,
@@ -125,4 +128,17 @@ const struct dvfs_driver cpux_driver = {
 		.get_opp  = cpux_get_opp,
 		.set_opp  = cpux_set_opp,
 	},
+};
+
+struct device cpux __device = {
+	.name = "cpux",
+	.regs = DEV_CCU,
+	.drv  = &cpux_driver.drv,
+#if CONFIG_REGULATOR_AXP803
+	.supplydev = &axp803_regulator,
+	.supply    = AXP803_REGL_DCDC2,
+#elif CONFIG_REGULATOR_SY8106A
+	.supplydev = &sy8106a,
+	.supply    = SY8106A_REGL_VOUT,
+#endif
 };

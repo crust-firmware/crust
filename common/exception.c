@@ -4,7 +4,6 @@
  */
 
 #include <debug.h>
-#include <devices.h>
 #include <exception.h>
 #include <irqchip.h>
 #include <spr.h>

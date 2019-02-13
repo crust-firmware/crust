@@ -11,7 +11,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <util.h>
+#include <clock/sunxi-ccu.h>
+#include <gpio/sunxi-gpio.h>
 #include <i2c/sun6i-a31-i2c.h>
+#include <irqchip/sun4i-intc.h>
+#include <platform/devices.h>
 
 #define I2C_ADDR_REG  0x00
 #define I2C_XADDR_REG 0x04
@@ -189,7 +193,7 @@ sun6i_a31_i2c_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct i2c_driver sun6i_a31_i2c_driver = {
+static const struct i2c_driver sun6i_a31_i2c_driver = {
 	.drv = {
 		.class = DM_CLASS_I2C,
 		.probe = sun6i_a31_i2c_probe,
@@ -199,5 +203,25 @@ const struct i2c_driver sun6i_a31_i2c_driver = {
 		.start = sun6i_a31_i2c_start,
 		.stop  = sun6i_a31_i2c_stop,
 		.write = sun6i_a31_i2c_write,
+	},
+};
+
+struct device r_i2c __device = {
+	.name   = "r_i2c",
+	.regs   = DEV_R_I2C,
+	.drv    = &sun6i_a31_i2c_driver.drv,
+	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_I2C),
+	.irq    = IRQ_HANDLE {
+		.dev = &r_intc,
+		.irq = IRQ_R_I2C,
+	},
+	.pins = GPIO_PINS(I2C_NUM_PINS) {
+#if CONFIG_SOC_A64
+		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 3 },
+		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 3 },
+#else
+		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 2 },
+		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 2 },
+#endif
 	},
 };

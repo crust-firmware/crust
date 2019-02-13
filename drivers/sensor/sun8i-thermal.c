@@ -8,8 +8,9 @@
 #include <error.h>
 #include <limits.h>
 #include <mmio.h>
-#include <sensor.h>
+#include <clock/sunxi-ccu.h>
 #include <sensor/sun8i-thermal.h>
+#include <platform/devices.h>
 
 #define THS0_DATA_REG          0x80
 #define THS1_DATA_REG          0x84
@@ -129,7 +130,7 @@ sun8i_thermal_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct sensor_driver sun8i_thermal_driver = {
+static const struct sensor_driver sun8i_thermal_driver = {
 	.drv = {
 		.class = DM_CLASS_SENSOR,
 		.probe = sun8i_thermal_probe,
@@ -137,5 +138,15 @@ const struct sensor_driver sun8i_thermal_driver = {
 	.ops = {
 		.get_info = sun8i_thermal_get_info,
 		.read_raw = sun8i_thermal_read_raw,
+	},
+};
+
+struct device ths __device = {
+	.name   = "ths",
+	.regs   = DEV_THS,
+	.drv    = &sun8i_thermal_driver.drv,
+	.clocks = CLOCK_PARENTS(2) {
+		{ .dev = &ccu, .id = CCU_CLOCK_THS },
+		{ .dev = &ccu, .id = CCU_CLOCK_THS_MOD },
 	},
 };

@@ -9,6 +9,7 @@
 #include <pmic.h>
 #include <regulator.h>
 #include <pmic/dummy.h>
+#include <regulator/sy8106a.h>
 
 static int
 dummy_pmic_power_off(struct device *dev)
@@ -33,7 +34,7 @@ dummy_pmic_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct pmic_driver dummy_pmic_driver = {
+static const struct pmic_driver dummy_pmic_driver = {
 	.drv = {
 		.class = DM_CLASS_PMIC,
 		.probe = dummy_pmic_probe,
@@ -44,4 +45,13 @@ const struct pmic_driver dummy_pmic_driver = {
 		.suspend  = dummy_pmic_power_off,
 		.wakeup   = dummy_pmic_power_on,
 	},
+};
+
+struct device dummy_pmic __device = {
+	.name = "dummy-pmic",
+	.drv  = &dummy_pmic_driver.drv,
+#if CONFIG_REGULATOR_SY8106A
+	.supplydev = &sy8106a,
+	.supply    = SY8106A_REGL_VOUT,
+#endif
 };

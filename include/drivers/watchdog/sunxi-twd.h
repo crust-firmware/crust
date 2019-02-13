@@ -8,6 +8,6 @@
 
 #include <watchdog.h>
 
-extern const struct watchdog_driver sunxi_twd_driver;
+extern struct device r_twd;
 
 #endif /* DRIVERS_WATCHDOG_SUNXI_TWD_H */

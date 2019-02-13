@@ -7,8 +7,9 @@
 #define DRIVERS_IRQCHIP_SUN4I_INTC_H
 
 #include <irqchip.h>
+#include <platform/irq.h>
 
-extern const struct irqchip_driver sun4i_intc_driver;
+extern struct device r_intc;
 
 void sun4i_intc_irq(struct device *dev);
 

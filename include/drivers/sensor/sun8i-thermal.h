@@ -8,6 +8,6 @@
 
 #include <sensor.h>
 
-extern const struct sensor_driver sun8i_thermal_driver;
+extern struct device ths;
 
 #endif /* DRIVERS_SENSOR_SUN8I_THERMAL_H */

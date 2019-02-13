@@ -10,6 +10,6 @@
 
 #define SUNXI_GPIO_PIN(port, index) (32 * (port) + (index))
 
-extern const struct gpio_driver sunxi_gpio_driver;
+extern struct device r_pio;
 
 #endif /* DRIVERS_GPIO_SUNXI_GPIO_H */

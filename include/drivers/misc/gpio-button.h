@@ -8,6 +8,6 @@
 
 #include <dm.h>
 
-extern const struct driver gpio_button_driver;
+extern struct device power_button;
 
 #endif /* DRIVERS_MISC_GPIO_BUTTON_H */

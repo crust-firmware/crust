@@ -8,6 +8,6 @@
 
 #include <pmic.h>
 
-extern const struct pmic_driver axp803_pmic_driver;
+extern struct device axp803_pmic;
 
 #endif /* DRIVERS_PMIC_AXP803_H */

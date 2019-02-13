@@ -7,7 +7,10 @@
 #include <mmio.h>
 #include <timer.h>
 #include <watchdog.h>
+#include <clock/sunxi-ccu.h>
+#include <irqchip/sun4i-intc.h>
 #include <watchdog/sunxi-twd.h>
+#include <platform/devices.h>
 
 #define TWD_STATUS_REG  0x00
 #define TWD_CTRL_REG    0x10
@@ -70,7 +73,7 @@ sunxi_twd_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct watchdog_driver sunxi_twd_driver = {
+static const struct watchdog_driver sunxi_twd_driver = {
 	.drv = {
 		.class = DM_CLASS_WATCHDOG,
 		.probe = sunxi_twd_probe,
@@ -78,5 +81,16 @@ const struct watchdog_driver sunxi_twd_driver = {
 	.ops = {
 		.disable = sunxi_twd_disable,
 		.enable  = sunxi_twd_enable,
+	},
+};
+
+struct device r_twd __device = {
+	.name   = "r_twd",
+	.regs   = DEV_R_TWD,
+	.drv    = &sunxi_twd_driver.drv,
+	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_TWD),
+	.irq    = IRQ_HANDLE {
+		.dev = &r_intc,
+		.irq = IRQ_R_TWD,
 	},
 };

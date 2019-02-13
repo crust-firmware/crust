@@ -11,7 +11,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <util.h>
+#include <clock/sunxi-ccu.h>
+#include <irqchip/sun4i-intc.h>
 #include <msgbox/sunxi-msgbox.h>
+#include <platform/devices.h>
 
 /* These macros take a virtual channel number. */
 #define CTRL_REG(n)           (0x0000 + 0x4 * ((n) / 2))
@@ -186,7 +189,7 @@ sunxi_msgbox_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct msgbox_driver sunxi_msgbox_driver = {
+static const struct msgbox_driver sunxi_msgbox_driver = {
 	.drv = {
 		.class = DM_CLASS_MSGBOX,
 		.probe = sunxi_msgbox_probe,
@@ -196,5 +199,17 @@ const struct msgbox_driver sunxi_msgbox_driver = {
 		.enable     = sunxi_msgbox_enable,
 		.send       = sunxi_msgbox_send,
 		.tx_pending = sunxi_msgbox_tx_pending,
+	},
+};
+
+struct device msgbox __device = {
+	.name    = "msgbox",
+	.regs    = DEV_MSGBOX,
+	.drv     = &sunxi_msgbox_driver.drv,
+	.drvdata = SUNXI_MSGBOX_DRVDATA { 0 },
+	.clocks  = CLOCK_PARENT(ccu, CCU_CLOCK_MSGBOX),
+	.irq     = IRQ_HANDLE {
+		.dev = &r_intc,
+		.irq = IRQ_MSGBOX,
 	},
 };

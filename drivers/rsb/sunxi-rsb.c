@@ -3,12 +3,15 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <clock.h>
 #include <dm.h>
 #include <error.h>
 #include <mmio.h>
 #include <rsb.h>
+#include <clock/sunxi-ccu.h>
+#include <gpio/sunxi-gpio.h>
+#include <irqchip/sun4i-intc.h>
 #include <rsb/sunxi-rsb.h>
+#include <platform/devices.h>
 
 #define RSB_CTRL_REG   0x00
 #define RSB_CCR_REG    0x04
@@ -124,7 +127,7 @@ sunxi_rsb_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct rsb_driver sunxi_rsb_driver = {
+static const struct rsb_driver sunxi_rsb_driver = {
 	.drv = {
 		.class = DM_CLASS_RSB,
 		.probe = sunxi_rsb_probe,
@@ -134,5 +137,20 @@ const struct rsb_driver sunxi_rsb_driver = {
 		.read      = sunxi_rsb_read,
 		.set_rate  = sunxi_rsb_set_rate,
 		.write     = sunxi_rsb_write,
+	},
+};
+
+struct device r_rsb __device = {
+	.name   = "r_rsb",
+	.regs   = DEV_R_RSB,
+	.drv    = &sunxi_rsb_driver.drv,
+	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_RSB),
+	.irq    = IRQ_HANDLE {
+		.dev = &r_intc,
+		.irq = IRQ_R_RSB,
+	},
+	.pins = GPIO_PINS(RSB_NUM_PINS) {
+		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 2 },
+		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 2 },
 	},
 };

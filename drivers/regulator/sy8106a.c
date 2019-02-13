@@ -10,6 +10,7 @@
 #include <limits.h>
 #include <mmio.h>
 #include <regulator.h>
+#include <i2c/sun6i-a31-i2c.h>
 #include <regulator/sy8106a.h>
 
 #define VOUT_SEL_REG   0x01
@@ -102,7 +103,7 @@ sy8106a_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct regulator_driver sy8106a_driver = {
+static const struct regulator_driver sy8106a_driver = {
 	.drv = {
 		.class = DM_CLASS_REGULATOR,
 		.probe = sy8106a_probe,
@@ -114,4 +115,11 @@ const struct regulator_driver sy8106a_driver = {
 		.set_state = sy8106a_set_state,
 		.write_raw = sy8106a_write_raw,
 	},
+};
+
+struct device sy8106a __device = {
+	.name = "sy8106a",
+	.drv  = &sy8106a_driver.drv,
+	.bus  = &r_i2c,
+	.addr = SY8106A_I2C_ADDRESS,
 };

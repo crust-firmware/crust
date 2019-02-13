@@ -10,7 +10,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <util.h>
+#include <clock/sunxi-ccu.h>
 #include <gpio/sunxi-gpio.h>
+#include <platform/devices.h>
 
 #define CONFIG_REG(port, index) (0x0000 + 0x24 * (port) + ((index) / 8) * 4)
 #define CONFIG_OFFSET(index)    (((pin) % 8) * 4)
@@ -78,7 +80,7 @@ sunxi_gpio_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct gpio_driver sunxi_gpio_driver = {
+static const struct gpio_driver sunxi_gpio_driver = {
 	.drv = {
 		.class = DM_CLASS_GPIO,
 		.probe = sunxi_gpio_probe,
@@ -88,4 +90,11 @@ const struct gpio_driver sunxi_gpio_driver = {
 		.set_mode  = sunxi_gpio_set_mode,
 		.set_value = sunxi_gpio_set_value,
 	},
+};
+
+struct device r_pio __device = {
+	.name   = "r_pio",
+	.regs   = DEV_R_PIO,
+	.drv    = &sunxi_gpio_driver.drv,
+	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_PIO),
 };

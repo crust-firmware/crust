@@ -8,9 +8,9 @@
 #include <limits.h>
 #include <mmio.h>
 #include <regulator.h>
-#include <rsb.h>
 #include <mfd/axp803.h>
 #include <regulator/axp803.h>
+#include <rsb/sunxi-rsb.h>
 
 #define OUTPUT_POWER_CONTROL1 0x10
 #define OUTPUT_POWER_CONTROL2 0x12
@@ -504,7 +504,7 @@ axp_regulator_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct regulator_driver axp803_regulator_driver = {
+static const struct regulator_driver axp803_regulator_driver = {
 	.drv = {
 		.class = DM_CLASS_REGULATOR,
 		.probe = axp_regulator_probe,
@@ -516,4 +516,11 @@ const struct regulator_driver axp803_regulator_driver = {
 		.set_state = axp803_regulator_set_state,
 		.write_raw = axp803_regulator_write_raw,
 	},
+};
+
+struct device axp803_regulator __device = {
+	.name = "axp803-regulator",
+	.drv  = &axp803_regulator_driver.drv,
+	.bus  = &r_rsb,
+	.addr = AXP803_RSB_RTADDR,
 };

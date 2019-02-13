@@ -10,6 +10,8 @@
 #include <clock.h>
 #include <stdint.h>
 #include <util.h>
+#include <platform/ccu.h>
+#include <platform/r_ccu.h>
 
 #define SUNXI_CCU_DRVDATA \
 	(uintptr_t)(struct sunxi_ccu_clock[])
@@ -33,6 +35,7 @@ struct sunxi_ccu_clock {
 	const bitfield_t           p;
 };
 
-extern const struct clock_driver sunxi_ccu_driver;
+extern struct device ccu;
+extern struct device r_ccu;
 
 #endif /* DRIVERS_CLOCK_SUNXI_CCU_H */

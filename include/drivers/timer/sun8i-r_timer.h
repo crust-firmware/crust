@@ -8,6 +8,6 @@
 
 #include <timer.h>
 
-extern const struct timer_driver sun8i_r_timer_driver;
+extern struct device r_timer0;
 
 #endif /* DRIVERS_TIMER_SUN8I_R_TIMER_H */

@@ -8,7 +8,10 @@
 #include <error.h>
 #include <mmio.h>
 #include <util.h>
+#include <clock/sunxi-ccu.h>
+#include <irqchip/sun4i-intc.h>
 #include <irqchip/sunxi-gpio.h>
+#include <platform/devices.h>
 
 #define HANDLE_LIST(dev)          ((struct irq_handle *)(dev)->drvdata)
 
@@ -98,12 +101,23 @@ sunxi_gpio_irqchip_probe(struct device *dev)
 	return dm_setup_irq(dev, sunxi_gpio_irq);
 }
 
-const struct irqchip_driver sunxi_gpio_irqchip_driver = {
+static const struct irqchip_driver sunxi_gpio_irqchip_driver = {
 	.drv = {
 		.class = DM_CLASS_IRQCHIP,
 		.probe = sunxi_gpio_irqchip_probe,
 	},
 	.ops = {
 		.enable = sunxi_gpio_enable,
+	},
+};
+
+struct device r_pio_irqchip __device = {
+	.name   = "r_pio_irqchip",
+	.regs   = DEV_R_PIO,
+	.drv    = &sunxi_gpio_irqchip_driver.drv,
+	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_PIO),
+	.irq    = IRQ_HANDLE {
+		.dev = &r_intc,
+		.irq = IRQ_R_PIO_PL,
 	},
 };

@@ -8,6 +8,6 @@
 
 #include <rsb.h>
 
-extern const struct rsb_driver sunxi_rsb_driver;
+extern struct device r_rsb;
 
 #endif /* DRIVERS_RSB_SUNXI_RSB_H */

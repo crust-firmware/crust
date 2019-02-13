@@ -9,8 +9,10 @@
 #include <pmic.h>
 #include <rsb.h>
 #include <system_power.h>
+#include <irqchip/sun4i-intc.h>
 #include <mfd/axp803.h>
 #include <pmic/axp803.h>
+#include <rsb/sunxi-rsb.h>
 
 #define IRQ_ENABLE_REG1   0x40
 #define IRQ_ENABLE_REG5   0x44
@@ -118,7 +120,7 @@ axp803_pmic_probe(struct device *dev)
 	return dm_setup_irq(dev, axp803_pmic_irq);
 }
 
-const struct pmic_driver axp803_pmic_driver = {
+static const struct pmic_driver axp803_pmic_driver = {
 	.drv = {
 		.class = DM_CLASS_PMIC,
 		.probe = axp803_pmic_probe,
@@ -128,5 +130,16 @@ const struct pmic_driver axp803_pmic_driver = {
 		.shutdown = axp803_pmic_shutdown,
 		.suspend  = axp803_pmic_suspend,
 		.wakeup   = axp803_pmic_wakeup,
+	},
+};
+
+struct device axp803_pmic __device = {
+	.name = "axp803-pmic",
+	.drv  = &axp803_pmic_driver.drv,
+	.bus  = &r_rsb,
+	.addr = AXP803_RSB_RTADDR,
+	.irq  = IRQ_HANDLE {
+		.dev = &r_intc,
+		.irq = IRQ_NMI,
 	},
 };

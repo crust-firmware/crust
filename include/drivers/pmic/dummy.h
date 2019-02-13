@@ -8,6 +8,6 @@
 
 #include <pmic.h>
 
-extern const struct pmic_driver dummy_pmic_driver;
+extern struct device dummy_pmic;
 
 #endif /* DRIVERS_PMIC_DUMMY_H */

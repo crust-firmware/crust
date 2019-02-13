@@ -9,6 +9,7 @@
 #include <spr.h>
 #include <util.h>
 #include <irqchip/sun4i-intc.h>
+#include <platform/devices.h>
 
 #define INTC_VECTOR_REG    0x0000
 #define INTC_BASE_ADDR_REG 0x0004
@@ -71,7 +72,7 @@ sun4i_intc_probe(struct device *dev)
 	return SUCCESS;
 }
 
-const struct irqchip_driver sun4i_intc_driver = {
+static const struct irqchip_driver sun4i_intc_driver = {
 	.drv = {
 		.class = DM_CLASS_IRQCHIP,
 		.probe = sun4i_intc_probe,
@@ -79,4 +80,10 @@ const struct irqchip_driver sun4i_intc_driver = {
 	.ops = {
 		.enable = sun4i_intc_enable,
 	},
+};
+
+struct device r_intc __device = {
+	.name = "r_intc",
+	.regs = DEV_R_INTC,
+	.drv  = &sun4i_intc_driver.drv,
 };

@@ -33,6 +33,6 @@ enum {
 	AXP803_REGL_COUNT,
 };
 
-extern const struct regulator_driver axp803_regulator_driver;
+extern struct device axp803_regulator;
 
 #endif /* DRIVERS_REGULATOR_AXP803_H */
