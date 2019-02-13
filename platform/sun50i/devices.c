@@ -40,7 +40,6 @@ static struct device cpux __device;
 static struct device dummy_pmic __device;
 #endif
 static struct device msgbox __device;
-static struct device pio __device;
 #if CONFIG_GPIO_BUTTON
 static struct device power_button __device;
 #endif
@@ -96,14 +95,6 @@ static struct device ccu = {
 			},
 			.gate  = CCU_GATE_MSGBOX,
 			.reset = CCU_RESET_MSGBOX,
-		},
-		[CCU_CLOCK_PIO] = {
-			.info = {
-				.name  = "pio",
-				.flags = CLK_FIXED,
-			},
-			.gate  = CCU_GATE_PIO,
-			.reset = CCU_RESET_PIO,
 		},
 		[CCU_CLOCK_THS] = {
 			.info = {
@@ -164,13 +155,6 @@ static struct device msgbox = {
 		.dev = &r_intc,
 		.irq = IRQ_MSGBOX,
 	},
-};
-
-static struct device pio = {
-	.name   = "pio",
-	.regs   = DEV_PIO,
-	.drv    = &sunxi_gpio_driver.drv,
-	.clocks = CLOCK_PARENT(ccu, CCU_CLOCK_PIO),
 };
 
 #if CONFIG_GPIO_BUTTON
