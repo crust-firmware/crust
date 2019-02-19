@@ -9,19 +9,21 @@
 #include <bitmap.h>
 #include <stdint.h>
 
-#define R_CCU_CLOCK_OSC24M    0
-#define R_CCU_CLOCK_OSC32K    1
-#define R_CCU_CLOCK_OSC16M    2
-#define R_CCU_CLOCK_AHB0      3
-#define R_CCU_CLOCK_APB0      4
-#define R_CCU_CLOCK_R_PIO     5
-#define R_CCU_CLOCK_R_CIR     6
-#define R_CCU_CLOCK_R_TIMER   7
-#define R_CCU_CLOCK_R_UART    8
-#define R_CCU_CLOCK_R_I2C     9
-#define R_CCU_CLOCK_R_TWD     10
-#define R_CCU_CLOCK_R_CIR_MOD 11
-#define R_CCU_CLOCK_COUNT     12
+enum {
+	R_CCU_CLOCK_OSC24M,
+	R_CCU_CLOCK_OSC32K,
+	R_CCU_CLOCK_OSC16M,
+	R_CCU_CLOCK_AHB0,
+	R_CCU_CLOCK_APB0,
+	R_CCU_CLOCK_R_PIO,
+	R_CCU_CLOCK_R_CIR,
+	R_CCU_CLOCK_R_TIMER,
+	R_CCU_CLOCK_R_UART,
+	R_CCU_CLOCK_R_I2C,
+	R_CCU_CLOCK_R_TWD,
+	R_CCU_CLOCK_R_CIR_MOD,
+	R_CCU_CLOCK_COUNT
+};
 
 #define R_CCU_CLOCK_AHB0_REG  0x0000
 #define R_CCU_CLOCK_APB0_REG  0x000c

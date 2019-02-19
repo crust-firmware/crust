@@ -9,12 +9,14 @@
 #include <bitmap.h>
 #include <stdint.h>
 
-#define CCU_CLOCK_PLL_PERIPH0 0
-#define CCU_CLOCK_MSGBOX      1
-#define CCU_CLOCK_PIO         2
-#define CCU_CLOCK_THS         3
-#define CCU_CLOCK_THS_MOD     4
-#define CCU_CLOCK_COUNT       5
+enum {
+	CCU_CLOCK_PLL_PERIPH0,
+	CCU_CLOCK_MSGBOX,
+	CCU_CLOCK_PIO,
+	CCU_CLOCK_THS,
+	CCU_CLOCK_THS_MOD,
+	CCU_CLOCK_COUNT
+};
 
 #define CCU_CLOCK_THS_REG     0x0074
 
