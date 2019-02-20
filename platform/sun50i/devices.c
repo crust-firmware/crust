@@ -75,31 +75,8 @@ static struct device axp803_pmic = {
 
 #if CONFIG_REGULATOR_AXP803
 static struct device axp803_regulator = {
-	.name    = "axp803-regulator",
-	.drv     = &axp803_regulator_driver.drv,
-	.drvdata = AXP803_DRVDATA {
-		[AXP803_REGL_DCDC1] = 3300,
-		[AXP803_REGL_DCDC2] = 1100,
-		[AXP803_REGL_DCDC3] = 1100,
-		/* DCDC4 is not connected. */
-		[AXP803_REGL_DCDC5] = 1500,
-		[AXP803_REGL_DCDC6] = 1100,
-		/* DC1SW is not connected. */
-		[AXP803_REGL_ALDO1] = 2800,
-		[AXP803_REGL_ALDO2] = 3300,
-		[AXP803_REGL_ALDO3] = 3000,
-		[AXP803_REGL_DLDO1] = 3300,
-		[AXP803_REGL_DLDO2] = 3600,
-		[AXP803_REGL_DLDO3] = 2800,
-		[AXP803_REGL_DLDO4] = 3300,
-		[AXP803_REGL_ELDO1] = 1800,
-		/* ELDO2 is not connected. */
-		[AXP803_REGL_ELDO3] = 1800,
-		/* FLDO1 is connected but not used. */
-		[AXP803_REGL_FLDO2] = 1100,
-		/* GPIO0 is not connected. */
-		/* GPIO1 is not connected. */
-	},
+	.name = "axp803-regulator",
+	.drv  = &axp803_regulator_driver.drv,
 	.bus  = &r_rsb,
 	.addr = AXP803_RSB_RTADDR,
 };
@@ -383,11 +360,10 @@ static struct device r_twd = {
 
 #if CONFIG_REGULATOR_SY8106A
 static struct device sy8106a = {
-	.name    = "sy8106a",
-	.drv     = &sy8106a_driver.drv,
-	.drvdata = 1100, /**< Default CPU voltage. */
-	.bus     = &r_i2c,
-	.addr    = SY8106A_I2C_ADDRESS,
+	.name = "sy8106a",
+	.drv  = &sy8106a_driver.drv,
+	.bus  = &r_i2c,
+	.addr = SY8106A_I2C_ADDRESS,
 };
 #endif
 

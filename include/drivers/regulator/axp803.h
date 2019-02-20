@@ -8,9 +8,6 @@
 
 #include <regulator.h>
 
-#define AXP803_DRVDATA \
-	(uintptr_t)(uint16_t[AXP803_REGL_COUNT])
-
 enum {
 	AXP803_REGL_DCDC1,
 	AXP803_REGL_DCDC2,

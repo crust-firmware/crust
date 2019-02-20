@@ -131,19 +131,6 @@ regulator_get_state(struct device *dev, uint8_t id)
 int regulator_get_value(struct device *dev, uint8_t id, uint16_t *value);
 
 /**
- * Set all regulators controlled by a device to their default values.
- *
- * This function may fail with:
- *   EIO    There was a problem communicating with the hardware.
- *   ERANGE A requested value is below the minimum or above the maximum
- *          allowed value for the regulator.
- *
- * @param dev    A device containing one or more regulators.
- * @param values An array of values, one for each regulator in the device.
- */
-int regulator_set_defaults(struct device *dev, uint16_t *values);
-
-/**
  * Set the value of a regulator. If the regulator is currently disabled, this
  * will update the value the regulator would have if it was enabled.
  *

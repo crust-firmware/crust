@@ -93,11 +93,8 @@ static int
 sy8106a_probe(struct device *dev)
 {
 	int err;
-	uint16_t default_value = dev->drvdata;
 
 	if ((err = i2c_probe(dev->bus, dev->addr)))
-		return err;
-	if ((err = regulator_set_defaults(dev, &default_value)))
 		return err;
 
 	dev->subdev_count = SY8106A_REGL_COUNT;
