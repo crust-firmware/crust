@@ -36,7 +36,7 @@ static struct device axp803_regulator __device;
 #endif
 static struct device ccu  __device;
 static struct device cpux __device;
-#if !CONFIG_PMIC_AXP803
+#if CONFIG_PMIC_DUMMY
 static struct device dummy_pmic __device;
 #endif
 static struct device msgbox __device;
@@ -45,12 +45,12 @@ static struct device pio    __device;
 static struct device power_button __device;
 #endif
 static struct device r_ccu __device;
-#if CONFIG_SOC_H5
+#if CONFIG_I2C
 static struct device r_i2c __device;
 #endif
 static struct device r_pio __device;
 static struct device r_pio_irqchip __device;
-#if CONFIG_SOC_A64
+#if CONFIG_RSB
 static struct device r_rsb __device;
 #endif
 static struct device r_timer0 __device;
@@ -166,7 +166,7 @@ static struct device cpux = {
 #endif
 };
 
-#if !CONFIG_PMIC_AXP803
+#if CONFIG_PMIC_DUMMY
 static struct device dummy_pmic = {
 	.name = "dummy-pmic",
 	.drv  = &dummy_pmic_driver.drv,
@@ -265,7 +265,7 @@ static struct device r_ccu = {
 			.gate      = R_CCU_GATE_R_TIMER,
 			.reset     = R_CCU_RESET_R_TIMER,
 		},
-#if CONFIG_SOC_A64
+#if CONFIG_RSB
 		[R_CCU_CLOCK_R_RSB] = {
 			.info.name = "r_rsb",
 			.parents   = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_APB0),
@@ -306,7 +306,7 @@ static struct device r_ccu = {
 	.subdev_count = R_CCU_CLOCK_COUNT,
 };
 
-#if CONFIG_SOC_H5
+#if CONFIG_I2C
 static struct device r_i2c = {
 	.name   = "r_i2c",
 	.regs   = DEV_R_I2C,
@@ -341,7 +341,7 @@ static struct device r_pio_irqchip = {
 	},
 };
 
-#if CONFIG_SOC_A64
+#if CONFIG_RSB
 static struct device r_rsb = {
 	.name   = "r_rsb",
 	.regs   = DEV_R_RSB,

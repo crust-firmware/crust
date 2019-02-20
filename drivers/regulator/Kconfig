@@ -11,5 +11,6 @@ config REGULATOR_AXP803
 
 config REGULATOR_SY8106A
 	bool "Silergy SY8106A voltage regulator"
+	depends on I2C
 
 endmenu

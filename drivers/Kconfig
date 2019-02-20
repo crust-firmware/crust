@@ -5,6 +5,7 @@
 
 menu "Device drivers"
 
+source "i2c/Kconfig"
 source "misc/Kconfig"
 source "pmic/Kconfig"
 source "regulator/Kconfig"
