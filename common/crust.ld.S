@@ -11,7 +11,6 @@ OUTPUT_FORMAT(elf32-or1k)
 ENTRY (start)
 
 MEMORY {
-  VECTORS (rwx): ORIGIN = VECTORS_BASE, LENGTH = VECTORS_SIZE
   SRAM_A2 (rwx): ORIGIN = SRAM_A2_BASE, LENGTH = SRAM_A2_SIZE
 }
 
@@ -19,16 +18,10 @@ SECTIONS
 {
   ASSERT(FIRMWARE_BASE >= SRAM_A2_BASE, "Firmware must be placed in SRAM A2")
 
-  . = VECTORS_BASE;
-
-  .vectors . : {
-    KEEP(*(.vectors))
-  } >VECTORS
-
-  ASSERT(. <= VECTORS_BASE + VECTORS_SIZE, "Vectors overflow")
   . = FIRMWARE_BASE;
 
   .text . : ALIGN(4) {
+    KEEP(*(.text.vector_stub_common))
     *(SORT_BY_ALIGNMENT(SORT_BY_NAME(.text*)))
     . = ALIGN(4);
   } >SRAM_A2

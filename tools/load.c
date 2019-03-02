@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 
 #include <config.h>
+#include <exception.h>
 #include <mmio.h>
 #include <util.h>
 #include <platform/devices.h>
@@ -54,8 +55,8 @@ main(int argc, char *argv[])
 		perror("Failed to mmap R_CPUCFG");
 		return EXIT_FAILURE;
 	}
-	sram = mmap(NULL, VECTORS_SIZE + FIRMWARE_SIZE, PROT_READ | PROT_WRITE,
-	            MAP_SHARED, fd, SRAM_ARM_OFFSET + PAGE_BASE(VECTORS_BASE));
+	sram = mmap(NULL, SRAM_A2_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED,
+	            fd, SRAM_ARM_OFFSET + PAGE_BASE(SRAM_A2_BASE));
 	if (sram == MAP_FAILED) {
 		perror("Failed to mmap SRAM A2");
 		return EXIT_FAILURE;
@@ -87,11 +88,7 @@ main(int argc, char *argv[])
 		perror("Failed to stat firmware file");
 		return EXIT_FAILURE;
 	}
-	if (st.st_size <= VECTORS_SIZE) {
-		puts("Firmware file is too small");
-		return EXIT_FAILURE;
-	}
-	if (st.st_size > VECTORS_SIZE + FIRMWARE_SIZE) {
+	if (st.st_size > FIRMWARE_SIZE) {
 		puts("Firmware will not fit in available SRAM");
 		return EXIT_FAILURE;
 	}
@@ -108,10 +105,17 @@ main(int argc, char *argv[])
 		puts("Failed to assert ARISC reset");
 		return EXIT_FAILURE;
 	}
+	puts("Writing exception vectors");
+	for (int i = RESET_EXCEPTION; i <= TRAP_EXCEPTION; ++i) {
+		uint32_t jump   = EXCEPTION_VECTOR_ADDRESS(i);
+		uint32_t offset = FIRMWARE_BASE - jump;
+
+		mmio_write_32((uintptr_t)(sram + jump), offset >> 2);
+	}
 	printf("Writing firmware (%jd/%d bytes used)\n",
-	       (intmax_t)(st.st_size - VECTORS_SIZE), FIRMWARE_SIZE);
-	memcpy(sram, file, st.st_size);
-	msync(sram, st.st_size, MS_SYNC);
+	       (intmax_t)st.st_size, FIRMWARE_SIZE);
+	memcpy(sram + FIRMWARE_BASE, file, st.st_size);
+	msync(sram + FIRMWARE_BASE, st.st_size, MS_SYNC);
 	puts("Deasserting ARISC reset");
 	mmio_set_32(r_cpucfg, BIT(0));
 	if (!mmio_get_32(r_cpucfg, BIT(0))) {
@@ -121,7 +125,7 @@ main(int argc, char *argv[])
 
 	munmap(file, st.st_size);
 	munmap(r_cpucfg_map, PAGESIZE);
-	munmap(sram, VECTORS_SIZE + FIRMWARE_SIZE);
+	munmap(sram, SRAM_A2_SIZE);
 
 	return EXIT_SUCCESS;
 }

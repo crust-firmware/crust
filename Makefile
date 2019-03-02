@@ -37,6 +37,7 @@ COMMON_CFLAGS	 = -Os -pipe -std=c11 \
 		   -Werror=vla \
 		   -Wno-missing-field-initializers
 COMMON_CPPFLAGS	 = -I$(OBJ)/include \
+		   -I$(SRC)/include/common \
 		   -I$(SRC)/include/lib
 
 AFLAGS		 = -Wa,--fatal-warnings

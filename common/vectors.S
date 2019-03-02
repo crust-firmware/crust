@@ -7,50 +7,11 @@
 #include <arch/exception.h>
 #include <arch/spr.h>
 
-	/* This macro creates an exception vector that jumps to a function. */
-	.macro vector_jump num label
-	.section .vectors, "ax", @progbits
-	.org EXCEPTION_VECTOR_ADDRESS(\num)
-	.global vector_\num
-	.type vector_\num, %function
-	.func vector_\num
-	.cfi_sections .debug_frame
-	.cfi_startproc
-vector_\num:
-	l.j \label
-	l.nop
-	.cfi_endproc
-	.endfunc
-	.size vector_\num, . - vector_\num
-	.endm
-
-	/* This macro creates an exception vector with a common handler. */
-	.macro vector_stub num
-vector_jump \num vector_stub_\num
-
-func vector_stub_\num
-	l.j	vector_stub_common
-	l.addi	r2, r0, \num		# Save the exception number
-endfunc vector_stub_\num
-	.endm
-
-/*
- * To save space, only handle exceptions that can actually happen. For example,
- * this processor does not have an MMU, so it can never experience a page
- * fault. Conveniently, the zero instruction (0x00000000) on OpenRISC 1000 is
- * an unconditional jump back to itself, i.e. an infinite loop. So it's safe to
- * entirely omit vectors for impossible exceptions.
- */
-vector_jump RESET_EXCEPTION start
-vector_stub BUS_ERROR
-vector_stub TICK_TIMER_EXCEPTION
-vector_stub ALIGNMENT_EXCEPTION
-vector_stub ILLEGAL_INSTRUCTION
-vector_stub EXTERNAL_INTERRUPT
-vector_stub RANGE_EXCEPTION
-vector_stub TRAP_EXCEPTION
-
 func vector_stub_common
+	l.mfspr	r2, r0, SPR_SYS_PPC_ADDR
+	l.srli	r2, r2, 8		# Exception number from vector address
+	l.sfgtui r2, TRAP_EXCEPTION
+	l.bf	start			# Invalid PPC means CPU reset
 	l.addi	r1, r1, -0x50		# 80 bytes for caller-saved registers
 	l.sw	0x00(r1), r3
 	l.sw	0x04(r1), r4
