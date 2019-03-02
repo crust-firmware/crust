@@ -46,8 +46,9 @@ SECTIONS
   . += STACK_SIZE;
   __stack_end = .;
 
+  ASSERT(. <= FIRMWARE_LIMIT, "Firmware overflows allocated memory area")
   ASSERT(. <= SCPI_MEM_BASE, "Firmware overflows into SCPI shared memory")
-  ASSERT(. <= SRAM_A2_BASE + SRAM_A2_SIZE, "Firmware overflows SRAM A2")
+  ASSERT(. <= SRAM_A2_LIMIT, "Firmware overflows SRAM A2")
 
   __scpi_mem = SCPI_MEM_BASE;
 
