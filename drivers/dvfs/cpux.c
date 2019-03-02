@@ -83,9 +83,9 @@ cpux_set_pll(struct device *dev, uint8_t opp)
 static int
 cpux_set_opp(struct device *dev, uint8_t id __unused, uint8_t opp)
 {
-	int      err;
 	uint8_t  previous = dev->drvdata;
 	uint16_t voltage  = cpux_opp_table[opp].voltage;
+	int err;
 
 	assert(opp < OPP_COUNT);
 

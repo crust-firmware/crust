@@ -40,7 +40,7 @@ static struct device cpux __device;
 static struct device dummy_pmic __device;
 #endif
 static struct device msgbox __device;
-static struct device pio    __device;
+static struct device pio __device;
 #if CONFIG_GPIO_BUTTON
 static struct device power_button __device;
 #endif
@@ -54,7 +54,7 @@ static struct device r_pio_irqchip __device;
 static struct device r_rsb __device;
 #endif
 static struct device r_timer0 __device;
-static struct device r_twd    __device;
+static struct device r_twd __device;
 #if CONFIG_REGULATOR_SY8106A
 static struct device sy8106a __device;
 #endif

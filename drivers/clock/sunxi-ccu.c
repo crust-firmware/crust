@@ -134,10 +134,10 @@ sunxi_ccu_get_parent(struct device *dev, uint8_t id)
 static int
 sunxi_ccu_get_rate(struct device *dev, uint8_t id, uint32_t *rate)
 {
-	struct clock_handle    *parent = sunxi_ccu_get_parent(dev, id);
-	struct sunxi_ccu_clock *clock  = get_clock(dev, id);
-	int err;
+	struct clock_handle *parent = sunxi_ccu_get_parent(dev, id);
+	struct sunxi_ccu_clock *clock = get_clock(dev, id);
 	uint32_t reg, tmp;
+	int err;
 
 	/* If a clock has no parent, it runs at a fixed rate. Return that. */
 	if (parent == NULL) {
@@ -179,8 +179,8 @@ sunxi_ccu_set_rate(struct device *dev, uint8_t id, uint32_t rate)
 {
 	struct sunxi_ccu_clock  *clock = get_clock(dev, id);
 	struct sunxi_ccu_factors factors;
-	int err;
 	uint32_t chosen_rate, old_rate, old_reg, reg;
+	int err;
 
 	/* Find the best configuration for the clock at the desired rate. */
 	chosen_rate = find_factors(clock, &factors, rate);

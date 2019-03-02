@@ -11,8 +11,8 @@ int
 i2c_probe(struct device *dev, uint8_t addr)
 {
 	const struct i2c_driver_ops *ops = I2C_OPS(dev);
-	int     err;
 	uint8_t dummy;
+	int err;
 
 	/* Start a read transaction. */
 	if ((err = ops->start(dev, addr, I2C_READ)))

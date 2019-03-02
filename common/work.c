@@ -64,7 +64,7 @@ void
 process_work(void)
 {
 	callback_t *fn;
-	uint32_t    flags;
+	uint32_t flags;
 	void *param;
 
 	/* Walk the queue with interrupts disabled. */
@@ -89,7 +89,7 @@ process_work(void)
 void
 queue_work(callback_t *fn, void *param)
 {
-	size_t   i;
+	size_t i;
 	uint32_t flags;
 
 	/* Walk the queue with interrupts disabled and check for duplicates. */

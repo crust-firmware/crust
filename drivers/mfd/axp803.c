@@ -23,9 +23,9 @@ int
 axp803_init_once(struct device *dev)
 {
 	struct device *bus = dev->bus;
-	int err;
-	uint32_t addr = RSB_RTADDR(dev->addr) | AXP803_RSB_HWADDR;
+	uint32_t addr      = RSB_RTADDR(dev->addr) | AXP803_RSB_HWADDR;
 	uint8_t  reg;
+	int err;
 
 	if (initialized)
 		return SUCCESS;
@@ -45,9 +45,9 @@ int
 axp803_reg_setbits(struct device *dev, uint8_t reg, uint8_t bits)
 {
 	struct device *bus = dev->bus;
-	int     err;
-	uint8_t addr = dev->addr;
+	uint8_t addr       = dev->addr;
 	uint8_t tmp;
+	int err;
 
 	if ((err = rsb_read(bus, addr, reg, &tmp)))
 		return err;

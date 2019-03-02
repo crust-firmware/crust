@@ -27,8 +27,8 @@ regulator_get_value(struct device *dev, uint8_t id, uint16_t *value)
 	const struct regulator_driver_ops *ops = REGULATOR_OPS(dev);
 	struct regulator_info *info = ops->get_info(dev, id);
 	const struct regulator_range *range;
-	int err;
 	uint32_t raw;
+	int err;
 
 	if ((err = ops->read_raw(dev, id, &raw)))
 		return err;

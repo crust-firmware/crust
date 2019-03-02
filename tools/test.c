@@ -1047,8 +1047,8 @@ try_sys_power(void)
 int
 main(int argc, char *argv[])
 {
-	int   fd;
 	void *mbox_map, *sram_map;
+	int fd;
 
 	static_assert(sizeof(struct scpi_msg) == SCPI_MESSAGE_SIZE,
 	              "struct scpi_msg does not have the correct size");

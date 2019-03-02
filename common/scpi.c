@@ -106,10 +106,10 @@ scpi_copy_message(struct scpi_msg *dest, struct scpi_msg *src)
 static void
 scpi_send_message(void *param)
 {
-	int err;
 	struct scpi_buffer *buffer = param;
 	uint8_t  client  = buffer->client;
 	uint64_t timeout = wallclock_read() + SCPI_TX_TIMEOUT;
+	int err;
 
 	/* Wait for any previous message to be acknowledged, with a timeout. */
 	while (msgbox_tx_pending(scpi_msgbox, buffer->client)) {
@@ -205,7 +205,7 @@ static void
 scpi_receive_message(struct device *dev __unused, uint8_t client, uint32_t msg)
 {
 	struct scpi_buffer *buffer;
-	struct scpi_msg    *rx_msg = &SCPI_MEM_AREA(client).rx_msg;
+	struct scpi_msg *rx_msg = &SCPI_MEM_AREA(client).rx_msg;
 
 	assert(client == SCPI_CLIENT_NS || client == SCPI_CLIENT_SECURE);
 

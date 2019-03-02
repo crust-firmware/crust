@@ -14,8 +14,8 @@ sensor_get_value(struct device *dev, uint8_t id, uint32_t *value)
 {
 	const struct sensor_driver_ops *ops = SENSOR_OPS(dev);
 	struct sensor_info *info = ops->get_info(dev, id);
-	int err;
 	uint32_t raw;
+	int err;
 
 	if ((err = ops->read_raw(dev, id, &raw)))
 		return err;

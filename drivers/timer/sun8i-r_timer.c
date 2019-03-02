@@ -68,8 +68,8 @@ sun8i_r_timer_irq(void *param)
 static int
 sun8i_r_timer_probe(struct device *dev)
 {
-	int err;
 	uintptr_t index = dev->drvdata;
+	int err;
 
 	if ((err = dm_setup_clocks(dev, 1)))
 		return err;

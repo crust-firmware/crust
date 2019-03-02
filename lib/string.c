@@ -63,7 +63,7 @@ strncpy(char *restrict dest, const char *restrict src, size_t n)
 char *
 strncpy_swap(char *restrict dest, const char *restrict src, size_t n)
 {
-	uintptr_t   d = (uintptr_t)dest;
+	uintptr_t d   = (uintptr_t)dest;
 	const char *s = src;
 
 	while (n-- > 0) {

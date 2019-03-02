@@ -31,11 +31,11 @@ int
 main(int argc, char *argv[])
 {
 	struct stat st;
-	char     *file;
-	char     *sram;
-	int       fd;
+	char *file;
+	char *sram;
 	uintptr_t r_cpucfg;
-	void     *r_cpucfg_map;
+	void *r_cpucfg_map;
+	int fd;
 
 	if (argc < 2 || strcmp("--help", argv[1]) == 0) {
 		puts("ARISC firmware loader for " CONFIG_PLATFORM);

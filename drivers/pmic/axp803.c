@@ -38,8 +38,8 @@ static void
 axp803_pmic_irq(void *param)
 {
 	struct device *dev = param;
-	int     err;
 	uint8_t reg;
+	int err;
 
 	/* IRQ register 5 is the only one with enabled IRQs. */
 	if ((err = rsb_read(dev->bus, dev->addr, IRQ_STATUS_REG5, &reg)))
@@ -86,8 +86,8 @@ static int
 axp803_pmic_probe(struct device *dev)
 {
 	struct device *bus = dev->bus;
-	int     err;
-	uint8_t addr = dev->addr;
+	uint8_t addr       = dev->addr;
+	int err;
 
 	if ((err = axp803_init_once(dev)))
 		return err;

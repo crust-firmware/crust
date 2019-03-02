@@ -160,7 +160,7 @@ dm_setup_clocks(struct device *dev, uint8_t num_clocks)
 int
 dm_setup_irq(struct device *dev, callback_t *fn)
 {
-	struct device     *irqchip;
+	struct device *irqchip;
 	struct irq_handle *handle = dev->irq;
 	int err;
 

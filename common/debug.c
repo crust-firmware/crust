@@ -63,7 +63,7 @@ log(const char *fmt, ...)
 	char c, sign;
 	int  width;
 	uintptr_t arg, level;
-	va_list   args;
+	va_list args;
 
 	assert(fmt);
 

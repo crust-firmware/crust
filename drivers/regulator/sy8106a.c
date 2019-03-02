@@ -41,8 +41,8 @@ sy8106a_get_info(struct device *dev __unused, uint8_t id __unused)
 static int
 sy8106a_get_state(struct device *dev, uint8_t id __unused)
 {
-	int     err;
 	uint8_t reg;
+	int err;
 
 	if ((err = i2c_read_reg(dev->bus, dev->addr, VOUT_COM_REG, &reg)))
 		return err;
@@ -53,8 +53,8 @@ sy8106a_get_state(struct device *dev, uint8_t id __unused)
 static int
 sy8106a_read_raw(struct device *dev, uint8_t id __unused, uint32_t *raw)
 {
-	int     err;
 	uint8_t reg;
+	int err;
 
 	if ((err = i2c_read_reg(dev->bus, dev->addr, VOUT_SEL_REG, &reg)))
 		return err;
@@ -66,8 +66,8 @@ sy8106a_read_raw(struct device *dev, uint8_t id __unused, uint32_t *raw)
 static int
 sy8106a_set_state(struct device *dev, uint8_t id __unused, bool enabled)
 {
-	int     err;
 	uint8_t reg;
+	int err;
 
 	if ((err = i2c_read_reg(dev->bus, dev->addr, VOUT_COM_REG, &reg)))
 		return err;

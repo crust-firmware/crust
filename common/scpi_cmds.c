@@ -120,13 +120,13 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
                              uint32_t *tx_payload __unused,
                              uint16_t *tx_size __unused)
 {
-	int err;
 	uint32_t descriptor    = rx_payload[0];
 	uint8_t  core          = (descriptor >> 0x00) & GENMASK(3, 0);
 	uint8_t  cluster       = (descriptor >> 0x04) & GENMASK(3, 0);
 	uint8_t  core_state    = (descriptor >> 0x08) & GENMASK(3, 0);
 	uint8_t  cluster_state = (descriptor >> 0x0c) & GENMASK(3, 0);
 	uint8_t  css_state     = (descriptor >> 0x10) & GENMASK(3, 0);
+	int err;
 
 	/* Do not check if the CSS should be turned on, as receiving this
 	 * command from an ARM CPU via PSCI implies that it is already on. */
@@ -219,7 +219,7 @@ static int
 scpi_cmd_get_dvfs_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                                uint16_t *tx_size)
 {
-	struct device    *dev;
+	struct device *dev;
 	struct dvfs_info *info;
 	uint8_t id;
 	uint8_t index = rx_payload[0];
@@ -301,7 +301,7 @@ scpi_cmd_get_clock_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                                 uint16_t *tx_size)
 {
 	struct clock_info *info;
-	struct device     *dev;
+	struct device *dev;
 	uint8_t id;
 	uint8_t index = rx_payload[0];
 
@@ -346,10 +346,10 @@ scpi_cmd_get_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                            uint16_t *tx_size)
 {
 	struct device *dev;
-	int      err;
 	uint8_t  id;
 	uint8_t  index = rx_payload[0];
 	uint32_t rate;
+	int err;
 
 	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
 		return EINVAL;
@@ -430,10 +430,10 @@ scpi_cmd_get_psu_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                          uint16_t *tx_size)
 {
 	struct device *dev;
-	int      err;
 	uint8_t  id;
 	uint8_t  index = rx_payload[0];
 	uint16_t value;
+	int err;
 
 	if (!(dev = dm_get_subdev_by_index(DM_CLASS_REGULATOR, index, &id)))
 		return EINVAL;
@@ -493,10 +493,10 @@ scpi_cmd_get_sensor_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                             uint16_t *tx_size)
 {
 	struct device *dev;
-	int      err;
 	uint8_t  id;
 	uint16_t index = rx_payload[0];
 	uint32_t value;
+	int err;
 
 	if (!(dev = dm_get_subdev_by_index(DM_CLASS_SENSOR, index, &id)))
 		return EINVAL;

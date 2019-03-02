@@ -14,7 +14,7 @@ clock_disable(struct device *dev, uint8_t id)
 {
 	const struct clock_driver_ops *ops = CLOCK_OPS(dev);
 	struct clock_handle *parent;
-	struct clock_info   *info = ops->get_info(dev, id);
+	struct clock_info *info = ops->get_info(dev, id);
 	int err;
 
 	/* Prevent disabling clocks that are critical or in use as parents. */
@@ -40,9 +40,9 @@ clock_enable(struct device *dev, uint8_t id)
 {
 	const struct clock_driver_ops *ops = CLOCK_OPS(dev);
 	struct clock_handle *parent;
-	struct clock_info   *info = ops->get_info(dev, id);
-	int err;
+	struct clock_info *info = ops->get_info(dev, id);
 	uint32_t rate;
+	int err;
 
 	/* Clamp the rate to the minimum/maximum rates and select a parent. */
 	if (!(info->flags & CLK_FIXED)) {
@@ -74,7 +74,7 @@ clock_get_state(struct device *dev, uint8_t id)
 {
 	const struct clock_driver_ops *ops = CLOCK_OPS(dev);
 	struct clock_handle *parent;
-	struct clock_info   *info = ops->get_info(dev, id);
+	struct clock_info *info = ops->get_info(dev, id);
 	int err;
 
 	/* If this clock is in use, it must have been enabled. */

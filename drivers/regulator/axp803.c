@@ -431,10 +431,10 @@ axp803_regulator_get_info(struct device *dev __unused, uint8_t id)
 static int
 axp803_regulator_get_state(struct device *dev, uint8_t id)
 {
-	int     err;
 	uint8_t reg;
 	uint8_t regaddr = axp803_regulators[id].enable_register;
 	uint8_t regmask = axp803_regulators[id].enable_mask;
+	int err;
 
 	if ((err = rsb_read(dev->bus, dev->addr, regaddr, &reg)))
 		return err;
@@ -446,10 +446,10 @@ axp803_regulator_get_state(struct device *dev, uint8_t id)
 static int
 axp803_regulator_read_raw(struct device *dev, uint8_t id, uint32_t *raw)
 {
-	int     err;
 	uint8_t reg;
 	uint8_t regaddr = axp803_regulators[id].value_register;
 	uint8_t regmask = axp803_regulators[id].status_mask;
+	int err;
 
 	if ((err = rsb_read(dev->bus, dev->addr, regaddr, &reg)))
 		return err;
@@ -462,10 +462,10 @@ axp803_regulator_read_raw(struct device *dev, uint8_t id, uint32_t *raw)
 static int
 axp803_regulator_set_state(struct device *dev, uint8_t id, bool enabled)
 {
-	int     err;
 	uint8_t reg;
 	uint8_t regaddr = axp803_regulators[id].enable_register;
 	uint8_t regmask = axp803_regulators[id].enable_mask;
+	int err;
 
 	if ((err = rsb_read(dev->bus, dev->addr, regaddr, &reg)))
 		return err;
