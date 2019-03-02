@@ -75,7 +75,7 @@ static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
 	/* Payload size limits. */
 	SCPI_PAYLOAD_LIMITS(SCPI_PAYLOAD_SIZE, SCPI_PAYLOAD_SIZE),
 	/* Firmware version. */
-	SCP_FIRMWARE_VERSION(0, 1, 0),
+	SCP_FIRMWARE_VERSION(0, 1, 9000),
 	/* Commands enabled 0. */
 	BIT(SCPI_CMD_SCP_READY) |
 	BIT(SCPI_CMD_GET_SCP_CAP) |
