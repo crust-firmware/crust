@@ -7,11 +7,12 @@
 #include <devices.h>
 #include <exception.h>
 #include <irqchip.h>
+#include <spr.h>
 #include <stdint.h>
 #include <irqchip/sun4i-intc.h>
 
 void
-handle_exception(uint32_t number, struct exception_regs *regs)
+handle_exception(uint32_t number)
 {
 	switch (number) {
 	case TICK_TIMER_EXCEPTION:
@@ -20,7 +21,7 @@ handle_exception(uint32_t number, struct exception_regs *regs)
 		sun4i_intc_irq(&r_intc);
 		break;
 	default:
-		panic("Unhandled exception %d at %p! (lr=%p)",
-		      number, (void *)regs->pc, (void *)regs->r9);
+		panic("Unhandled exception %d at %p!",
+		      number, (void *)mfspr(SPR_SYS_EPCR_INDEX(0)));
 	}
 }
