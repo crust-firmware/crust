@@ -112,8 +112,8 @@ firmware, or `make config` or `make nconfig` to create a custom configuration.
 
 ## Running the firmware
 
-To run Crust, you'll need [a patched version of U-Boot][crust-uboot] that loads
-all of the firmware pieces to the right place in SRAM. And you'll need [a
+To run Crust, you'll need [a patched version of U-Boot][crust-u-boot] that
+loads all of the firmware pieces to the right place in SRAM. And you'll need [a
 version of ATF][crust-atf] that has an SCPI client that can take advantage of
 this firmware's capabilities. You can use the build system in [the Crust
 meta-repository][crust-meta] to automatically generate an MMC or SPI flash
@@ -126,7 +126,7 @@ independent projects.
 
 [crust-atf]: https://github.com/crust-firmware/arm-trusted-firmware
 [crust-meta]: https://github.com/crust-firmware/meta
-[crust-uboot]: https://github.com/crust-firmware/u-boot
+[crust-u-boot]: https://github.com/crust-firmware/u-boot
 
 ## Contributing
 
