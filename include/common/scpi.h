@@ -17,8 +17,8 @@
  * allowed if they arrive on the "secure" channel.
  */
 #define SCPI_CLIENTS       2
-#define SCPI_CLIENT_NS     0 /**< Client 0: Linux (nonsecure). */
-#define SCPI_CLIENT_SECURE 1 /**< Client 1: ATF (secure). */
+#define SCPI_CLIENT_SECURE 0 /**< Client 0: ATF (secure). */
+#define SCPI_CLIENT_NS     1 /**< Client 1: Linux (nonsecure). */
 
 /**
  * Create and send an SCPI message. This is used for commands initiated by the

@@ -22,7 +22,7 @@
 
 #define SCPI_BUFFER_MAX  2
 
-#define SCPI_MEM_AREA(n) (((struct scpi_mem *)SCPI_MEM_BASE)[n])
+#define SCPI_MEM_AREA(n) (__scpi_mem[SCPI_CLIENTS - n - 1])
 
 #define SCPI_TX_TIMEOUT  (100 * REFCLK_KHZ)     /* 100ms */
 
@@ -36,6 +36,9 @@ struct scpi_buffer {
 	uint8_t         client; /**< Client that should receive the reply. */
 	bool            busy;   /**< Flag telling if this buffer is in use. */
 };
+
+/** The shared memory area, with an address defined in the linker script. */
+extern struct scpi_mem __scpi_mem[SCPI_CLIENTS];
 
 /** The message box device used for communication with SCPI clients. */
 static struct device *scpi_msgbox;
