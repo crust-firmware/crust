@@ -14,13 +14,15 @@ data console_base
 	.word	0
 
 func console_init
-	l.ori	r4, r0, lo(console_base)
+	l.movhi	r4, hi(console_base)
+	l.ori	r4, r4, lo(console_base)
 	l.jr	r9
 	l.sw	0(r4), r3
 endfunc console_init
 
 func console_putc
-	l.ori	r4, r0, lo(console_base)
+	l.movhi	r4, hi(console_base)
+	l.ori	r4, r4, lo(console_base)
 	l.andi	r3, r3, 0xff
 	l.lwz	r4, 0(r4)
 	l.sfeqi	r3, '\n'

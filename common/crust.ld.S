@@ -17,10 +17,7 @@ MEMORY {
 
 SECTIONS
 {
-  ASSERT(FIRMWARE_BASE >= SRAM_A2_BASE,
-         "Firmware must be placed in SRAM A2")
-  ASSERT(FIRMWARE_BASE + FIRMWARE_SIZE <= SRAM_A2_BASE + SRAM_A2_SIZE,
-         "Firmware must be placed in SRAM A2")
+  ASSERT(FIRMWARE_BASE >= SRAM_A2_BASE, "Firmware must be placed in SRAM A2")
 
   . = VECTORS_BASE;
 
@@ -52,7 +49,12 @@ SECTIONS
     __bss_end = .;
   } >SRAM_A2
 
-  ASSERT(. <= STACK_BASE, "Firmware overflows into stack")
+  __stack_start = .;
+  . += STACK_SIZE;
+  __stack_end = .;
+
+  ASSERT(. <= SCPI_MEM_BASE, "Firmware overflows into SCPI shared memory")
+  ASSERT(. <= SRAM_A2_BASE + SRAM_A2_SIZE, "Firmware overflows SRAM A2")
 
   /DISCARD/ : {
     *(.comment*)
