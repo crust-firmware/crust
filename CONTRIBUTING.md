@@ -27,7 +27,7 @@ are prefixed with letters corresponding to the chart below.
 | Prefix           | Description
 |------------------|-----------------------------------------------------------
 | Area (A)         | Indicates the area of the project impacted.
-| Difficulty (D)   | Indicates the difficulty of an issue.
+| Difficulty (D)   | Indicates the expected difficulty of an issue.
 | Resolution (R)   | Indicates the resolution of an issue.
 | Status (S)       | Indicates the status of an issue.
 | Type (T)         | Indicates the type of an issue.
@@ -43,8 +43,8 @@ The Crust firmware project accepts patches through the use of GitHub pull
 requests. Although project maintainers accept impromptu pull requests on
 occasion, it is recommended that all pull requests correspond to an issue on
 the Crust firmware [issues page][issues]. Pull requests submitted _without_ a
-corresponding issue may be immediately rejected. If you believe Crust firmware
-could benefit from a new feature, please submit a feature request on the Crust
+corresponding issue may be rejected. If you believe Crust firmware could
+benefit from a new feature, please submit a feature request on the Crust
 firmware [issues page][issues].
 
 ### Patch lifecycle
@@ -58,8 +58,8 @@ firmware [issues page][issues].
    `WIP:`.
 3. Address feedback from project maintainers. Prompt responses will allow a
    pull request to get merged sooner!
-4. Complete the process until the pull request is approved by at least two
-   project maintainers.
+4. Complete the process until the pull request is approved by the project
+   maintainers.
 
 ### Commits
 
@@ -97,8 +97,8 @@ All pull requests are built and tested with Travis CI upon submission. To
 verify that your changes will pass the CI build, the following process should
 be used:
 
-- Run unit tests on the host with `make check` (or `make test`).
-- Format code with`make check-format`.
+- Verify source code style with `make check-format`. (This requires installing
+  [Uncrustify][uncrustify]. See below.)
 - Run integration tests by building the firmware with `make TEST=1` and running
   it on the hardware (if possible).
 
@@ -141,11 +141,6 @@ headers should be alphabetically sorted whenever possible.
   - All letters should be uppercase.
   - All hyphens, slashes, and periods should be replaced by underscores.
 
-### Using headers
-
-- Drivers are not allowed to include platform headers.
-- Library code is only allowed to include library headers.
-
 ### Naming drivers
 
 Drivers should be named as vaguely as the hardware allows. For example, if a
@@ -181,3 +176,4 @@ page][issues] for submitted questions.
 [dco]: https://developercertificate.org
 [doxygen]: https://www.stack.nl/~dimitri/doxygen/manual/docblocks.html
 [issues]: https://github.com/crust-firmware/crust/issues
+[uncrustify]: https://github.com/uncrustify/uncrustify

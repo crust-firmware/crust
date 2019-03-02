@@ -1,34 +1,34 @@
 # Crust: Free management firmware for Allwinner SoCs
 
-[![CI status](https://travis-ci.org/crust-firmware/crust.svg?branch=master)][t]
+[![CI status](https://travis-ci.com/crust-firmware/crust.svg?branch=master)][t]
 
-[t]: https://travis-ci.org/crust-firmware/crust
+[t]: https://travis-ci.com/crust-firmware/crust
 
 ## Overview
 
 Most Allwinner SoCs, including all recent ones, contain an [OpenRISC][or1k] CPU
 in addition to their ARM cores. This CPU is in the RTC power domain and is
 responsible for system suspend/resume/reset/shutdown, dynamic frequency scaling
-for the ARM cores, and controlling the external power management IC (PMIC).
-
-Allwinner provides no source code for their "scp.bin" firmware, other than in
-an [encrypted tarball][tar.aes], so [reverse-engineering][sunxi-blobs] their
-released binaries was required to understand the hardware interfaces used by
-this firmware.
+for the ARM cores, and controlling the external power management IC (PMIC). See
+the [AR100][ar100] article on the linux-sunxi wiki for more information.
 
 This firmware attempts to completely replace the proprietary firmware provided
 by Allwinner. It is designed to be compatible with mainline versions of Linux,
-u-boot, and ATF. While initially only developed on and for the `sun50i` series
-(A64/H64/H5/R18), ideally it could be backported for use on other SoC
-platforms.
+U-Boot, and ATF. While initially only developed on and for the `sun50i` series
+(A64/H64/H5/R18), it aims to be portable to all relevant boards and SoCs.
 
-**This firmware is currently a work in progress! It is buggy and missing major
-functionality!** Moreover, due to sharing SRAM A2 with ATF (explained below),
-you likely cannot install it anyway.
+**This firmware is still a work in progress!** A stable, known-working version
+of the firmware is available in the `crust-v0.1.y` branch of this repository.
+The [U-Boot][crust-u-boot] and [ATF][crust-atf] patchsets to go along with that
+firmware are available in the `crust-v0.1.y` branches of those repositories.
 
+The current development version of this firmware requires the `crust` branches
+of the (forked) [U-Boot][crust-u-boot] and [ATF][crust-atf] repositories. Those
+patchsets are mostly glue to load and run Crust, but they also include some
+configuration changes that make testing the firmware easier.
+
+[ar100]: https://linux-sunxi.org/AR100
 [or1k]: http://openrisc.io/
-[sunxi-blobs]: https://github.com/smaeul/sunxi-blobs
-[tar.aes]: https://github.com/tinalinux/linux-3.10/tree/r18-v0.9/drivers/arisc
 
 ## Architecture
 
@@ -36,7 +36,7 @@ This firm is designed to be flexible yet extremely lightweight. It borrows
 heavily from ideas in both Linux and ATF for its layout and driver model. The
 code is divided into directories based on major function:
 
-- `board`: These files contain configuration for each board supported by this
+- `configs`: These files contain configuration for each board supported by this
   firmware. They determine which subdirectory of `platform` is used (for
   SoC-internal devices) and which external devices are enabled.
 - `common`: Files in this directory contain the main logic of the firmware, as
@@ -75,22 +75,28 @@ iteratively.
 ## Build prerequisites
 
 Building this firmware requires a cross-compiler targeting the `or1k`
-architecture. Prebuilt toolchains can be downloaded from the OpenRISC
-organization [on GitHub][or1k-toolchains], or you can manually build one with
-[musl-cross-make][musl-cross-make]. If your cross toolchain has a different
-tuple, or is not in your `PATH`, edit the top of the `Makefile` to provide
-the appropriate full path or prefix.
+architecture, which is officially supported in GCC as of GCC 9. Snapshots are
+available from [the maintainer's GitHub account][stffrdhrn]. A portable
+pre-built toolchain is available from [musl.cc][musl-cc-or1k].
 
-[musl-cross-make]: https://github.com/smaeul/musl-cross-make
+The older unofficial [`or1k-gcc`][or1k-toolchains] toolchain is also available
+for download. Crust supports both toolchains at the moment, but will move to
+exclusively supporting the official GCC release once that is widely available.
+
+If your cross toolchain has a different tuple (the toolchain's `libc` is not
+relevant for compiling this firmware), or is not in your `PATH`, edit the top
+of the `Makefile` to provide the appropriate full path or prefix.
+
+[stffrdhrn]: https://github.com/stffrdhrn/gcc/releases
+[musl-cc-or1k]: http://musl.cc/or1k-linux-musl-cross.tgz
 [or1k-toolchains]: https://github.com/openrisc/or1k-gcc/releases
 
 ## Supported devices
 
 While this firmware should ideally support any SoC with the ARISC core present,
 there are several limiting factors to doing so:
-- Changing memory map for device access between SoCs.
-- Differences in SRAM area location and size between SOCs (in some cases, SRAM
-  may be too small to fit this firmware).
+- MMIO device memory map differences between SoCs.
+- Differences in SRAM area location and size between SOCs.
 - Different PMICs used with different hardware generations.
 - Variations in connection to external voltage regulators, buttons, LEDs, etc.
 - Hardware bugs, if any.
@@ -100,28 +106,23 @@ and H5) first in mind, and other SoCs second.
 
 In order to support external devices, the firmware needs to know some
 information about the layout of the board and the connections to port L GPIO
-pins. Therefore, the supported boards are enumerated in the `boards` directory,
-and specifying a board with the `BOARD` `make` variable is required to build
-the firmware. You can also specify `BOARD` in a `config.mk` file, that will be
-included by the main `Makefile`.
+pins. This project uses Kconfig to handle the possible configurations. You can
+run `make <board>_defconfig` for boards that are already supported by the
+firmware, or `make config` or `make nconfig` to create a custom configuration.
 
 ## Running the firmware
 
-The ARISC firmware *must* run from SRAM A2, because
-- The OpenRISC CPU has its special exception vector area at the beginning of
-  SRAM A2.
-- SRAM A2 is the only memory on a bus directly connected to the ARISC core (in
-  other words, using any other memory would prevent turning some busses off
-  during suspend).
-- SRAM A1 is not accessible from the OpenRISC core on some SoCs.
+To run Crust, you'll need [a patched version of U-Boot][crust-uboot] that loads
+all of the firmware pieces to the right place in SRAM. And you'll need [a
+version of ATF][crust-atf] that has an SCPI client that can take advantage of
+this firmware's capabilities. You can use the build system in [the Crust
+meta-repository][crust-meta] to automatically generate an MMC or SPI flash
+image containing the correct versions of all firmware components.
 
-Unfortunately, on `sun50i` SoCs, ATF currently takes up the entirety of SRAM
-A2. Fortunately, it can be made smaller. [This version of ATF][crust-atf] has
-been patched to put its dynamically-allocated data in SRAM A1. This leaves half
-of SRAM A2 for the ARISC firmware. You'll also need [a patched version of
-U-Boot][crust-uboot] that loads ATF to the right place. You can use the build
-system in [our meta-repository][crust-meta] to automatically generate an SPI
-flash image containing the correct versions of all firmware components.
+The ATF and U-Boot patches are being upstreamed as much as possible while Crust
+is in development. However, finishing the process and switching everyone over
+to use Crust will take a while, as it requires coordination between several
+independent projects.
 
 [crust-atf]: https://github.com/crust-firmware/arm-trusted-firmware
 [crust-meta]: https://github.com/crust-firmware/meta
