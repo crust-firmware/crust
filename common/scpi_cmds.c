@@ -49,7 +49,7 @@ static const uint8_t scpi_error_map[] = {
 	SCPI_E_PARAM,   /* EEXIST */
 	SCPI_E_PARAM,   /* EINVAL */
 	SCPI_E_DEVICE,  /* EIO */
-	SCPI_E_SUPPORT, /* ENODEV */
+	SCPI_E_PARAM,   /* ENODEV */
 	SCPI_E_SUPPORT, /* ENOTSUP */
 	SCPI_E_ACCESS,  /* EPERM */
 	SCPI_E_RANGE,   /* ERANGE */
@@ -219,15 +219,15 @@ static int
 scpi_cmd_get_dvfs_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                                uint16_t *tx_size)
 {
-	struct device *dev;
+	struct device_handle dvfs;
 	struct dvfs_info *info;
-	uint8_t id;
 	uint8_t index = rx_payload[0];
+	int err;
 
-	if ((dev = dm_get_subdev_by_index(DM_CLASS_DVFS, index, &id)) == NULL)
-		return EINVAL;
+	if ((err = dm_get_subdev_by_index(&dvfs, DM_CLASS_DVFS, index)))
+		return err;
 
-	info = dvfs_get_info(dev, id);
+	info = dvfs_get_info(dvfs.dev, dvfs.id);
 	tx_payload[0] = index | info->opp_count << 8 | info->latency << 16;
 	for (uint8_t i = 0; i < info->opp_count; ++i) {
 		tx_payload[2 * i + 1] = info->opp_table[i].rate * 1000000;
@@ -247,17 +247,17 @@ static int
 scpi_cmd_set_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
                           uint16_t *tx_size __unused)
 {
-	struct device *dev;
-	uint8_t id;
+	struct device_handle dvfs;
 	uint8_t index = rx_payload[0];
 	uint8_t opp   = rx_payload[0] >> 8;
+	int err;
 
-	if ((dev = dm_get_subdev_by_index(DM_CLASS_DVFS, index, &id)) == NULL)
-		return EINVAL;
+	if ((err = dm_get_subdev_by_index(&dvfs, DM_CLASS_DVFS, index)))
+		return err;
 	if (system_is_throttled())
 		return EPERM;
 
-	return dvfs_set_opp(dev, id, opp);
+	return dvfs_set_opp(dvfs.dev, dvfs.id, opp);
 }
 
 /*
@@ -267,14 +267,14 @@ static int
 scpi_cmd_get_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                           uint16_t *tx_size)
 {
-	struct device *dev;
-	uint8_t id;
+	struct device_handle dvfs;
 	uint8_t index = rx_payload[0];
+	int err;
 
-	if ((dev = dm_get_subdev_by_index(DM_CLASS_DVFS, index, &id)) == NULL)
-		return EINVAL;
+	if ((err = dm_get_subdev_by_index(&dvfs, DM_CLASS_DVFS, index)))
+		return err;
 
-	tx_payload[0] = dvfs_get_opp(dev, id);
+	tx_payload[0] = dvfs_get_opp(dvfs.dev, dvfs.id);
 	*tx_size      = sizeof(uint8_t);
 
 	return SUCCESS;
@@ -300,15 +300,15 @@ static int
 scpi_cmd_get_clock_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                                 uint16_t *tx_size)
 {
+	struct device_handle clock;
 	struct clock_info *info;
-	struct device *dev;
-	uint8_t id;
 	uint8_t index = rx_payload[0];
+	int err;
 
-	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
-		return EINVAL;
+	if ((err = dm_get_subdev_by_index(&clock, DM_CLASS_CLOCK, index)))
+		return err;
 
-	info = clock_get_info(dev, id);
+	info = clock_get_info(clock.dev, clock.id);
 	tx_payload[0] = index | (info->flags & CLK_SCPI_MASK) << 16;
 	tx_payload[1] = info->min_rate;
 	tx_payload[2] = info->max_rate;
@@ -325,17 +325,19 @@ static int
 scpi_cmd_set_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
                            uint16_t *tx_size __unused)
 {
-	struct device *dev;
-	uint8_t  id;
+	struct device_handle clock;
+	struct clock_info *info;
 	uint8_t  index = rx_payload[0];
 	uint32_t rate  = rx_payload[1];
+	int err;
 
-	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
-		return EINVAL;
-	if (!(clock_get_info(dev, id)->flags & CLK_WRITABLE))
+	if ((err = dm_get_subdev_by_index(&clock, DM_CLASS_CLOCK, index)))
+		return err;
+	info = clock_get_info(clock.dev, clock.id);
+	if (!(info->flags & CLK_WRITABLE))
 		return EPERM;
 
-	return clock_set_rate(dev, id, rate);
+	return clock_set_rate(clock.dev, clock.id, rate);
 }
 
 /*
@@ -345,17 +347,18 @@ static int
 scpi_cmd_get_clock_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                            uint16_t *tx_size)
 {
-	struct device *dev;
-	uint8_t  id;
+	struct device_handle clock;
+	struct clock_info *info;
 	uint8_t  index = rx_payload[0];
 	uint32_t rate;
 	int err;
 
-	if ((dev = dm_get_subdev_by_index(DM_CLASS_CLOCK, index, &id)) == NULL)
-		return EINVAL;
-	if (!(clock_get_info(dev, id)->flags & CLK_READABLE))
+	if ((err = dm_get_subdev_by_index(&clock, DM_CLASS_CLOCK, index)))
+		return err;
+	info = clock_get_info(clock.dev, clock.id);
+	if (!(info->flags & CLK_READABLE))
 		return EPERM;
-	if ((err = clock_get_rate(dev, id, &rate)))
+	if ((err = clock_get_rate(clock.dev, clock.id, &rate)))
 		return err;
 
 	tx_payload[0] = rate;
@@ -384,15 +387,16 @@ static int
 scpi_cmd_get_psu_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                               uint16_t *tx_size)
 {
+	struct device_handle regulator;
 	struct regulator_info *info;
-	struct device *dev;
-	uint8_t  id;
 	uint16_t index = rx_payload[0];
+	int err;
 
-	if (!(dev = dm_get_subdev_by_index(DM_CLASS_REGULATOR, index, &id)))
-		return EINVAL;
+	if ((err = dm_get_subdev_by_index(&regulator, DM_CLASS_REGULATOR,
+	                                  index)))
+		return err;
 
-	info = regulator_get_info(dev, id);
+	info = regulator_get_info(regulator.dev, regulator.id);
 	tx_payload[0] = index | (info->flags & REGL_SCPI_MASK) << 16;
 	tx_payload[1] = info->min_value;
 	tx_payload[2] = info->max_value;
@@ -409,17 +413,20 @@ static int
 scpi_cmd_set_psu_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
                          uint16_t *tx_size __unused)
 {
-	struct device *dev;
-	uint8_t  id;
+	struct device_handle regulator;
+	struct regulator_info *info;
 	uint8_t  index = rx_payload[0];
 	uint32_t value = rx_payload[1];
+	int err;
 
-	if (!(dev = dm_get_subdev_by_index(DM_CLASS_REGULATOR, index, &id)))
-		return EINVAL;
-	if (!(regulator_get_info(dev, id)->flags & REGL_WRITABLE))
+	if ((err = dm_get_subdev_by_index(&regulator, DM_CLASS_REGULATOR,
+	                                  index)))
+		return err;
+	info = regulator_get_info(regulator.dev, regulator.id);
+	if (!(info->flags & REGL_WRITABLE))
 		return EPERM;
 
-	return regulator_set_value(dev, id, value);
+	return regulator_set_value(regulator.dev, regulator.id, value);
 }
 
 /*
@@ -429,17 +436,19 @@ static int
 scpi_cmd_get_psu_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                          uint16_t *tx_size)
 {
-	struct device *dev;
-	uint8_t  id;
+	struct device_handle regulator;
+	struct regulator_info *info;
 	uint8_t  index = rx_payload[0];
 	uint16_t value;
 	int err;
 
-	if (!(dev = dm_get_subdev_by_index(DM_CLASS_REGULATOR, index, &id)))
-		return EINVAL;
-	if (!(regulator_get_info(dev, id)->flags & REGL_READABLE))
+	if ((err = dm_get_subdev_by_index(&regulator, DM_CLASS_REGULATOR,
+	                                  index)))
+		return err;
+	info = regulator_get_info(regulator.dev, regulator.id);
+	if (!(info->flags & REGL_READABLE))
 		return EPERM;
-	if ((err = regulator_get_value(dev, id, &value)))
+	if ((err = regulator_get_value(regulator.dev, regulator.id, &value)))
 		return err;
 
 	tx_payload[0] = value;
@@ -468,15 +477,15 @@ static int
 scpi_cmd_get_sensor_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                                  uint16_t *tx_size)
 {
-	struct sensor_info *info;
-	struct device *dev;
-	uint8_t  id;
+	struct device_handle sensor;
+	struct sensor_info  *info;
 	uint16_t index = rx_payload[0];
+	int err;
 
-	if (!(dev = dm_get_subdev_by_index(DM_CLASS_SENSOR, index, &id)))
-		return EINVAL;
+	if ((err = dm_get_subdev_by_index(&sensor, DM_CLASS_SENSOR, index)))
+		return err;
 
-	info = sensor_get_info(dev, id);
+	info = sensor_get_info(sensor.dev, sensor.id);
 	tx_payload[0] = index | (info->class) << 16 |
 	                (info->flags & SENSOR_SCPI_MASK) << 24;
 	strncpy_swap((char *)&tx_payload[1], info->name, 20);
@@ -492,15 +501,14 @@ static int
 scpi_cmd_get_sensor_handler(uint32_t *rx_payload, uint32_t *tx_payload,
                             uint16_t *tx_size)
 {
-	struct device *dev;
-	uint8_t  id;
+	struct device_handle sensor;
 	uint16_t index = rx_payload[0];
 	uint32_t value;
 	int err;
 
-	if (!(dev = dm_get_subdev_by_index(DM_CLASS_SENSOR, index, &id)))
-		return EINVAL;
-	if ((err = sensor_get_value(dev, id, &value)))
+	if ((err = dm_get_subdev_by_index(&sensor, DM_CLASS_SENSOR, index)))
+		return err;
+	if ((err = sensor_get_value(sensor.dev, sensor.id, &value)))
 		return err;
 
 	tx_payload[0] = value;

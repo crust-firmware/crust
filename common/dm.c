@@ -66,48 +66,60 @@ dm_count_subdevs_by_class(uint32_t class)
 struct device *
 dm_first_dev_by_class(uint32_t class)
 {
-	return dm_next_dev_by_class(class, device_list - 1);
+	struct device_handle handle = DEVICE_HANDLE_INIT(class);
+
+	return dm_next_dev_by_class(&handle) == SUCCESS ? handle.dev : NULL;
 }
 
-struct device *
-dm_next_dev_by_class(uint32_t class, struct device *prev)
+int
+dm_next_dev_by_class(struct device_handle *handle)
 {
-	for (struct device *dev = prev + 1; dev < device_list_end; ++dev) {
-		if (device_is_running(dev) && dev->drv->class == class)
-			return dev;
-	}
+	struct device *dev;
+	int8_t start = handle->index + 1;
 
-	return NULL;
-}
-
-struct device *
-dm_get_subdev_by_index(uint32_t class, uint8_t index,
-                       uint8_t *id)
-{
-	for_each_dev_in_class(dev, class) {
-		uint8_t start = dev->subdev_index;
-		uint8_t end   = dev->subdev_index + dev->subdev_count;
-
-		if (index >= start && index < end) {
-			*id = index - start;
-			return dev;
+	for (dev = &device_list[start]; dev < device_list_end; ++dev) {
+		if (!device_is_running(dev))
+			continue;
+		if (dev->drv->class == handle->class) {
+			handle->dev   = dev;
+			handle->index = dev - device_list;
+			return SUCCESS;
 		}
 	}
 
-	return NULL;
+	return ENODEV;
 }
 
-struct device *
-dm_next_subdev(struct device *dev, uint8_t *id)
+int
+dm_get_subdev_by_index(struct device_handle *handle, uint8_t class,
+                       uint8_t index)
+{
+	*handle = DEVICE_HANDLE_INIT(class);
+
+	while (dm_next_dev_by_class(handle) == SUCCESS) {
+		uint8_t start = handle->dev->subdev_index;
+		uint8_t end   = start + handle->dev->subdev_count;
+
+		if (index >= start && index < end) {
+			handle->id = index - start;
+			return SUCCESS;
+		}
+	}
+
+	return ENODEV;
+}
+
+int
+dm_next_subdev(struct device_handle *handle)
 {
 	/* Case when the given subdevice is not the last in its controller. */
-	if (++*id < dev->subdev_count)
-		return dev;
+	if (handle->dev && ++handle->id < handle->dev->subdev_count)
+		return SUCCESS;
 
 	/* Otherwise, it is the first subdevice in the next device. */
-	*id = 0;
+	handle->id = 0;
 
-	return dm_next_dev_by_class(dev->drv->class, dev);
+	return dm_next_dev_by_class(handle);
 }
 
 void

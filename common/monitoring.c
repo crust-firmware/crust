@@ -72,13 +72,11 @@ stop_throttling(void)
 static void
 poll_sensors(void *param __unused)
 {
-	struct device *dev;
-	uint8_t  id;
+	struct device_handle sensor = DEVICE_HANDLE_INIT(DM_CLASS_SENSOR);
 	uint32_t max_temp = 0, temp;
 
-	for (dev = dm_get_subdev_by_index(DM_CLASS_SENSOR, 0, &id);
-	     dev != NULL; dev = dm_next_subdev(dev, &id)) {
-		if (sensor_get_value(dev, id, &temp) != SUCCESS)
+	while (dm_next_subdev(&sensor) == SUCCESS) {
+		if (sensor_get_value(sensor.dev, sensor.id, &temp) != SUCCESS)
 			continue;
 		if (temp > max_temp)
 			max_temp = temp;

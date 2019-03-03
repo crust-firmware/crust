@@ -13,9 +13,11 @@
 
 #define __device __attribute__((section(".device"), used))
 
-#define for_each_dev_in_class(var, class) \
-	for (struct device *var = dm_first_dev_by_class(class); \
-	     var != NULL; var = dm_next_dev_by_class(class, var))
+#define DEVICE_HANDLE_INIT(cls) \
+	(struct device_handle) { \
+		.class = (cls), \
+		.index = -1, \
+	}
 
 enum {
 	DEVICE_FLAG_RUNNING = BIT(0),
@@ -72,6 +74,17 @@ struct device {
 	uint8_t                    subdev_index;
 };
 
+struct device_handle {
+	/** Pointer to the device. */
+	struct device *dev;
+	/** Subdevice ID within the device (if used). */
+	uint8_t        id;
+	/** Class of the device (used for iteration). */
+	uint8_t        class;
+	/** Index of the device in the device list (used for iteration). */
+	int8_t         index;
+};
+
 struct driver {
 	/** One of the enumerated driver classes. */
 	const uint32_t class;
@@ -101,40 +114,34 @@ struct device *dm_first_dev_by_class(uint32_t class);
  * Get the next device of a given class. This function only considers
  * successfully-probed devices.
  *
- * @param class One of the enumerated driver classes.
- * @param prev	The previous device of this class, returned either by this
- *              function or by {@code dm_first_dev_by_class}.
- * @return      The address of the device description, or NULL if no more
- *              devices of this class were found.
+ * @param handle Pointer to a handle initialized with DEVICE_HANDLE_INIT or a
+ *               previous successful call to a driver model getter or iterator.
+ * @return       Zero if a device was found and the handle was updated. Error
+ *               if no device exists, and the handle contents are undefined.
  */
-struct device *dm_next_dev_by_class(uint32_t class, struct device *prev);
+int dm_next_dev_by_class(struct device_handle *handle);
 
 /**
  * Get the nth subdevice of a given class.
  *
- * If this function returns NULL, the value stored at {@code id} is undefined.
- *
- * @param class One of the enumerated driver classes.
- * @param index The zero-based index of the subdevice within the class.
- * @param id    An integer in which to store the per-device subdevice ID.
- * @return      The controller device containing this subdevice, or NULL if
- *              there is no subdevice with this index.
+ * @param handle Pointer to a handle (existing contents are ignored).
+ * @param class  One of the enumerated driver classes.
+ * @param index  The zero-based index of the subdevice within the class.
+ * @return       Zero if a device was found and the handle was updated. Error
+ *               if no device exists, and the handle contents are undefined.
  */
-struct device *dm_get_subdev_by_index(uint32_t class, uint8_t index,
-                                      uint8_t *id);
+int dm_get_subdev_by_index(struct device_handle *handle, uint8_t class,
+                           uint8_t index);
 
 /**
  * Get the next subdevice of the same class as the given subdevice.
  *
- * If this function returns NULL, the value stored at {@code id} is undefined.
- *
- * @param dev   The controller device containing the previous subdevice.
- * @param id    An integer containing the previous subdevice's per-device ID,
- *              and in which to store the next subdevice's per-device ID.
- * @return      The controller device containing this subdevice, or NULL if
- *              there is no next subdevice.
+ * @param handle Pointer to a handle initialized with DEVICE_HANDLE_INIT or a
+ *               previous successful call to a driver model getter or iterator.
+ * @return       Zero if a device was found and the handle was updated. Error
+ *               if no device exists, and the handle contents are undefined.
  */
-struct device *dm_next_subdev(struct device *dev, uint8_t *id);
+int dm_next_subdev(struct device_handle *handle);
 
 /**
  * Initialize the driver model, probing all devices in topological order.
