@@ -6,13 +6,13 @@
 obj-y += clock/
 obj-y += dvfs/
 obj-y += gpio/
-obj-y += i2c/
+obj-$(CONFIG_I2C) += i2c/
 obj-y += irqchip/
 obj-y += mfd/
 obj-y += misc/
 obj-y += msgbox/
 obj-y += pmic/
-obj-y += rsb/
+obj-$(CONFIG_RSB) += rsb/
 obj-y += regulator/
 obj-y += sensor/
 obj-y += timer/

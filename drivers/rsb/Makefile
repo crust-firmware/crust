@@ -3,4 +3,4 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
-obj-$(CONFIG_RSB) += sunxi-rsb.o
+obj-y += sunxi-rsb.o
