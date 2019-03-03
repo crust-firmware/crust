@@ -24,44 +24,37 @@ device_is_running(struct device *dev)
 	return dev->flags & DEVICE_FLAG_RUNNING;
 }
 
-static int
+static void
 device_probe(struct device *dev)
 {
 	int err;
 
 	/* Skip already-probed devices. */
 	if (dev->flags & DEVICE_FLAG_RUNNING)
-		return SUCCESS;
-	if (dev->flags & DEVICE_FLAG_MISSING)
-		return ENODEV;
+		return;
 
 	/* Probe all devices this device depends on. */
-	if (dev->bus && (err = device_probe(dev->bus)))
-		return err;
-	if (dev->supplydev && (err = device_probe(dev->supplydev)))
-		return err;
+	if (dev->bus)
+		device_probe(dev->bus);
+	if (dev->supplydev)
+		device_probe(dev->supplydev);
 
 	/* Tell the device the index of its first subdevice. */
 	dev->subdev_index = total_subdevs[dev->drv->class];
 
 	/* Probe the device itself, and report any errors. */
-	if ((err = dev->drv->probe(dev)) == SUCCESS) {
-		dev->flags |= DEVICE_FLAG_RUNNING;
-		/* If the driver's probe function did not provide the number of
-		 * subdevices, assume the default number of 1. */
-		if (dev->subdev_count == 0)
-			dev->subdev_count = 1;
-		/* Update the total number of subdevices for this class. */
-		total_subdevs[dev->drv->class] += dev->subdev_count;
-		debug("dm: Probed %s", dev->name);
-	} else if (err == ENODEV) {
-		dev->flags |= DEVICE_FLAG_MISSING;
-		warn("dm: Failed to probe %s (missing)", dev->name);
-	} else {
+	if ((err = dev->drv->probe(dev)))
 		panic("dm: Failed to probe %s (%d)", dev->name, err);
-	}
 
-	return err;
+	dev->flags |= DEVICE_FLAG_RUNNING;
+	/* If the driver's probe function did not provide the number of
+	 * subdevices, assume the default number of 1. */
+	if (dev->subdev_count == 0)
+		dev->subdev_count = 1;
+	/* Update the total number of subdevices for this class. */
+	total_subdevs[dev->drv->class] += dev->subdev_count;
+
+	debug("dm: Probed %s", dev->name);
 }
 
 uint8_t
@@ -135,8 +128,7 @@ dm_setup_clocks(struct device *dev, uint8_t num_clocks)
 		uint8_t id = clocks[i].id;
 
 		/* Probe to ensure clock controller's driver is loaded. */
-		if ((err = device_probe(clockdev)))
-			return err;
+		device_probe(clockdev);
 
 		/* Enable each clock used by the device. */
 		if ((err = clock_enable(clockdev, id)))
@@ -151,7 +143,6 @@ dm_setup_irq(struct device *dev, callback_t *fn)
 {
 	struct device *irqchip;
 	struct irq_handle *handle = dev->irq;
-	int err;
 
 	/* Replace the irqchip reference with a link to the child device. */
 	irqchip     = handle->dev;
@@ -160,8 +151,7 @@ dm_setup_irq(struct device *dev, callback_t *fn)
 	handle->fn = fn;
 
 	/* Probe to ensure the interrupt controller's driver is loaded. */
-	if ((err = device_probe(irqchip)))
-		return err;
+	device_probe(irqchip);
 
 	return irqchip_enable(irqchip, handle);
 }
@@ -178,8 +168,7 @@ dm_setup_pins(struct device *dev, uint8_t num_pins)
 		uint8_t mode = pins[i].mode;
 
 		/* Probe to ensure GPIO controller's driver is loaded. */
-		if ((err = device_probe(gpiodev)))
-			return err;
+		device_probe(gpiodev);
 
 		/* Set pin mode and return if error occurs. */
 		if ((err = gpio_set_mode(gpiodev, id, mode)))
