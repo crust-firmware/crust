@@ -111,16 +111,6 @@ struct device *dm_first_dev_by_class(uint32_t class);
 struct device *dm_next_dev_by_class(uint32_t class, struct device *prev);
 
 /**
- * Get the device with the given name. This function only considers
- * successfully-probed devices.
- *
- * @param name  The name of the device.
- * @return      The address of the device description, or NULL if no device
- *              with this name was found.
- */
-struct device *dm_get_dev_by_name(const char *name);
-
-/**
  * Get the nth subdevice of a given class.
  *
  * If this function returns NULL, the value stored at {@code id} is undefined.

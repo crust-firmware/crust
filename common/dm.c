@@ -88,17 +88,6 @@ dm_next_dev_by_class(uint32_t class, struct device *prev)
 }
 
 struct device *
-dm_get_dev_by_name(const char *name)
-{
-	for (struct device *dev = device_list; dev < device_list_end; ++dev) {
-		if (device_is_running(dev) && strcmp(dev->name, name) == 0)
-			return dev;
-	}
-
-	return NULL;
-}
-
-struct device *
 dm_get_subdev_by_index(uint32_t class, uint8_t index,
                        uint8_t *id)
 {
