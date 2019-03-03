@@ -115,7 +115,7 @@ static const struct irqchip_driver sunxi_gpio_irqchip_driver = {
 	},
 };
 
-struct device r_pio_irqchip __device = {
+struct device r_pio_irqchip = {
 	.name   = "r_pio_irqchip",
 	.regs   = DEV_R_PIO,
 	.drv    = &sunxi_gpio_irqchip_driver.drv,

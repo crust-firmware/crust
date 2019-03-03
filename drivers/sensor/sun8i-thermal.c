@@ -141,7 +141,7 @@ static const struct sensor_driver sun8i_thermal_driver = {
 	},
 };
 
-struct device ths __device = {
+struct device ths = {
 	.name   = "ths",
 	.regs   = DEV_THS,
 	.drv    = &sun8i_thermal_driver.drv,

@@ -130,7 +130,7 @@ static const struct dvfs_driver cpux_driver = {
 	},
 };
 
-struct device cpux __device = {
+struct device cpux = {
 	.name = "cpux",
 	.regs = DEV_CCU,
 	.drv  = &cpux_driver.drv,

@@ -206,7 +206,7 @@ static const struct i2c_driver sun6i_a31_i2c_driver = {
 	},
 };
 
-struct device r_i2c __device = {
+struct device r_i2c = {
 	.name   = "r_i2c",
 	.regs   = DEV_R_I2C,
 	.drv    = &sun6i_a31_i2c_driver.drv,

@@ -134,7 +134,7 @@ static const struct pmic_driver axp803_pmic_driver = {
 	},
 };
 
-struct device axp803_pmic __device = {
+struct device axp803_pmic = {
 	.name = "axp803-pmic",
 	.drv  = &axp803_pmic_driver.drv,
 	.bus  = &r_rsb,

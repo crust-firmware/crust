@@ -35,7 +35,7 @@ static const struct driver gpio_button_driver = {
 	.probe = gpio_button_probe,
 };
 
-struct device power_button __device = {
+struct device power_button = {
 	.name = "power-button",
 	.drv  = &gpio_button_driver,
 	.irq  = IRQ_HANDLE {

@@ -80,7 +80,7 @@ static const struct irqchip_driver sun4i_intc_driver = {
 	},
 };
 
-struct device r_intc __device = {
+struct device r_intc = {
 	.name = "r_intc",
 	.regs = DEV_R_INTC,
 	.drv  = &sun4i_intc_driver.drv,

@@ -140,7 +140,7 @@ static const struct rsb_driver sunxi_rsb_driver = {
 	},
 };
 
-struct device r_rsb __device = {
+struct device r_rsb = {
 	.name   = "r_rsb",
 	.regs   = DEV_R_RSB,
 	.drv    = &sunxi_rsb_driver.drv,

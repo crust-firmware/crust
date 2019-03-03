@@ -283,7 +283,7 @@ static const struct clock_driver sunxi_ccu_driver = {
 	},
 };
 
-struct device ccu __device = {
+struct device ccu = {
 	.name    = "ccu",
 	.regs    = DEV_CCU,
 	.drv     = &sunxi_ccu_driver.drv,
@@ -323,7 +323,7 @@ struct device ccu __device = {
 	.subdev_count = CCU_CLOCK_COUNT,
 };
 
-struct device r_ccu __device = {
+struct device r_ccu = {
 	.name    = "r_ccu",
 	.regs    = DEV_R_PRCM,
 	.drv     = &sunxi_ccu_driver.drv,

@@ -166,7 +166,7 @@ static const struct msgbox_driver sunxi_msgbox_driver = {
 	},
 };
 
-struct device msgbox __device = {
+struct device msgbox = {
 	.name   = "msgbox",
 	.regs   = DEV_MSGBOX,
 	.drv    = &sunxi_msgbox_driver.drv,

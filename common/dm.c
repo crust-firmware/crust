@@ -5,6 +5,7 @@
 
 #include <clock.h>
 #include <debug.h>
+#include <devices.h>
 #include <dm.h>
 #include <error.h>
 #include <gpio.h>
@@ -13,9 +14,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-
-extern struct device device_list[];
-extern struct device device_list_end[];
 
 static uint8_t total_subdevs[DM_CLASS_COUNT];
 
@@ -76,14 +74,13 @@ int
 dm_next_dev_by_class(struct device_handle *handle)
 {
 	struct device *dev;
-	int8_t start = handle->index + 1;
 
-	for (dev = &device_list[start]; dev < device_list_end; ++dev) {
+	for (int8_t i = handle->index + 1; (dev = device_list[i]); ++i) {
 		if (!device_is_running(dev))
 			continue;
 		if (dev->drv->class == handle->class) {
 			handle->dev   = dev;
-			handle->index = dev - device_list;
+			handle->index = i;
 			return SUCCESS;
 		}
 	}
@@ -126,14 +123,18 @@ dm_next_subdev(struct device_handle *handle)
 void
 dm_init(void)
 {
-	for (struct device *dev = device_list; dev < device_list_end; ++dev)
+	struct device *dev;
+
+	for (struct device *const *iter = device_list; (dev = *iter); ++iter)
 		device_probe(dev);
 }
 
 void
 dm_poll(void)
 {
-	for (struct device *dev = device_list; dev < device_list_end; ++dev) {
+	struct device *dev;
+
+	for (struct device *const *iter = device_list; (dev = *iter); ++iter) {
 		void (*poll)(struct device *) = dev->drv->poll;
 		if (poll)
 			poll(dev);

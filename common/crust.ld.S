@@ -27,9 +27,6 @@ SECTIONS
   } >SRAM_A2
 
   .data . : ALIGN(4) {
-    device_list = .;
-    KEEP(*(.device))
-    device_list_end = .;
     *(SORT_BY_ALIGNMENT(SORT_BY_NAME(.rodata*)))
     *(SORT_BY_ALIGNMENT(SORT_BY_NAME(.data*)))
     . = ALIGN(4);

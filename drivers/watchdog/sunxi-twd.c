@@ -78,7 +78,7 @@ static const struct watchdog_driver sunxi_twd_driver = {
 	},
 };
 
-struct device r_twd __device = {
+struct device r_twd = {
 	.name   = "r_twd",
 	.regs   = DEV_R_TWD,
 	.drv    = &sunxi_twd_driver.drv,

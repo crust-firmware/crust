@@ -92,7 +92,7 @@ static const struct gpio_driver sunxi_gpio_driver = {
 	},
 };
 
-struct device r_pio __device = {
+struct device r_pio = {
 	.name   = "r_pio",
 	.regs   = DEV_R_PIO,
 	.drv    = &sunxi_gpio_driver.drv,

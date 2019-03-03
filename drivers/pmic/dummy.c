@@ -47,7 +47,7 @@ static const struct pmic_driver dummy_pmic_driver = {
 	},
 };
 
-struct device dummy_pmic __device = {
+struct device dummy_pmic = {
 	.name = "dummy-pmic",
 	.drv  = &dummy_pmic_driver.drv,
 #if CONFIG_REGULATOR_SY8106A

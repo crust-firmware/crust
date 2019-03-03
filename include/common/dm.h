@@ -11,8 +11,6 @@
 #include <stdint.h>
 #include <util.h>
 
-#define __device __attribute__((section(".device"), used))
-
 #define DEVICE_HANDLE_INIT(cls) \
 	(struct device_handle) { \
 		.class = (cls), \
@@ -154,10 +152,7 @@ int dm_next_subdev(struct device_handle *handle);
 
 /**
  * Initialize the driver model, probing all devices in topological order.
- *
- * If a device cannot be probed because it is not present, a warning will be
- * issued. If a device cannot be probed for any other reason, the firmware will
- * panic.
+ * If a device cannot be probed, the firmware will panic.
  */
 void dm_init(void);
 

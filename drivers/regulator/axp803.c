@@ -518,7 +518,7 @@ static const struct regulator_driver axp803_regulator_driver = {
 	},
 };
 
-struct device axp803_regulator __device = {
+struct device axp803_regulator = {
 	.name = "axp803-regulator",
 	.drv  = &axp803_regulator_driver.drv,
 	.bus  = &r_rsb,

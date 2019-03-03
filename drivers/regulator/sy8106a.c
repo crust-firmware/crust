@@ -117,7 +117,7 @@ static const struct regulator_driver sy8106a_driver = {
 	},
 };
 
-struct device sy8106a __device = {
+struct device sy8106a = {
 	.name = "sy8106a",
 	.drv  = &sy8106a_driver.drv,
 	.bus  = &r_i2c,
