@@ -61,6 +61,7 @@ CPPFLAGS	 = $(COMMON_CPPFLAGS) \
 		   -nostdinc \
 		   -Werror=missing-include-dirs
 LDFLAGS		 = -nostdlib \
+		   $(if $(HAVE_GCC9),-no-pie) \
 		   -Wl,-O1 \
 		   -Wl,--build-id=none \
 		   -Wl,--fatal-warnings \
