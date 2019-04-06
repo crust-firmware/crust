@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <system_power.h>
 #include <timer.h>
+#include <dvfs/cpux.h>
 
 #define HYSTERESIS_TEMP 5000
 #define HYSTERESIS_TIME 5
@@ -23,7 +24,6 @@
 #define TEMP_HOT        90000
 #define TEMP_CRITICAL   100000
 
-static struct device *dvfs;
 static uint8_t original_opp;
 static uint8_t throttle_level;
 static uint8_t time_cool;
@@ -32,11 +32,13 @@ static uint8_t time_warm;
 static void
 set_opp(void)
 {
+#if CONFIG_DVFS
 	int err;
 
 	/* Update the CPU's OPP. */
-	if ((err = dvfs_set_opp(dvfs, 0, original_opp - throttle_level)))
+	if ((err = dvfs_set_opp(&cpux, 0, original_opp - throttle_level)))
 		error("Failed to throttle CPU: %d", err);
+#endif
 
 	/* The throttle has changed. Reset the hysteresis timers. */
 	time_cool = 0;
@@ -46,9 +48,11 @@ set_opp(void)
 static void
 start_throttling(bool immediate)
 {
+#if CONFIG_DVFS
 	/* Record the OPP in use before throttling. */
 	if (throttle_level == 0)
-		original_opp = dvfs_get_opp(dvfs, 0);
+		original_opp = dvfs_get_opp(&cpux, 0);
+#endif
 
 	/* Do nothing if the system is fully throttled already. */
 	if (throttle_level == original_opp || original_opp == 0)
@@ -107,8 +111,6 @@ start_monitoring(void)
 {
 	int err;
 
-	if ((dvfs = dm_first_dev_by_class(DM_CLASS_DVFS)) == NULL)
-		return;
 	if ((err = timer_run_periodic(poll_sensors, NULL)))
 		panic("Cannot monitor sensors: %d", err);
 }
