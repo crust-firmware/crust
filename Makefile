@@ -47,8 +47,8 @@ CFLAGS		 = $(COMMON_CFLAGS) \
 		   -fno-pie \
 		   -fomit-frame-pointer \
 		   -funsigned-char \
-		   -mhard-mul -msoft-div \
-		   $(if $(HAVE_GCC9),-msext -msfimm -mshftimm) \
+		   -msoft-div -msoft-mul \
+		   $(if $(HAVE_GCC9),-msfimm -mshftimm) \
 		   -static
 CPPFLAGS	 = $(COMMON_CPPFLAGS) \
 		   -I$(SRC)/include/common \

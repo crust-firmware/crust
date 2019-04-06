@@ -29,6 +29,16 @@ func __divsi3
 endfunc __divsi3
 
 /*
+ * Of the three ORBIS32 32-bit multiplication instructions (l.mul, l.muli, and
+ * l.mulu), only l.mul works. By passing "-msoft-mul" to the compiler, and
+ * delegating to this function, we can force all multiplication to use l.mul.
+ */
+func __mulsi3
+	l.jr	r9
+	l.mul	r11, r3, r4
+endfunc __mulsi3
+
+/*
  * Derived from the "best method for counting bits in a 32-bit integer" at
  * https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel.
  *
