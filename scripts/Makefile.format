@@ -13,6 +13,6 @@ check-format: $(format_files)
 	$(Q) uncrustify -c $(SRC)/.uncrustify -l C -q --check $^
 
 format: $(format_files)
-	$(Q) uncrustify -c $(SRC)/.uncrustify -l C -q --no-backup $^
+	$(Q) uncrustify -c $(SRC)/.uncrustify -l C -q --no-backup --replace $^
 
 .PHONY: check-format format
