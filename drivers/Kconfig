@@ -5,6 +5,7 @@
 
 menu "Device drivers"
 
+source "dvfs/Kconfig"
 source "i2c/Kconfig"
 source "misc/Kconfig"
 source "pmic/Kconfig"

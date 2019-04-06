@@ -34,8 +34,10 @@ static struct device axp803_pmic __device;
 #if CONFIG_REGULATOR_AXP803
 static struct device axp803_regulator __device;
 #endif
-static struct device ccu  __device;
+static struct device ccu __device;
+#if CONFIG_CPUX
 static struct device cpux __device;
+#endif
 #if CONFIG_PMIC_DUMMY
 static struct device dummy_pmic __device;
 #endif
@@ -121,6 +123,7 @@ static struct device ccu = {
 	.subdev_count = CCU_CLOCK_COUNT,
 };
 
+#if CONFIG_DVFS
 static struct device cpux = {
 	.name = "cpux",
 	.regs = DEV_CCU,
@@ -133,6 +136,7 @@ static struct device cpux = {
 	.supply    = SY8106A_REGL_VOUT,
 #endif
 };
+#endif
 
 #if CONFIG_PMIC_DUMMY
 static struct device dummy_pmic = {

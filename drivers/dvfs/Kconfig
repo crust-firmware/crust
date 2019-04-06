@@ -1,0 +1,13 @@
+#
+# Copyright © 2017-2019 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+config DVFS
+	bool "DVFS support"
+	depends on REGULATOR_AXP803 || REGULATOR_SY8106A
+	help
+		Enable control of the ARM CPU frequency at runtime. Do
+		not select this option if you have a native DVFS driver
+		in Linux, or if you have any other Linux driver that may
+		attempt to communicate with the PMIC at runtime.
