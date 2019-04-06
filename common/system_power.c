@@ -15,6 +15,7 @@
 #include <stddef.h>
 #include <system_power.h>
 #include <watchdog.h>
+#include <watchdog/sunxi-twd.h>
 
 static bool is_off;
 static bool is_suspended;
@@ -34,17 +35,15 @@ system_is_suspended(void)
 noreturn void
 system_reset(void)
 {
-	struct device *pmic, *watchdog;
+	struct device *pmic;
 
 	if ((pmic = dm_first_dev_by_class(DM_CLASS_PMIC)))
 		pmic_reset(pmic);
 
-	if ((watchdog = dm_first_dev_by_class(DM_CLASS_WATCHDOG))) {
-		watchdog_disable(watchdog);
-		watchdog_enable(watchdog, 0);
-		/* This is always at least one reference clock cycle. */
-		udelay(1);
-	}
+	watchdog_disable(&r_twd);
+	watchdog_enable(&r_twd, 0);
+	/* This is always at least one reference clock cycle. */
+	udelay(1);
 
 	panic("Failed to reset system");
 }
