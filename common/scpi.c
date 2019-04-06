@@ -6,7 +6,6 @@
 #include <compiler.h>
 #include <css.h>
 #include <debug.h>
-#include <dm.h>
 #include <error.h>
 #include <interrupts.h>
 #include <msgbox.h>
@@ -18,6 +17,7 @@
 #include <util.h>
 #include <wallclock.h>
 #include <work.h>
+#include <msgbox/sunxi-msgbox.h>
 #include <platform/memory.h>
 #include <platform/time.h>
 
@@ -40,9 +40,6 @@ struct scpi_buffer {
 
 /** The shared memory area, with an address defined in the linker script. */
 extern struct scpi_mem __scpi_mem[SCPI_CLIENTS];
-
-/** The message box device used for communication with SCPI clients. */
-static struct device *scpi_msgbox;
 
 /** Buffers used to hold messages while they are being processed. */
 static struct scpi_buffer scpi_buffers[SCPI_BUFFER_MAX];
@@ -116,7 +113,7 @@ scpi_send_message(void *param)
 	int err;
 
 	/* Wait for any previous message to be acknowledged, with a timeout. */
-	while (msgbox_tx_pending(scpi_msgbox, buffer->client)) {
+	while (msgbox_tx_pending(&msgbox, buffer->client)) {
 		if (wallclock_read() >= timeout) {
 			warn("SCPI.%u: Channel busy", client);
 			scpi_free_buffer(buffer);
@@ -128,7 +125,7 @@ scpi_send_message(void *param)
 	scpi_copy_message(&SCPI_MEM_AREA(client).tx_msg, &buffer->mem.tx_msg);
 
 	/* Notify the client that the message has been sent. */
-	if ((err = msgbox_send(scpi_msgbox, client, SCPI_VIRTUAL_CHANNEL)))
+	if ((err = msgbox_send(&msgbox, client, SCPI_VIRTUAL_CHANNEL)))
 		error("SCPI.%u: Send error: %d", client, err);
 
 	/* Mark the buffer as no longer in use. */
@@ -241,15 +238,13 @@ scpi_init(void)
 {
 	int err;
 
-	if ((scpi_msgbox = dm_first_dev_by_class(DM_CLASS_MSGBOX)) == NULL)
-		panic("SCPI: No message box device");
 	/* Non-secure client channel. */
-	if ((err = msgbox_enable(scpi_msgbox, SCPI_CLIENT_NS,
+	if ((err = msgbox_enable(&msgbox, SCPI_CLIENT_NS,
 	                         scpi_receive_message)))
 		panic("SCPI.%u: Error registering handler: %d",
 		      SCPI_CLIENT_NS, err);
 	/* Secure client channel. */
-	if ((err = msgbox_enable(scpi_msgbox, SCPI_CLIENT_SECURE,
+	if ((err = msgbox_enable(&msgbox, SCPI_CLIENT_SECURE,
 	                         scpi_receive_message)))
 		panic("SCPI.%u: Error registering handler: %d",
 		      SCPI_CLIENT_SECURE, err);
