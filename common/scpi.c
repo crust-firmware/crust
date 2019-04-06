@@ -4,6 +4,7 @@
  */
 
 #include <compiler.h>
+#include <css.h>
 #include <debug.h>
 #include <dm.h>
 #include <error.h>
@@ -253,7 +254,11 @@ scpi_init(void)
 		panic("SCPI.%u: Error registering handler: %d",
 		      SCPI_CLIENT_SECURE, err);
 
-	scpi_create_message(SCPI_CLIENT_SECURE, SCPI_CMD_SCP_READY, NULL, 0);
+	/* Only send the ready message once. Assume that if the system is
+	 * already booted, some secondary CPUs will have been turned on. */
+	if (css_get_online_cores(0) == 1)
+		scpi_create_message(SCPI_CLIENT_SECURE, SCPI_CMD_SCP_READY,
+		                    NULL, 0);
 
 	info("SCPI: Initialization complete");
 }
