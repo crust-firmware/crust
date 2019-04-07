@@ -17,9 +17,9 @@
 #include <platform/devices.h>
 
 /* These macros take a virtual channel number. */
-#define CTRL_REG(n)         (0x0000 + 0x4 * ((n) / 2))
-#define CTRL_MASK(n)        (0x1111 << 16 * ((n) % 2))
-#define CTRL_SET(n)         (0x0110 << 16 * ((n) % 2))
+#define CTRL_REG0           0x0000
+#define CTRL_REG1           0x0004
+#define CTRL_NORMAL         0x01100110
 
 #define IRQ_EN_REG          0x0040
 #define IRQ_STAT_REG        0x0050
@@ -84,10 +84,6 @@ sunxi_msgbox_enable(struct device *dev, uint8_t chan,
 	if (get_handler(dev, chan) != NULL)
 		return EEXIST;
 	set_handler(dev, chan, handler);
-
-	/* Ensure FIFO directions are set properly. */
-	mmio_clrset_32(dev->regs + CTRL_REG(chan),
-	               CTRL_MASK(chan), CTRL_SET(chan));
 
 	/* Clear existing messages in the receive FIFO. */
 	while (sunxi_msgbox_peek_data(dev, chan))
@@ -165,6 +161,10 @@ sunxi_msgbox_probe(struct device *dev)
 
 	if ((err = dm_setup_clocks(dev, 1)))
 		return err;
+
+	/* Set even channels ARM -> SCP and odd channels SCP -> ARM. */
+	mmio_write_32(dev->regs + CTRL_REG0, CTRL_NORMAL);
+	mmio_write_32(dev->regs + CTRL_REG1, CTRL_NORMAL);
 
 	/* Drain all messages (required to clear interrupts). */
 	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; ++chan) {
