@@ -90,7 +90,7 @@ sunxi_msgbox_enable(struct device *dev, uint8_t chan,
 		mmio_read_32(dev->regs + RX_MSG_DATA_REG(chan));
 
 	/* Clear and enable the receive interrupt. */
-	mmio_set_32(dev->regs + IRQ_STAT_REG, RX_IRQ(chan));
+	mmio_write_32(dev->regs + IRQ_STAT_REG, RX_IRQ(chan));
 	mmio_set_32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
 
 	return SUCCESS;
