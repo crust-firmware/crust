@@ -87,6 +87,8 @@ struct device_handle {
 struct driver {
 	/** One of the enumerated driver classes. */
 	const uint32_t class;
+	/** A function called to check for new work or state changes. */
+	void           (*poll)(struct device *dev);
 	/** A function called to detect and initialize new devices. */
 	int            (*probe)(struct device *dev);
 };
@@ -150,6 +152,11 @@ int dm_next_subdev(struct device_handle *handle);
  * panic.
  */
 void dm_init(void);
+
+/**
+ * Poll all devices that have the `.poll` hook populated in their driver.
+ */
+void dm_poll(void);
 
 /**
  * Set up the clocks specified for a device.

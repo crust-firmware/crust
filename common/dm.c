@@ -130,6 +130,16 @@ dm_init(void)
 		device_probe(dev);
 }
 
+void
+dm_poll(void)
+{
+	for (struct device *dev = device_list; dev < device_list_end; ++dev) {
+		void (*poll)(struct device *) = dev->drv->poll;
+		if (poll)
+			poll(dev);
+	}
+}
+
 int
 dm_setup_clocks(struct device *dev, uint8_t num_clocks)
 {

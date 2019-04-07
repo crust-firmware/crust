@@ -35,6 +35,9 @@ main(void)
 	scpi_init();
 
 	while (true) {
+		/* Perform every-iteration operations. */
+		dm_poll();
+
 		if (wallclock_read() > next_tick) {
 			next_tick += REFCLK_HZ;
 
