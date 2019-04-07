@@ -44,10 +44,8 @@ sun4i_intc_irq(struct device *dev)
 
 	/* Call the registered callback. */
 	while (handle != NULL) {
-		if (handle->irq == irq) {
-			handle->fn(handle->dev);
+		if (handle->irq == irq && handle->fn(handle->dev))
 			break;
-		}
 		handle = handle->next;
 	}
 

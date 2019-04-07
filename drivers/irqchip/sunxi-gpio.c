@@ -7,6 +7,7 @@
 #include <dm.h>
 #include <error.h>
 #include <mmio.h>
+#include <stdbool.h>
 #include <util.h>
 #include <clock/sunxi-ccu.h>
 #include <irqchip/sun4i-intc.h>
@@ -53,10 +54,11 @@ sunxi_gpio_enable(struct device *dev, struct irq_handle *handle)
 	return SUCCESS;
 }
 
-static void
+static bool
 sunxi_gpio_irq(struct device *dev)
 {
 	uint32_t reg;
+	bool handled = false;
 
 	for (size_t port = 0; port < MAX_PORTS; ++port) {
 		/* Check the status of the IRQs for this port. */
@@ -70,8 +72,9 @@ sunxi_gpio_irq(struct device *dev)
 
 			struct irq_handle *handle = HANDLE_LIST(dev);
 			while (handle != NULL) {
-				if (handle->irq == SUNXI_GPIO_IRQ(port, pin)) {
-					handle->fn(handle->dev);
+				if (handle->irq == SUNXI_GPIO_IRQ(port, pin) &&
+				    handle->fn(handle->dev)) {
+					handled = true;
 					break;
 				}
 				handle = handle->next;
@@ -81,6 +84,8 @@ sunxi_gpio_irq(struct device *dev)
 		/* Clear the handled pending IRQs for this port. */
 		mmio_write_32(dev->regs + INT_STATUS_REG(port), reg);
 	}
+
+	return handled;
 }
 
 static int

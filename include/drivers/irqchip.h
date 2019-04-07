@@ -8,6 +8,7 @@
 
 #include <dm.h>
 #include <intrusive.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #define IRQCHIP_OPS(dev) \
@@ -18,7 +19,7 @@
 struct irq_handle {
 	struct irq_handle *next;
 	struct device     *dev;
-	void               (*fn)(struct device *);
+	bool               (*fn)(struct device *);
 
 	const uint8_t      irq;
 	const uint8_t      mode;

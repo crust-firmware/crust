@@ -6,6 +6,7 @@
 #ifndef COMMON_DM_H
 #define COMMON_DM_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <util.h>
@@ -164,7 +165,7 @@ int dm_setup_clocks(struct device *dev, uint8_t num_clocks);
  * @param dev   The device referencing the IRQs to initialize.
  * @param fn    The function to call when an IRQ is received.
  */
-int dm_setup_irq(struct device *dev, void (*fn)(struct device *));
+int dm_setup_irq(struct device *dev, bool (*fn)(struct device *));
 
 /**
  * Set the mode of the GPIO pins specified for a device.

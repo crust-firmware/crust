@@ -9,6 +9,7 @@
 #include <error.h>
 #include <gpio.h>
 #include <irqchip.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -151,7 +152,7 @@ dm_setup_clocks(struct device *dev, uint8_t num_clocks)
 }
 
 int
-dm_setup_irq(struct device *dev, void (*fn)(struct device *))
+dm_setup_irq(struct device *dev, bool (*fn)(struct device *))
 {
 	struct device *irqchip;
 	struct irq_handle *handle = dev->irq;
