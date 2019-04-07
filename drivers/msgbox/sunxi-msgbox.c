@@ -16,31 +16,24 @@
 #include <msgbox/sunxi-msgbox.h>
 #include <platform/devices.h>
 
-/* These macros take a virtual channel number. */
 #define CTRL_REG0           0x0000
 #define CTRL_REG1           0x0004
 #define CTRL_NORMAL         0x01100110
 
 #define IRQ_EN_REG          0x0040
 #define IRQ_STAT_REG        0x0050
-#define RX_IRQ(n)           BIT(0 + 4 * (n))
-#define TX_IRQ(n)           BIT(3 + 4 * (n))
-
 #define REMOTE_IRQ_EN_REG   0x0060
 #define REMOTE_IRQ_STAT_REG 0x0070
-#define REMOTE_RX_IRQ(n)    BIT(2 + 4 * (n))
-#define REMOTE_TX_IRQ(n)    BIT(1 + 4 * (n))
+#define RX_IRQ(n)           BIT(0 + 2 * (n))
+#define TX_IRQ(n)           BIT(1 + 2 * (n))
 
-#define RX_FIFO_STAT_REG(n) (0x0100 + 0x8 * (n))
-#define TX_FIFO_STAT_REG(n) (0x0104 + 0x8 * (n))
+#define FIFO_STAT_REG(n)    (0x0100 + 0x4 * (n))
 #define FIFO_STAT_MASK      BIT(0)
 
-#define RX_MSG_STAT_REG(n)  (0x0140 + 0x8 * (n))
-#define TX_MSG_STAT_REG(n)  (0x0144 + 0x8 * (n))
+#define MSG_STAT_REG(n)     (0x0140 + 0x4 * (n))
 #define MSG_STAT_MASK       GENMASK(2, 0)
 
-#define RX_MSG_DATA_REG(n)  (0x0180 + 0x8 * (n))
-#define TX_MSG_DATA_REG(n)  (0x0184 + 0x8 * (n))
+#define MSG_DATA_REG(n)     (0x0180 + 0x4 * (n))
 
 static inline msgbox_handler *
 get_handler(struct device *dev, uint8_t chan)
@@ -57,7 +50,7 @@ set_handler(struct device *dev, uint8_t chan, msgbox_handler *handler)
 static bool
 sunxi_msgbox_peek_data(struct device *dev, uint8_t chan)
 {
-	return mmio_read_32(dev->regs + RX_MSG_STAT_REG(chan)) & MSG_STAT_MASK;
+	return mmio_read_32(dev->regs + MSG_STAT_REG(chan)) & MSG_STAT_MASK;
 }
 
 static int
@@ -87,7 +80,7 @@ sunxi_msgbox_enable(struct device *dev, uint8_t chan,
 
 	/* Clear existing messages in the receive FIFO. */
 	while (sunxi_msgbox_peek_data(dev, chan))
-		mmio_read_32(dev->regs + RX_MSG_DATA_REG(chan));
+		mmio_read_32(dev->regs + MSG_DATA_REG(chan));
 
 	/* Clear and enable the receive interrupt. */
 	mmio_write_32(dev->regs + IRQ_STAT_REG, RX_IRQ(chan));
@@ -112,7 +105,7 @@ sunxi_msgbox_send(struct device *dev, uint8_t chan, uint32_t msg)
 	/* Reject the message if the FIFO is full. */
 	if (mmio_read_32(dev->regs + FIFO_STAT_REG(chan)) & FIFO_STAT_MASK)
 		return EBUSY;
-	mmio_write_32(dev->regs + TX_MSG_DATA_REG(chan), msg);
+	mmio_write_32(dev->regs + MSG_DATA_REG(chan), msg);
 
 	return SUCCESS;
 }
@@ -137,12 +130,12 @@ sunxi_msgbox_irq(struct device *dev)
 	bool handled = false;
 
 	reg = mmio_read_32(dev->regs + IRQ_STAT_REG);
-	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; ++chan) {
+	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; chan += 2) {
 		if (!(reg & RX_IRQ(chan)))
 			continue;
 		handled = true;
 		while (sunxi_msgbox_peek_data(dev, chan)) {
-			msg = mmio_read_32(dev->regs + RX_MSG_DATA_REG(chan));
+			msg = mmio_read_32(dev->regs + MSG_DATA_REG(chan));
 			sunxi_msgbox_handle_msg(dev, chan, msg);
 		}
 		/* Clear the pending interrupt once the FIFO is empty. */
@@ -167,10 +160,10 @@ sunxi_msgbox_probe(struct device *dev)
 	mmio_write_32(dev->regs + CTRL_REG0, CTRL_NORMAL);
 	mmio_write_32(dev->regs + CTRL_REG1, CTRL_NORMAL);
 
-	/* Drain all messages (required to clear interrupts). */
-	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; ++chan) {
+	/* Drain messages in RX channels (required to clear IRQs). */
+	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; chan += 2) {
 		while (sunxi_msgbox_peek_data(dev, chan))
-			mmio_read_32(dev->regs + RX_MSG_DATA_REG(chan));
+			mmio_read_32(dev->regs + MSG_DATA_REG(chan));
 	}
 
 	/* Disable and clear all interrupts. */

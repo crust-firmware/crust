@@ -24,6 +24,9 @@
 
 #define SCPI_TX_TIMEOUT  (10 * REFCLK_KHZ) /* 10ms */
 
+#define RX_CHAN(client)  (2 * (client))
+#define TX_CHAN(client)  (2 * (client) + 1)
+
 /** The shared memory area, with an address defined in the linker script. */
 extern struct scpi_mem __scpi_mem[SCPI_CLIENTS];
 
@@ -39,7 +42,7 @@ static void
 scpi_wait_tx_done(uint8_t client)
 {
 	while (wallclock_read() < scpi_timeout[client])
-		if (msgbox_last_tx_done(&msgbox, client))
+		if (msgbox_last_tx_done(&msgbox, TX_CHAN(client)))
 			break;
 	/* Prevent reordering shared memory reads before the loop. */
 	barrier();
@@ -63,7 +66,8 @@ scpi_send_message(uint8_t client)
 	barrier();
 
 	/* Notify the client that the message has been sent. */
-	if ((err = msgbox_send(&msgbox, client, SCPI_VIRTUAL_CHANNEL)))
+	if ((err = msgbox_send(&msgbox, TX_CHAN(client),
+	                       SCPI_VIRTUAL_CHANNEL)))
 		error("SCPI.%u: Send error: %d", client, err);
 }
 
@@ -123,8 +127,10 @@ scpi_handle_message(uint8_t client)
  * message is received.
  */
 static void
-scpi_receive_message(struct device *dev __unused, uint8_t client, uint32_t msg)
+scpi_receive_message(struct device *dev __unused, uint8_t chan, uint32_t msg)
 {
+	uint8_t client = chan / 2;
+
 	assert(client == SCPI_CLIENT_EL2 || client == SCPI_CLIENT_EL3);
 
 	/* Do not try to parse messages sent with a different protocol. */
@@ -140,12 +146,12 @@ scpi_init(void)
 	int err;
 
 	/* Non-secure client channel. */
-	if ((err = msgbox_enable(&msgbox, SCPI_CLIENT_EL3,
+	if ((err = msgbox_enable(&msgbox, RX_CHAN(SCPI_CLIENT_EL3),
 	                         scpi_receive_message)))
 		panic("SCPI.%u: Error registering handler: %d",
 		      SCPI_CLIENT_EL3, err);
 	/* Secure client channel. */
-	if ((err = msgbox_enable(&msgbox, SCPI_CLIENT_EL2,
+	if ((err = msgbox_enable(&msgbox, RX_CHAN(SCPI_CLIENT_EL2),
 	                         scpi_receive_message)))
 		panic("SCPI.%u: Error registering handler: %d",
 		      SCPI_CLIENT_EL2, err);

@@ -8,14 +8,8 @@
 
 #include <msgbox.h>
 
-/*
- * The message box hardware provides 8 unidirectional channels. As the mailbox
- * framework expects them to be bidirectional, create virtual channels out of
- * pairs of opposite-direction hardware channels. The first channel in each
- * pair is set up for AP->SCP communication, and the second channel is set up
- * for SCP->AP transmission.
- */
-#define SUNXI_MSGBOX_CHANS 4
+/* The message box hardware provides 8 unidirectional channels. */
+#define SUNXI_MSGBOX_CHANS 8
 
 #define SUNXI_MSGBOX_DRVDATA \
 	(uintptr_t)&(msgbox_handler *[SUNXI_MSGBOX_CHANS])
