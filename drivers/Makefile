@@ -16,5 +16,4 @@ obj-y += pmic/
 obj-$(CONFIG_RSB) += rsb/
 obj-y += regulator/
 obj-y += sensor/
-obj-y += timer/
 obj-y += watchdog/
