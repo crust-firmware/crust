@@ -11,7 +11,6 @@
 #include <stdbool.h>
 #include <wallclock.h>
 #include <watchdog.h>
-#include <work.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/devices.h>
 #include <platform/time.h>
@@ -43,7 +42,5 @@ main(void)
 			poll_sensors();
 			watchdog_restart(&r_twd);
 		}
-		/* Perform every-iteration operations. */
-		process_work();
 	}
 }

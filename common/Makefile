@@ -19,4 +19,3 @@ obj-y += start.o
 obj-y += system_power.o
 obj-y += vectors.o
 obj-y += wallclock.o
-obj-y += work.o
