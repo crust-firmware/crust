@@ -8,6 +8,7 @@
 #include <error.h>
 #include <mmio.h>
 #include <msgbox.h>
+#include <scpi.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <util.h>
@@ -35,18 +36,6 @@
 
 #define MSG_DATA_REG(n)     (0x0180 + 0x4 * (n))
 
-static inline msgbox_handler *
-get_handler(struct device *dev, uint8_t chan)
-{
-	return ((msgbox_handler **)dev->drvdata)[chan];
-}
-
-static inline void
-set_handler(struct device *dev, uint8_t chan, msgbox_handler *handler)
-{
-	((msgbox_handler **)dev->drvdata)[chan] = handler;
-}
-
 static bool
 sunxi_msgbox_peek_data(struct device *dev, uint8_t chan)
 {
@@ -57,30 +46,17 @@ static int
 sunxi_msgbox_disable(struct device *dev, uint8_t chan)
 {
 	assert(chan < SUNXI_MSGBOX_CHANS);
-	assert(get_handler(dev, chan) != NULL);
 
 	/* Disable the receive interrupt. */
 	mmio_clr_32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
-
-	set_handler(dev, chan, NULL);
 
 	return SUCCESS;
 }
 
 static int
-sunxi_msgbox_enable(struct device *dev, uint8_t chan,
-                    msgbox_handler *handler)
+sunxi_msgbox_enable(struct device *dev, uint8_t chan)
 {
 	assert(chan < SUNXI_MSGBOX_CHANS);
-	assert(handler != NULL);
-
-	if (get_handler(dev, chan) != NULL)
-		return EEXIST;
-	set_handler(dev, chan, handler);
-
-	/* Clear existing messages in the receive FIFO. */
-	while (sunxi_msgbox_peek_data(dev, chan))
-		mmio_read_32(dev->regs + MSG_DATA_REG(chan));
 
 	/* Clear and enable the receive interrupt. */
 	mmio_write_32(dev->regs + IRQ_STAT_REG, RX_IRQ(chan));
@@ -111,12 +87,16 @@ sunxi_msgbox_send(struct device *dev, uint8_t chan, uint32_t msg)
 }
 
 static void
-sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan, uint32_t msg)
+sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan)
 {
-	msgbox_handler *handler = get_handler(dev, chan);
+	uint32_t msg = mmio_read_32(dev->regs + MSG_DATA_REG(chan));
 
-	if (handler != NULL) {
-		handler(dev, chan, msg);
+	switch (chan) {
+	case MSGBOX_CHAN_SCPI_EL3_RX:
+		scpi_receive_message(SCPI_CLIENT_EL3, msg);
+		return;
+	case MSGBOX_CHAN_SCPI_EL2_RX:
+		scpi_receive_message(SCPI_CLIENT_EL2, msg);
 		return;
 	}
 
@@ -126,20 +106,17 @@ sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan, uint32_t msg)
 static bool
 sunxi_msgbox_irq(struct device *dev)
 {
-	uint32_t msg, reg;
-	bool handled = false;
+	uint32_t status = mmio_read_32(dev->regs + IRQ_STAT_REG);
+	bool handled    = false;
 
-	reg = mmio_read_32(dev->regs + IRQ_STAT_REG);
 	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; chan += 2) {
-		if (!(reg & RX_IRQ(chan)))
-			continue;
-		handled = true;
-		while (sunxi_msgbox_peek_data(dev, chan)) {
-			msg = mmio_read_32(dev->regs + MSG_DATA_REG(chan));
-			sunxi_msgbox_handle_msg(dev, chan, msg);
+		if (status & RX_IRQ(chan)) {
+			handled = true;
+			while (sunxi_msgbox_peek_data(dev, chan))
+				sunxi_msgbox_handle_msg(dev, chan);
+			/* Clear the IRQ once the FIFO is empty. */
+			mmio_write_32(dev->regs + IRQ_STAT_REG, RX_IRQ(chan));
 		}
-		/* Clear the pending interrupt once the FIFO is empty. */
-		mmio_write_32(dev->regs + IRQ_STAT_REG, RX_IRQ(chan));
 	}
 
 	return handled;
@@ -149,9 +126,6 @@ static int
 sunxi_msgbox_probe(struct device *dev)
 {
 	int err;
-
-	/* Ensure a handler array was allocated. */
-	assert(dev->drvdata);
 
 	if ((err = dm_setup_clocks(dev, 1)))
 		return err;
@@ -190,12 +164,11 @@ static const struct msgbox_driver sunxi_msgbox_driver = {
 };
 
 struct device msgbox __device = {
-	.name    = "msgbox",
-	.regs    = DEV_MSGBOX,
-	.drv     = &sunxi_msgbox_driver.drv,
-	.drvdata = SUNXI_MSGBOX_DRVDATA { 0 },
-	.clocks  = CLOCK_PARENT(ccu, CCU_CLOCK_MSGBOX),
-	.irq     = IRQ_HANDLE {
+	.name   = "msgbox",
+	.regs   = DEV_MSGBOX,
+	.drv    = &sunxi_msgbox_driver.drv,
+	.clocks = CLOCK_PARENT(ccu, CCU_CLOCK_MSGBOX),
+	.irq    = IRQ_HANDLE {
 		.dev = &r_intc,
 		.irq = IRQ_MSGBOX,
 	},

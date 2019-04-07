@@ -126,11 +126,9 @@ scpi_handle_message(uint8_t client)
  * This is the callback from the message box framework; it is called when a new
  * message is received.
  */
-static void
-scpi_receive_message(struct device *dev __unused, uint8_t chan, uint32_t msg)
+void
+scpi_receive_message(uint8_t client, uint32_t msg)
 {
-	uint8_t client = chan / 2;
-
 	assert(client == SCPI_CLIENT_EL2 || client == SCPI_CLIENT_EL3);
 
 	/* Do not try to parse messages sent with a different protocol. */
@@ -146,14 +144,12 @@ scpi_init(void)
 	int err;
 
 	/* Non-secure client channel. */
-	if ((err = msgbox_enable(&msgbox, RX_CHAN(SCPI_CLIENT_EL3),
-	                         scpi_receive_message)))
-		panic("SCPI.%u: Error registering handler: %d",
+	if ((err = msgbox_enable(&msgbox, RX_CHAN(SCPI_CLIENT_EL3))))
+		panic("SCPI.%u: Error enabling channel: %d",
 		      SCPI_CLIENT_EL3, err);
 	/* Secure client channel. */
-	if ((err = msgbox_enable(&msgbox, RX_CHAN(SCPI_CLIENT_EL2),
-	                         scpi_receive_message)))
-		panic("SCPI.%u: Error registering handler: %d",
+	if ((err = msgbox_enable(&msgbox, RX_CHAN(SCPI_CLIENT_EL2))))
+		panic("SCPI.%u: Error enabling channel: %d",
 		      SCPI_CLIENT_EL2, err);
 
 	/* Only send the ready message once. Assume that if the system is

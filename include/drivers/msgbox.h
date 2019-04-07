@@ -14,12 +14,16 @@
 #define MSGBOX_OPS(dev) \
 	(&container_of((dev)->drv, struct msgbox_driver, drv)->ops)
 
-typedef void msgbox_handler (struct device *dev, uint8_t, uint32_t);
+enum {
+	MSGBOX_CHAN_SCPI_EL3_RX = 0,
+	MSGBOX_CHAN_SCPI_EL3_TX = 1,
+	MSGBOX_CHAN_SCPI_EL2_RX = 2,
+	MSGBOX_CHAN_SCPI_EL2_TX = 3,
+};
 
 struct msgbox_driver_ops {
 	int  (*disable)(struct device *dev, uint8_t chan);
-	int  (*enable)(struct device *dev, uint8_t chan,
-	               msgbox_handler *handler);
+	int  (*enable)(struct device *dev, uint8_t chan);
 	bool (*last_tx_done)(struct device *dev, uint8_t chan);
 	int  (*send)(struct device *dev, uint8_t chan,
 	             uint32_t message);
@@ -31,8 +35,7 @@ struct msgbox_driver {
 };
 
 /**
- * Disable a message channel, so it will no longer be able to send or receive
- * messages.
+ * Disable a message channel, so it will no longer be able to receive messages.
  *
  * @param dev  The message box device.
  * @param chan The message box channel.
@@ -44,17 +47,15 @@ msgbox_disable(struct device *dev, uint8_t chan)
 }
 
 /**
- * Enable a message box channel to send and receive messages. The provided
- * handler is called for each incoming message.
+ * Enable a message box channel to receive messages.
  *
  * @param dev     The message box device.
  * @param chan    The message box channel.
- * @param handler The callback function to register.
  */
 static inline int
-msgbox_enable(struct device *dev, uint8_t chan, msgbox_handler *handler)
+msgbox_enable(struct device *dev, uint8_t chan)
 {
-	return MSGBOX_OPS(dev)->enable(dev, chan, handler);
+	return MSGBOX_OPS(dev)->enable(dev, chan);
 }
 
 /**

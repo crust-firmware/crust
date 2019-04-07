@@ -11,9 +11,6 @@
 /* The message box hardware provides 8 unidirectional channels. */
 #define SUNXI_MSGBOX_CHANS 8
 
-#define SUNXI_MSGBOX_DRVDATA \
-	(uintptr_t)&(msgbox_handler *[SUNXI_MSGBOX_CHANS])
-
 extern struct device msgbox;
 
 #endif /* DRIVERS_MSGBOX_SUNXI_MSGBOX_H */

@@ -44,6 +44,16 @@ bool scpi_handle_cmd(uint8_t client, struct scpi_msg *rx_msg,
                      struct scpi_msg *tx_msg);
 
 /**
+ * Notify the SCPI framework of a new SCPI command. The SCPI framework parses
+ * the message, performs any requested actions, and possibly generates a reply
+ * message.
+ *
+ * @param  client The client from which the message was received.
+ * @param  msg    The message (virtual channel) received via the message box.
+ */
+void scpi_receive_message(uint8_t client, uint32_t msg);
+
+/**
  * Initialize the SCPI API handlers and report to the system that the firmware
  * has finished booting and is ready to accept requests.
  */
