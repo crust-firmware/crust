@@ -39,7 +39,7 @@ static void
 scpi_wait_tx_done(uint8_t client)
 {
 	while (wallclock_read() < scpi_timeout[client])
-		if (!msgbox_tx_pending(&msgbox, client))
+		if (msgbox_last_tx_done(&msgbox, client))
 			break;
 	/* Prevent reordering shared memory reads before the loop. */
 	barrier();
