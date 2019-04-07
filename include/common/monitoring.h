@@ -9,9 +9,10 @@
 #include <stdbool.h>
 
 /**
- * Start monitoring temperature sensors, throttling the system as necessary.
+ * Poll the temperature sensors, throttling the system as necessary. This
+ * function should be called once per second.
  */
-void start_monitoring(void);
+void poll_sensors(void);
 
 /**
  * Check if the system is being throttled due to overtemperature.

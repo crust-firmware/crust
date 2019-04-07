@@ -9,6 +9,7 @@
 #include <monitoring.h>
 #include <scpi.h>
 #include <stdbool.h>
+#include <wallclock.h>
 #include <watchdog.h>
 #include <work.h>
 #include <watchdog/sunxi-twd.h>
@@ -22,9 +23,10 @@ noreturn void main(void);
 noreturn void
 main(void)
 {
+	uint64_t next_tick = wallclock_read() + REFCLK_HZ;
+
 	console_init(DEV_UART0);
 	dm_init();
-	start_monitoring();
 
 	/* Enable watchdog. */
 	watchdog_enable(&r_twd, WDOG_TIMEOUT);
@@ -34,7 +36,13 @@ main(void)
 	scpi_init();
 
 	while (true) {
-		/* Process work queue ad infinitum. */
+		if (wallclock_read() > next_tick) {
+			next_tick += REFCLK_HZ;
+
+			/* Perform 1Hz operations. */
+			poll_sensors();
+		}
+		/* Perform every-iteration operations. */
 		process_work();
 	}
 }

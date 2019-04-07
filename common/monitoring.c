@@ -14,7 +14,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <system_power.h>
-#include <timer.h>
 #include <dvfs/cpux.h>
 
 #define HYSTERESIS_TEMP 5000
@@ -73,8 +72,8 @@ stop_throttling(void)
 	set_opp();
 }
 
-static void
-poll_sensors(void *param __unused)
+void
+poll_sensors(void)
 {
 	struct device_handle sensor = DEVICE_HANDLE_INIT(DM_CLASS_SENSOR);
 	uint32_t max_temp = 0, temp;
@@ -104,15 +103,6 @@ poll_sensors(void *param __unused)
 		if (++time_cool >= HYSTERESIS_TIME)
 			stop_throttling();
 	}
-}
-
-void
-start_monitoring(void)
-{
-	int err;
-
-	if ((err = timer_run_periodic(poll_sensors, NULL)))
-		panic("Cannot monitor sensors: %d", err);
 }
 
 bool __pure
