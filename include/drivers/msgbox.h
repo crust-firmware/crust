@@ -22,6 +22,7 @@ enum {
 };
 
 struct msgbox_driver_ops {
+	void (*ack_rx)(struct device *dev, uint8_t chan);
 	int  (*disable)(struct device *dev, uint8_t chan);
 	int  (*enable)(struct device *dev, uint8_t chan);
 	bool (*last_tx_done)(struct device *dev, uint8_t chan);
@@ -33,6 +34,18 @@ struct msgbox_driver {
 	const struct driver            drv;
 	const struct msgbox_driver_ops ops;
 };
+
+/**
+ * Acknowledge a message received on a message box channel.
+ *
+ * @param dev  The message box device.
+ * @param chan The message box channel.
+ */
+static inline void
+msgbox_ack_rx(struct device *dev, uint8_t chan)
+{
+	MSGBOX_OPS(dev)->ack_rx(dev, chan);
+}
 
 /**
  * Disable a message channel, so it will no longer be able to receive messages.

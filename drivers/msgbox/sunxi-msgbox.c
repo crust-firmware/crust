@@ -43,6 +43,12 @@ sunxi_msgbox_peek_data(struct device *dev, uint8_t chan)
 	return mmio_read_32(dev->regs + MSG_STAT_REG(chan)) & MSG_STAT_MASK;
 }
 
+static void
+sunxi_msgbox_ack_rx(struct device *dev, uint8_t chan)
+{
+	mmio_write_32(dev->regs + IRQ_STAT_REG, RX_IRQ(chan));
+}
+
 static int
 sunxi_msgbox_disable(struct device *dev, uint8_t chan)
 {
@@ -114,10 +120,8 @@ sunxi_msgbox_poll(struct device *dev)
 
 	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; chan += 2) {
 		if (status & RX_IRQ(chan)) {
-			while (sunxi_msgbox_peek_data(dev, chan))
+			if (sunxi_msgbox_peek_data(dev, chan))
 				sunxi_msgbox_handle_msg(dev, chan);
-			/* Clear the IRQ once the FIFO is empty. */
-			mmio_write_32(dev->regs + IRQ_STAT_REG, RX_IRQ(chan));
 		}
 	}
 }
@@ -154,6 +158,7 @@ static const struct msgbox_driver sunxi_msgbox_driver = {
 		.probe = sunxi_msgbox_probe,
 	},
 	.ops = {
+		.ack_rx       = sunxi_msgbox_ack_rx,
 		.disable      = sunxi_msgbox_disable,
 		.enable       = sunxi_msgbox_enable,
 		.last_tx_done = sunxi_msgbox_last_tx_done,

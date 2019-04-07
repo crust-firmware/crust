@@ -116,17 +116,27 @@ scpi_create_message(uint8_t client, uint8_t command)
 void
 scpi_receive_message(uint8_t client, uint32_t msg)
 {
+	bool reply_needed;
+
 	assert(client == SCPI_CLIENT_EL2 || client == SCPI_CLIENT_EL3);
 
 	/* Do not try to parse messages sent with a different protocol. */
-	if (msg != SCPI_VIRTUAL_CHANNEL)
+	if (msg != SCPI_VIRTUAL_CHANNEL) {
+		msgbox_ack_rx(&msgbox, RX_CHAN(client));
 		return;
+	}
 
 	/* Try to ensure the TX buffer is free before writing to it. */
 	scpi_wait_tx_done(client);
 
-	/* Handle the command, and send the reply if one is generated. */
-	if (scpi_handle_cmd(client, &SCPI_MEM_AREA(client)))
+	/* Handle the message. */
+	reply_needed = scpi_handle_cmd(client, &SCPI_MEM_AREA(client));
+
+	/* Release the RX buffer. */
+	msgbox_ack_rx(&msgbox, RX_CHAN(client));
+
+	/* If a reply was generated, send it. */
+	if (reply_needed)
 		scpi_send_message(client);
 }
 
