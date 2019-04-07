@@ -42,6 +42,11 @@ void scpi_create_message(uint8_t client, uint8_t command);
 bool scpi_handle_cmd(uint8_t client, struct scpi_mem *mem);
 
 /**
+ * Handle incoming SCPI commands and send replies as buffers become available.
+ */
+void scpi_poll(void);
+
+/**
  * Notify the SCPI framework of a new SCPI command. The SCPI framework parses
  * the message, performs any requested actions, and possibly generates a reply
  * message.
