@@ -16,7 +16,6 @@
 #include <string.h>
 #include <util.h>
 #include <wallclock.h>
-#include <work.h>
 #include <msgbox/sunxi-msgbox.h>
 #include <platform/memory.h>
 #include <platform/time.h>
@@ -155,7 +154,7 @@ scpi_create_message(uint8_t client, uint8_t command, uint32_t *payload,
 	if (payload_size > 0)
 		memcpy(&buffer->mem.tx_msg, payload, payload_size);
 
-	queue_work(scpi_send_message, buffer);
+	scpi_send_message(buffer);
 
 	return SUCCESS;
 }
@@ -185,7 +184,7 @@ scpi_handle_message(void *param)
 		return;
 	}
 
-	queue_work(scpi_send_message, buffer);
+	scpi_send_message(buffer);
 }
 
 /**
@@ -230,7 +229,7 @@ scpi_receive_message(struct device *dev __unused, uint8_t client, uint32_t msg)
 	/* Save the received message outside the shared memory area. */
 	scpi_copy_message(&buffer->mem.rx_msg, rx_msg);
 
-	queue_work(scpi_handle_message, buffer);
+	scpi_handle_message(buffer);
 }
 
 void
