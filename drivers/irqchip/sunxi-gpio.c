@@ -54,9 +54,8 @@ sunxi_gpio_enable(struct device *dev, struct irq_handle *handle)
 }
 
 static void
-sunxi_gpio_irq(void *param)
+sunxi_gpio_irq(struct device *dev)
 {
-	struct device *dev = param;
 	uint32_t reg;
 
 	for (size_t port = 0; port < MAX_PORTS; ++port) {

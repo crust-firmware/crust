@@ -144,9 +144,8 @@ sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan, uint32_t msg)
 }
 
 static void
-sunxi_msgbox_irq(void *param)
+sunxi_msgbox_irq(struct device *dev)
 {
-	struct device *dev = param;
 	uint32_t msg, reg;
 
 	reg = mmio_read_32(dev->regs + IRQ_STATUS_REG);

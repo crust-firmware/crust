@@ -151,7 +151,7 @@ dm_setup_clocks(struct device *dev, uint8_t num_clocks)
 }
 
 int
-dm_setup_irq(struct device *dev, callback_t *fn)
+dm_setup_irq(struct device *dev, void (*fn)(struct device *))
 {
 	struct device *irqchip;
 	struct irq_handle *handle = dev->irq;

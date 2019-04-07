@@ -37,9 +37,8 @@
 #define PIN_FUNCTION_REG  0x8f
 
 static void
-axp803_pmic_irq(void *param)
+axp803_pmic_irq(struct device *dev)
 {
-	struct device *dev = param;
 	uint8_t reg;
 	int err;
 

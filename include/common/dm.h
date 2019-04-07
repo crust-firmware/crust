@@ -9,7 +9,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <util.h>
-#include <work.h>
 
 #define __device __attribute__((section(".device"), used))
 
@@ -165,7 +164,7 @@ int dm_setup_clocks(struct device *dev, uint8_t num_clocks);
  * @param dev   The device referencing the IRQs to initialize.
  * @param fn    The function to call when an IRQ is received.
  */
-int dm_setup_irq(struct device *dev, callback_t *fn);
+int dm_setup_irq(struct device *dev, void (*fn)(struct device *));
 
 /**
  * Set the mode of the GPIO pins specified for a device.
