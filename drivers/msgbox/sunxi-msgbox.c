@@ -17,30 +17,30 @@
 #include <platform/devices.h>
 
 /* These macros take a virtual channel number. */
-#define CTRL_REG(n)           (0x0000 + 0x4 * ((n) / 2))
-#define CTRL_MASK(n)          (0x1111 << 16 * ((n) % 2))
-#define CTRL_SET(n)           (0x0110 << 16 * ((n) % 2))
+#define CTRL_REG(n)         (0x0000 + 0x4 * ((n) / 2))
+#define CTRL_MASK(n)        (0x1111 << 16 * ((n) % 2))
+#define CTRL_SET(n)         (0x0110 << 16 * ((n) % 2))
 
-#define IRQ_EN_REG            0x0040
-#define IRQ_STATUS_REG        0x0050
-#define RX_IRQ(n)             BIT(0 + 4 * (n))
-#define TX_IRQ(n)             BIT(3 + 4 * (n))
+#define IRQ_EN_REG          0x0040
+#define IRQ_STAT_REG        0x0050
+#define RX_IRQ(n)           BIT(0 + 4 * (n))
+#define TX_IRQ(n)           BIT(3 + 4 * (n))
 
-#define REMOTE_IRQ_EN_REG     0x0060
-#define REMOTE_IRQ_STATUS_REG 0x0070
-#define REMOTE_RX_IRQ(n)      BIT(2 + 4 * (n))
-#define REMOTE_TX_IRQ(n)      BIT(1 + 4 * (n))
+#define REMOTE_IRQ_EN_REG   0x0060
+#define REMOTE_IRQ_STAT_REG 0x0070
+#define REMOTE_RX_IRQ(n)    BIT(2 + 4 * (n))
+#define REMOTE_TX_IRQ(n)    BIT(1 + 4 * (n))
 
-#define RX_FIFO_STATUS_REG(n) (0x0100 + 0x8 * (n))
-#define TX_FIFO_STATUS_REG(n) (0x0104 + 0x8 * (n))
-#define FIFO_STATUS_MASK      BIT(0)
+#define RX_FIFO_STAT_REG(n) (0x0100 + 0x8 * (n))
+#define TX_FIFO_STAT_REG(n) (0x0104 + 0x8 * (n))
+#define FIFO_STAT_MASK      BIT(0)
 
-#define RX_MSG_STATUS_REG(n)  (0x0140 + 0x8 * (n))
-#define TX_MSG_STATUS_REG(n)  (0x0144 + 0x8 * (n))
-#define MSG_STATUS_MASK       GENMASK(2, 0)
+#define RX_MSG_STAT_REG(n)  (0x0140 + 0x8 * (n))
+#define TX_MSG_STAT_REG(n)  (0x0144 + 0x8 * (n))
+#define MSG_STAT_MASK       GENMASK(2, 0)
 
-#define RX_MSG_DATA_REG(n)    (0x0180 + 0x8 * (n))
-#define TX_MSG_DATA_REG(n)    (0x0184 + 0x8 * (n))
+#define RX_MSG_DATA_REG(n)  (0x0180 + 0x8 * (n))
+#define TX_MSG_DATA_REG(n)  (0x0184 + 0x8 * (n))
 
 static inline msgbox_handler *
 get_handler(struct device *dev, uint8_t chan)
@@ -57,11 +57,7 @@ set_handler(struct device *dev, uint8_t chan, msgbox_handler *handler)
 static bool
 sunxi_msgbox_peek_data(struct device *dev, uint8_t chan)
 {
-	uint32_t reg;
-
-	reg = mmio_read_32(dev->regs + RX_MSG_STATUS_REG(chan));
-
-	return (reg & MSG_STATUS_MASK) > 0;
+	return mmio_read_32(dev->regs + RX_MSG_STAT_REG(chan)) & MSG_STAT_MASK;
 }
 
 static int
@@ -98,7 +94,7 @@ sunxi_msgbox_enable(struct device *dev, uint8_t chan,
 		mmio_read_32(dev->regs + RX_MSG_DATA_REG(chan));
 
 	/* Clear and enable the receive interrupt. */
-	mmio_set_32(dev->regs + IRQ_STATUS_REG, RX_IRQ(chan));
+	mmio_set_32(dev->regs + IRQ_STAT_REG, RX_IRQ(chan));
 	mmio_set_32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
 
 	return SUCCESS;
@@ -107,13 +103,9 @@ sunxi_msgbox_enable(struct device *dev, uint8_t chan,
 static bool
 sunxi_msgbox_last_tx_done(struct device *dev, uint8_t chan)
 {
-	uint32_t reg;
-
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
-	reg = mmio_read_32(dev->regs + REMOTE_IRQ_STATUS_REG);
-
-	return !(reg & RX_IRQ(chan));
+	return !(mmio_read_32(dev->regs + REMOTE_IRQ_STAT_REG) & RX_IRQ(chan));
 }
 
 static int
@@ -147,7 +139,7 @@ sunxi_msgbox_irq(struct device *dev)
 	uint32_t msg, reg;
 	bool handled = false;
 
-	reg = mmio_read_32(dev->regs + IRQ_STATUS_REG);
+	reg = mmio_read_32(dev->regs + IRQ_STAT_REG);
 	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; ++chan) {
 		if (!(reg & RX_IRQ(chan)))
 			continue;
@@ -157,7 +149,7 @@ sunxi_msgbox_irq(struct device *dev)
 			sunxi_msgbox_handle_msg(dev, chan, msg);
 		}
 		/* Clear the pending interrupt once the FIFO is empty. */
-		mmio_write_32(dev->regs + IRQ_STATUS_REG, RX_IRQ(chan));
+		mmio_write_32(dev->regs + IRQ_STAT_REG, RX_IRQ(chan));
 	}
 
 	return handled;
@@ -182,7 +174,7 @@ sunxi_msgbox_probe(struct device *dev)
 
 	/* Disable and clear all interrupts. */
 	mmio_write_32(dev->regs + IRQ_EN_REG, 0);
-	mmio_write_32(dev->regs + IRQ_STATUS_REG, GENMASK(15, 0));
+	mmio_write_32(dev->regs + IRQ_STAT_REG, GENMASK(15, 0));
 
 	if ((err = dm_setup_irq(dev, sunxi_msgbox_irq)))
 		return err;
