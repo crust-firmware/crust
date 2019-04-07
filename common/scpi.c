@@ -26,11 +26,6 @@
 
 #define SCPI_TX_TIMEOUT  (100 * REFCLK_KHZ)     /* 100ms */
 
-struct scpi_mem {
-	struct scpi_msg tx_msg; /**< The reply to be sent to a client. */
-	struct scpi_msg rx_msg; /**< The request received from a client. */
-};
-
 struct scpi_buffer {
 	struct scpi_mem mem;    /**< Memory for the request/reply messages. */
 	uint8_t         client; /**< Client that should receive the reply. */

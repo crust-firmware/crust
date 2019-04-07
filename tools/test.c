@@ -131,12 +131,6 @@ struct scpi_call_times {
 	struct timespec finish;      /**< After all processing is complete. */
 };
 
-/** A structure representing the shared memory area used for SCPI. */
-struct scpi_mem {
-	struct scpi_msg rx_msg; /**< The reply sent by the server. */
-	struct scpi_msg tx_msg; /**< The request sent by a client. */
-};
-
 /** Context for returning to the main program on failure. */
 static sigjmp_buf main_buf;
 /** Context for continuing with the next test on failure. */
@@ -359,9 +353,9 @@ scpi_copy_msg(struct scpi_msg *dest, struct scpi_msg *src)
 	memcpy(dest, src, length);
 
 	/* Ensure that there is no stale cache of the shared memory area. */
-	if (dest == &SCPI_SHMEM->tx_msg)
+	if (dest == &SCPI_SHMEM->rx_msg)
 		data_cache_clean(dest, length);
-	else if (src == &SCPI_SHMEM->rx_msg)
+	else if (src == &SCPI_SHMEM->tx_msg)
 		data_cache_clean(src, length);
 }
 
@@ -401,7 +395,7 @@ scpi_send_request(struct scpi_msg *msg, struct scpi_call_times *times)
 
 	clock_gettime(CLOCK_MONOTONIC, &times->start);
 	/* Copy the message to shared memory. */
-	scpi_copy_msg(&SCPI_SHMEM->tx_msg, msg);
+	scpi_copy_msg(&SCPI_SHMEM->rx_msg, msg);
 	/* Send the message. */
 	clock_gettime(CLOCK_MONOTONIC, &times->send);
 	msgbox_send();
@@ -410,7 +404,7 @@ scpi_send_request(struct scpi_msg *msg, struct scpi_call_times *times)
 	msgbox_receive();
 	clock_gettime(CLOCK_MONOTONIC, &times->receive);
 	/* Copy the message from shared memory to DRAM. */
-	scpi_copy_msg(msg, &SCPI_SHMEM->rx_msg);
+	scpi_copy_msg(msg, &SCPI_SHMEM->tx_msg);
 	/* Acknowledge the response, now that it's safely stored in DRAM. */
 	msgbox_ack();
 	clock_gettime(CLOCK_MONOTONIC, &times->receive_ack);
@@ -444,7 +438,7 @@ scpi_serve_reply(struct scpi_msg *msg, struct scpi_call_times *times,
 	msgbox_receive();
 	clock_gettime(CLOCK_MONOTONIC, &times->receive);
 	/* Copy the message from shared memory to DRAM. */
-	scpi_copy_msg(msg, &SCPI_SHMEM->rx_msg);
+	scpi_copy_msg(msg, &SCPI_SHMEM->tx_msg);
 	/* Acknowledge that the message was received. */
 	msgbox_ack();
 	clock_gettime(CLOCK_MONOTONIC, &times->receive_ack);
@@ -453,7 +447,7 @@ scpi_serve_reply(struct scpi_msg *msg, struct scpi_call_times *times,
 		msg->status = SCPI_OK;
 	else
 		msg->status = SCPI_E_PARAM;
-	scpi_copy_msg(&SCPI_SHMEM->tx_msg, msg);
+	scpi_copy_msg(&SCPI_SHMEM->rx_msg, msg);
 	/* Send the reply message. */
 	clock_gettime(CLOCK_MONOTONIC, &times->send);
 	msgbox_send();

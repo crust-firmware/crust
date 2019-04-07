@@ -124,4 +124,13 @@ struct scpi_msg {
 #endif
 };
 
+/**
+ * The structure representing an SCPI shared memory area, defined by the SCPI
+ * specification.
+ */
+struct scpi_mem {
+	struct scpi_msg tx_msg; /**< Server to client message. */
+	struct scpi_msg rx_msg; /**< Client to server message. */
+};
+
 #endif /* COMMON_SCPI_PROTOCOL_H */
