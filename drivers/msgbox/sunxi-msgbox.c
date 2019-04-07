@@ -109,7 +109,8 @@ sunxi_msgbox_send(struct device *dev, uint8_t chan, uint32_t msg)
 {
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
-	if (!sunxi_msgbox_last_tx_done(dev, chan))
+	/* Reject the message if the FIFO is full. */
+	if (mmio_read_32(dev->regs + FIFO_STAT_REG(chan)) & FIFO_STAT_MASK)
 		return EBUSY;
 	mmio_write_32(dev->regs + TX_MSG_DATA_REG(chan), msg);
 
