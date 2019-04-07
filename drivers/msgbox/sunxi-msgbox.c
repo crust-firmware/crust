@@ -13,7 +13,6 @@
 #include <stddef.h>
 #include <util.h>
 #include <clock/sunxi-ccu.h>
-#include <irqchip/sun4i-intc.h>
 #include <msgbox/sunxi-msgbox.h>
 #include <platform/devices.h>
 
@@ -26,7 +25,9 @@
 #define REMOTE_IRQ_EN_REG   0x0060
 #define REMOTE_IRQ_STAT_REG 0x0070
 #define RX_IRQ(n)           BIT(0 + 2 * (n))
+#define RX_IRQ_MASK         0x5555
 #define TX_IRQ(n)           BIT(1 + 2 * (n))
+#define TX_IRQ_MASK         0xaaaa
 
 #define FIFO_STAT_REG(n)    (0x0100 + 0x4 * (n))
 #define FIFO_STAT_MASK      BIT(0)
@@ -47,7 +48,7 @@ sunxi_msgbox_disable(struct device *dev, uint8_t chan)
 {
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
-	/* Disable the receive interrupt. */
+	/* Disable the receive IRQ. */
 	mmio_clr_32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
 
 	return SUCCESS;
@@ -58,7 +59,7 @@ sunxi_msgbox_enable(struct device *dev, uint8_t chan)
 {
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
-	/* Clear and enable the receive interrupt. */
+	/* Clear and enable the receive IRQ. */
 	mmio_write_32(dev->regs + IRQ_STAT_REG, RX_IRQ(chan));
 	mmio_set_32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
 
@@ -103,23 +104,22 @@ sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan)
 	debug("%s: %u: Unsolicited message 0x%08x", dev->name, chan, msg);
 }
 
-static bool
-sunxi_msgbox_irq(struct device *dev)
+static void
+sunxi_msgbox_poll(struct device *dev)
 {
 	uint32_t status = mmio_read_32(dev->regs + IRQ_STAT_REG);
-	bool handled    = false;
+
+	if (!(status & RX_IRQ_MASK))
+		return;
 
 	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; chan += 2) {
 		if (status & RX_IRQ(chan)) {
-			handled = true;
 			while (sunxi_msgbox_peek_data(dev, chan))
 				sunxi_msgbox_handle_msg(dev, chan);
 			/* Clear the IRQ once the FIFO is empty. */
 			mmio_write_32(dev->regs + IRQ_STAT_REG, RX_IRQ(chan));
 		}
 	}
-
-	return handled;
 }
 
 static int
@@ -140,12 +140,9 @@ sunxi_msgbox_probe(struct device *dev)
 			mmio_read_32(dev->regs + MSG_DATA_REG(chan));
 	}
 
-	/* Disable and clear all interrupts. */
+	/* Disable and clear all IRQ. */
 	mmio_write_32(dev->regs + IRQ_EN_REG, 0);
 	mmio_write_32(dev->regs + IRQ_STAT_REG, GENMASK(15, 0));
-
-	if ((err = dm_setup_irq(dev, sunxi_msgbox_irq)))
-		return err;
 
 	return SUCCESS;
 }
@@ -153,6 +150,7 @@ sunxi_msgbox_probe(struct device *dev)
 static const struct msgbox_driver sunxi_msgbox_driver = {
 	.drv = {
 		.class = DM_CLASS_MSGBOX,
+		.poll  = sunxi_msgbox_poll,
 		.probe = sunxi_msgbox_probe,
 	},
 	.ops = {
@@ -168,8 +166,4 @@ struct device msgbox __device = {
 	.regs   = DEV_MSGBOX,
 	.drv    = &sunxi_msgbox_driver.drv,
 	.clocks = CLOCK_PARENT(ccu, CCU_CLOCK_MSGBOX),
-	.irq    = IRQ_HANDLE {
-		.dev = &r_intc,
-		.irq = IRQ_MSGBOX,
-	},
 };
