@@ -36,12 +36,10 @@ void scpi_create_message(uint8_t client, uint8_t command);
  * any requested actions, and possibly generates a reply message.
  *
  * @param  client The client from which the message was received.
- * @param  rx_msg The received message.
- * @param  tx_msg Memory where the reply message should be placed.
+ * @param  mem    The shared memory area containing the request and reply.
  * @return If the reply message is valid and should be sent to the client.
  */
-bool scpi_handle_cmd(uint8_t client, struct scpi_msg *rx_msg,
-                     struct scpi_msg *tx_msg);
+bool scpi_handle_cmd(uint8_t client, struct scpi_mem *mem);
 
 /**
  * Notify the SCPI framework of a new SCPI command. The SCPI framework parses

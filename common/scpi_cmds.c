@@ -604,9 +604,10 @@ static const struct scpi_cmd scpi_cmds[] = {
  * Generic SCPI command handling function.
  */
 bool
-scpi_handle_cmd(uint8_t client, struct scpi_msg *rx_msg,
-                struct scpi_msg *tx_msg)
+scpi_handle_cmd(uint8_t client, struct scpi_mem *mem)
 {
+	struct scpi_msg *rx_msg = &mem->rx_msg;
+	struct scpi_msg *tx_msg = &mem->tx_msg;
 	const struct scpi_cmd *cmd;
 
 	/* Initialize the response (defaults for unsupported commands). */

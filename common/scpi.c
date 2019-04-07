@@ -49,7 +49,10 @@ scpi_wait_tx_done(uint8_t client)
 }
 
 /**
- * Part 3 of SCPI message handling.
+ * Part 2 of SCPI message handling.
+ *
+ * This function sends an SCPI message back to the client, recording the
+ * timeout for when the client must acknowledge the message.
  *
  * This function releases the shared memory buffer.
  */
@@ -72,7 +75,7 @@ scpi_send_message(uint8_t client)
 }
 
 /**
- * Parts 1 & 2 of SCPI message handling (SCP-initiated messages).
+ * Part 1 of SCPI message handling (SCP-initiated messages).
  *
  * This function writes a message directly to the client's shared memory for
  * transmission. It must disable interrupts to prevent an incoming SCPI command
@@ -98,7 +101,10 @@ scpi_create_message(uint8_t client, uint8_t command)
 }
 
 /**
- * Part 2 of SCPI message handling (received messages).
+ * Part 1 of SCPI message handling (received messages).
+ *
+ * This is the callback from the message box framework; it is called when a new
+ * message is received.
  *
  * Dispatch handling of the message to the appropriate function for each
  * command. The functions for doing so are defined in a separate file to
@@ -106,25 +112,6 @@ scpi_create_message(uint8_t client, uint8_t command)
  *
  * When the command's actions are complete, and a reply message is created,
  * enqueue a function to send the response.
- */
-static void
-scpi_handle_message(uint8_t client)
-{
-	struct scpi_mem *mem = &SCPI_MEM_AREA(client);
-
-	/* Try to ensure the TX buffer is free before writing to it. */
-	scpi_wait_tx_done(client);
-
-	/* Handle the command, and send the reply if one is generated. */
-	if (scpi_handle_cmd(client, &mem->rx_msg, &mem->tx_msg))
-		scpi_send_message(client);
-}
-
-/**
- * Part 1 of SCPI message handling (received messages).
- *
- * This is the callback from the message box framework; it is called when a new
- * message is received.
  */
 void
 scpi_receive_message(uint8_t client, uint32_t msg)
@@ -135,7 +122,12 @@ scpi_receive_message(uint8_t client, uint32_t msg)
 	if (msg != SCPI_VIRTUAL_CHANNEL)
 		return;
 
-	scpi_handle_message(client);
+	/* Try to ensure the TX buffer is free before writing to it. */
+	scpi_wait_tx_done(client);
+
+	/* Handle the command, and send the reply if one is generated. */
+	if (scpi_handle_cmd(client, &SCPI_MEM_AREA(client)))
+		scpi_send_message(client);
 }
 
 void
