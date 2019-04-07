@@ -31,19 +31,19 @@
 #define FLAG_WRITABLE               BIT(1)
 
 /* Simplified version of the message box register definitions. This tool only
- * uses virtual channel 1 (hardware channels 2/3). */
+ * uses virtual channel 0 (hardware channels 0/1). */
 #define MSGBOX_LOCAL_IRQ_STATUS_REG 0x0070
-#define MSGBOX_LOCAL_RX_IRQ         BIT(6)
+#define MSGBOX_LOCAL_RX_IRQ         BIT(2)
 
 #define MSGBOX_ARISC_IRQ_STATUS_REG 0x0050
-#define MSGBOX_ARISC_RX_IRQ         BIT(4)
+#define MSGBOX_ARISC_RX_IRQ         BIT(0)
 
-#define MSGBOX_RX_MSG_STATUS_REG    0x014c
-#define MSGBOX_TX_MSG_STATUS_REG    0x0148
+#define MSGBOX_RX_MSG_STATUS_REG    0x0144
+#define MSGBOX_TX_MSG_STATUS_REG    0x0140
 #define MSGBOX_MSG_STATUS_MASK      GENMASK(2, 0)
 
-#define MSGBOX_RX_MSG_DATA_REG      0x018c
-#define MSGBOX_TX_MSG_DATA_REG      0x0188
+#define MSGBOX_RX_MSG_DATA_REG      0x0184
+#define MSGBOX_TX_MSG_DATA_REG      0x0180
 
 #define SENSOR_CLASS_TEMPERATURE    0
 #define SENSOR_CLASS_COUNT          5
