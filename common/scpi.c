@@ -130,8 +130,7 @@ scpi_send_message(void *param)
  * Parts 1 & 2 of SCPI message handling (SCP-initiated messages).
  */
 int
-scpi_create_message(uint8_t client, uint8_t command, uint32_t *payload,
-                    uint16_t payload_size)
+scpi_create_message(uint8_t client, uint8_t command)
 {
 	struct scpi_buffer *buffer = scpi_alloc_buffer(client);
 
@@ -142,12 +141,8 @@ scpi_create_message(uint8_t client, uint8_t command, uint32_t *payload,
 	/* Create the message header. */
 	buffer->mem.tx_msg.command = command;
 	buffer->mem.tx_msg.sender  = SCPI_SENDER_SCP;
-	buffer->mem.tx_msg.size    = payload_size;
+	buffer->mem.tx_msg.size    = 0;
 	buffer->mem.tx_msg.status  = SCPI_OK;
-
-	/* Copy the payload to the buffer, if there is one. */
-	if (payload_size > 0)
-		memcpy(&buffer->mem.tx_msg, payload, payload_size);
 
 	scpi_send_message(buffer);
 
@@ -246,8 +241,7 @@ scpi_init(void)
 	/* Only send the ready message once. Assume that if the system is
 	 * already booted, some secondary CPUs will have been turned on. */
 	if (css_get_online_cores(0) == 1)
-		scpi_create_message(SCPI_CLIENT_SECURE, SCPI_CMD_SCP_READY,
-		                    NULL, 0);
+		scpi_create_message(SCPI_CLIENT_SECURE, SCPI_CMD_SCP_READY);
 
 	info("SCPI: Initialization complete");
 }
