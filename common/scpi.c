@@ -197,7 +197,7 @@ scpi_receive_message(struct device *dev __unused, uint8_t client, uint32_t msg)
 	struct scpi_buffer *buffer;
 	struct scpi_msg *rx_msg = &SCPI_MEM_AREA(client).rx_msg;
 
-	assert(client == SCPI_CLIENT_NS || client == SCPI_CLIENT_SECURE);
+	assert(client == SCPI_CLIENT_EL2 || client == SCPI_CLIENT_EL3);
 
 	/* Do not try to parse messages sent with a different protocol. */
 	if (msg != SCPI_VIRTUAL_CHANNEL)
@@ -228,20 +228,20 @@ scpi_init(void)
 	int err;
 
 	/* Non-secure client channel. */
-	if ((err = msgbox_enable(&msgbox, SCPI_CLIENT_NS,
+	if ((err = msgbox_enable(&msgbox, SCPI_CLIENT_EL3,
 	                         scpi_receive_message)))
 		panic("SCPI.%u: Error registering handler: %d",
-		      SCPI_CLIENT_NS, err);
+		      SCPI_CLIENT_EL3, err);
 	/* Secure client channel. */
-	if ((err = msgbox_enable(&msgbox, SCPI_CLIENT_SECURE,
+	if ((err = msgbox_enable(&msgbox, SCPI_CLIENT_EL2,
 	                         scpi_receive_message)))
 		panic("SCPI.%u: Error registering handler: %d",
-		      SCPI_CLIENT_SECURE, err);
+		      SCPI_CLIENT_EL2, err);
 
 	/* Only send the ready message once. Assume that if the system is
 	 * already booted, some secondary CPUs will have been turned on. */
 	if (css_get_online_cores(0) == 1)
-		scpi_create_message(SCPI_CLIENT_SECURE, SCPI_CMD_SCP_READY);
+		scpi_create_message(SCPI_CLIENT_EL3, SCPI_CMD_SCP_READY);
 
 	info("SCPI: Initialization complete");
 }

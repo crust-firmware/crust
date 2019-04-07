@@ -621,7 +621,7 @@ scpi_handle_cmd(uint8_t client, struct scpi_msg *rx_msg,
 	cmd = &scpi_cmds[rx_msg->command];
 
 	/* Update the command status and payload based on the message. */
-	if ((cmd->flags & FLAG_SECURE_ONLY) && client != SCPI_CLIENT_SECURE) {
+	if ((cmd->flags & FLAG_SECURE_ONLY) && client != SCPI_CLIENT_EL3) {
 		/* Prevent Linux from sending commands that bypass PSCI. */
 		tx_msg->status = SCPI_E_ACCESS;
 	} else if (rx_msg->size != cmd->rx_size) {
