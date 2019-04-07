@@ -20,137 +20,81 @@
 #include <platform/memory.h>
 #include <platform/time.h>
 
-#define SCPI_BUFFER_MAX  2
-
 #define SCPI_MEM_AREA(n) (__scpi_mem[SCPI_CLIENTS - n - 1])
 
-#define SCPI_TX_TIMEOUT  (100 * REFCLK_KHZ)     /* 100ms */
-
-struct scpi_buffer {
-	struct scpi_mem mem;    /**< Memory for the request/reply messages. */
-	uint8_t         client; /**< Client that should receive the reply. */
-	bool            busy;   /**< Flag telling if this buffer is in use. */
-};
+#define SCPI_TX_TIMEOUT  (10 * REFCLK_KHZ) /* 10ms */
 
 /** The shared memory area, with an address defined in the linker script. */
 extern struct scpi_mem __scpi_mem[SCPI_CLIENTS];
 
-/** Buffers used to hold messages while they are being processed. */
-static struct scpi_buffer scpi_buffers[SCPI_BUFFER_MAX];
+/** The time at which the message sent to this client is considered lost. */
+static uint64_t scpi_timeout[SCPI_CLIENTS];
 
 /**
- * Allocate a temporary buffer for processing an SCPI message.
+ * Wait for a previous transmission to be acknowledged, with a timeout.
  *
- * Because this function is called from both IRQ handlers and process context,
- * it must be locked.
- */
-static struct scpi_buffer *
-scpi_alloc_buffer(uint8_t client)
-{
-	struct scpi_buffer *buffer = NULL;
-	uint32_t flags;
-
-	flags = disable_interrupts();
-	for (size_t i = 0; i < SCPI_BUFFER_MAX; ++i) {
-		if (!scpi_buffers[i].busy) {
-			buffer         = &scpi_buffers[i];
-			buffer->busy   = true;
-			buffer->client = client;
-			break;
-		}
-	}
-	restore_interrupts(flags);
-
-	return buffer;
-}
-
-/**
- * Free a temporary buffer after processing an SCPI message.
- */
-static inline void
-scpi_free_buffer(struct scpi_buffer *buffer)
-{
-	/* Prevent the compiler from reordering the store (the unlock
-	 * operation) before earlier operations. */
-	barrier();
-	buffer->busy = false;
-}
-
-/**
- * Copy an SCPI message to or from shared memory. This function examines the
- * message's payload size field and only copies as many bytes as are necessary.
- * To work around hardware byte swapping, it copies four bytes at a time.
+ * This function acquires the shared memory buffer.
  */
 static void
-scpi_copy_message(struct scpi_msg *dest, struct scpi_msg *src)
+scpi_wait_tx_done(uint8_t client)
 {
-	uint32_t *d = (uint32_t *)dest;
-	uint32_t *s = (uint32_t *)src;
-
-	for (int n = src->size + SCPI_HEADER_SIZE; n > 0; n -= 4)
-		*d++ = *s++;
+	while (wallclock_read() < scpi_timeout[client])
+		if (!msgbox_tx_pending(&msgbox, client))
+			break;
+	/* Prevent reordering shared memory reads before the loop. */
+	barrier();
 }
 
 /**
  * Part 3 of SCPI message handling.
  *
- * Send a prepared message once the shared memory area is free (the AP has
- * acknowledged our last message). Try hard to avoid dropping messages. If
- * waiting for an acknowledgement times out, do other work and try again later.
+ * This function releases the shared memory buffer.
  */
 static void
-scpi_send_message(void *param)
+scpi_send_message(uint8_t client)
 {
-	struct scpi_buffer *buffer = param;
-	uint8_t  client  = buffer->client;
-	uint64_t timeout = wallclock_read() + SCPI_TX_TIMEOUT;
 	int err;
 
-	/* Wait for any previous message to be acknowledged, with a timeout. */
-	while (msgbox_tx_pending(&msgbox, buffer->client)) {
-		if (wallclock_read() >= timeout) {
-			warn("SCPI.%u: Channel busy", client);
-			scpi_free_buffer(buffer);
-			return;
-		}
-	}
+	/* Ensure that the outgoing message is fully written at this point. */
+	barrier();
 
-	/* Copy the prepared reply from the buffer to shared memory. */
-	scpi_copy_message(&SCPI_MEM_AREA(client).tx_msg, &buffer->mem.tx_msg);
+	/* Ensure that the timeout is updated before transmission. */
+	scpi_timeout[client] = wallclock_read() + SCPI_TX_TIMEOUT;
+	barrier();
 
 	/* Notify the client that the message has been sent. */
 	if ((err = msgbox_send(&msgbox, client, SCPI_VIRTUAL_CHANNEL)))
 		error("SCPI.%u: Send error: %d", client, err);
-
-	/* Mark the buffer as no longer in use. */
-	scpi_free_buffer(buffer);
 }
 
 /**
  * Parts 1 & 2 of SCPI message handling (SCP-initiated messages).
+ *
+ * This function writes a message directly to the client's shared memory for
+ * transmission. It must disable interrupts to prevent an incoming SCPI command
+ * from generating a reply that would overwrite this message.
  */
-int
+void
 scpi_create_message(uint8_t client, uint8_t command)
 {
-	struct scpi_buffer *buffer = scpi_alloc_buffer(client);
+	struct scpi_mem *mem = &SCPI_MEM_AREA(client);
+	uint32_t flags       = disable_interrupts();
 
-	/* Ensure there is space to put the created message. */
-	if (buffer == NULL)
-		return EBUSY;
+	/* Try to ensure the TX buffer is free before writing to it. */
+	scpi_wait_tx_done(client);
 
 	/* Create the message header. */
-	buffer->mem.tx_msg.command = command;
-	buffer->mem.tx_msg.sender  = SCPI_SENDER_SCP;
-	buffer->mem.tx_msg.size    = 0;
-	buffer->mem.tx_msg.status  = SCPI_OK;
+	mem->tx_msg.command = command;
+	mem->tx_msg.sender  = SCPI_SENDER_SCP;
+	mem->tx_msg.size    = 0;
+	mem->tx_msg.status  = SCPI_OK;
 
-	scpi_send_message(buffer);
-
-	return SUCCESS;
+	scpi_send_message(client);
+	restore_interrupts(flags);
 }
 
 /**
- * Part 2 of SCPI message handling.
+ * Part 2 of SCPI message handling (received messages).
  *
  * Dispatch handling of the message to the appropriate function for each
  * command. The functions for doing so are defined in a separate file to
@@ -160,66 +104,34 @@ scpi_create_message(uint8_t client, uint8_t command)
  * enqueue a function to send the response.
  */
 static void
-scpi_handle_message(void *param)
+scpi_handle_message(uint8_t client)
 {
-	struct scpi_buffer *buffer = param;
+	struct scpi_mem *mem = &SCPI_MEM_AREA(client);
 
-	assert(buffer->busy);
+	/* Try to ensure the TX buffer is free before writing to it. */
+	scpi_wait_tx_done(client);
 
-	/* Create a reply in tx_msg based on the contents of rx_msg. */
-	if (!scpi_handle_cmd(buffer->client, &buffer->mem.rx_msg,
-	                     &buffer->mem.tx_msg)) {
-		/* If the message does not need a reply, stop processing. */
-		scpi_free_buffer(buffer);
-		return;
-	}
-
-	scpi_send_message(buffer);
+	/* Handle the command, and send the reply if one is generated. */
+	if (scpi_handle_cmd(client, &mem->rx_msg, &mem->tx_msg))
+		scpi_send_message(client);
 }
 
 /**
  * Part 1 of SCPI message handling (received messages).
  *
  * This is the callback from the message box framework; it is called when a new
- * message is received. The SCPI client regains ownership of the shared memory
- * area once the message is acknowledged, which happens when the message box
- * driver clears the pending IRQ, immediately after this function returns.
- * Thus, we must do our best to copy the shared memory area's contents to a
- * safe before returning.
- *
- * Once the message is in a location controlled by the SCP firmware, enqueue a
- * work item to parse, handle, and respond to it. This allows the interrupt to
- * finish as quickly as possible.
+ * message is received.
  */
 static void
 scpi_receive_message(struct device *dev __unused, uint8_t client, uint32_t msg)
 {
-	struct scpi_buffer *buffer;
-	struct scpi_msg *rx_msg = &SCPI_MEM_AREA(client).rx_msg;
-
 	assert(client == SCPI_CLIENT_EL2 || client == SCPI_CLIENT_EL3);
 
 	/* Do not try to parse messages sent with a different protocol. */
 	if (msg != SCPI_VIRTUAL_CHANNEL)
 		return;
 
-	/* Ensure there is a place to put the received message. */
-	buffer = scpi_alloc_buffer(client);
-	if (buffer == NULL) {
-		error("SCPI.%u: No free buffer", client);
-		return;
-	}
-
-	/* Perform minimal validation of the message to optimize copying it.
-	 * No valid message will be too large (because conforming clients will
-	 * honor our advertised maximum payload size), so this guards against a
-	 * malicious client or reserved bits being set. */
-	if (rx_msg->size > SCPI_PAYLOAD_SIZE)
-		rx_msg->size = SCPI_PAYLOAD_SIZE;
-	/* Save the received message outside the shared memory area. */
-	scpi_copy_message(&buffer->mem.rx_msg, rx_msg);
-
-	scpi_handle_message(buffer);
+	scpi_handle_message(client);
 }
 
 void

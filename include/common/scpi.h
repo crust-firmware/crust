@@ -29,7 +29,7 @@ enum {
  * @param client  The client that should receive the message.
  * @param command The command number to include in the message.
  */
-int scpi_create_message(uint8_t client, uint8_t command);
+void scpi_create_message(uint8_t client, uint8_t command);
 
 /**
  * Handle a received SCPI command. This function parses the message, performs
