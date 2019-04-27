@@ -101,8 +101,9 @@ func __udivsi3				# u32 __udivsi3(u32 x, u32 y) {
 	l.add	r11, r11, r11		#		q *= 2;
 4:	l.jr	r9			#	return q;
 	l.nop
-5:	l.jr	r9			# identity:
-	l.ori	r11, r3, 0		#	return x;
+5:	l.ori	r11, r3, 0		# identity:
+	l.jr	r9			#	return x;
+	l.ori	r12, r0, 0		#	r = 0;
 endfunc __udivsi3			# }
 
 func __umodsi3
