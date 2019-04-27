@@ -7,25 +7,25 @@
 
 func __divsi3
 	l.sflts	r3, r0
-	l.sw	-8(r1), r2
+	l.sw	-8(r1), r18
 	l.bnf	1f
-	l.ori	r2, r0, 0
+	l.ori	r18, r0, 0
 	l.sub	r3, r0, r3		# Negate x if it is negative
-	l.addi	r2, r2, 1		# Increment the flag if x is negative
+	l.addi	r18, r18, 1		# Increment the flag if x is negative
 1:	l.sflts	r4, r0
 	l.bnf	2f
 	l.sw	-4(r1), r9
 	l.sub	r4, r0, r4		# Negate y if it is negative
-	l.addi	r2, r2, -1		# Decrement the flag if y is negative
+	l.addi	r18, r18, -1		# Decrement the flag if y is negative
 2:	l.jal	__udivsi3
 	l.addi	r1, r1, -8
-	l.sfne	r2, r0
+	l.sfne	r18, r0
 	l.bnf	3f
 	l.addi	r1, r1, 8
 	l.sub	r11, r0, r11		# Negate q if the flag is nonzero
 3:	l.lwz	r9, -4(r1)
 	l.jr	r9
-	l.lwz	r2, -8(r1)
+	l.lwz	r18, -8(r1)
 endfunc __divsi3
 
 /*
