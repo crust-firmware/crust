@@ -68,8 +68,10 @@ system_suspend(void)
 	uint32_t flags = disable_interrupts();
 
 	/* If the system is already suspended, do nothing. */
-	if (is_suspended)
+	if (is_suspended) {
+		restore_interrupts(flags);
 		return;
+	}
 
 	/* Mark the system as being suspended. */
 	is_suspended = true;
@@ -91,8 +93,10 @@ system_wakeup(void)
 	if (is_off)
 		system_reset();
 	/* If the system is already awake, do nothing. */
-	if (!is_suspended)
+	if (!is_suspended) {
+		restore_interrupts(flags);
 		return;
+	}
 
 	/* Mark the system as no longer being suspended. */
 	is_suspended = false;
