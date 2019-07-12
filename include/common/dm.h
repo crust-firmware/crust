@@ -58,11 +58,6 @@ struct device {
 	const uint8_t              supply;
 	/** Flags describing this device's state. */
 	uint8_t                    flags;
-	/** The number of subdevices (channels, etc.) within this device.
-	 * Subdevice-aware drivers should update this in the probe function. */
-	uint8_t                    subdev_count;
-	/** The index within the class of this device's first subdevice. */
-	uint8_t                    subdev_index;
 };
 
 struct device_handle {
@@ -94,14 +89,6 @@ struct driver {
 void device_probe(struct device *dev);
 
 /**
- * Get the total number of subdevices (channels, etc.) available in a class.
- *
- * @param class One of the enumerated driver classes.
- * @return      The number of available subdevices.
- */
-uint8_t dm_count_subdevs_by_class(uint32_t class);
-
-/**
  * Get the first device of a given class. This function only considers
  * successfully-probed devices.
  *
@@ -121,28 +108,6 @@ struct device *dm_first_dev_by_class(uint32_t class);
  *               if no device exists, and the handle contents are undefined.
  */
 int dm_next_dev_by_class(struct device_handle *handle);
-
-/**
- * Get the nth subdevice of a given class.
- *
- * @param handle Pointer to a handle (existing contents are ignored).
- * @param class  One of the enumerated driver classes.
- * @param index  The zero-based index of the subdevice within the class.
- * @return       Zero if a device was found and the handle was updated. Error
- *               if no device exists, and the handle contents are undefined.
- */
-int dm_get_subdev_by_index(struct device_handle *handle, uint8_t class,
-                           uint8_t index);
-
-/**
- * Get the next subdevice of the same class as the given subdevice.
- *
- * @param handle Pointer to a handle initialized with DEVICE_HANDLE_INIT or a
- *               previous successful call to a driver model getter or iterator.
- * @return       Zero if a device was found and the handle was updated. Error
- *               if no device exists, and the handle contents are undefined.
- */
-int dm_next_subdev(struct device_handle *handle);
 
 /**
  * Initialize the driver model, probing all devices in topological order.

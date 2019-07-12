@@ -15,8 +15,6 @@
 #include <stdint.h>
 #include <string.h>
 
-static uint8_t total_subdevs[DM_CLASS_COUNT];
-
 static inline bool
 device_is_running(struct device *dev)
 {
@@ -38,28 +36,13 @@ device_probe(struct device *dev)
 	if (dev->supplydev)
 		device_probe(dev->supplydev);
 
-	/* Tell the device the index of its first subdevice. */
-	dev->subdev_index = total_subdevs[dev->drv->class];
-
 	/* Probe the device itself, and report any errors. */
 	if ((err = dev->drv->probe(dev)))
 		panic("dm: Failed to probe %s (%d)", dev->name, err);
 
 	dev->flags |= DEVICE_FLAG_RUNNING;
-	/* If the driver's probe function did not provide the number of
-	 * subdevices, assume the default number of 1. */
-	if (dev->subdev_count == 0)
-		dev->subdev_count = 1;
-	/* Update the total number of subdevices for this class. */
-	total_subdevs[dev->drv->class] += dev->subdev_count;
 
 	debug("dm: Probed %s", dev->name);
-}
-
-uint8_t
-dm_count_subdevs_by_class(uint32_t class)
-{
-	return total_subdevs[class];
 }
 
 struct device *
@@ -86,38 +69,6 @@ dm_next_dev_by_class(struct device_handle *handle)
 	}
 
 	return ENODEV;
-}
-
-int
-dm_get_subdev_by_index(struct device_handle *handle, uint8_t class,
-                       uint8_t index)
-{
-	*handle = DEVICE_HANDLE_INIT(class);
-
-	while (dm_next_dev_by_class(handle) == SUCCESS) {
-		uint8_t start = handle->dev->subdev_index;
-		uint8_t end   = start + handle->dev->subdev_count;
-
-		if (index >= start && index < end) {
-			handle->id = index - start;
-			return SUCCESS;
-		}
-	}
-
-	return ENODEV;
-}
-
-int
-dm_next_subdev(struct device_handle *handle)
-{
-	/* Case when the given subdevice is not the last in its controller. */
-	if (handle->dev && ++handle->id < handle->dev->subdev_count)
-		return SUCCESS;
-
-	/* Otherwise, it is the first subdevice in the next device. */
-	handle->id = 0;
-
-	return dm_next_dev_by_class(handle);
 }
 
 void

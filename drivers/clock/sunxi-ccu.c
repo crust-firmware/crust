@@ -337,10 +337,9 @@ static struct sunxi_ccu_clock ccu_clocks[CCU_CLOCK_COUNT] = {
 
 struct sunxi_ccu ccu = {
 	.dev = {
-		.name         = "ccu",
-		.regs         = DEV_CCU,
-		.drv          = &sunxi_ccu_driver.drv,
-		.subdev_count = CCU_CLOCK_COUNT,
+		.name = "ccu",
+		.regs = DEV_CCU,
+		.drv  = &sunxi_ccu_driver.drv,
 	},
 	.clocks = ccu_clocks,
 };
@@ -436,10 +435,9 @@ static struct sunxi_ccu_clock r_ccu_clocks[R_CCU_CLOCK_COUNT] = {
 
 struct sunxi_ccu r_ccu = {
 	.dev = {
-		.name         = "r_ccu",
-		.regs         = DEV_R_PRCM,
-		.drv          = &sunxi_ccu_driver.drv,
-		.subdev_count = R_CCU_CLOCK_COUNT,
+		.name = "r_ccu",
+		.regs = DEV_R_PRCM,
+		.drv  = &sunxi_ccu_driver.drv,
 	},
 	.clocks = r_ccu_clocks,
 };

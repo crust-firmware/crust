@@ -499,8 +499,6 @@ axp_regulator_probe(struct device *dev)
 	if ((err = axp803_init_once(dev)))
 		return err;
 
-	dev->subdev_count = AXP803_REGL_COUNT;
-
 	return SUCCESS;
 }
 
