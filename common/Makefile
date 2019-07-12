@@ -12,7 +12,6 @@ obj-y += devices.o
 obj-y += dm.o
 obj-y += exception.o
 obj-y += main.o
-obj-y += monitoring.o
 obj-y += panic.o
 obj-y += scpi.o
 obj-y += scpi_cmds.o

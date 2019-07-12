@@ -6,7 +6,6 @@
 #include <compiler.h>
 #include <console.h>
 #include <debug.h>
-#include <monitoring.h>
 #include <scpi.h>
 #include <stdbool.h>
 #include <wallclock.h>
@@ -43,7 +42,6 @@ main(void)
 			next_tick += REFCLK_HZ;
 
 			/* Perform 1Hz operations. */
-			poll_sensors();
 			watchdog_restart(&r_twd);
 		}
 	}
