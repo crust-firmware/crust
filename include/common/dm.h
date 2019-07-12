@@ -86,11 +86,11 @@ struct device_handle {
 
 struct driver {
 	/** One of the enumerated driver classes. */
-	const uint32_t class;
+	uint32_t class;
 	/** A function called to check for new work or state changes. */
-	void           (*poll)(struct device *dev);
+	void     (*poll)(struct device *dev);
 	/** A function called to detect and initialize new devices. */
-	int            (*probe)(struct device *dev);
+	int      (*probe)(struct device *dev);
 };
 
 /**
