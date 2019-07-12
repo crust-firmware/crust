@@ -70,6 +70,23 @@ clock_enable(struct device *dev, uint8_t id)
 }
 
 int
+clock_get(struct clock_handle *clock)
+{
+	struct device *dev = clock->dev;
+	uint8_t id         = clock->id;
+	int err;
+
+	/* Ensure the controller's driver is loaded. */
+	device_probe(dev);
+
+	/* Enable the clock. */
+	if ((err = clock_enable(dev, id)))
+		return err;
+
+	return SUCCESS;
+}
+
+int
 clock_get_state(struct device *dev, uint8_t id)
 {
 	const struct clock_driver_ops *ops = CLOCK_OPS(dev);

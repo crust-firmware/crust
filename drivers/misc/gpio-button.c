@@ -25,7 +25,7 @@ gpio_button_probe(struct device *dev)
 {
 	int err;
 
-	if ((err = dm_setup_pins(dev, 1)))
+	if ((err = gpio_get(&dev->pins[0])))
 		return err;
 
 	return irq_get(&container_of(dev, struct gpio_button, dev)->irq);

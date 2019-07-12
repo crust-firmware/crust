@@ -110,11 +110,13 @@ sunxi_rsb_probe(struct device *dev)
 {
 	int err;
 
-	if ((err = dm_setup_clocks(dev, 1)))
+	if ((err = clock_get(&dev->clocks[0])))
 		return err;
 
-	if ((err = dm_setup_pins(dev, RSB_NUM_PINS)))
-		return err;
+	for (int i = 0; i < RSB_NUM_PINS; ++i) {
+		if ((err = gpio_get(&dev->pins[i])))
+			return err;
+	}
 
 	mmio_write_32(dev->regs + RSB_CTRL_REG, BIT(0));
 	mmio_pollz_32(dev->regs + RSB_CTRL_REG, BIT(0));

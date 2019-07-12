@@ -120,20 +120,4 @@ void dm_init(void);
  */
 void dm_poll(void);
 
-/**
- * Set up the clocks specified for a device.
- *
- * @param dev        The device referencing the clocks to initialize.
- * @param num_clocks The number of clocks utilized by the device.
- */
-int dm_setup_clocks(struct device *dev, uint8_t num_clocks);
-
-/**
- * Set the mode of the GPIO pins specified for a device.
- *
- * @param dev       The device referencing the GPIO pins to initialize.
- * @param num_pins  The number of pins utilized by the device.
- */
-int dm_setup_pins(struct device *dev, uint8_t num_pins);
-
 #endif /* COMMON_DM_H */

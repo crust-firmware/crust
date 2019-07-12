@@ -104,6 +104,13 @@ int clock_disable(struct device *dev, uint8_t id);
 int clock_enable(struct device *dev, uint8_t id);
 
 /**
+ * Get a reference to a clock and its controller device, and enable the clock.
+ *
+ * @param clock A handle for the clock.
+ */
+int clock_get(struct clock_handle *clock);
+
+/**
  * Get generic information about a clock.
  *
  * This function has no defined errors.

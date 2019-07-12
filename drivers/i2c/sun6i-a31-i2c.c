@@ -164,12 +164,14 @@ sun6i_a31_i2c_probe(struct device *dev)
 {
 	int err;
 
-	if ((err = dm_setup_clocks(dev, 1)))
+	if ((err = clock_get(&dev->clocks[0])))
 		return err;
 
 	/* Set port L pins 0-1 to I²C. */
-	if ((err = dm_setup_pins(dev, I2C_NUM_PINS)))
-		return err;
+	for (int i = 0; i < I2C_NUM_PINS; ++i) {
+		if ((err = gpio_get(&dev->pins[i])))
+			return err;
+	}
 
 	/* Set I2C bus clock divider for 400 KHz operation. */
 	mmio_write_32(dev->regs + I2C_CCR_REG, 0x00000011);

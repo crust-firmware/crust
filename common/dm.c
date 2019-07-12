@@ -3,17 +3,13 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <clock.h>
 #include <debug.h>
 #include <devices.h>
 #include <dm.h>
 #include <error.h>
-#include <gpio.h>
-#include <irq.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 
 static inline bool
 device_is_running(struct device *dev)
@@ -90,47 +86,4 @@ dm_poll(void)
 		if (poll)
 			poll(dev);
 	}
-}
-
-int
-dm_setup_clocks(struct device *dev, uint8_t num_clocks)
-{
-	struct clock_handle *clocks = dev->clocks;
-	int err;
-
-	for (uint8_t i = 0; i < num_clocks; ++i) {
-		struct device *clockdev = clocks[i].dev;
-		uint8_t id = clocks[i].id;
-
-		/* Probe to ensure clock controller's driver is loaded. */
-		device_probe(clockdev);
-
-		/* Enable each clock used by the device. */
-		if ((err = clock_enable(clockdev, id)))
-			return err;
-	}
-
-	return SUCCESS;
-}
-
-int
-dm_setup_pins(struct device *dev, uint8_t num_pins)
-{
-	struct gpio_handle *pins = dev->pins;
-	int err;
-
-	for (uint8_t i = 0; i < num_pins; ++i) {
-		struct device *gpiodev = pins[i].dev;
-		uint8_t id   = pins[i].pin;
-		uint8_t mode = pins[i].mode;
-
-		/* Probe to ensure GPIO controller's driver is loaded. */
-		device_probe(gpiodev);
-
-		/* Set pin mode and return if error occurs. */
-		if ((err = gpio_set_mode(gpiodev, id, mode)))
-			return err;
-	}
-
-	return SUCCESS;
 }

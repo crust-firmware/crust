@@ -131,7 +131,7 @@ sunxi_msgbox_probe(struct device *dev)
 {
 	int err;
 
-	if ((err = dm_setup_clocks(dev, 1)))
+	if ((err = clock_get(&dev->clocks[0])))
 		return err;
 
 	/* Set even channels ARM -> SCP and odd channels SCP -> ARM. */

@@ -74,7 +74,7 @@ sunxi_gpio_probe(struct device *dev)
 {
 	int err;
 
-	if ((err = dm_setup_clocks(dev, 1)))
+	if ((err = clock_get(&dev->clocks[0])))
 		return err;
 
 	return SUCCESS;

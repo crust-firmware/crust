@@ -34,6 +34,13 @@ struct gpio_handle {
 };
 
 /**
+ * Get a reference to a pin and its controller device, and set the pin's mode.
+ *
+ * @param gpio A handle for the GPIO pin.
+ */
+int gpio_get(struct gpio_handle *gpio);
+
+/**
  * Get the value of a pin.
  *
  * @param dev   The GPIO controller.
