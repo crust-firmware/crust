@@ -11,10 +11,12 @@
 #include <misc/gpio-button.h>
 #include <platform/devices.h>
 
-static void
-gpio_button_irq(void *param __unused)
+static bool
+gpio_button_irq(struct device *dev __unused)
 {
 	system_wakeup();
+
+	return true;
 }
 
 static int
