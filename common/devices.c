@@ -10,8 +10,6 @@
 #include <msgbox/sunxi-msgbox.h>
 #include <pmic/axp803.h>
 #include <pmic/dummy.h>
-#include <regulator/axp803.h>
-#include <regulator/sy8106a.h>
 #include <watchdog/sunxi-twd.h>
 
 /* format off -- IF_ENABLED_INIT includes a hidden comma */
@@ -34,10 +32,6 @@ struct device *const device_list[] = {
 	/* SCPI clock providers */
 	&ccu.dev,
 	&r_ccu.dev,
-
-	/* SCPI power supply providers */
-	IF_ENABLED_INIT(CONFIG_REGULATOR_AXP803, &axp803_regulator)
-	IF_ENABLED_INIT(CONFIG_REGULATOR_SY8106A, &sy8106a)
 
 	/* Sentinel */
 	0,
