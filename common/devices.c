@@ -4,7 +4,6 @@
  */
 
 #include <kconfig.h>
-#include <dvfs/cpux.h>
 #include <misc/gpio-button.h>
 #include <msgbox/sunxi-msgbox.h>
 #include <pmic/axp803.h>
@@ -24,9 +23,6 @@ struct device *const device_list[] = {
 
 	/* Wakeup sources */
 	IF_ENABLED_INIT(CONFIG_GPIO_BUTTON, &power_button.dev)
-
-	/* SCPI DVFS providers */
-	IF_ENABLED_INIT(CONFIG_DVFS, &cpux.dev)
 
 	/* Sentinel */
 	0,

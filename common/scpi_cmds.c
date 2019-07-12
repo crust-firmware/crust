@@ -6,9 +6,7 @@
 #include <css.h>
 #include <debug.h>
 #include <dm.h>
-#include <dvfs.h>
 #include <error.h>
-#include <monitoring.h>
 #include <scpi.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -78,11 +76,7 @@ static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
 	BIT(SCPI_CMD_GET_SCP_CAP) |
 	BIT(SCPI_CMD_SET_CSS_PWR) |
 	BIT(SCPI_CMD_GET_CSS_PWR) |
-	BIT(SCPI_CMD_SET_SYS_PWR) |
-	BIT(SCPI_CMD_GET_DVFS_CAP) |
-	BIT(SCPI_CMD_GET_DVFS_INFO) |
-	BIT(SCPI_CMD_SET_DVFS) |
-	BIT(SCPI_CMD_GET_DVFS),
+	BIT(SCPI_CMD_SET_SYS_PWR),
 	/* Commands enabled 1. */
 	0,
 	/* Commands enabled 2. */
@@ -186,87 +180,6 @@ scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
 }
 
 /*
- * Handler/payload data for SCPI_CMD_GET_DVFS_CAP: Get DVFS capability.
- */
-static int
-scpi_cmd_get_dvfs_cap_handler(uint32_t *rx_payload __unused,
-                              uint32_t *tx_payload, uint16_t *tx_size)
-{
-	tx_payload[0] = dm_count_subdevs_by_class(DM_CLASS_DVFS);
-	*tx_size      = 1;
-
-	return SUCCESS;
-}
-
-/*
- * Handler/payload data for SCPI_CMD_GET_DVFS_INFO: Get DVFS info.
- */
-static int
-scpi_cmd_get_dvfs_info_handler(uint32_t *rx_payload, uint32_t *tx_payload,
-                               uint16_t *tx_size)
-{
-	struct device_handle dvfs;
-	struct dvfs_info *info;
-	uint8_t index = rx_payload[0];
-	int err;
-
-	if ((err = dm_get_subdev_by_index(&dvfs, DM_CLASS_DVFS, index)))
-		return err;
-
-	info = dvfs_get_info(dvfs.dev, dvfs.id);
-	tx_payload[0] = index | info->opp_count << 8 | info->latency << 16;
-	for (uint8_t i = 0; i < info->opp_count; ++i) {
-		tx_payload[2 * i + 1] = info->opp_table[i].rate * 1000000;
-		tx_payload[2 * i + 2] = info->opp_table[i].voltage;
-	}
-	*tx_size = sizeof(uint32_t) * (2 * info->opp_count + 1);
-
-	assert(*tx_size <= SCPI_PAYLOAD_SIZE);
-
-	return SUCCESS;
-}
-
-/*
- * Handler/payload data for SCPI_CMD_SET_DVFS: Set DVFS.
- */
-static int
-scpi_cmd_set_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload __unused,
-                          uint16_t *tx_size __unused)
-{
-	struct device_handle dvfs;
-	uint8_t index = rx_payload[0];
-	uint8_t opp   = rx_payload[0] >> 8;
-	int err;
-
-	if ((err = dm_get_subdev_by_index(&dvfs, DM_CLASS_DVFS, index)))
-		return err;
-	if (system_is_throttled())
-		return EPERM;
-
-	return dvfs_set_opp(dvfs.dev, dvfs.id, opp);
-}
-
-/*
- * Handler/payload data for SCPI_CMD_GET_DVFS: Get DVFS.
- */
-static int
-scpi_cmd_get_dvfs_handler(uint32_t *rx_payload, uint32_t *tx_payload,
-                          uint16_t *tx_size)
-{
-	struct device_handle dvfs;
-	uint8_t index = rx_payload[0];
-	int err;
-
-	if ((err = dm_get_subdev_by_index(&dvfs, DM_CLASS_DVFS, index)))
-		return err;
-
-	tx_payload[0] = dvfs_get_opp(dvfs.dev, dvfs.id);
-	*tx_size      = sizeof(uint8_t);
-
-	return SUCCESS;
-}
-
-/*
  * The list of supported SCPI commands.
  */
 static const struct scpi_cmd scpi_cmds[] = {
@@ -289,21 +202,6 @@ static const struct scpi_cmd scpi_cmds[] = {
 		.handler = scpi_cmd_set_sys_power_handler,
 		.rx_size = sizeof(uint8_t),
 		.flags   = FLAG_SECURE_ONLY,
-	},
-	[SCPI_CMD_GET_DVFS_CAP] = {
-		.handler = scpi_cmd_get_dvfs_cap_handler,
-	},
-	[SCPI_CMD_GET_DVFS_INFO] = {
-		.handler = scpi_cmd_get_dvfs_info_handler,
-		.rx_size = sizeof(uint8_t),
-	},
-	[SCPI_CMD_SET_DVFS] = {
-		.handler = scpi_cmd_set_dvfs_handler,
-		.rx_size = sizeof(uint16_t),
-	},
-	[SCPI_CMD_GET_DVFS] = {
-		.handler = scpi_cmd_get_dvfs_handler,
-		.rx_size = sizeof(uint8_t),
 	},
 };
 
