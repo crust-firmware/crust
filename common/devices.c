@@ -4,7 +4,6 @@
  */
 
 #include <kconfig.h>
-#include <clock/sunxi-ccu.h>
 #include <dvfs/cpux.h>
 #include <misc/gpio-button.h>
 #include <msgbox/sunxi-msgbox.h>
@@ -28,10 +27,6 @@ struct device *const device_list[] = {
 
 	/* SCPI DVFS providers */
 	IF_ENABLED_INIT(CONFIG_DVFS, &cpux.dev)
-
-	/* SCPI clock providers */
-	&ccu.dev,
-	&r_ccu.dev,
 
 	/* Sentinel */
 	0,
