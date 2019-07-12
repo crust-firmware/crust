@@ -12,7 +12,6 @@
 #include <pmic/dummy.h>
 #include <regulator/axp803.h>
 #include <regulator/sy8106a.h>
-#include <sensor/sun8i-thermal.h>
 #include <watchdog/sunxi-twd.h>
 
 /* format off -- IF_ENABLED_INIT includes a hidden comma */
@@ -39,9 +38,6 @@ struct device *const device_list[] = {
 	/* SCPI power supply providers */
 	IF_ENABLED_INIT(CONFIG_REGULATOR_AXP803, &axp803_regulator)
 	IF_ENABLED_INIT(CONFIG_REGULATOR_SY8106A, &sy8106a)
-
-	/* SCPI sensor providers */
-	&ths,
 
 	/* Sentinel */
 	0,
