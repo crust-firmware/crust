@@ -108,13 +108,14 @@ sunxi_rsb_write(struct device *dev, uint8_t addr, uint8_t reg, uint8_t data)
 static int
 sunxi_rsb_probe(struct device *dev)
 {
+	struct sunxi_rsb *this = container_of(dev, struct sunxi_rsb, dev);
 	int err;
 
 	if ((err = clock_get(&dev->clocks[0])))
 		return err;
 
 	for (int i = 0; i < RSB_NUM_PINS; ++i) {
-		if ((err = gpio_get(&dev->pins[i])))
+		if ((err = gpio_get(&this->pins[i])))
 			return err;
 	}
 
@@ -140,13 +141,23 @@ static const struct rsb_driver sunxi_rsb_driver = {
 	},
 };
 
-struct device r_rsb = {
-	.name   = "r_rsb",
-	.regs   = DEV_R_RSB,
-	.drv    = &sunxi_rsb_driver.drv,
-	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_RSB),
-	.pins   = GPIO_PINS(RSB_NUM_PINS) {
-		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 2 },
-		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 2 },
+struct sunxi_rsb r_rsb = {
+	.dev = {
+		.name   = "r_rsb",
+		.regs   = DEV_R_RSB,
+		.drv    = &sunxi_rsb_driver.drv,
+		.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_RSB),
+	},
+	.pins = {
+		{
+			.dev  = &r_pio,
+			.pin  = SUNXI_GPIO_PIN(0, 0),
+			.mode = 2,
+		},
+		{
+			.dev  = &r_pio,
+			.pin  = SUNXI_GPIO_PIN(0, 1),
+			.mode = 2,
+		},
 	},
 };

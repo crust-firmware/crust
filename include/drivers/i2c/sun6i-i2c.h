@@ -6,8 +6,14 @@
 #ifndef DRIVERS_I2C_SUN6I_I2C_H
 #define DRIVERS_I2C_SUN6I_I2C_H
 
+#include <gpio.h>
 #include <i2c.h>
 
-extern struct device r_i2c;
+struct sun6i_i2c {
+	struct device      dev;
+	struct gpio_handle pins[I2C_NUM_PINS];
+};
+
+extern struct sun6i_i2c r_i2c;
 
 #endif /* DRIVERS_I2C_SUN6I_I2C_H */

@@ -139,7 +139,7 @@ struct axp803_pmic axp803_pmic = {
 	.dev = {
 		.name = "axp803-pmic",
 		.drv  = &axp803_pmic_driver.drv,
-		.bus  = &r_rsb,
+		.bus  = &r_rsb.dev,
 		.addr = AXP803_RSB_RTADDR,
 	},
 	.irq = {

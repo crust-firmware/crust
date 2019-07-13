@@ -7,6 +7,7 @@
 #include <dm.h>
 #include <error.h>
 #include <i2c.h>
+#include <kconfig.h>
 #include <mmio.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -162,6 +163,7 @@ sun6i_i2c_write(struct device *dev, uint8_t data)
 static int
 sun6i_i2c_probe(struct device *dev)
 {
+	struct sun6i_i2c *this = container_of(dev, struct sun6i_i2c, dev);
 	int err;
 
 	if ((err = clock_get(&dev->clocks[0])))
@@ -169,7 +171,7 @@ sun6i_i2c_probe(struct device *dev)
 
 	/* Set port L pins 0-1 to I²C. */
 	for (int i = 0; i < I2C_NUM_PINS; ++i) {
-		if ((err = gpio_get(&dev->pins[i])))
+		if ((err = gpio_get(&this->pins[i])))
 			return err;
 	}
 
@@ -206,18 +208,23 @@ static const struct i2c_driver sun6i_i2c_driver = {
 	},
 };
 
-struct device r_i2c = {
-	.name   = "r_i2c",
-	.regs   = DEV_R_I2C,
-	.drv    = &sun6i_i2c_driver.drv,
-	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_I2C),
-	.pins   = GPIO_PINS(I2C_NUM_PINS) {
-#if CONFIG_SOC_A64
-		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 3 },
-		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 3 },
-#else
-		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 2 },
-		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 2 },
-#endif
+struct sun6i_i2c r_i2c = {
+	.dev = {
+		.name   = "r_i2c",
+		.regs   = DEV_R_I2C,
+		.drv    = &sun6i_i2c_driver.drv,
+		.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_I2C),
+	},
+	.pins = {
+		{
+			.dev  = &r_pio,
+			.pin  = SUNXI_GPIO_PIN(0, 0),
+			.mode = IS_ENABLED(CONFIG_SOC_A64) ? 3 : 2,
+		},
+		{
+			.dev  = &r_pio,
+			.pin  = SUNXI_GPIO_PIN(0, 1),
+			.mode = IS_ENABLED(CONFIG_SOC_A64) ? 3 : 2,
+		},
 	},
 };

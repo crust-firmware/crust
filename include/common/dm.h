@@ -28,8 +28,6 @@ struct device {
 	struct device *const       bus;
 	/** The clocks utilized by this device. */
 	struct clock_handle *const clocks;
-	/** The GPIO pins utilized by this device. */
-	struct gpio_handle *const  pins;
 	/** A bus-specific address/port (if this device is on a bus). */
 	const uint8_t              addr;
 	/** Flags describing this device's state. */

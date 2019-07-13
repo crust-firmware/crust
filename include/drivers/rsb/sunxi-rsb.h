@@ -6,8 +6,14 @@
 #ifndef DRIVERS_RSB_SUNXI_RSB_H
 #define DRIVERS_RSB_SUNXI_RSB_H
 
+#include <gpio.h>
 #include <rsb.h>
 
-extern struct device r_rsb;
+struct sunxi_rsb {
+	struct device      dev;
+	struct gpio_handle pins[RSB_NUM_PINS];
+};
+
+extern struct sunxi_rsb r_rsb;
 
 #endif /* DRIVERS_RSB_SUNXI_RSB_H */

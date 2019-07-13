@@ -7,11 +7,13 @@
 #define DRIVERS_MISC_GPIO_BUTTON_H
 
 #include <dm.h>
+#include <gpio.h>
 #include <irq.h>
 
 struct gpio_button {
-	struct device     dev;
-	struct irq_handle irq;
+	struct device      dev;
+	struct irq_handle  irq;
+	struct gpio_handle pin;
 };
 
 extern struct gpio_button power_button;

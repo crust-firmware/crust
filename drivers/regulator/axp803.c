@@ -518,6 +518,6 @@ static const struct regulator_driver axp803_regulator_driver = {
 struct device axp803_regulator = {
 	.name = "axp803-regulator",
 	.drv  = &axp803_regulator_driver.drv,
-	.bus  = &r_rsb,
+	.bus  = &r_rsb.dev,
 	.addr = AXP803_RSB_RTADDR,
 };
