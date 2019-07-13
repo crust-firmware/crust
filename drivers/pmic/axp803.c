@@ -125,7 +125,6 @@ axp803_pmic_probe(struct device *dev)
 
 static const struct pmic_driver axp803_pmic_driver = {
 	.drv = {
-		.class = DM_CLASS_PMIC,
 		.probe = axp803_pmic_probe,
 	},
 	.ops = {

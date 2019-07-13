@@ -153,7 +153,6 @@ sunxi_msgbox_probe(struct device *dev)
 
 static const struct msgbox_driver sunxi_msgbox_driver = {
 	.drv = {
-		.class = DM_CLASS_MSGBOX,
 		.poll  = sunxi_msgbox_poll,
 		.probe = sunxi_msgbox_probe,
 	},

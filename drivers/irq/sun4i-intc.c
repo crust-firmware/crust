@@ -76,7 +76,6 @@ sun4i_intc_probe(struct device *dev)
 
 static const struct irq_driver sun4i_intc_driver = {
 	.drv = {
-		.class = DM_CLASS_IRQ,
 		.probe = sun4i_intc_probe,
 	},
 	.ops = {

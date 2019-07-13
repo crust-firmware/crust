@@ -112,7 +112,6 @@ sunxi_gpio_irqchip_probe(struct device *dev)
 
 static const struct irq_driver sunxi_gpio_irqchip_driver = {
 	.drv = {
-		.class = DM_CLASS_IRQ,
 		.probe = sunxi_gpio_irqchip_probe,
 	},
 	.ops = {

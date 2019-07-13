@@ -130,7 +130,6 @@ sunxi_rsb_probe(struct device *dev)
 
 static const struct rsb_driver sunxi_rsb_driver = {
 	.drv = {
-		.class = DM_CLASS_RSB,
 		.probe = sunxi_rsb_probe,
 	},
 	.ops = {

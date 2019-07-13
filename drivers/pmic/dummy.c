@@ -39,7 +39,6 @@ dummy_pmic_probe(struct device *dev __unused)
 
 static const struct pmic_driver dummy_pmic_driver = {
 	.drv = {
-		.class = DM_CLASS_PMIC,
 		.probe = dummy_pmic_probe,
 	},
 	.ops = {

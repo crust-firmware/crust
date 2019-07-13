@@ -15,20 +15,6 @@ enum {
 	DEVICE_FLAG_RUNNING = BIT(0),
 };
 
-enum {
-	DM_CLASS_NONE = 0,
-	DM_CLASS_CLOCK,
-	DM_CLASS_GPIO,
-	DM_CLASS_I2C,
-	DM_CLASS_IRQ,
-	DM_CLASS_MSGBOX,
-	DM_CLASS_PMIC,
-	DM_CLASS_REGULATOR,
-	DM_CLASS_RSB,
-	DM_CLASS_WATCHDOG,
-	DM_CLASS_COUNT,
-};
-
 struct driver;
 
 struct device {
@@ -55,12 +41,10 @@ struct device {
 };
 
 struct driver {
-	/** One of the enumerated driver classes. */
-	uint32_t class;
 	/** A function called to check for new work or state changes. */
-	void     (*poll)(struct device *dev);
+	void (*poll)(struct device *dev);
 	/** A function called to detect and initialize new devices. */
-	int      (*probe)(struct device *dev);
+	int  (*probe)(struct device *dev);
 };
 
 /**

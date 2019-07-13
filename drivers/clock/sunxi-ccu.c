@@ -289,7 +289,6 @@ sunxi_ccu_probe(struct device *dev __unused)
 
 static const struct clock_driver sunxi_ccu_driver = {
 	.drv = {
-		.class = DM_CLASS_CLOCK,
 		.probe = sunxi_ccu_probe,
 	},
 	.ops = {

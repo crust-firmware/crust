@@ -32,7 +32,6 @@ gpio_button_probe(struct device *dev)
 }
 
 static const struct driver gpio_button_driver = {
-	.class = DM_CLASS_NONE,
 	.probe = gpio_button_probe,
 };
 

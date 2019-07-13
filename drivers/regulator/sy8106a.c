@@ -103,7 +103,6 @@ sy8106a_probe(struct device *dev)
 
 static const struct regulator_driver sy8106a_driver = {
 	.drv = {
-		.class = DM_CLASS_REGULATOR,
 		.probe = sy8106a_probe,
 	},
 	.ops = {
