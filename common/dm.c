@@ -18,8 +18,6 @@ device_probe(struct device *dev)
 	/* Probe all devices this device depends on. */
 	if (dev->bus)
 		device_probe(dev->bus);
-	if (dev->supplydev)
-		device_probe(dev->supplydev);
 
 	/* Probe the device itself, and report any errors. */
 	if ((err = dev->drv->probe(dev)))

@@ -30,12 +30,8 @@ struct device {
 	struct clock_handle *const clocks;
 	/** The GPIO pins utilized by this device. */
 	struct gpio_handle *const  pins;
-	/** The controller for this device's power supply (regulator). */
-	struct device *const       supplydev;
 	/** A bus-specific address/port (if this device is on a bus). */
 	const uint8_t              addr;
-	/** A supplydev-specific power supply identifier. */
-	const uint8_t              supply;
 	/** Flags describing this device's state. */
 	uint8_t                    flags;
 };
