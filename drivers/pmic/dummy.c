@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <debug.h>
+#include <compiler.h>
 #include <dm.h>
 #include <error.h>
 #include <pmic.h>
@@ -14,6 +14,9 @@
 static int
 dummy_pmic_power_off(struct device *dev)
 {
+	if (!dev->supplydev)
+		return SUCCESS;
+
 	/* Turn CPU power off. */
 	return regulator_disable(dev->supplydev, dev->supply);
 }
@@ -21,16 +24,16 @@ dummy_pmic_power_off(struct device *dev)
 static int
 dummy_pmic_power_on(struct device *dev)
 {
+	if (!dev->supplydev)
+		return SUCCESS;
+
 	/* Turn CPU power on. */
 	return regulator_enable(dev->supplydev, dev->supply);
 }
 
 static int
-dummy_pmic_probe(struct device *dev)
+dummy_pmic_probe(struct device *dev __unused)
 {
-	if (dev->supplydev == NULL)
-		return ENODEV;
-
 	return SUCCESS;
 }
 
