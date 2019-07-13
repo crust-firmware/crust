@@ -25,7 +25,7 @@ device_is_running(struct device *dev)
 	return dev->flags & DEVICE_FLAG_RUNNING;
 }
 
-static void
+void
 device_probe(struct device *dev)
 {
 	int err;

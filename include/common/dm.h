@@ -94,6 +94,14 @@ struct driver {
 };
 
 /**
+ * Ensure a device is probed (or in other words, its driver is initialized).
+ * If a device's driver is already initialized, this function does nothing.
+ *
+ * @param dev  A device
+ */
+void device_probe(struct device *dev);
+
+/**
  * Get the total number of subdevices (channels, etc.) available in a class.
  *
  * @param class One of the enumerated driver classes.
