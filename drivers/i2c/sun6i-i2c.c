@@ -13,7 +13,7 @@
 #include <util.h>
 #include <clock/sunxi-ccu.h>
 #include <gpio/sunxi-gpio.h>
-#include <i2c/sun6i-a31-i2c.h>
+#include <i2c/sun6i-i2c.h>
 #include <platform/devices.h>
 
 #define I2C_ADDR_REG  0x00
@@ -41,7 +41,7 @@ enum {
 };
 
 static bool
-sun6i_a31_i2c_wait_idle(struct device *dev)
+sun6i_i2c_wait_idle(struct device *dev)
 {
 	/* With a single master on the bus, this should only take one cycle. */
 	int timeout = 2;
@@ -57,7 +57,7 @@ sun6i_a31_i2c_wait_idle(struct device *dev)
 }
 
 static bool
-sun6i_a31_i2c_wait_start(struct device *dev)
+sun6i_i2c_wait_start(struct device *dev)
 {
 	/* With a single master on the bus, this should only take one cycle. */
 	int timeout = 2;
@@ -73,7 +73,7 @@ sun6i_a31_i2c_wait_start(struct device *dev)
 }
 
 static bool
-sun6i_a31_i2c_wait_state(struct device *dev, uint8_t state)
+sun6i_i2c_wait_state(struct device *dev, uint8_t state)
 {
 	/* Wait for up to 8 transfer cycles, one ACK, and one extra cycle. */
 	int timeout = 10;
@@ -89,13 +89,13 @@ sun6i_a31_i2c_wait_state(struct device *dev, uint8_t state)
 }
 
 static int
-sun6i_a31_i2c_read(struct device *dev, uint8_t *data)
+sun6i_i2c_read(struct device *dev, uint8_t *data)
 {
 	/* Disable sending an ACK and trigger a state change. */
 	mmio_clrset_32(dev->regs + I2C_CTRL_REG, BIT(2), BIT(3));
 
 	/* Wait for data to arrive. */
-	if (!sun6i_a31_i2c_wait_state(dev, DATA_RX_NACK))
+	if (!sun6i_i2c_wait_state(dev, DATA_RX_NACK))
 		return EIO;
 
 	/* Read the data. */
@@ -105,7 +105,7 @@ sun6i_a31_i2c_read(struct device *dev, uint8_t *data)
 }
 
 static int
-sun6i_a31_i2c_start(struct device *dev, uint8_t addr, uint8_t direction)
+sun6i_i2c_start(struct device *dev, uint8_t addr, uint8_t direction)
 {
 	uint8_t init_state = mmio_read_32(dev->regs + I2C_STAT_REG);
 	uint8_t state;
@@ -114,13 +114,13 @@ sun6i_a31_i2c_start(struct device *dev, uint8_t addr, uint8_t direction)
 	mmio_set_32(dev->regs + I2C_CTRL_REG, BIT(5) | BIT(3));
 
 	/* Wait for the start condition to be sent. */
-	if (!sun6i_a31_i2c_wait_start(dev))
+	if (!sun6i_i2c_wait_start(dev))
 		return EIO;
 
 	/* Wait for the start state if the bus was previously idle; otherwise,
 	 * wait for the repeated start state. */
 	state = init_state == IDLE ? START_COND_TX : START_COND_TX_REPEAT;
-	if (!sun6i_a31_i2c_wait_state(dev, state))
+	if (!sun6i_i2c_wait_state(dev, state))
 		return EIO;
 
 	/* Write the address and direction, then trigger a state change. */
@@ -129,38 +129,38 @@ sun6i_a31_i2c_start(struct device *dev, uint8_t addr, uint8_t direction)
 
 	/* Check for address acknowledgement. */
 	state = direction == I2C_WRITE ? ADDR_WRITE_TX_ACK : ADDR_READ_TX_ACK;
-	if (!sun6i_a31_i2c_wait_state(dev, state))
+	if (!sun6i_i2c_wait_state(dev, state))
 		return ENODEV;
 
 	return SUCCESS;
 }
 
 static void
-sun6i_a31_i2c_stop(struct device *dev)
+sun6i_i2c_stop(struct device *dev)
 {
 	/* Send a stop condition. */
 	mmio_set_32(dev->regs + I2C_CTRL_REG, BIT(4) | BIT(3));
 
 	/* Wait for the bus to go idle. */
-	sun6i_a31_i2c_wait_idle(dev);
+	sun6i_i2c_wait_idle(dev);
 }
 
 static int
-sun6i_a31_i2c_write(struct device *dev, uint8_t data)
+sun6i_i2c_write(struct device *dev, uint8_t data)
 {
 	/* Write data, then trigger a state change. */
 	mmio_write_32(dev->regs + I2C_DATA_REG, data);
 	mmio_set_32(dev->regs + I2C_CTRL_REG, BIT(3));
 
 	/* Wait for data to be sent. */
-	if (!sun6i_a31_i2c_wait_state(dev, DATA_TX_ACK))
+	if (!sun6i_i2c_wait_state(dev, DATA_TX_ACK))
 		return EIO;
 
 	return SUCCESS;
 }
 
 static int
-sun6i_a31_i2c_probe(struct device *dev)
+sun6i_i2c_probe(struct device *dev)
 {
 	int err;
 
@@ -188,28 +188,28 @@ sun6i_a31_i2c_probe(struct device *dev)
 	mmio_set_32(dev->regs + I2C_SRST_REG, BIT(0));
 
 	/* Wait for the bus to go idle. */
-	if (!sun6i_a31_i2c_wait_idle(dev))
+	if (!sun6i_i2c_wait_idle(dev))
 		return EIO;
 
 	return SUCCESS;
 }
 
-static const struct i2c_driver sun6i_a31_i2c_driver = {
+static const struct i2c_driver sun6i_i2c_driver = {
 	.drv = {
-		.probe = sun6i_a31_i2c_probe,
+		.probe = sun6i_i2c_probe,
 	},
 	.ops = {
-		.read  = sun6i_a31_i2c_read,
-		.start = sun6i_a31_i2c_start,
-		.stop  = sun6i_a31_i2c_stop,
-		.write = sun6i_a31_i2c_write,
+		.read  = sun6i_i2c_read,
+		.start = sun6i_i2c_start,
+		.stop  = sun6i_i2c_stop,
+		.write = sun6i_i2c_write,
 	},
 };
 
 struct device r_i2c = {
 	.name   = "r_i2c",
 	.regs   = DEV_R_I2C,
-	.drv    = &sun6i_a31_i2c_driver.drv,
+	.drv    = &sun6i_i2c_driver.drv,
 	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_I2C),
 	.pins   = GPIO_PINS(I2C_NUM_PINS) {
 #if CONFIG_SOC_A64

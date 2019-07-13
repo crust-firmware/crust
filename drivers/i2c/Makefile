@@ -5,4 +5,4 @@
 
 obj-y += i2c.o
 
-obj-y += sun6i-a31-i2c.o
+obj-y += sun6i-i2c.o

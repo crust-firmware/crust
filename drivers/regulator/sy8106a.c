@@ -10,7 +10,7 @@
 #include <limits.h>
 #include <mmio.h>
 #include <regulator.h>
-#include <i2c/sun6i-a31-i2c.h>
+#include <i2c/sun6i-i2c.h>
 #include <regulator/sy8106a.h>
 
 #define VOUT_SEL_REG   0x01
