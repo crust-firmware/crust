@@ -9,7 +9,7 @@
 #include <irqchip.h>
 #include <platform/irq.h>
 
-extern struct device r_intc;
+extern struct irqchip_device r_intc;
 
 void sun4i_intc_irq(struct device *dev);
 

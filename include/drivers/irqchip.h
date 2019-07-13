@@ -25,6 +25,11 @@ struct irq_handle {
 	const uint8_t      mode;
 };
 
+struct irqchip_device {
+	struct device      dev;
+	struct irq_handle *list;
+};
+
 struct irqchip_driver_ops {
 	int (*enable)(struct device *dev, struct irq_handle *handle);
 };

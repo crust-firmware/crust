@@ -84,7 +84,7 @@ struct device r_twd = {
 	.drv    = &sunxi_twd_driver.drv,
 	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_TWD),
 	.irq    = IRQ_HANDLE {
-		.dev = &r_intc,
+		.dev = &r_intc.dev,
 		.irq = IRQ_R_TWD,
 	},
 };

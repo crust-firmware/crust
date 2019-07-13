@@ -18,6 +18,6 @@ enum {
 	SUNXI_GPIO_IRQ_MODE_EITHER_EDGE  = 4,
 };
 
-extern struct device r_pio_irqchip;
+extern struct irqchip_device r_pio_irqchip;
 
 #endif /* DRIVERS_IRQCHIP_SUNXI_GPIO_H */

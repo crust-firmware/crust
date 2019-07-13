@@ -146,7 +146,7 @@ struct device r_rsb = {
 	.drv    = &sunxi_rsb_driver.drv,
 	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_RSB),
 	.irq    = IRQ_HANDLE {
-		.dev = &r_intc,
+		.dev = &r_intc.dev,
 		.irq = IRQ_R_RSB,
 	},
 	.pins = GPIO_PINS(RSB_NUM_PINS) {

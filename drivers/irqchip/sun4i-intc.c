@@ -5,6 +5,7 @@
 
 #include <dm.h>
 #include <error.h>
+#include <intrusive.h>
 #include <mmio.h>
 #include <spr.h>
 #include <util.h>
@@ -20,14 +21,15 @@
 #define INTC_MASK_REG      0x0050
 #define INTC_RESP_REG      0x0060
 
-#define HANDLE_LIST(dev)   ((struct irq_handle *)(dev)->drvdata)
-
 static int
 sun4i_intc_enable(struct device *dev, struct irq_handle *handle)
 {
+	struct irq_handle **list =
+		&container_of(dev, struct irqchip_device, dev)->list;
+
 	/* Prepend the handle onto the list of IRQs. */
-	handle->next = HANDLE_LIST(dev);
-	dev->drvdata = (uintptr_t)handle;
+	handle->next = *list;
+	*list        = handle;
 
 	/* Enable the IRQ. */
 	mmio_set_32(dev->regs + INTC_EN_REG, BIT(handle->irq));
@@ -38,7 +40,9 @@ sun4i_intc_enable(struct device *dev, struct irq_handle *handle)
 void
 sun4i_intc_irq(struct device *dev)
 {
-	struct irq_handle *handle = HANDLE_LIST(dev);
+	struct irq_handle **list =
+		&container_of(dev, struct irqchip_device, dev)->list;
+	struct irq_handle *handle = *list;
 	/* Get the number of the current IRQ. */
 	uint8_t irq = mmio_read_32(dev->regs + INTC_VECTOR_REG) >> 2;
 
@@ -80,8 +84,10 @@ static const struct irqchip_driver sun4i_intc_driver = {
 	},
 };
 
-struct device r_intc = {
-	.name = "r_intc",
-	.regs = DEV_R_INTC,
-	.drv  = &sun4i_intc_driver.drv,
+struct irqchip_device r_intc = {
+	.dev = {
+		.name = "r_intc",
+		.regs = DEV_R_INTC,
+		.drv  = &sun4i_intc_driver.drv,
+	},
 };

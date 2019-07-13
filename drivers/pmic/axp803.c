@@ -140,7 +140,7 @@ struct device axp803_pmic = {
 	.bus  = &r_rsb,
 	.addr = AXP803_RSB_RTADDR,
 	.irq  = IRQ_HANDLE {
-		.dev = &r_intc,
+		.dev = &r_intc.dev,
 		.irq = IRQ_NMI,
 	},
 };

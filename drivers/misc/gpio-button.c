@@ -39,7 +39,7 @@ struct device power_button = {
 	.name = "power-button",
 	.drv  = &gpio_button_driver,
 	.irq  = IRQ_HANDLE {
-		.dev  = &r_pio_irqchip,
+		.dev  = &r_pio_irqchip.dev,
 		.irq  = SUNXI_GPIO_IRQ(0, CONFIG_GPIO_BUTTON_PIN),
 		.mode = SUNXI_GPIO_IRQ_MODE_FALLING_EDGE,
 	},

@@ -212,7 +212,7 @@ struct device r_i2c = {
 	.drv    = &sun6i_a31_i2c_driver.drv,
 	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_I2C),
 	.irq    = IRQ_HANDLE {
-		.dev = &r_intc,
+		.dev = &r_intc.dev,
 		.irq = IRQ_R_I2C,
 	},
 	.pins = GPIO_PINS(I2C_NUM_PINS) {

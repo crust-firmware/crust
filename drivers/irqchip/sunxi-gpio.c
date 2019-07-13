@@ -6,6 +6,7 @@
 #include <debug.h>
 #include <dm.h>
 #include <error.h>
+#include <intrusive.h>
 #include <mmio.h>
 #include <stdbool.h>
 #include <util.h>
@@ -13,8 +14,6 @@
 #include <irqchip/sun4i-intc.h>
 #include <irqchip/sunxi-gpio.h>
 #include <platform/devices.h>
-
-#define HANDLE_LIST(dev)          ((struct irq_handle *)(dev)->drvdata)
 
 #define INT_CONFIG_REG(port, pin) (0x0200 + 0x20 * (port) + ((pin) / 8) * 4)
 #define INT_CONFIG_OFFSET(pin)    (((pin) % 8) * 4)
@@ -35,13 +34,15 @@
 static int
 sunxi_gpio_enable(struct device *dev, struct irq_handle *handle)
 {
+	struct irq_handle **list =
+		&container_of(dev, struct irqchip_device, dev)->list;
 	uint8_t irq  = handle->irq;
 	uint8_t pin  = IRQ_PIN(irq);
 	uint8_t port = IRQ_PORT(irq);
 
 	/* Prepend the handle onto the list of IRQs. */
-	handle->next = HANDLE_LIST(dev);
-	dev->drvdata = (uintptr_t)handle;
+	handle->next = *list;
+	*list        = handle;
 
 	/* Set the IRQ mode. */
 	mmio_clrset_32(dev->regs + INT_CONFIG_REG(port, pin),
@@ -57,6 +58,8 @@ sunxi_gpio_enable(struct device *dev, struct irq_handle *handle)
 static bool
 sunxi_gpio_irq(struct device *dev)
 {
+	struct irq_handle **list =
+		&container_of(dev, struct irqchip_device, dev)->list;
 	uint32_t reg;
 	bool handled = false;
 
@@ -70,7 +73,7 @@ sunxi_gpio_irq(struct device *dev)
 			if (!(reg & BIT(pin)))
 				continue;
 
-			struct irq_handle *handle = HANDLE_LIST(dev);
+			struct irq_handle *handle = *list;
 			while (handle != NULL) {
 				if (handle->irq == SUNXI_GPIO_IRQ(port, pin) &&
 				    handle->fn(handle->dev)) {
@@ -115,13 +118,15 @@ static const struct irqchip_driver sunxi_gpio_irqchip_driver = {
 	},
 };
 
-struct device r_pio_irqchip = {
-	.name   = "r_pio_irqchip",
-	.regs   = DEV_R_PIO,
-	.drv    = &sunxi_gpio_irqchip_driver.drv,
-	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_PIO),
-	.irq    = IRQ_HANDLE {
-		.dev = &r_intc,
-		.irq = IRQ_R_PIO_PL,
+struct irqchip_device r_pio_irqchip = {
+	.dev = {
+		.name   = "r_pio_irqchip",
+		.regs   = DEV_R_PIO,
+		.drv    = &sunxi_gpio_irqchip_driver.drv,
+		.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_PIO),
+		.irq    = IRQ_HANDLE {
+			.dev = &r_intc.dev,
+			.irq = IRQ_R_PIO_PL,
+		},
 	},
 };
