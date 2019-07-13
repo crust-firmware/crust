@@ -7,7 +7,6 @@
 #include <mmio.h>
 #include <watchdog.h>
 #include <clock/sunxi-ccu.h>
-#include <irqchip/sun4i-intc.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/devices.h>
 
@@ -83,8 +82,4 @@ struct device r_twd = {
 	.regs   = DEV_R_TWD,
 	.drv    = &sunxi_twd_driver.drv,
 	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_TWD),
-	.irq    = IRQ_HANDLE {
-		.dev = &r_intc.dev,
-		.irq = IRQ_R_TWD,
-	},
 };

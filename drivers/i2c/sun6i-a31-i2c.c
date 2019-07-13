@@ -14,7 +14,6 @@
 #include <clock/sunxi-ccu.h>
 #include <gpio/sunxi-gpio.h>
 #include <i2c/sun6i-a31-i2c.h>
-#include <irqchip/sun4i-intc.h>
 #include <platform/devices.h>
 
 #define I2C_ADDR_REG  0x00
@@ -211,11 +210,7 @@ struct device r_i2c = {
 	.regs   = DEV_R_I2C,
 	.drv    = &sun6i_a31_i2c_driver.drv,
 	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_I2C),
-	.irq    = IRQ_HANDLE {
-		.dev = &r_intc.dev,
-		.irq = IRQ_R_I2C,
-	},
-	.pins = GPIO_PINS(I2C_NUM_PINS) {
+	.pins   = GPIO_PINS(I2C_NUM_PINS) {
 #if CONFIG_SOC_A64
 		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 3 },
 		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 3 },

@@ -9,7 +9,6 @@
 #include <rsb.h>
 #include <clock/sunxi-ccu.h>
 #include <gpio/sunxi-gpio.h>
-#include <irqchip/sun4i-intc.h>
 #include <rsb/sunxi-rsb.h>
 #include <platform/devices.h>
 
@@ -145,11 +144,7 @@ struct device r_rsb = {
 	.regs   = DEV_R_RSB,
 	.drv    = &sunxi_rsb_driver.drv,
 	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_RSB),
-	.irq    = IRQ_HANDLE {
-		.dev = &r_intc.dev,
-		.irq = IRQ_R_RSB,
-	},
-	.pins = GPIO_PINS(RSB_NUM_PINS) {
+	.pins   = GPIO_PINS(RSB_NUM_PINS) {
 		{ &r_pio, SUNXI_GPIO_PIN(0, 0), 2 },
 		{ &r_pio, SUNXI_GPIO_PIN(0, 1), 2 },
 	},
