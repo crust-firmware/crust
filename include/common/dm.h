@@ -46,8 +46,6 @@ struct device {
 	const uintptr_t            regs;
 	/** The driver for this device. */
 	const struct driver *const drv;
-	/** Extra per-device data private to its driver. */
-	uintptr_t                  drvdata;
 	/** The controller for the bus this device is connected to. */
 	struct device *const       bus;
 	/** The clocks utilized by this device. */
