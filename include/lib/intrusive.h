@@ -10,6 +10,6 @@
 #include <stdint.h>
 
 #define container_of(ptr, type, member) \
-	((type *)((uintptr_t)(ptr) - offsetof(type, member)))
+	((type *)((char *)(ptr) - offsetof(type, member)))
 
 #endif /* LIB_INTRUSIVE_H */
