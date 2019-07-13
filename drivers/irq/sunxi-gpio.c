@@ -11,8 +11,8 @@
 #include <stdbool.h>
 #include <util.h>
 #include <clock/sunxi-ccu.h>
-#include <irqchip/sun4i-intc.h>
-#include <irqchip/sunxi-gpio.h>
+#include <irq/sun4i-intc.h>
+#include <irq/sunxi-gpio.h>
 #include <platform/devices.h>
 
 #define INT_CONFIG_REG(port, pin) (0x0200 + 0x20 * (port) + ((pin) / 8) * 4)
@@ -32,10 +32,10 @@
 #define MAX_PORTS                 1
 
 static int
-sunxi_gpio_enable(struct device *dev, struct irq_handle *handle)
+sunxi_gpio_irqchip_enable(struct device *dev, struct irq_handle *handle)
 {
 	struct irq_handle **list =
-		&container_of(dev, struct irqchip_device, dev)->list;
+		&container_of(dev, struct irq_device, dev)->list;
 	uint8_t irq  = handle->irq;
 	uint8_t pin  = IRQ_PIN(irq);
 	uint8_t port = IRQ_PORT(irq);
@@ -56,10 +56,10 @@ sunxi_gpio_enable(struct device *dev, struct irq_handle *handle)
 }
 
 static bool
-sunxi_gpio_irq(struct device *dev)
+sunxi_gpio_irqchip_irq(struct device *dev)
 {
 	struct irq_handle **list =
-		&container_of(dev, struct irqchip_device, dev)->list;
+		&container_of(dev, struct irq_device, dev)->list;
 	uint32_t reg;
 	bool handled = false;
 
@@ -105,20 +105,20 @@ sunxi_gpio_irqchip_probe(struct device *dev)
 		mmio_write_32(dev->regs + INT_STATUS_REG(port), ~0);
 	}
 
-	return dm_setup_irq(dev, sunxi_gpio_irq);
+	return dm_setup_irq(dev, sunxi_gpio_irqchip_irq);
 }
 
-static const struct irqchip_driver sunxi_gpio_irqchip_driver = {
+static const struct irq_driver sunxi_gpio_irqchip_driver = {
 	.drv = {
-		.class = DM_CLASS_IRQCHIP,
+		.class = DM_CLASS_IRQ,
 		.probe = sunxi_gpio_irqchip_probe,
 	},
 	.ops = {
-		.enable = sunxi_gpio_enable,
+		.enable = sunxi_gpio_irqchip_enable,
 	},
 };
 
-struct irqchip_device r_pio_irqchip = {
+struct irq_device r_pio_irqchip = {
 	.dev = {
 		.name   = "r_pio_irqchip",
 		.regs   = DEV_R_PIO,

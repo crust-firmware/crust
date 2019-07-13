@@ -7,7 +7,7 @@
 #include <dm.h>
 #include <system_power.h>
 #include <gpio/sunxi-gpio.h>
-#include <irqchip/sunxi-gpio.h>
+#include <irq/sunxi-gpio.h>
 #include <misc/gpio-button.h>
 #include <platform/devices.h>
 

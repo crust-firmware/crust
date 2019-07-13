@@ -9,7 +9,7 @@
 #include <mmio.h>
 #include <spr.h>
 #include <util.h>
-#include <irqchip/sun4i-intc.h>
+#include <irq/sun4i-intc.h>
 #include <platform/devices.h>
 
 #define INTC_VECTOR_REG    0x0000
@@ -25,7 +25,7 @@ static int
 sun4i_intc_enable(struct device *dev, struct irq_handle *handle)
 {
 	struct irq_handle **list =
-		&container_of(dev, struct irqchip_device, dev)->list;
+		&container_of(dev, struct irq_device, dev)->list;
 
 	/* Prepend the handle onto the list of IRQs. */
 	handle->next = *list;
@@ -41,7 +41,7 @@ void
 sun4i_intc_irq(struct device *dev)
 {
 	struct irq_handle **list =
-		&container_of(dev, struct irqchip_device, dev)->list;
+		&container_of(dev, struct irq_device, dev)->list;
 	struct irq_handle *handle = *list;
 	/* Get the number of the current IRQ. */
 	uint8_t irq = mmio_read_32(dev->regs + INTC_VECTOR_REG) >> 2;
@@ -74,9 +74,9 @@ sun4i_intc_probe(struct device *dev)
 	return SUCCESS;
 }
 
-static const struct irqchip_driver sun4i_intc_driver = {
+static const struct irq_driver sun4i_intc_driver = {
 	.drv = {
-		.class = DM_CLASS_IRQCHIP,
+		.class = DM_CLASS_IRQ,
 		.probe = sun4i_intc_probe,
 	},
 	.ops = {
@@ -84,7 +84,7 @@ static const struct irqchip_driver sun4i_intc_driver = {
 	},
 };
 
-struct irqchip_device r_intc = {
+struct irq_device r_intc = {
 	.dev = {
 		.name = "r_intc",
 		.regs = DEV_R_INTC,

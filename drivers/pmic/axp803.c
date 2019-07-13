@@ -9,7 +9,7 @@
 #include <pmic.h>
 #include <rsb.h>
 #include <system_power.h>
-#include <irqchip/sun4i-intc.h>
+#include <irq/sun4i-intc.h>
 #include <mfd/axp803.h>
 #include <pmic/axp803.h>
 #include <rsb/sunxi-rsb.h>

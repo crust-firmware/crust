@@ -5,10 +5,10 @@
 
 #include <debug.h>
 #include <exception.h>
-#include <irqchip.h>
+#include <irq.h>
 #include <spr.h>
 #include <stdint.h>
-#include <irqchip/sun4i-intc.h>
+#include <irq/sun4i-intc.h>
 
 void
 handle_exception(uint32_t number)

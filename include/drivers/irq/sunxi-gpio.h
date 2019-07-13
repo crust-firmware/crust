@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#ifndef DRIVERS_IRQCHIP_SUNXI_GPIO_H
-#define DRIVERS_IRQCHIP_SUNXI_GPIO_H
+#ifndef DRIVERS_IRQ_SUNXI_GPIO_H
+#define DRIVERS_IRQ_SUNXI_GPIO_H
 
-#include <irqchip.h>
+#include <irq.h>
 
 #define SUNXI_GPIO_IRQ(port, index) (32 * (port) + (index))
 
@@ -18,6 +18,6 @@ enum {
 	SUNXI_GPIO_IRQ_MODE_EITHER_EDGE  = 4,
 };
 
-extern struct irqchip_device r_pio_irqchip;
+extern struct irq_device r_pio_irqchip;
 
-#endif /* DRIVERS_IRQCHIP_SUNXI_GPIO_H */
+#endif /* DRIVERS_IRQ_SUNXI_GPIO_H */

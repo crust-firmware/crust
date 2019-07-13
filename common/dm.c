@@ -9,7 +9,7 @@
 #include <dm.h>
 #include <error.h>
 #include <gpio.h>
-#include <irqchip.h>
+#include <irq.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -165,19 +165,19 @@ dm_setup_clocks(struct device *dev, uint8_t num_clocks)
 int
 dm_setup_irq(struct device *dev, bool (*fn)(struct device *))
 {
-	struct device *irqchip;
+	struct device *controller;
 	struct irq_handle *handle = dev->irq;
 
-	/* Replace the irqchip reference with a link to the child device. */
-	irqchip     = handle->dev;
+	/* Replace the controller reference with a link to the child device. */
+	controller  = handle->dev;
 	handle->dev = dev;
 	/* Put the function reference in the handle. */
 	handle->fn = fn;
 
 	/* Probe to ensure the interrupt controller's driver is loaded. */
-	device_probe(irqchip);
+	device_probe(controller);
 
-	return irqchip_enable(irqchip, handle);
+	return irq_enable(controller, handle);
 }
 
 int
