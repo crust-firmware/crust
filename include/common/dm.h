@@ -11,12 +11,6 @@
 #include <stdint.h>
 #include <util.h>
 
-#define DEVICE_HANDLE_INIT(cls) \
-	(struct device_handle) { \
-		.class = (cls), \
-		.index = -1, \
-	}
-
 enum {
 	DEVICE_FLAG_RUNNING = BIT(0),
 };
@@ -60,17 +54,6 @@ struct device {
 	uint8_t                    flags;
 };
 
-struct device_handle {
-	/** Pointer to the device. */
-	struct device *dev;
-	/** Subdevice ID within the device (if used). */
-	uint8_t        id;
-	/** Class of the device (used for iteration). */
-	uint8_t        class;
-	/** Index of the device in the device list (used for iteration). */
-	int8_t         index;
-};
-
 struct driver {
 	/** One of the enumerated driver classes. */
 	uint32_t class;
@@ -87,37 +70,5 @@ struct driver {
  * @param dev  A device
  */
 void device_probe(struct device *dev);
-
-/**
- * Get the first device of a given class. This function only considers
- * successfully-probed devices.
- *
- * @param class One of the enumerated driver classes.
- * @return      The address of the device description, or NULL if no
- *              devices of this class were found.
- */
-struct device *dm_first_dev_by_class(uint32_t class);
-
-/**
- * Get the next device of a given class. This function only considers
- * successfully-probed devices.
- *
- * @param handle Pointer to a handle initialized with DEVICE_HANDLE_INIT or a
- *               previous successful call to a driver model getter or iterator.
- * @return       Zero if a device was found and the handle was updated. Error
- *               if no device exists, and the handle contents are undefined.
- */
-int dm_next_dev_by_class(struct device_handle *handle);
-
-/**
- * Initialize the driver model, probing all devices in topological order.
- * If a device cannot be probed, the firmware will panic.
- */
-void dm_init(void);
-
-/**
- * Poll all devices that have the `.poll` hook populated in their driver.
- */
-void dm_poll(void);
 
 #endif /* COMMON_DM_H */

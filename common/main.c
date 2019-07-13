@@ -6,15 +6,20 @@
 #include <compiler.h>
 #include <console.h>
 #include <debug.h>
+#include <dm.h>
+#include <kconfig.h>
+#include <pmic.h>
 #include <scpi.h>
 #include <stdbool.h>
 #include <wallclock.h>
 #include <watchdog.h>
+#include <misc/gpio-button.h>
+#include <msgbox/sunxi-msgbox.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/devices.h>
 #include <platform/time.h>
 
-#define WDOG_TIMEOUT (5 * REFCLK_HZ) /* 5 seconds */
+#define WATCHDOG_TIMEOUT 5 /* seconds */
 
 noreturn void main(void);
 
@@ -24,18 +29,30 @@ main(void)
 	uint64_t next_tick = wallclock_read() + REFCLK_HZ;
 
 	console_init(DEV_UART0);
-	dm_init();
 
-	/* Enable watchdog. */
-	watchdog_enable(&r_twd, WDOG_TIMEOUT);
-	info("Trusted watchdog enabled");
+	/* Initialize and enable the watchdog first. This provides a failsafe
+	 * for the possibility that something below hangs. */
+	device_probe(&r_twd);
+	watchdog_enable(&r_twd, WATCHDOG_TIMEOUT * REFCLK_HZ);
+	info("Watchdog enabled");
 
-	/* Do this last, as it tells SCPI clients we are finished booting. */
+	/* Initialize the remaining devices needed to boot. */
+	device_probe(&msgbox);
+
+	/* Initialize the power management IC. */
+	pmic_detect();
+	device_probe(pmic);
+
+	/* Initialize wakeup sources. */
+	if (IS_ENABLED(CONFIG_GPIO_BUTTON))
+		device_probe(&power_button.dev);
+
+	/* Inform SCPI clients that the firmware has finished booting. */
 	scpi_init();
 
 	while (true) {
 		/* Perform every-iteration operations. */
-		dm_poll();
+		msgbox.drv->poll(&msgbox);
 		scpi_poll();
 
 		if (wallclock_read() > next_tick) {

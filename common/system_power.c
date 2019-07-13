@@ -35,10 +35,7 @@ system_is_suspended(void)
 noreturn void
 system_reset(void)
 {
-	struct device *pmic;
-
-	if ((pmic = dm_first_dev_by_class(DM_CLASS_PMIC)))
-		pmic_reset(pmic);
+	pmic_reset(pmic);
 
 	watchdog_disable(&r_twd);
 	watchdog_enable(&r_twd, 0);
@@ -51,10 +48,7 @@ system_reset(void)
 void
 system_shutdown(void)
 {
-	struct device *pmic;
-
-	if ((pmic = dm_first_dev_by_class(DM_CLASS_PMIC)))
-		pmic_shutdown(pmic);
+	pmic_shutdown(pmic);
 
 	/* We didn't actually shut down. Wait for a wakeup event and reset. */
 	is_off = true;
@@ -63,7 +57,6 @@ system_shutdown(void)
 void
 system_suspend(void)
 {
-	struct device *pmic;
 	uint32_t flags = disable_interrupts();
 
 	/* If the system is already suspended, do nothing. */
@@ -78,14 +71,12 @@ system_suspend(void)
 	/* State management is done, so we can resume handling interrupts. */
 	restore_interrupts(flags);
 
-	if ((pmic = dm_first_dev_by_class(DM_CLASS_PMIC)))
-		pmic_suspend(pmic);
+	pmic_suspend(pmic);
 }
 
 void
 system_wakeup(void)
 {
-	struct device *pmic;
 	uint32_t flags = disable_interrupts();
 
 	/* Tried to wake up from a fake "off" state. Reset the system. */
@@ -104,8 +95,7 @@ system_wakeup(void)
 	restore_interrupts(flags);
 
 	/* Tell the PMIC to turn everything back on. */
-	if ((pmic = dm_first_dev_by_class(DM_CLASS_PMIC)))
-		pmic_wakeup(pmic);
+	pmic_wakeup(pmic);
 
 	/* Resume execution on the CSS. */
 	css_set_css_state(POWER_STATE_ON);

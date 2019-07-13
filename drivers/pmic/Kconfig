@@ -9,9 +9,4 @@ config PMIC_AXP803
 	bool "X-Powers AXP803 PMIC"
 	depends on RSB
 
-config PMIC_DUMMY
-	bool
-	default n if PMIC_AXP803
-	default y
-
 endmenu
