@@ -17,7 +17,7 @@
 
 #define CLOCK_PARENT(d, i) \
 	& (struct clock_handle) { \
-		.dev = &(d), \
+		.dev = &(d).dev, \
 		.id  = (i), \
 	}
 

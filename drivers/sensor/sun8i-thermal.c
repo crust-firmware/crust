@@ -146,7 +146,7 @@ struct device ths = {
 	.regs   = DEV_THS,
 	.drv    = &sun8i_thermal_driver.drv,
 	.clocks = CLOCK_PARENTS(2) {
-		{ .dev = &ccu, .id = CCU_CLOCK_THS },
-		{ .dev = &ccu, .id = CCU_CLOCK_THS_MOD },
+		{ .dev = &ccu.dev, .id = CCU_CLOCK_THS },
+		{ .dev = &ccu.dev, .id = CCU_CLOCK_THS_MOD },
 	},
 };

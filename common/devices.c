@@ -33,8 +33,8 @@ struct device *const device_list[] = {
 	IF_ENABLED_INIT(CONFIG_DVFS, &cpux)
 
 	/* SCPI clock providers */
-	&ccu,
-	&r_ccu,
+	&ccu.dev,
+	&r_ccu.dev,
 
 	/* SCPI power supply providers */
 	IF_ENABLED_INIT(CONFIG_REGULATOR_AXP803, &axp803_regulator)
