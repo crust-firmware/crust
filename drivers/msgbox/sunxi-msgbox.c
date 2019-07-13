@@ -129,9 +129,11 @@ sunxi_msgbox_poll(struct device *dev)
 static int
 sunxi_msgbox_probe(struct device *dev)
 {
+	struct sunxi_msgbox *this =
+		container_of(dev, struct sunxi_msgbox, dev);
 	int err;
 
-	if ((err = clock_get(&dev->clocks[0])))
+	if ((err = clock_get(&this->clock)))
 		return err;
 
 	/* Set even channels ARM -> SCP and odd channels SCP -> ARM. */
@@ -165,9 +167,11 @@ static const struct msgbox_driver sunxi_msgbox_driver = {
 	},
 };
 
-struct device msgbox = {
-	.name   = "msgbox",
-	.regs   = DEV_MSGBOX,
-	.drv    = &sunxi_msgbox_driver.drv,
-	.clocks = CLOCK_PARENT(ccu, CCU_CLOCK_MSGBOX),
+struct sunxi_msgbox msgbox = {
+	.dev = {
+		.name = "msgbox",
+		.regs = DEV_MSGBOX,
+		.drv  = &sunxi_msgbox_driver.drv,
+	},
+	.clock = { .dev = &ccu.dev, .id = CCU_CLOCK_MSGBOX },
 };

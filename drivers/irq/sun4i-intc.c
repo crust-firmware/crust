@@ -24,12 +24,12 @@
 static int
 sun4i_intc_enable(struct device *dev, struct irq_handle *handle)
 {
-	struct irq_handle **list =
-		&container_of(dev, struct sun4i_intc, dev)->list;
+	struct sun4i_intc *this =
+		container_of(dev, struct sun4i_intc, dev);
 
 	/* Prepend the handle onto the list of IRQs. */
-	handle->next = *list;
-	*list        = handle;
+	handle->next = this->list;
+	this->list   = handle;
 
 	/* Enable the IRQ. */
 	mmio_set_32(dev->regs + INTC_EN_REG, BIT(handle->irq));
@@ -40,9 +40,9 @@ sun4i_intc_enable(struct device *dev, struct irq_handle *handle)
 void
 sun4i_intc_irq(struct device *dev)
 {
-	struct irq_handle *const *list =
-		&container_of(dev, struct sun4i_intc, dev)->list;
-	const struct irq_handle *handle = *list;
+	struct sun4i_intc *this =
+		container_of(dev, struct sun4i_intc, dev);
+	const struct irq_handle *handle = this->list;
 	/* Get the number of the current IRQ. */
 	uint8_t irq = mmio_read_32(dev->regs + INTC_VECTOR_REG) >> 2;
 

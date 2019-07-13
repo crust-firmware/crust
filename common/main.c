@@ -32,12 +32,12 @@ main(void)
 
 	/* Initialize and enable the watchdog first. This provides a failsafe
 	 * for the possibility that something below hangs. */
-	device_probe(&r_twd);
-	watchdog_enable(&r_twd, WATCHDOG_TIMEOUT * REFCLK_HZ);
+	device_probe(&r_twd.dev);
+	watchdog_enable(&r_twd.dev, WATCHDOG_TIMEOUT * REFCLK_HZ);
 	info("Watchdog enabled");
 
 	/* Initialize the remaining devices needed to boot. */
-	device_probe(&msgbox);
+	device_probe(&msgbox.dev);
 
 	/* Initialize the power management IC. */
 	pmic_detect();
@@ -52,14 +52,14 @@ main(void)
 
 	while (true) {
 		/* Perform every-iteration operations. */
-		msgbox.drv->poll(&msgbox);
+		msgbox.dev.drv->poll(&msgbox.dev);
 		scpi_poll();
 
 		if (wallclock_read() > next_tick) {
 			next_tick += REFCLK_HZ;
 
 			/* Perform 1Hz operations. */
-			watchdog_restart(&r_twd);
+			watchdog_restart(&r_twd.dev);
 		}
 	}
 }

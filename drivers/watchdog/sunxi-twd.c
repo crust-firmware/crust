@@ -51,9 +51,10 @@ sunxi_twd_enable(struct device *dev, uint32_t timeout)
 static int
 sunxi_twd_probe(struct device *dev)
 {
+	struct sunxi_twd *this = container_of(dev, struct sunxi_twd, dev);
 	int err;
 
-	if ((err = clock_get(&dev->clocks[0])))
+	if ((err = clock_get(&this->clock)))
 		return err;
 
 	/* Disable watchdog. */
@@ -76,9 +77,11 @@ static const struct watchdog_driver sunxi_twd_driver = {
 	},
 };
 
-struct device r_twd = {
-	.name   = "r_twd",
-	.regs   = DEV_R_TWD,
-	.drv    = &sunxi_twd_driver.drv,
-	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_TWD),
+struct sunxi_twd r_twd = {
+	.dev = {
+		.name = "r_twd",
+		.regs = DEV_R_TWD,
+		.drv  = &sunxi_twd_driver.drv,
+	},
+	.clock = { .dev = &r_ccu.dev, .id = R_CCU_CLOCK_R_TWD },
 };

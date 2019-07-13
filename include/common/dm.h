@@ -26,8 +26,6 @@ struct device {
 	const struct driver *const drv;
 	/** The controller for the bus this device is connected to. */
 	struct device *const       bus;
-	/** The clocks utilized by this device. */
-	struct clock_handle *const clocks;
 	/** A bus-specific address/port (if this device is on a bus). */
 	const uint8_t              addr;
 	/** Flags describing this device's state. */

@@ -6,8 +6,14 @@
 #ifndef DRIVERS_WATCHDOG_SUNXI_TWD_H
 #define DRIVERS_WATCHDOG_SUNXI_TWD_H
 
+#include <clock.h>
 #include <watchdog.h>
 
-extern struct device r_twd;
+struct sunxi_twd {
+	struct device       dev;
+	struct clock_handle clock;
+};
+
+extern struct sunxi_twd r_twd;
 
 #endif /* DRIVERS_WATCHDOG_SUNXI_TWD_H */

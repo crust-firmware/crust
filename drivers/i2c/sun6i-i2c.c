@@ -166,7 +166,7 @@ sun6i_i2c_probe(struct device *dev)
 	struct sun6i_i2c *this = container_of(dev, struct sun6i_i2c, dev);
 	int err;
 
-	if ((err = clock_get(&dev->clocks[0])))
+	if ((err = clock_get(&this->clock)))
 		return err;
 
 	/* Set port L pins 0-1 to I²C. */
@@ -210,19 +210,19 @@ static const struct i2c_driver sun6i_i2c_driver = {
 
 struct sun6i_i2c r_i2c = {
 	.dev = {
-		.name   = "r_i2c",
-		.regs   = DEV_R_I2C,
-		.drv    = &sun6i_i2c_driver.drv,
-		.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_I2C),
+		.name = "r_i2c",
+		.regs = DEV_R_I2C,
+		.drv  = &sun6i_i2c_driver.drv,
 	},
-	.pins = {
+	.clock = { .dev = &r_ccu.dev, .id = R_CCU_CLOCK_R_I2C },
+	.pins  = {
 		{
-			.dev  = &r_pio,
+			.dev  = &r_pio.dev,
 			.pin  = SUNXI_GPIO_PIN(0, 0),
 			.mode = IS_ENABLED(CONFIG_SOC_A64) ? 3 : 2,
 		},
 		{
-			.dev  = &r_pio,
+			.dev  = &r_pio.dev,
 			.pin  = SUNXI_GPIO_PIN(0, 1),
 			.mode = IS_ENABLED(CONFIG_SOC_A64) ? 3 : 2,
 		},

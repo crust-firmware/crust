@@ -72,9 +72,10 @@ sunxi_gpio_set_value(struct device *dev, uint8_t pin, bool value)
 static int
 sunxi_gpio_probe(struct device *dev)
 {
+	struct sunxi_gpio *this = container_of(dev, struct sunxi_gpio, dev);
 	int err;
 
-	if ((err = clock_get(&dev->clocks[0])))
+	if ((err = clock_get(&this->clock)))
 		return err;
 
 	return SUCCESS;
@@ -91,9 +92,11 @@ static const struct gpio_driver sunxi_gpio_driver = {
 	},
 };
 
-struct device r_pio = {
-	.name   = "r_pio",
-	.regs   = DEV_R_PIO,
-	.drv    = &sunxi_gpio_driver.drv,
-	.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_PIO),
+struct sunxi_gpio r_pio = {
+	.dev = {
+		.name = "r_pio",
+		.regs = DEV_R_PIO,
+		.drv  = &sunxi_gpio_driver.drv,
+	},
+	.clock = { .dev = &r_ccu.dev, .id = R_CCU_CLOCK_R_PIO },
 };

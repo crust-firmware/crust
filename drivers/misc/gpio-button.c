@@ -48,7 +48,7 @@ struct gpio_button power_button = {
 		.handler = gpio_button_irq,
 	},
 	.pin = {
-		.dev  = &r_pio,
+		.dev  = &r_pio.dev,
 		.pin  = SUNXI_GPIO_PIN(0, CONFIG_GPIO_BUTTON_PIN),
 		.mode = 6,
 	},

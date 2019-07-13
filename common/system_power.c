@@ -37,8 +37,8 @@ system_reset(void)
 {
 	pmic_reset(pmic);
 
-	watchdog_disable(&r_twd);
-	watchdog_enable(&r_twd, 0);
+	watchdog_disable(&r_twd.dev);
+	watchdog_enable(&r_twd.dev, 0);
 	/* This is always at least one reference clock cycle. */
 	udelay(1);
 

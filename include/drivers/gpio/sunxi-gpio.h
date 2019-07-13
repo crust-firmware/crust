@@ -6,10 +6,16 @@
 #ifndef DRIVERS_GPIO_SUNXI_GPIO_H
 #define DRIVERS_GPIO_SUNXI_GPIO_H
 
+#include <clock.h>
 #include <gpio.h>
 
 #define SUNXI_GPIO_PIN(port, index) (32 * (port) + (index))
 
-extern struct device r_pio;
+struct sunxi_gpio {
+	struct device       dev;
+	struct clock_handle clock;
+};
+
+extern struct sunxi_gpio r_pio;
 
 #endif /* DRIVERS_GPIO_SUNXI_GPIO_H */

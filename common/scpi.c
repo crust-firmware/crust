@@ -54,7 +54,7 @@ scpi_send_message(uint8_t client)
 	barrier();
 
 	/* Notify the client that the message has been sent. */
-	if ((err = msgbox_send(&msgbox, TX_CHAN(client),
+	if ((err = msgbox_send(&msgbox.dev, TX_CHAN(client),
 	                       SCPI_VIRTUAL_CHANNEL)))
 		error("SCPI.%u: Send error: %d", client, err);
 }
@@ -94,7 +94,8 @@ scpi_poll(void)
 		/* Flush any outgoing messages. The TX buffer becomes free
 		 * when the message is acknowledged or when it times out. */
 		if (state->tx_full) {
-			if (msgbox_last_tx_done(&msgbox, TX_CHAN(client)) ||
+			if (msgbox_last_tx_done(&msgbox.dev,
+			                        TX_CHAN(client)) ||
 			    wallclock_read() > state->timeout)
 				state->tx_full = false;
 		}
@@ -104,7 +105,7 @@ scpi_poll(void)
 			bool reply_needed = scpi_handle_cmd(client, mem);
 
 			/* Acknowledge the request as soon as possible. */
-			msgbox_ack_rx(&msgbox, RX_CHAN(client));
+			msgbox_ack_rx(&msgbox.dev, RX_CHAN(client));
 			state->rx_full = false;
 
 			if (reply_needed) {
@@ -122,7 +123,7 @@ scpi_receive_message(uint8_t client, uint32_t msg)
 
 	/* Do not try to parse messages sent with a different protocol. */
 	if (msg != SCPI_VIRTUAL_CHANNEL) {
-		msgbox_ack_rx(&msgbox, RX_CHAN(client));
+		msgbox_ack_rx(&msgbox.dev, RX_CHAN(client));
 		return;
 	}
 
@@ -136,11 +137,11 @@ scpi_init(void)
 	int err;
 
 	/* Non-secure client channel. */
-	if ((err = msgbox_enable(&msgbox, RX_CHAN(SCPI_CLIENT_EL3))))
+	if ((err = msgbox_enable(&msgbox.dev, RX_CHAN(SCPI_CLIENT_EL3))))
 		panic("SCPI.%u: Error enabling channel: %d",
 		      SCPI_CLIENT_EL3, err);
 	/* Secure client channel. */
-	if ((err = msgbox_enable(&msgbox, RX_CHAN(SCPI_CLIENT_EL2))))
+	if ((err = msgbox_enable(&msgbox.dev, RX_CHAN(SCPI_CLIENT_EL2))))
 		panic("SCPI.%u: Error enabling channel: %d",
 		      SCPI_CLIENT_EL2, err);
 

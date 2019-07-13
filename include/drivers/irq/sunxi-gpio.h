@@ -19,9 +19,10 @@ enum {
 };
 
 struct sunxi_gpio_irqchip {
-	struct device      dev;
-	struct irq_handle  irq;
-	struct irq_handle *list;
+	struct device       dev;
+	struct clock_handle clock;
+	struct irq_handle   irq;
+	struct irq_handle  *list;
 };
 
 extern struct sunxi_gpio_irqchip r_pio_irqchip;

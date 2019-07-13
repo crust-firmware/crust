@@ -34,15 +34,15 @@
 static int
 sunxi_gpio_irqchip_enable(struct device *dev, struct irq_handle *handle)
 {
-	struct irq_handle **list =
-		&container_of(dev, struct sunxi_gpio_irqchip, dev)->list;
+	struct sunxi_gpio_irqchip *this =
+		container_of(dev, struct sunxi_gpio_irqchip, dev);
 	uint8_t irq  = handle->irq;
 	uint8_t pin  = IRQ_PIN(irq);
 	uint8_t port = IRQ_PORT(irq);
 
 	/* Prepend the handle onto the list of IRQs. */
-	handle->next = *list;
-	*list        = handle;
+	handle->next = this->list;
+	this->list   = handle;
 
 	/* Set the IRQ mode. */
 	mmio_clrset_32(dev->regs + INT_CONFIG_REG(port, pin),
@@ -58,9 +58,9 @@ sunxi_gpio_irqchip_enable(struct device *dev, struct irq_handle *handle)
 static bool
 sunxi_gpio_irqchip_irq(const struct irq_handle *irq)
 {
-	struct sunxi_gpio_irqchip *irqchip =
+	struct sunxi_gpio_irqchip *this =
 		container_of(irq, struct sunxi_gpio_irqchip, irq);
-	struct device *dev = &irqchip->dev;
+	struct device *dev = &this->dev;
 	uint32_t reg;
 	bool handled = false;
 
@@ -74,7 +74,7 @@ sunxi_gpio_irqchip_irq(const struct irq_handle *irq)
 			if (!(reg & BIT(pin)))
 				continue;
 
-			const struct irq_handle *handle = irqchip->list;
+			const struct irq_handle *handle = this->list;
 			while (handle != NULL) {
 				if (handle->irq == SUNXI_GPIO_IRQ(port, pin) &&
 				    handle->handler(handle)) {
@@ -95,9 +95,11 @@ sunxi_gpio_irqchip_irq(const struct irq_handle *irq)
 static int
 sunxi_gpio_irqchip_probe(struct device *dev)
 {
+	struct sunxi_gpio_irqchip *this =
+		container_of(dev, struct sunxi_gpio_irqchip, dev);
 	int err;
 
-	if ((err = clock_get(&dev->clocks[0])))
+	if ((err = clock_get(&this->clock)))
 		return err;
 
 	/* Disable and clear all IRQs. */
@@ -106,8 +108,7 @@ sunxi_gpio_irqchip_probe(struct device *dev)
 		mmio_write_32(dev->regs + INT_STATUS_REG(port), ~0);
 	}
 
-	return irq_get(&container_of(dev, struct sunxi_gpio_irqchip,
-	                             dev)->irq);
+	return irq_get(&this->irq);
 }
 
 static const struct irq_driver sunxi_gpio_irqchip_driver = {
@@ -121,12 +122,12 @@ static const struct irq_driver sunxi_gpio_irqchip_driver = {
 
 struct sunxi_gpio_irqchip r_pio_irqchip = {
 	.dev = {
-		.name   = "r_pio_irqchip",
-		.regs   = DEV_R_PIO,
-		.drv    = &sunxi_gpio_irqchip_driver.drv,
-		.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_PIO),
+		.name = "r_pio_irqchip",
+		.regs = DEV_R_PIO,
+		.drv  = &sunxi_gpio_irqchip_driver.drv,
 	},
-	.irq = {
+	.clock = { .dev = &r_ccu.dev, .id = R_CCU_CLOCK_R_PIO },
+	.irq   = {
 		.dev     = &r_intc.dev,
 		.irq     = IRQ_R_PIO_PL,
 		.handler = sunxi_gpio_irqchip_irq,
