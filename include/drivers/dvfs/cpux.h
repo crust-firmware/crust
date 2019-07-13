@@ -13,6 +13,11 @@ enum {
 	CPUX_DVFS_DOMAIN_COUNT,
 };
 
-extern struct device cpux;
+struct cpux {
+	struct device dev;
+	uint8_t      *state;
+};
+
+extern struct cpux cpux;
 
 #endif /* DRIVERS_DVFS_CPUX_H */

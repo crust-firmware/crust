@@ -35,7 +35,7 @@ set_opp(void)
 	int err;
 
 	/* Update the CPU's OPP. */
-	if ((err = dvfs_set_opp(&cpux, 0, original_opp - throttle_level)))
+	if ((err = dvfs_set_opp(&cpux.dev, 0, original_opp - throttle_level)))
 		error("Failed to throttle CPU: %d", err);
 #endif
 
@@ -50,7 +50,7 @@ start_throttling(bool immediate)
 #if CONFIG_DVFS
 	/* Record the OPP in use before throttling. */
 	if (throttle_level == 0)
-		original_opp = dvfs_get_opp(&cpux, 0);
+		original_opp = dvfs_get_opp(&cpux.dev, 0);
 #endif
 
 	/* Do nothing if the system is fully throttled already. */

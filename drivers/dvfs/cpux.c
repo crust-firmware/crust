@@ -7,6 +7,7 @@
 #include <debug.h>
 #include <dvfs.h>
 #include <error.h>
+#include <intrusive.h>
 #include <limits.h>
 #include <mmio.h>
 #include <regulator.h>
@@ -66,7 +67,9 @@ cpux_get_info(struct device *dev __unused, uint8_t id __unused)
 static uint8_t
 cpux_get_opp(struct device *dev, uint8_t id __unused)
 {
-	return dev->drvdata;
+	uint8_t *state = container_of(dev, struct cpux, dev)->state;
+
+	return *state;
 }
 
 static int
@@ -86,7 +89,8 @@ cpux_set_pll(struct device *dev, uint8_t opp)
 static int
 cpux_set_opp(struct device *dev, uint8_t id __unused, uint8_t opp)
 {
-	uint8_t  previous = dev->drvdata;
+	uint8_t *state    = container_of(dev, struct cpux, dev)->state;
+	uint8_t  previous = *state;
 	uint16_t voltage  = cpux_opp_table[opp].voltage;
 	int err;
 
@@ -102,7 +106,7 @@ cpux_set_opp(struct device *dev, uint8_t id __unused, uint8_t opp)
 		return err;
 
 	/* Record the new OPP. */
-	dev->drvdata = opp;
+	*state = opp;
 
 	return SUCCESS;
 }
@@ -130,15 +134,18 @@ static const struct dvfs_driver cpux_driver = {
 	},
 };
 
-struct device cpux = {
-	.name = "cpux",
-	.regs = DEV_CCU,
-	.drv  = &cpux_driver.drv,
+struct cpux cpux = {
+	.dev = {
+		.name = "cpux",
+		.regs = DEV_CCU,
+		.drv  = &cpux_driver.drv,
 #if CONFIG_REGULATOR_AXP803
-	.supplydev = &axp803_regulator,
-	.supply    = AXP803_REGL_DCDC2,
+		.supplydev = &axp803_regulator,
+		.supply    = AXP803_REGL_DCDC2,
 #elif CONFIG_REGULATOR_SY8106A
-	.supplydev = &sy8106a,
-	.supply    = SY8106A_REGL_VOUT,
+		.supplydev = &sy8106a,
+		.supply    = SY8106A_REGL_VOUT,
 #endif
+	},
+	.state = &(uint8_t) { 0 },
 };

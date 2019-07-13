@@ -30,7 +30,7 @@ struct device *const device_list[] = {
 	IF_ENABLED_INIT(CONFIG_GPIO_BUTTON, &power_button)
 
 	/* SCPI DVFS providers */
-	IF_ENABLED_INIT(CONFIG_DVFS, &cpux)
+	IF_ENABLED_INIT(CONFIG_DVFS, &cpux.dev)
 
 	/* SCPI clock providers */
 	&ccu.dev,
