@@ -16,5 +16,5 @@ pmic_detect(void)
 	if (IS_ENABLED(CONFIG_PMIC_AXP803))
 		pmic = &axp803_pmic.dev;
 	else
-		pmic = &dummy_pmic;
+		pmic = &dummy_pmic.dev;
 }

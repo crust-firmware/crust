@@ -28,6 +28,11 @@ struct regulator_range {
 	const uint16_t step;        /**< Distance between adjacent values. */
 };
 
+struct regulator_handle {
+	struct device *dev; /**< The device containing this regulator. */
+	uint8_t        id;  /**< The per-device regulator identifier. */
+};
+
 struct regulator_info {
 	const char *const            name;      /**< Name exported to SCPI. */
 	const uint16_t               min_value; /**< Minimum allowed value. */

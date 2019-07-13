@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <compiler.h>
 #include <dm.h>
 #include <error.h>
 #include <pmic.h>
@@ -14,26 +13,39 @@
 static int
 dummy_pmic_power_off(struct device *dev)
 {
-	if (!dev->supplydev)
-		return SUCCESS;
+	struct dummy_pmic *this = container_of(dev, struct dummy_pmic, dev);
+	int err;
 
 	/* Turn CPU power off. */
-	return regulator_disable(dev->supplydev, dev->supply);
+	if (this->vdd_cpux.dev &&
+	    (err = regulator_disable(this->vdd_cpux.dev, this->vdd_cpux.id)))
+		return err;
+
+	return SUCCESS;
 }
 
 static int
 dummy_pmic_power_on(struct device *dev)
 {
-	if (!dev->supplydev)
-		return SUCCESS;
+	struct dummy_pmic *this = container_of(dev, struct dummy_pmic, dev);
+	int err;
 
 	/* Turn CPU power on. */
-	return regulator_enable(dev->supplydev, dev->supply);
+	if (this->vdd_cpux.dev &&
+	    (err = regulator_enable(this->vdd_cpux.dev, this->vdd_cpux.id)))
+		return err;
+
+	return SUCCESS;
 }
 
 static int
-dummy_pmic_probe(struct device *dev __unused)
+dummy_pmic_probe(struct device *dev)
 {
+	struct dummy_pmic *this = container_of(dev, struct dummy_pmic, dev);
+
+	if (this->vdd_cpux.dev)
+		device_probe(this->vdd_cpux.dev);
+
 	return SUCCESS;
 }
 
@@ -49,11 +61,15 @@ static const struct pmic_driver dummy_pmic_driver = {
 	},
 };
 
-struct device dummy_pmic = {
-	.name = "dummy-pmic",
-	.drv  = &dummy_pmic_driver.drv,
+struct dummy_pmic dummy_pmic = {
+	.dev = {
+		.name = "dummy-pmic",
+		.drv  = &dummy_pmic_driver.drv,
+	},
 #if CONFIG_REGULATOR_SY8106A
-	.supplydev = &sy8106a,
-	.supply    = SY8106A_REGL_VOUT,
+	.vdd_cpux = {
+		.dev = &sy8106a,
+		.id  = SY8106A_REGL_VOUT,
+	},
 #endif
 };
