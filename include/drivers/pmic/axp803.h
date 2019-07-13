@@ -6,8 +6,14 @@
 #ifndef DRIVERS_PMIC_AXP803_H
 #define DRIVERS_PMIC_AXP803_H
 
+#include <irq.h>
 #include <pmic.h>
 
-extern struct device axp803_pmic;
+struct axp803_pmic {
+	struct device     dev;
+	struct irq_handle irq;
+};
+
+extern struct axp803_pmic axp803_pmic;
 
 #endif /* DRIVERS_PMIC_AXP803_H */

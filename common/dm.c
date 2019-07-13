@@ -163,24 +163,6 @@ dm_setup_clocks(struct device *dev, uint8_t num_clocks)
 }
 
 int
-dm_setup_irq(struct device *dev, bool (*fn)(struct device *))
-{
-	struct device *controller;
-	struct irq_handle *handle = dev->irq;
-
-	/* Replace the controller reference with a link to the child device. */
-	controller  = handle->dev;
-	handle->dev = dev;
-	/* Put the function reference in the handle. */
-	handle->fn = fn;
-
-	/* Probe to ensure the interrupt controller's driver is loaded. */
-	device_probe(controller);
-
-	return irq_enable(controller, handle);
-}
-
-int
 dm_setup_pins(struct device *dev, uint8_t num_pins)
 {
 	struct gpio_handle *pins = dev->pins;

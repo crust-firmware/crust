@@ -25,7 +25,7 @@ static int
 sun4i_intc_enable(struct device *dev, struct irq_handle *handle)
 {
 	struct irq_handle **list =
-		&container_of(dev, struct irq_device, dev)->list;
+		&container_of(dev, struct sun4i_intc, dev)->list;
 
 	/* Prepend the handle onto the list of IRQs. */
 	handle->next = *list;
@@ -40,15 +40,15 @@ sun4i_intc_enable(struct device *dev, struct irq_handle *handle)
 void
 sun4i_intc_irq(struct device *dev)
 {
-	struct irq_handle **list =
-		&container_of(dev, struct irq_device, dev)->list;
-	struct irq_handle *handle = *list;
+	struct irq_handle *const *list =
+		&container_of(dev, struct sun4i_intc, dev)->list;
+	const struct irq_handle *handle = *list;
 	/* Get the number of the current IRQ. */
 	uint8_t irq = mmio_read_32(dev->regs + INTC_VECTOR_REG) >> 2;
 
 	/* Call the registered callback. */
 	while (handle != NULL) {
-		if (handle->irq == irq && handle->fn(handle->dev))
+		if (handle->irq == irq && handle->handler(handle))
 			break;
 		handle = handle->next;
 	}
@@ -84,7 +84,7 @@ static const struct irq_driver sun4i_intc_driver = {
 	},
 };
 
-struct irq_device r_intc = {
+struct sun4i_intc r_intc = {
 	.dev = {
 		.name = "r_intc",
 		.regs = DEV_R_INTC,

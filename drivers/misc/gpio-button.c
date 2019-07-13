@@ -5,6 +5,7 @@
 
 #include <compiler.h>
 #include <dm.h>
+#include <intrusive.h>
 #include <system_power.h>
 #include <gpio/sunxi-gpio.h>
 #include <irq/sunxi-gpio.h>
@@ -12,7 +13,7 @@
 #include <platform/devices.h>
 
 static bool
-gpio_button_irq(struct device *dev __unused)
+gpio_button_irq(const struct irq_handle *irq __unused)
 {
 	system_wakeup();
 
@@ -27,7 +28,7 @@ gpio_button_probe(struct device *dev)
 	if ((err = dm_setup_pins(dev, 1)))
 		return err;
 
-	return dm_setup_irq(dev, gpio_button_irq);
+	return irq_get(&container_of(dev, struct gpio_button, dev)->irq);
 }
 
 static const struct driver gpio_button_driver = {
@@ -35,15 +36,19 @@ static const struct driver gpio_button_driver = {
 	.probe = gpio_button_probe,
 };
 
-struct device power_button = {
-	.name = "power-button",
-	.drv  = &gpio_button_driver,
-	.irq  = IRQ_HANDLE {
-		.dev  = &r_pio_irqchip.dev,
-		.irq  = SUNXI_GPIO_IRQ(0, CONFIG_GPIO_BUTTON_PIN),
-		.mode = SUNXI_GPIO_IRQ_MODE_FALLING_EDGE,
+struct gpio_button power_button = {
+	.dev = {
+		.name = "power-button",
+		.drv  = &gpio_button_driver,
+		.pins = GPIO_PINS(1) {
+			{ &r_pio,
+			  SUNXI_GPIO_PIN(0, CONFIG_GPIO_BUTTON_PIN), 6 },
+		},
 	},
-	.pins = GPIO_PINS(1) {
-		{ &r_pio, SUNXI_GPIO_PIN(0, CONFIG_GPIO_BUTTON_PIN), 6 },
+	.irq = {
+		.dev     = &r_pio_irqchip.dev,
+		.irq     = SUNXI_GPIO_IRQ(0, CONFIG_GPIO_BUTTON_PIN),
+		.mode    = SUNXI_GPIO_IRQ_MODE_FALLING_EDGE,
+		.handler = gpio_button_irq,
 	},
 };

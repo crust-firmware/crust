@@ -11,23 +11,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define IRQ_OPS(dev) \
-	(&container_of((dev)->drv, struct irq_driver, drv)->ops)
-
-#define IRQ_HANDLE &(struct irq_handle)
-
 struct irq_handle {
 	struct irq_handle *next;
 	struct device     *dev;
-	bool               (*fn)(struct device *);
-
 	const uint8_t      irq;
 	const uint8_t      mode;
-};
-
-struct irq_device {
-	struct device      dev;
-	struct irq_handle *list;
+	bool               (*handler)(const struct irq_handle *);
 };
 
 struct irq_driver_ops {
@@ -39,10 +28,11 @@ struct irq_driver {
 	const struct irq_driver_ops ops;
 };
 
-static inline int
-irq_enable(struct device *dev, struct irq_handle *handle)
-{
-	return IRQ_OPS(dev)->enable(dev, handle);
-}
+/**
+ * Get a reference to an IRQ line's controller device; then enable the IRQ.
+ *
+ * @param irq  A handle for the IRQ line
+ */
+int irq_get(struct irq_handle *irq);
 
 #endif /* DRIVERS_IRQ_H */

@@ -23,11 +23,11 @@ struct device *const device_list[] = {
 	&msgbox,
 
 	/* PMICs */
-	IF_ENABLED_INIT(CONFIG_PMIC_AXP803, &axp803_pmic)
+	IF_ENABLED_INIT(CONFIG_PMIC_AXP803, &axp803_pmic.dev)
 	IF_ENABLED_INIT(CONFIG_PMIC_DUMMY, &dummy_pmic)
 
 	/* Wakeup sources */
-	IF_ENABLED_INIT(CONFIG_GPIO_BUTTON, &power_button)
+	IF_ENABLED_INIT(CONFIG_GPIO_BUTTON, &power_button.dev)
 
 	/* SCPI DVFS providers */
 	IF_ENABLED_INIT(CONFIG_DVFS, &cpux.dev)

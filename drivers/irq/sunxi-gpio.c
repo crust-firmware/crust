@@ -35,7 +35,7 @@ static int
 sunxi_gpio_irqchip_enable(struct device *dev, struct irq_handle *handle)
 {
 	struct irq_handle **list =
-		&container_of(dev, struct irq_device, dev)->list;
+		&container_of(dev, struct sunxi_gpio_irqchip, dev)->list;
 	uint8_t irq  = handle->irq;
 	uint8_t pin  = IRQ_PIN(irq);
 	uint8_t port = IRQ_PORT(irq);
@@ -56,10 +56,11 @@ sunxi_gpio_irqchip_enable(struct device *dev, struct irq_handle *handle)
 }
 
 static bool
-sunxi_gpio_irqchip_irq(struct device *dev)
+sunxi_gpio_irqchip_irq(const struct irq_handle *irq)
 {
-	struct irq_handle **list =
-		&container_of(dev, struct irq_device, dev)->list;
+	struct sunxi_gpio_irqchip *irqchip =
+		container_of(irq, struct sunxi_gpio_irqchip, irq);
+	struct device *dev = &irqchip->dev;
 	uint32_t reg;
 	bool handled = false;
 
@@ -73,10 +74,10 @@ sunxi_gpio_irqchip_irq(struct device *dev)
 			if (!(reg & BIT(pin)))
 				continue;
 
-			struct irq_handle *handle = *list;
+			const struct irq_handle *handle = irqchip->list;
 			while (handle != NULL) {
 				if (handle->irq == SUNXI_GPIO_IRQ(port, pin) &&
-				    handle->fn(handle->dev)) {
+				    handle->handler(handle)) {
 					handled = true;
 					break;
 				}
@@ -105,7 +106,8 @@ sunxi_gpio_irqchip_probe(struct device *dev)
 		mmio_write_32(dev->regs + INT_STATUS_REG(port), ~0);
 	}
 
-	return dm_setup_irq(dev, sunxi_gpio_irqchip_irq);
+	return irq_get(&container_of(dev, struct sunxi_gpio_irqchip,
+	                             dev)->irq);
 }
 
 static const struct irq_driver sunxi_gpio_irqchip_driver = {
@@ -118,15 +120,16 @@ static const struct irq_driver sunxi_gpio_irqchip_driver = {
 	},
 };
 
-struct irq_device r_pio_irqchip = {
+struct sunxi_gpio_irqchip r_pio_irqchip = {
 	.dev = {
 		.name   = "r_pio_irqchip",
 		.regs   = DEV_R_PIO,
 		.drv    = &sunxi_gpio_irqchip_driver.drv,
 		.clocks = CLOCK_PARENT(r_ccu, R_CCU_CLOCK_R_PIO),
-		.irq    = IRQ_HANDLE {
-			.dev = &r_intc.dev,
-			.irq = IRQ_R_PIO_PL,
-		},
+	},
+	.irq = {
+		.dev     = &r_intc.dev,
+		.irq     = IRQ_R_PIO_PL,
+		.handler = sunxi_gpio_irqchip_irq,
 	},
 };

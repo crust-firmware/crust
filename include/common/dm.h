@@ -50,8 +50,6 @@ struct device {
 	struct device *const       bus;
 	/** The clocks utilized by this device. */
 	struct clock_handle *const clocks;
-	/** The IRQ line connected to this device. */
-	struct irq_handle *const   irq;
 	/** The GPIO pins utilized by this device. */
 	struct gpio_handle *const  pins;
 	/** The controller for this device's power supply (regulator). */
@@ -166,14 +164,6 @@ void dm_poll(void);
  * @param num_clocks The number of clocks utilized by the device.
  */
 int dm_setup_clocks(struct device *dev, uint8_t num_clocks);
-
-/**
- * Set up the IRQ lines used by a device.
- *
- * @param dev   The device referencing the IRQs to initialize.
- * @param fn    The function to call when an IRQ is received.
- */
-int dm_setup_irq(struct device *dev, bool (*fn)(struct device *));
 
 /**
  * Set the mode of the GPIO pins specified for a device.

@@ -9,7 +9,12 @@
 #include <irq.h>
 #include <platform/irq.h>
 
-extern struct irq_device r_intc;
+struct sun4i_intc {
+	struct device      dev;
+	struct irq_handle *list;
+};
+
+extern struct sun4i_intc r_intc;
 
 void sun4i_intc_irq(struct device *dev);
 

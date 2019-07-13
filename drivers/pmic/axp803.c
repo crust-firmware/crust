@@ -6,6 +6,7 @@
 #include <debug.h>
 #include <dm.h>
 #include <error.h>
+#include <intrusive.h>
 #include <pmic.h>
 #include <rsb.h>
 #include <system_power.h>
@@ -37,8 +38,9 @@
 #define PIN_FUNCTION_REG  0x8f
 
 static bool
-axp803_pmic_irq(struct device *dev)
+axp803_pmic_irq(const struct irq_handle *irq)
 {
+	struct device *dev = &container_of(irq, struct axp803_pmic, irq)->dev;
 	uint8_t reg;
 	int err;
 
@@ -118,7 +120,7 @@ axp803_pmic_probe(struct device *dev)
 		return err;
 
 	/* Register the NMI IRQ handler. */
-	return dm_setup_irq(dev, axp803_pmic_irq);
+	return irq_get(&container_of(dev, struct axp803_pmic, dev)->irq);
 }
 
 static const struct pmic_driver axp803_pmic_driver = {
@@ -134,13 +136,16 @@ static const struct pmic_driver axp803_pmic_driver = {
 	},
 };
 
-struct device axp803_pmic = {
-	.name = "axp803-pmic",
-	.drv  = &axp803_pmic_driver.drv,
-	.bus  = &r_rsb,
-	.addr = AXP803_RSB_RTADDR,
-	.irq  = IRQ_HANDLE {
-		.dev = &r_intc.dev,
-		.irq = IRQ_NMI,
+struct axp803_pmic axp803_pmic = {
+	.dev = {
+		.name = "axp803-pmic",
+		.drv  = &axp803_pmic_driver.drv,
+		.bus  = &r_rsb,
+		.addr = AXP803_RSB_RTADDR,
+	},
+	.irq = {
+		.dev     = &r_intc.dev,
+		.irq     = IRQ_NMI,
+		.handler = axp803_pmic_irq,
 	},
 };
