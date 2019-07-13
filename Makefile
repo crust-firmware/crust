@@ -188,6 +188,7 @@ $(TGT)/%.o: $(SRC)/%.S
 	$(Q) $(CC) $(CPPFLAGS) $(AFLAGS) -MMD -c -o $@ $<
 
 $(SRC)/Makefile:;
+$(SRC)/%.h:;
 
 .PHONY: all check clean clobber distclean scp tools
 .SECONDARY:
