@@ -14,6 +14,12 @@
 #define GPIO_OPS(dev) \
 	(&container_of((dev)->drv, struct gpio_driver, drv)->ops)
 
+struct gpio_handle {
+	struct device *const dev;
+	const uint8_t        pin;
+	const uint8_t        mode;
+};
+
 struct gpio_driver_ops {
 	int (*get_value)(struct device *dev, uint8_t pin, bool *value);
 	int (*set_mode)(struct device *dev, uint8_t pin, uint8_t mode);
@@ -23,12 +29,6 @@ struct gpio_driver_ops {
 struct gpio_driver {
 	const struct driver          drv;
 	const struct gpio_driver_ops ops;
-};
-
-struct gpio_handle {
-	struct device *const dev;
-	const uint8_t        pin;
-	const uint8_t        mode;
 };
 
 /**

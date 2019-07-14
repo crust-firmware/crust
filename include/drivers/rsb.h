@@ -27,6 +27,11 @@ enum {
 	RSB_WR32 = 0x63,
 };
 
+struct rsb_handle {
+	struct device *dev;
+	uint8_t        addr;
+};
+
 struct rsb_driver_ops {
 	int (*init_pmic)(struct device *dev, uint32_t addr, uint8_t reg,
 	                 uint8_t data);

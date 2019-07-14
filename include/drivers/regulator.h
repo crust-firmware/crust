@@ -22,15 +22,15 @@ enum {
 	REGL_SCPI_MASK = REGL_READABLE | REGL_WRITABLE,
 };
 
+struct regulator_handle {
+	struct device *dev; /**< The device containing this regulator. */
+	uint8_t        id;  /**< The per-device regulator identifier. */
+};
+
 struct regulator_range {
 	const uint16_t start_raw;   /**< Smallest raw value in the range. */
 	const int16_t  start_value; /**< Cooked value at smallest raw value. */
 	const uint16_t step;        /**< Distance between adjacent values. */
-};
-
-struct regulator_handle {
-	struct device *dev; /**< The device containing this regulator. */
-	uint8_t        id;  /**< The per-device regulator identifier. */
 };
 
 struct regulator_info {

@@ -20,6 +20,11 @@ enum {
 	I2C_WRITE = 0,
 };
 
+struct i2c_handle {
+	struct device *dev;
+	uint8_t        addr;
+};
+
 struct i2c_driver_ops {
 	int  (*read)(struct device *dev, uint8_t *data);
 	int  (*start)(struct device *dev, uint8_t addr, uint8_t direction);
