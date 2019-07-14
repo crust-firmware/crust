@@ -7,6 +7,7 @@
 #define DRIVERS_REGULATOR_AXP803_H
 
 #include <regulator.h>
+#include <rsb.h>
 
 enum {
 	AXP803_REGL_DCDC1,
@@ -33,6 +34,11 @@ enum {
 	AXP803_REGL_COUNT,
 };
 
-extern struct device axp803_regulator;
+struct axp803_regulator {
+	struct device     dev;
+	struct rsb_handle bus;
+};
+
+extern struct axp803_regulator axp803_regulator;
 
 #endif /* DRIVERS_REGULATOR_AXP803_H */

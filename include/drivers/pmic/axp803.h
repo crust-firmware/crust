@@ -8,9 +8,11 @@
 
 #include <irq.h>
 #include <pmic.h>
+#include <rsb.h>
 
 struct axp803_pmic {
 	struct device     dev;
+	struct rsb_handle bus;
 	struct irq_handle irq;
 };
 

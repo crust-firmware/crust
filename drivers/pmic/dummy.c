@@ -68,7 +68,7 @@ struct dummy_pmic dummy_pmic = {
 	},
 #if CONFIG_REGULATOR_SY8106A
 	.vdd_cpux = {
-		.dev = &sy8106a,
+		.dev = &sy8106a.dev,
 		.id  = SY8106A_REGL_VOUT,
 	},
 #endif

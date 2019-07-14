@@ -33,13 +33,11 @@ struct rsb_handle {
 };
 
 struct rsb_driver_ops {
-	int (*init_pmic)(struct device *dev, uint32_t addr, uint8_t reg,
-	                 uint8_t data);
-	int (*read)(struct device *dev, uint8_t addr, uint8_t reg,
-	            uint8_t *data);
-	int (*set_rate)(struct device *dev, uint32_t rate);
-	int (*write)(struct device *dev, uint8_t addr, uint8_t reg,
+	int (*probe)(struct rsb_handle *bus, uint16_t hwaddr, uint8_t addr,
 	             uint8_t data);
+	int (*read)(struct rsb_handle *bus, uint8_t addr, uint8_t *data);
+	int (*set_rate)(struct device *dev, uint32_t rate);
+	int (*write)(struct rsb_handle *bus, uint8_t addr, uint8_t data);
 };
 
 struct rsb_driver {
@@ -48,53 +46,46 @@ struct rsb_driver {
 };
 
 /**
- * Probe for an RSB PMIC, switch it to RSB mode, and set its runtime address.
+ * Probe for an RSB device, switch it to RSB mode, and set its runtime address.
  *
- * @param dev   The RSB controller that the device is connected to.
- * @param addr  A pointer to a word containing the device address in the two
- *              least significant bytes, and where the runtime address will be
- *              stored in the third byte.
- * @param reg   The register used to switch the PMIC to RSB mode.
- * @param data  The data value that will switch the PMIC to RSB mode.
+ * @param bus    The RSB bus that the device is connected to.
+ * @param hwaddr The hardware address of this device.
+ * @param addr   The register used to switch the PMIC to RSB mode.
+ * @param data   The data value that will switch the PMIC to RSB mode.
  */
-static inline int
-rsb_init_pmic(struct device *dev, uint32_t addr, uint8_t reg, uint8_t data)
-{
-	return RSB_OPS(dev)->init_pmic(dev, addr, reg, data);
-}
+int rsb_probe(struct rsb_handle *bus, uint16_t hwaddr, uint8_t addr,
+              uint8_t data);
 
 /**
  * Read a register contained inside an RSB device.
  *
- * @param dev   The RSB controller that the device is connected to.
- * @param addr  The address of the RSB device (as passed to rsb_probe).
- * @param reg   The register within the the RSB device to read.
+ * @param bus   The RSB bus that the device is connected to.
+ * @param addr  The register within the the RSB device to read.
  * @param data  The location to save the data read from the register.
  */
 static inline int
-rsb_read(struct device *dev, uint8_t addr, uint8_t reg, uint8_t *data)
+rsb_read(struct rsb_handle *bus, uint8_t addr, uint8_t *data)
 {
-	return RSB_OPS(dev)->read(dev, addr, reg, data);
+	return RSB_OPS(bus->dev)->read(bus, addr, data);
 }
 
 static inline int
-rsb_set_rate(struct device *dev, uint32_t rate)
+rsb_set_rate(struct rsb_handle *bus, uint32_t rate)
 {
-	return RSB_OPS(dev)->set_rate(dev, rate);
+	return RSB_OPS(bus->dev)->set_rate(bus->dev, rate);
 }
 
 /**
  * Write to a register contained inside an RSB device.
  *
- * @param dev   The RSB controller that the device is connected to.
- * @param addr  The address of the RSB device (as passed to rsb_probe).
- * @param reg   The register within the the RSB device to write.
+ * @param bus   The RSB bus that the device is connected to.
+ * @param addr  The register within the the RSB device to write.
  * @param data  The data to write to the register.
  */
 static inline int
-rsb_write(struct device *dev, uint8_t addr, uint8_t reg, uint8_t data)
+rsb_write(struct rsb_handle *bus, uint8_t addr, uint8_t data)
 {
-	return RSB_OPS(dev)->write(dev, addr, reg, data);
+	return RSB_OPS(bus->dev)->write(bus, addr, data);
 }
 
 #endif /* DRIVERS_RSB_H */

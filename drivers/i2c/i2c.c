@@ -8,77 +8,80 @@
 #include <stdint.h>
 
 int
-i2c_probe(struct device *dev, uint8_t addr)
+i2c_probe(struct i2c_handle *bus)
 {
-	const struct i2c_driver_ops *ops = I2C_OPS(dev);
+	const struct i2c_driver_ops *ops = I2C_OPS(bus->dev);
 	uint8_t dummy;
 	int err;
 
+	/* Ensure the controller's driver is loaded. */
+	device_probe(bus->dev);
+
 	/* Start a read transaction. */
-	if ((err = ops->start(dev, addr, I2C_READ)))
+	if ((err = ops->start(bus, I2C_READ)))
 		goto abort;
 
 	/* Read data to avoid putting the device in an inconsistent state. */
-	if (ops->read(dev, &dummy))
+	if (ops->read(bus, &dummy))
 		goto abort;
 
 abort:
 	/* Finish the transaction. */
-	ops->stop(dev);
+	ops->stop(bus);
 
 	return err;
 }
 
 int
-i2c_read_reg(struct device *dev, uint8_t addr, uint8_t reg, uint8_t *data)
+i2c_read_reg(struct i2c_handle *bus, uint8_t addr, uint8_t *data)
 {
-	const struct i2c_driver_ops *ops = I2C_OPS(dev);
+	const struct i2c_driver_ops *ops = I2C_OPS(bus->dev);
 	int err;
 
 	/* Start a write transaction. */
-	if ((err = ops->start(dev, addr, I2C_WRITE)))
+	if ((err = ops->start(bus, I2C_WRITE)))
 		goto abort;
 
 	/* Write the register address. */
-	if ((err = ops->write(dev, reg)))
+	if ((err = ops->write(bus, addr)))
 		goto abort;
 
 	/* Restart as a read transaction. */
-	if ((err = ops->start(dev, addr, I2C_READ)))
+	if ((err = ops->start(bus, I2C_READ)))
 		goto abort;
 
 	/* Read the register data. */
-	if ((err = ops->read(dev, data)))
+	if ((err = ops->read(bus, data)))
 		goto abort;
 
 abort:
 	/* Finish the transaction. */
-	ops->stop(dev);
+	ops->stop(bus);
 
 	return err;
 }
 
 int
-i2c_write_reg(struct device *dev, uint8_t addr, uint8_t reg, uint8_t data)
+i2c_write_reg(struct i2c_handle *bus, uint8_t addr, uint8_t data)
 {
-	const struct i2c_driver_ops *ops = I2C_OPS(dev);
+	const struct i2c_driver_ops *ops = I2C_OPS(bus->dev);
 	int err;
 
 	/* Start a write transaction. */
-	if ((err = ops->start(dev, addr, I2C_WRITE)))
+	if ((err = ops->start(bus, I2C_WRITE)))
 		goto abort;
 
 	/* Write the register address. */
-	if ((err = ops->write(dev, reg)))
+	if ((err = ops->write(bus, addr)))
 		goto abort;
 
 	/* Write the register data. */
-	if ((err = ops->write(dev, data)))
+	if ((err = ops->write(bus, data)))
 		goto abort;
 
 abort:
 	/* Finish the transaction. */
-	ops->stop(dev);
+	ops->stop(bus);
 
 	return err;
 }

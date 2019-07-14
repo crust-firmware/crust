@@ -20,18 +20,17 @@
 static bool initialized;
 
 int
-axp803_init_once(struct device *dev)
+axp803_probe(struct rsb_handle *bus)
 {
-	struct device *bus = dev->bus;
-	uint32_t addr      = RSB_RTADDR(dev->addr) | AXP803_RSB_HWADDR;
-	uint8_t  reg;
+	uint8_t reg;
 	int err;
 
 	if (initialized)
 		return SUCCESS;
-	if ((err = rsb_init_pmic(bus, addr, AXP803_MODE_REG, AXP803_MODE_VAL)))
+	if ((err = rsb_probe(bus, AXP803_RSB_HWADDR,
+	                     AXP803_MODE_REG, AXP803_MODE_VAL)))
 		return err;
-	if ((err = rsb_read(bus, dev->addr, IC_TYPE_REG, &reg)))
+	if ((err = rsb_read(bus, IC_TYPE_REG, &reg)))
 		return err;
 	if ((reg & IC_TYPE_MASK) != IC_TYPE_VALUE)
 		return ENODEV;
@@ -42,15 +41,13 @@ axp803_init_once(struct device *dev)
 }
 
 int
-axp803_reg_setbits(struct device *dev, uint8_t reg, uint8_t bits)
+axp803_reg_setbits(struct rsb_handle *bus, uint8_t addr, uint8_t bits)
 {
-	struct device *bus = dev->bus;
-	uint8_t addr       = dev->addr;
 	uint8_t tmp;
 	int err;
 
-	if ((err = rsb_read(bus, addr, reg, &tmp)))
+	if ((err = rsb_read(bus, addr, &tmp)))
 		return err;
 
-	return rsb_write(bus, addr, reg, tmp | bits);
+	return rsb_write(bus, addr, tmp | bits);
 }

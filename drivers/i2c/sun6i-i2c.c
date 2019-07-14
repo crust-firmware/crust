@@ -90,8 +90,10 @@ sun6i_i2c_wait_state(struct device *dev, uint8_t state)
 }
 
 static int
-sun6i_i2c_read(struct device *dev, uint8_t *data)
+sun6i_i2c_read(struct i2c_handle *bus, uint8_t *data)
 {
+	struct device *dev = bus->dev;
+
 	/* Disable sending an ACK and trigger a state change. */
 	mmio_clrset_32(dev->regs + I2C_CTRL_REG, BIT(2), BIT(3));
 
@@ -106,8 +108,9 @@ sun6i_i2c_read(struct device *dev, uint8_t *data)
 }
 
 static int
-sun6i_i2c_start(struct device *dev, uint8_t addr, uint8_t direction)
+sun6i_i2c_start(struct i2c_handle *bus, uint8_t direction)
 {
+	struct device *dev = bus->dev;
 	uint8_t init_state = mmio_read_32(dev->regs + I2C_STAT_REG);
 	uint8_t state;
 
@@ -125,7 +128,7 @@ sun6i_i2c_start(struct device *dev, uint8_t addr, uint8_t direction)
 		return EIO;
 
 	/* Write the address and direction, then trigger a state change. */
-	mmio_write_32(dev->regs + I2C_DATA_REG, (addr << 1) | direction);
+	mmio_write_32(dev->regs + I2C_DATA_REG, (bus->addr << 1) | direction);
 	mmio_set_32(dev->regs + I2C_CTRL_REG, BIT(3));
 
 	/* Check for address acknowledgement. */
@@ -137,8 +140,10 @@ sun6i_i2c_start(struct device *dev, uint8_t addr, uint8_t direction)
 }
 
 static void
-sun6i_i2c_stop(struct device *dev)
+sun6i_i2c_stop(struct i2c_handle *bus)
 {
+	struct device *dev = bus->dev;
+
 	/* Send a stop condition. */
 	mmio_set_32(dev->regs + I2C_CTRL_REG, BIT(4) | BIT(3));
 
@@ -147,8 +152,10 @@ sun6i_i2c_stop(struct device *dev)
 }
 
 static int
-sun6i_i2c_write(struct device *dev, uint8_t data)
+sun6i_i2c_write(struct i2c_handle *bus, uint8_t data)
 {
+	struct device *dev = bus->dev;
+
 	/* Write data, then trigger a state change. */
 	mmio_write_32(dev->regs + I2C_DATA_REG, data);
 	mmio_set_32(dev->regs + I2C_CTRL_REG, BIT(3));
