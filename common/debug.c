@@ -22,10 +22,10 @@ static char *prefixes[LOG_LEVELS] = {
 	"DEBUG:\t ",
 };
 
-static void print_decimal(char sign, int width, bool zero, uint32_t num);
+static void print_decimal(int width, bool zero, uint32_t num);
 static void print_hex(int width, bool zero, uint32_t num);
 static void print_padding(int width, bool zero);
-static void print_signed(char sign, int width, bool zero, int32_t num);
+static void print_signed(int width, bool zero, int32_t num);
 static void print_string(const char *s);
 
 void
@@ -60,7 +60,7 @@ void
 log(const char *fmt, ...)
 {
 	bool zero;
-	char c, sign;
+	char c;
 	int  width;
 	uintptr_t arg, level;
 	va_list args;
@@ -84,25 +84,17 @@ log(const char *fmt, ...)
 			continue;
 		}
 		arg   = va_arg(args, uintptr_t);
-		sign  = '\0';
 		width = 0;
 		zero  = false;
 conversion:
 		switch ((c = *fmt++)) {
-		case ' ':
-			if (!sign)
-				sign = ' ';
-			goto conversion;
-		case '+':
-			sign = '+';
-			goto conversion;
 		case 'c':
 			print_padding(width - 1, zero);
 			console_putc(arg);
 			break;
 		case 'd':
 		case 'i':
-			print_signed(sign, width, zero, arg);
+			print_signed(width, zero, arg);
 			break;
 		case 'p':
 			/* "%p" behaves like "0x%08x". */
@@ -119,7 +111,7 @@ conversion:
 			print_string((const char *)arg);
 			break;
 		case 'u':
-			print_decimal(sign, width, zero, arg);
+			print_decimal(width, zero, arg);
 			break;
 		default:
 			assert(c);
@@ -136,7 +128,7 @@ conversion:
 }
 
 static void
-print_decimal(char sign, int width, bool zero, uint32_t num)
+print_decimal(int width, bool zero, uint32_t num)
 {
 	unsigned digits  = 1;
 	unsigned divisor = 1;
@@ -144,10 +136,6 @@ print_decimal(char sign, int width, bool zero, uint32_t num)
 	while (divisor <= num / 10) {
 		++digits;
 		divisor *= 10;
-	}
-	if (sign) {
-		console_putc(sign);
-		--width;
 	}
 	print_padding(width - digits, zero);
 	while (digits--) {
@@ -189,12 +177,14 @@ print_padding(int width, bool zero)
 }
 
 static void
-print_signed(char sign, int width, bool zero, int32_t num)
+print_signed(int width, bool zero, int32_t num)
 {
-	if (num < 0)
-		print_decimal('-', width, zero, -num);
-	else
-		print_decimal(sign, width, zero, num);
+	if (num < 0) {
+		console_putc('-');
+		print_decimal(width ? width - 1 : width, zero, -num);
+	} else {
+		print_decimal(width, zero, num);
+	}
 }
 
 static void
