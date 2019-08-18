@@ -11,7 +11,7 @@ env:
 language: c
 
 install:
-  - curl -LSs https://github.com/openrisc/or1k-gcc/releases/download/or1k-5.4.0-20170218/or1k-linux-musl-5.4.0-20170218.tar.xz | tar xJf -
+  - curl -LSs https://github.com/stffrdhrn/gcc/releases/download/or1k-9.1.1-20190507/or1k-linux-musl-9.1.1-20190507.tar.xz | tar xJf -
   - export PATH=$PATH:$PWD/or1k-linux-musl/bin
 
 matrix:
