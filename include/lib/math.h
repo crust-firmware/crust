@@ -11,4 +11,12 @@
  */
 #define popcount(x) __builtin_popcount(x)
 
+/**
+ * Perform unsigned division.
+ *
+ * This function replaces the dividend with the quotient and returns the
+ * remainder.
+ */
+uint32_t udivmod(uint32_t *dividend, uint32_t divisor);
+
 #endif /* LIB_MATH_H */
