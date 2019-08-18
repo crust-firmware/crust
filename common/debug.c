@@ -89,7 +89,6 @@ log(const char *fmt, ...)
 conversion:
 		switch ((c = *fmt++)) {
 		case 'c':
-			print_padding(width - 1, zero);
 			console_putc(arg);
 			break;
 		case 'd':
@@ -107,7 +106,6 @@ conversion:
 			break;
 		case 's':
 			assert(arg);
-			print_padding(width - strlen((const char *)arg), zero);
 			print_string((const char *)arg);
 			break;
 		case 'u':
