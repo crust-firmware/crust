@@ -69,6 +69,6 @@ script:
       or1k-linux-musl-size build/$config/scp.elf
       grep __bss_end build/$config/scp.map
       sha256sum -b build/$config/scp.bin
-      echo ========== end $config ==========
+      echo =========== end $config ===========
     done
 ...
