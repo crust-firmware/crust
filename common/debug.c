@@ -6,6 +6,7 @@
 #include <console.h>
 #include <ctype.h>
 #include <debug.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -22,10 +23,8 @@ static char *prefixes[LOG_LEVELS] = {
 	"DEBUG:\t ",
 };
 
-static void print_decimal(int width, bool zero, uint32_t num);
-static void print_hex(int width, bool zero, uint32_t num);
-static void print_padding(int width, bool zero);
-static void print_signed(int width, bool zero, int32_t num);
+static void print_number(uint32_t num, int base, int width, bool zero);
+static void print_signed(int32_t num, int base, int width, bool zero);
 static void print_string(const char *s);
 
 void
@@ -93,23 +92,22 @@ conversion:
 			break;
 		case 'd':
 		case 'i':
-			print_signed(width, zero, arg);
+			print_signed(arg, 10, width, zero);
 			break;
 		case 'p':
 			/* "%p" behaves like "0x%08x". */
 			print_string("0x");
-			width = 2 * sizeof(arg);
-			zero  = true;
-		/* falls through */
+			print_number(arg, 16, 2 * sizeof(arg), true);
+			break;
 		case 'x':
-			print_hex(width, zero, arg);
+			print_number(arg, 16, width, zero);
 			break;
 		case 's':
 			assert(arg);
 			print_string((const char *)arg);
 			break;
 		case 'u':
-			print_decimal(width, zero, arg);
+			print_number(arg, 10, width, zero);
 			break;
 		default:
 			assert(c);
@@ -126,62 +124,29 @@ conversion:
 }
 
 static void
-print_decimal(int width, bool zero, uint32_t num)
+print_number(uint32_t num, int base, int width, bool zero)
 {
-	unsigned digits  = 1;
-	unsigned divisor = 1;
+	static const char chars[16] = "0123456789abcdef";
+	char digits[3 * sizeof(num)];
+	int  i = 0;
 
-	while (divisor <= num / 10) {
-		++digits;
-		divisor *= 10;
-	}
-	print_padding(width - digits, zero);
-	while (digits--) {
-		uint32_t digit = 0;
-		while (num >= divisor) {
-			num -= divisor;
-			++digit;
-		}
-		console_putc(digit + '0');
-		divisor /= 10;
-	}
-}
-
-static void
-print_hex(int width, bool zero, uint32_t num)
-{
-	unsigned bits   = 8 * sizeof(num);
-	unsigned digits = 2 * sizeof(num);
-
-	while (digits > 1) {
-		if ((num >> (bits - 4)) & 0xf)
-			break;
-		--digits;
-		num <<= 4;
-	}
-	print_padding(width - digits, zero);
-	while (digits--) {
-		uint32_t digit = (num >> (bits - 4)) & 0xf;
-		console_putc(digit < 10 ? digit + '0' : digit - 10 + 'a');
-		num <<= 4;
-	}
-}
-
-static void
-print_padding(int width, bool zero)
-{
-	for (int i = 0; i < width; ++i)
+	do {
+		digits[i++] = chars[udivmod(&num, base)];
+	} while (num);
+	while (width-- > i)
 		console_putc(zero ? '0' : ' ');
+	while (i--)
+		console_putc(digits[i]);
 }
 
 static void
-print_signed(int width, bool zero, int32_t num)
+print_signed(int32_t num, int base, int width, bool zero)
 {
 	if (num < 0) {
 		console_putc('-');
-		print_decimal(width ? width - 1 : width, zero, -num);
+		print_number(-num, base, width ? width - 1 : width, zero);
 	} else {
-		print_decimal(width, zero, num);
+		print_number(num, base, width, zero);
 	}
 }
 
