@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <debug.h>
 #include <delay.h>
 #include <limits.h>
 #include <stdint.h>
@@ -28,7 +27,5 @@ delay_cycles(uint32_t cycles)
 void
 udelay(uint32_t useconds)
 {
-	assert(useconds < UINT32_MAX / REFCLK_MHZ);
-
 	delay_cycles(REFCLK_MHZ * useconds);
 }

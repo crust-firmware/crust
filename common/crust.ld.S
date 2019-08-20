@@ -21,7 +21,7 @@ SECTIONS
   . = FIRMWARE_BASE;
 
   .text . : ALIGN(4) {
-    KEEP(*(.text.vector_stub_common))
+    KEEP(*(.text.start))
     *(SORT_BY_ALIGNMENT(SORT_BY_NAME(.text*)))
     . = ALIGN(4);
   } >SRAM_A2

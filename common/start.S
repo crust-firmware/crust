@@ -7,6 +7,7 @@
 #include <arch/spr.h>
 
 func start
+	l.mfspr r2, r0, SPR_SYS_PPC_ADDR
 	l.addi	r3, r0, 0		# Invalidate instruction cache
 	l.addi	r4, r0, 4096		# Cache lines (256) * block size (16)
 1:	l.mtspr	r0, r3, SPR_ICACHE_ICBIR_ADDR

@@ -6,7 +6,6 @@
 mainmenu "Crust Firmware Configuration"
 
 source "platform/Kconfig"
-source "drivers/Kconfig"
 
 menu "Debugging options"
 
