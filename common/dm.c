@@ -15,10 +15,6 @@ device_probe(struct device *dev)
 	if (dev->flags & DEVICE_FLAG_RUNNING)
 		return;
 
-	/* Probe all devices this device depends on. */
-	if (dev->bus)
-		device_probe(dev->bus);
-
 	/* Probe the device itself, and report any errors. */
 	if ((err = dev->drv->probe(dev)))
 		panic("dm: Failed to probe %s (%d)", dev->name, err);

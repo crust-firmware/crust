@@ -24,10 +24,6 @@ struct device {
 	const uintptr_t            regs;
 	/** The driver for this device. */
 	const struct driver *const drv;
-	/** The controller for the bus this device is connected to. */
-	struct device *const       bus;
-	/** A bus-specific address/port (if this device is on a bus). */
-	const uint8_t              addr;
 	/** Flags describing this device's state. */
 	uint8_t                    flags;
 };
