@@ -9,7 +9,6 @@
 #include <delay.h>
 #include <dm.h>
 #include <error.h>
-#include <interrupts.h>
 #include <pmic.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -57,19 +56,12 @@ system_shutdown(void)
 void
 system_suspend(void)
 {
-	uint32_t flags = disable_interrupts();
-
 	/* If the system is already suspended, do nothing. */
-	if (is_suspended) {
-		restore_interrupts(flags);
+	if (is_suspended)
 		return;
-	}
 
 	/* Mark the system as being suspended. */
 	is_suspended = true;
-
-	/* State management is done, so we can resume handling interrupts. */
-	restore_interrupts(flags);
 
 	pmic_suspend(pmic);
 }
@@ -77,22 +69,15 @@ system_suspend(void)
 void
 system_wakeup(void)
 {
-	uint32_t flags = disable_interrupts();
-
 	/* Tried to wake up from a fake "off" state. Reset the system. */
 	if (is_off)
 		system_reset();
 	/* If the system is already awake, do nothing. */
-	if (!is_suspended) {
-		restore_interrupts(flags);
+	if (!is_suspended)
 		return;
-	}
 
 	/* Mark the system as no longer being suspended. */
 	is_suspended = false;
-
-	/* State management is done, so we can resume handling interrupts. */
-	restore_interrupts(flags);
 
 	/* Tell the PMIC to turn everything back on. */
 	pmic_wakeup(pmic);
