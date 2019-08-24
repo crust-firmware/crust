@@ -9,6 +9,5 @@
 func panic
 	l.jal	log			# Log the panic message (clobbers r9)
 	l.nop
-1:	l.j	1b			# Infinite loop
-	l.nop
+	l.trap	0
 endfunc panic

@@ -10,6 +10,7 @@
 #include <kconfig.h>
 #include <pmic.h>
 #include <scpi.h>
+#include <spr.h>
 #include <stdbool.h>
 #include <wallclock.h>
 #include <watchdog.h>
@@ -22,14 +23,19 @@
 
 #define WATCHDOG_TIMEOUT 5 /* seconds */
 
-noreturn void main(void);
+noreturn void main(uint32_t exception);
 
 noreturn void
-main(void)
+main(uint32_t exception)
 {
 	uint64_t next_tick = wallclock_read() + REFCLK_HZ;
 
 	console_init(DEV_UART0);
+
+	if (exception) {
+		error("Unhandled exception %u at %p!",
+		      exception, (void *)mfspr(SPR_SYS_EPCR_INDEX(0)));
+	}
 
 	/* Initialize and enable the watchdog first. This provides a failsafe
 	 * for the possibility that something below hangs. */

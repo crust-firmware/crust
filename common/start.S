@@ -7,11 +7,16 @@
 #include <arch/spr.h>
 
 func start
-	l.addi	r3, r0, 0		# Invalidate instruction cache
+	l.mfspr	r2, r0, SPR_SYS_PPC_ADDR
+	l.sfltui r2, 0x4000		# Size of exception vector area
+	l.bf	1f
+	l.srli	r2, r2, 8		# Vector address → exception number
+	l.addi	r2, r0, 0		# Set to zero if not an exception
+1:	l.addi	r3, r0, 0		# Invalidate instruction cache
 	l.addi	r4, r0, 4096		# Cache lines (256) * block size (16)
-1:	l.mtspr	r0, r3, SPR_ICACHE_ICBIR_ADDR
+2:	l.mtspr	r0, r3, SPR_ICACHE_ICBIR_ADDR
 	l.sfltu	r3, r4
-	l.bf	1b
+	l.bf	2b
 	l.addi	r3, r3, 16		# Cache block size
 	l.psync				# Flush CPU pipeline
 	l.mfspr	r3, r0, SPR_SYS_SR_ADDR	# Enable instruction cache
@@ -25,11 +30,12 @@ func start
 	l.ori	r3, r3, lo(__bss_start)
 	l.movhi	r4, hi(__bss_end)
 	l.ori	r4, r4, lo(__bss_end)
-1:	l.sw    0(r3), r0
-	l.sfltu r3, r4
-	l.bf	1b
+3:	l.sw	0(r3), r0
+	l.sfltu	r3, r4
+	l.bf	3b
 	l.addi	r3, r3, 4
 	l.movhi	r1, hi(__stack_end)
-	l.j	main			# Jump to C entry point
 	l.ori	r1, r1, lo(__stack_end)	# Initialize stack pointer
+	l.j	main			# Jump to C entry point
+	l.or	r3, r2, r2
 endfunc start
