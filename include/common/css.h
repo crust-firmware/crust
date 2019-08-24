@@ -10,15 +10,6 @@
 #include <stdint.h>
 
 /**
- * Possible CSS power domain states, matching those used in existing
- * implementations of the SCPI protocol.
- */
-enum {
-	POWER_STATE_ON  = 0,
-	POWER_STATE_OFF = 3,
-};
-
-/**
  * Get the state of the compute subsystem (CSS).
  */
 uint8_t css_get_css_state(void);

@@ -110,19 +110,19 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
 
 	/* Do not check if the CSS should be turned on, as receiving this
 	 * command from an ARM CPU via PSCI implies that it is already on. */
-	if (cluster_state == POWER_STATE_ON &&
+	if (cluster_state == SCPI_CSS_ON &&
 	    (err = css_set_cluster_state(cluster, cluster_state)))
 		return err;
 	if ((err = css_set_core_state(cluster, core, core_state)))
 		return err;
-	if (cluster_state != POWER_STATE_ON &&
+	if (cluster_state != SCPI_CSS_ON &&
 	    (err = css_set_cluster_state(cluster, cluster_state)))
 		return err;
-	if (css_state != POWER_STATE_ON &&
+	if (css_state != SCPI_CSS_ON &&
 	    (err = css_set_css_state(css_state)))
 		return err;
 	/* Turning everything off means system suspend. */
-	if (css_state == POWER_STATE_OFF)
+	if (css_state == SCPI_CSS_OFF)
 		system_suspend();
 
 	return SUCCESS;
@@ -167,11 +167,11 @@ scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
 {
 	uint8_t system_state = rx_payload[0];
 
-	if (system_state == SYSTEM_POWER_STATE_REBOOT ||
-	    system_state == SYSTEM_POWER_STATE_RESET)
+	if (system_state == SCPI_SYSTEM_REBOOT ||
+	    system_state == SCPI_SYSTEM_RESET)
 		system_reset();
 
-	if (system_state != SYSTEM_POWER_STATE_SHUTDOWN)
+	if (system_state != SCPI_SYSTEM_SHUTDOWN)
 		return EINVAL;
 
 	system_shutdown();

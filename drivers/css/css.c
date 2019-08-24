@@ -7,6 +7,7 @@
 #include <css.h>
 #include <debug.h>
 #include <error.h>
+#include <scpi_protocol.h>
 #include <stdint.h>
 #include <util.h>
 
@@ -25,7 +26,7 @@ uint8_t __weak
 css_get_css_state(void)
 {
 	/* Assume the CSS is always on. */
-	return POWER_STATE_ON;
+	return SCPI_CSS_ON;
 }
 
 /**
@@ -49,9 +50,9 @@ css_get_cluster_state(uint8_t cluster __unused)
 {
 	/* Assume present clusters/cores are always on. */
 	if (cluster >= css_get_cluster_count())
-		return POWER_STATE_OFF;
+		return SCPI_CSS_OFF;
 
-	return POWER_STATE_ON;
+	return SCPI_CSS_ON;
 }
 
 /**
@@ -75,11 +76,11 @@ css_get_core_state(uint8_t cluster, uint8_t core)
 {
 	/* Assume present clusters/cores are always on. */
 	if (cluster >= css_get_cluster_count())
-		return POWER_STATE_OFF;
+		return SCPI_CSS_OFF;
 	if (core >= css_get_core_count(cluster))
-		return POWER_STATE_OFF;
+		return SCPI_CSS_OFF;
 
-	return POWER_STATE_ON;
+	return SCPI_CSS_ON;
 }
 
 /*
@@ -98,7 +99,7 @@ css_get_online_cores(uint8_t cluster)
 
 	cores = css_get_core_count(cluster);
 	for (uint8_t core = 0; core < cores; ++core) {
-		if (css_get_core_state(cluster, core) != POWER_STATE_OFF)
+		if (css_get_core_state(cluster, core) != SCPI_CSS_OFF)
 			mask |= BIT(core);
 	}
 

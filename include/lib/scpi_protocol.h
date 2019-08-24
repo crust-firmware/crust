@@ -92,6 +92,24 @@ enum {
 };
 
 /**
+ * Possible CSS power domain states, as used in existing SCPI implementations.
+ */
+enum {
+	SCPI_CSS_ON        = 0,
+	SCPI_CSS_RETENTION = 1,
+	SCPI_CSS_OFF       = 3,
+};
+
+/**
+ * Possible system power states, defined by the SCPI protocol specification.
+ */
+enum {
+	SCPI_SYSTEM_SHUTDOWN = 0,
+	SCPI_SYSTEM_REBOOT   = 1,
+	SCPI_SYSTEM_RESET    = 2,
+};
+
+/**
  * The memory structure representing an SCPI message, defined by the SCPI
  * specification.
  *

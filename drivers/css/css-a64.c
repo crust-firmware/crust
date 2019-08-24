@@ -9,6 +9,7 @@
 #include <delay.h>
 #include <error.h>
 #include <mmio.h>
+#include <scpi_protocol.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -107,13 +108,13 @@ css_get_cluster_state(uint8_t cluster)
 	/* Are the cluster output clamps gated? */
 	reg = mmio_read_32(DEV_R_PRCM + R_PRCM_PWROFF_GATING_REG(cluster));
 	if (reg & BIT(0))
-		return POWER_STATE_OFF;
+		return SCPI_CSS_OFF;
 	/* Is the cluster in H_RESET? */
 	reg = mmio_read_32(DEV_CPUCFG + CPUCFG_RESET_CTRL_REG(cluster));
 	if (!(reg & BIT(12)))
-		return POWER_STATE_OFF;
+		return SCPI_CSS_OFF;
 
-	return POWER_STATE_ON;
+	return SCPI_CSS_ON;
 }
 
 uint8_t __const
@@ -133,13 +134,13 @@ css_get_core_state(uint8_t cluster, uint8_t core)
 	/* Is the core in power-on reset? */
 	reg = mmio_read_32(DEV_R_CPUCFG + R_CPUCFG_PWRON_RESET_REG(cluster));
 	if (!(reg & BIT(core)))
-		return POWER_STATE_OFF;
+		return SCPI_CSS_OFF;
 	/* Is the core in core reset? */
 	reg = mmio_read_32(DEV_CPUCFG + CPUCFG_RESET_CTRL_REG(cluster));
 	if (!(reg & BIT(core)))
-		return POWER_STATE_OFF;
+		return SCPI_CSS_OFF;
 
-	return POWER_STATE_ON;
+	return SCPI_CSS_ON;
 }
 
 int
@@ -159,7 +160,7 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 	if (state == current_state)
 		return SUCCESS;
 
-	if (state == POWER_STATE_ON) {
+	if (state == SCPI_CSS_ON) {
 		/* Apply power to the cluster power domain. */
 		set_power_switch(cluster, 0, true);
 		/* Release the cluster output clamps. */
@@ -195,7 +196,7 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 			uintptr_t rvbar = CPUCFG_RVBAR_LO_REG(cluster, core);
 			mmio_write_32(DEV_CPUCFG + rvbar, rvba[cluster]);
 		}
-	} else if (state == POWER_STATE_OFF) {
+	} else if (state == SCPI_CSS_OFF) {
 		/* Wait for all CPUs to be idle. */
 		mmio_poll_32(DEV_CPUCFG +
 		             CPUCFG_CPU_STATUS_REG(cluster), GENMASK(19, 16));
@@ -242,7 +243,7 @@ css_set_core_state(uint8_t cluster, uint8_t core, uint8_t state)
 	if (state == current_state)
 		return SUCCESS;
 
-	if (state == POWER_STATE_ON) {
+	if (state == SCPI_CSS_ON) {
 		/* Deassert DBGPWRDUP (prevent debug access to the core). */
 		mmio_clr_32(DEV_CPUCFG + CPUCFG_DEBUG_REG, BIT(core));
 		/* Assert core reset (active-low). */
@@ -271,7 +272,7 @@ css_set_core_state(uint8_t cluster, uint8_t core, uint8_t state)
 		            CPUCFG_RESET_CTRL_REG(cluster), BIT(core));
 		/* Assert DBGPWRDUP (allow debug access to the core). */
 		mmio_set_32(DEV_CPUCFG + CPUCFG_DEBUG_REG, BIT(core));
-	} else if (state == POWER_STATE_OFF) {
+	} else if (state == SCPI_CSS_OFF) {
 		/* Wait for the core to be in WFI and ready to shut down. */
 		mmio_poll_32(DEV_CPUCFG +
 		             CPUCFG_CPU_STATUS_REG(cluster), BIT(16 + core));

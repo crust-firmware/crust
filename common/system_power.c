@@ -10,6 +10,7 @@
 #include <dm.h>
 #include <error.h>
 #include <pmic.h>
+#include <scpi_protocol.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <system_power.h>
@@ -83,7 +84,7 @@ system_wakeup(void)
 	pmic_wakeup(pmic);
 
 	/* Resume execution on the CSS. */
-	css_set_css_state(POWER_STATE_ON);
-	css_set_cluster_state(0, POWER_STATE_ON);
-	css_set_core_state(0, 0, POWER_STATE_ON);
+	css_set_css_state(SCPI_CSS_ON);
+	css_set_cluster_state(0, SCPI_CSS_ON);
+	css_set_core_state(0, 0, SCPI_CSS_ON);
 }
