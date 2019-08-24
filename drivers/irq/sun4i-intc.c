@@ -6,8 +6,8 @@
 #include <dm.h>
 #include <error.h>
 #include <intrusive.h>
+#include <limits.h>
 #include <mmio.h>
-#include <spr.h>
 #include <util.h>
 #include <irq/sun4i-intc.h>
 #include <platform/devices.h>
@@ -37,24 +37,31 @@ sun4i_intc_enable(struct device *dev, struct irq_handle *handle)
 	return SUCCESS;
 }
 
-void
-sun4i_intc_irq(struct device *dev)
+static void
+sun4i_intc_poll(struct device *dev)
 {
 	struct sun4i_intc *this =
 		container_of(dev, struct sun4i_intc, dev);
-	const struct irq_handle *handle = this->list;
-	/* Get the number of the current IRQ. */
-	uint8_t irq = mmio_read_32(dev->regs + INTC_VECTOR_REG) >> 2;
+	uint32_t status = mmio_read_32(dev->regs + INTC_EN_REG) &
+	                  mmio_read_32(dev->regs + INTC_IRQ_PEND_REG);
 
-	/* Call the registered callback. */
-	while (handle != NULL) {
-		if (handle->irq == irq && handle->handler(handle))
-			break;
-		handle = handle->next;
+	for (int i = 0; i < WORD_BIT; ++i) {
+		if (status & BIT(i)) {
+			const struct irq_handle *handle = this->list;
+			/* Call the registered callback. */
+			while (handle != NULL) {
+				if (handle->irq == i &&
+				    handle->handler(handle))
+					break;
+				handle = handle->next;
+			}
+			/* Clear the IRQ pending status if handled. */
+			if (handle != NULL) {
+				mmio_write_32(dev->regs + INTC_IRQ_PEND_REG,
+				              BIT(i));
+			}
+		}
 	}
-
-	/* Clear the IRQ pending status. */
-	mmio_set_32(dev->regs + INTC_IRQ_PEND_REG, BIT(irq));
 }
 
 static int
@@ -68,15 +75,13 @@ sun4i_intc_probe(struct device *dev)
 	mmio_write_32(dev->regs + INTC_MASK_REG, 0);
 	mmio_write_32(dev->regs + INTC_IRQ_PEND_REG, ~0);
 
-	/* Enable the CPU external interrupt input. */
-	mtspr(SPR_SYS_SR_ADDR, SPR_SYS_SR_IEE_SET(mfspr(SPR_SYS_SR_ADDR), 1));
-
 	return SUCCESS;
 }
 
 static const struct irq_driver sun4i_intc_driver = {
 	.drv = {
 		.probe = sun4i_intc_probe,
+		.poll  = sun4i_intc_poll,
 	},
 	.ops = {
 		.enable = sun4i_intc_enable,

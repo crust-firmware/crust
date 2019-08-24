@@ -5,19 +5,14 @@
 
 #include <debug.h>
 #include <exception.h>
-#include <irq.h>
 #include <spr.h>
 #include <stdint.h>
-#include <irq/sun4i-intc.h>
 
 void
 handle_exception(uint32_t number)
 {
 	switch (number) {
 	case TICK_TIMER_EXCEPTION:
-		break;
-	case EXTERNAL_INTERRUPT:
-		sun4i_intc_irq(&r_intc.dev);
 		break;
 	default:
 		panic("Unhandled exception %d at %p!",

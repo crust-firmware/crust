@@ -16,6 +16,4 @@ struct sun4i_intc {
 
 extern struct sun4i_intc r_intc;
 
-void sun4i_intc_irq(struct device *dev);
-
 #endif /* DRIVERS_IRQ_SUN4I_INTC_H */

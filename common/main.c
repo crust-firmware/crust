@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <wallclock.h>
 #include <watchdog.h>
+#include <irq/sun4i-intc.h>
 #include <misc/gpio-button.h>
 #include <msgbox/sunxi-msgbox.h>
 #include <watchdog/sunxi-twd.h>
@@ -53,6 +54,7 @@ main(void)
 	while (true) {
 		/* Perform every-iteration operations. */
 		msgbox.dev.drv->poll(&msgbox.dev);
+		r_intc.dev.drv->poll(&r_intc.dev);
 		scpi_poll();
 
 		if (wallclock_read() > next_tick) {
