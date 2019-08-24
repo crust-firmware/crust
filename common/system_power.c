@@ -5,86 +5,114 @@
 
 #include <compiler.h>
 #include <css.h>
-#include <debug.h>
-#include <delay.h>
-#include <dm.h>
-#include <error.h>
 #include <pmic.h>
 #include <scpi_protocol.h>
 #include <stdbool.h>
-#include <stddef.h>
 #include <system_power.h>
-#include <watchdog.h>
 #include <watchdog/sunxi-twd.h>
 
-static bool is_off;
-static bool is_suspended;
+static uint8_t system_state;
 
 bool __pure
-system_is_off(void)
+system_can_wake(void)
 {
-	return is_off;
+	return system_state == SYSTEM_INACTIVE ||
+	       system_state == SYSTEM_OFF;
 }
 
 bool __pure
-system_is_suspended(void)
+system_is_running(void)
 {
-	return is_suspended;
+	return system_state == SYSTEM_ACTIVE;
 }
 
-noreturn void
+void
+system_state_machine(void)
+{
+	switch (system_state) {
+	case SYSTEM_SUSPEND:
+		/* Enable wakeup sources. */
+
+		/* Perform PMIC-specific suspend actions. */
+		pmic_suspend(pmic);
+
+		/* Turn off all unnecessary power domains. */
+
+		/* Turn off all unnecessary clocks. */
+
+		/* The system is now inactive. */
+		system_state = SYSTEM_INACTIVE;
+		break;
+	case SYSTEM_RESUME:
+		/* Turn on previously-disabled clocks. */
+
+		/* Turn on previously-disabled power domains. */
+
+		/* Perform PMIC-specific resume actions. */
+		pmic_resume(pmic);
+
+		/* Disable wakeup sources. */
+
+		/* Resume execution on the first CPU in the CSS. */
+		css_set_css_state(SCPI_CSS_ON);
+		css_set_cluster_state(0, SCPI_CSS_ON);
+		css_set_core_state(0, 0, SCPI_CSS_ON);
+
+		/* The system is now active. */
+		system_state = SYSTEM_ACTIVE;
+		break;
+	case SYSTEM_SHUTDOWN:
+		/* Enable a subset of wakeup sources. */
+
+		/* Perform PMIC-specific shutdown actions. */
+		pmic_shutdown(pmic);
+
+		/* Turn off all possible power domains. */
+
+		/* Turn off all possible clocks. */
+
+		/* The system is now off. */
+		system_state = SYSTEM_OFF;
+		break;
+	case SYSTEM_RESET:
+		/* Attempt to reset the SoC using the PMIC. */
+		pmic_reset(pmic);
+
+		/* Attempt to reset the SoC using the watchdog. */
+		watchdog_disable(&r_twd.dev);
+		watchdog_enable(&r_twd.dev, 0);
+
+		/* Leave the system state as is; continue making reset
+		 * attempts each time this function is called. */
+		break;
+	}
+}
+
+void
 system_reset(void)
 {
-	pmic_reset(pmic);
-
-	watchdog_disable(&r_twd.dev);
-	watchdog_enable(&r_twd.dev, 0);
-	/* This is always at least one reference clock cycle. */
-	udelay(1);
-
-	panic("Failed to reset system");
+	system_state = SYSTEM_RESET;
 }
 
 void
 system_shutdown(void)
 {
-	pmic_shutdown(pmic);
-
-	/* We didn't actually shut down. Wait for a wakeup event and reset. */
-	is_off = true;
+	if (system_state == SYSTEM_ACTIVE)
+		system_state = SYSTEM_SHUTDOWN;
 }
 
 void
 system_suspend(void)
 {
-	/* If the system is already suspended, do nothing. */
-	if (is_suspended)
-		return;
-
-	/* Mark the system as being suspended. */
-	is_suspended = true;
-
-	pmic_suspend(pmic);
+	if (system_state == SYSTEM_ACTIVE)
+		system_state = SYSTEM_SUSPEND;
 }
 
 void
 system_wakeup(void)
 {
-	/* Tried to wake up from a fake "off" state. Reset the system. */
-	if (is_off)
-		system_reset();
-	/* If the system is already awake, do nothing. */
-	if (!is_suspended)
-		return;
-
-	/* Mark the system as no longer being suspended. */
-	is_suspended = false;
-
-	/* Tell the PMIC to turn everything back on. */
-	pmic_resume(pmic);
-
-	/* Resume execution on the CSS. */
-	css_set_css_state(SCPI_CSS_ON);
-	css_set_cluster_state(0, SCPI_CSS_ON);
-	css_set_core_state(0, 0, SCPI_CSS_ON);
+	if (system_state == SYSTEM_INACTIVE)
+		system_state = SYSTEM_RESUME;
+	if (system_state == SYSTEM_OFF)
+		system_state = SYSTEM_RESET;
 }

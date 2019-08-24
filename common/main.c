@@ -12,6 +12,7 @@
 #include <scpi.h>
 #include <spr.h>
 #include <stdbool.h>
+#include <system_power.h>
 #include <wallclock.h>
 #include <watchdog.h>
 #include <irq/sun4i-intc.h>
@@ -59,9 +60,15 @@ main(uint32_t exception)
 
 	while (true) {
 		/* Perform every-iteration operations. */
-		msgbox.dev.drv->poll(&msgbox.dev);
-		r_intc.dev.drv->poll(&r_intc.dev);
+		if (system_is_running()) {
+			/* Poll communication channels. */
+			msgbox.dev.drv->poll(&msgbox.dev);
+		} else if (system_can_wake()) {
+			/* Poll wakeup sources. */
+			r_intc.dev.drv->poll(&r_intc.dev);
+		}
 		scpi_poll();
+		system_state_machine();
 
 		if (wallclock_read() > next_tick) {
 			next_tick += REFCLK_HZ;

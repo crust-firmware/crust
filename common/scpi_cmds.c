@@ -165,16 +165,14 @@ scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
                                uint32_t *tx_payload __unused,
                                uint16_t *tx_size __unused)
 {
-	uint8_t system_state = rx_payload[0];
+	uint8_t state = rx_payload[0];
 
-	if (system_state == SCPI_SYSTEM_REBOOT ||
-	    system_state == SCPI_SYSTEM_RESET)
+	if (state == SCPI_SYSTEM_SHUTDOWN)
+		system_shutdown();
+	else if (state == SCPI_SYSTEM_REBOOT || state == SCPI_SYSTEM_RESET)
 		system_reset();
-
-	if (system_state != SCPI_SYSTEM_SHUTDOWN)
+	else
 		return EINVAL;
-
-	system_shutdown();
 
 	return SUCCESS;
 }

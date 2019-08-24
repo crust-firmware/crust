@@ -9,33 +9,48 @@
 #include <compiler.h>
 #include <stdbool.h>
 
-/**
- * Check if the system is in a simulated off state.
- */
-bool system_is_off(void) __pure;
+enum {
+	SYSTEM_ACTIVE,
+	SYSTEM_SUSPEND,
+	SYSTEM_INACTIVE,
+	SYSTEM_RESUME,
+	SYSTEM_SHUTDOWN,
+	SYSTEM_OFF,
+	SYSTEM_RESET,
+};
 
 /**
- * Check if the system is suspended.
+ * Check if the system is in a state where it can be woken up.
  */
-bool system_is_suspended(void) __pure;
+bool system_can_wake(void) __pure;
 
 /**
- * Reset the SoC, including all CPU cores and internal peripheral devices.
+ * Check if the system is in a state where the main CPUs are executing.
  */
-noreturn void system_reset(void);
+bool system_is_running(void) __pure;
 
 /**
- * Shutdown the SoC, turn off all voltage domains, and shutdown the PMIC.
+ * Perform system state transitions.
+ */
+void system_state_machine(void);
+
+/**
+ * Reset the SoC, including all CPUs and internal peripherals.
+ */
+void system_reset(void);
+
+/**
+ * Shut down the SoC, and turn off all possible external voltage domains.
  */
 void system_shutdown(void);
 
 /**
- * Suspend the SoC and external voltage domains.
+ * Suspend the SoC, and turn off all possible external voltage domains.
  */
 void system_suspend(void);
 
 /**
- * Wake up the SoC and external voltage domains, and resume CSS execution.
+ * Wake up the SoC, and turn on necessary external voltage domains.
  */
 void system_wakeup(void);
 
