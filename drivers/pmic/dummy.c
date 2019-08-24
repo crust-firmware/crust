@@ -55,9 +55,9 @@ static const struct pmic_driver dummy_pmic_driver = {
 	},
 	.ops = {
 		.reset    = dummy_pmic_power_on,
+		.resume   = dummy_pmic_power_on,
 		.shutdown = dummy_pmic_power_off,
 		.suspend  = dummy_pmic_power_off,
-		.wakeup   = dummy_pmic_power_on,
 	},
 };
 

@@ -76,6 +76,15 @@ axp803_pmic_reset(struct device *dev)
 }
 
 static int
+axp803_pmic_resume(struct device *dev)
+{
+	struct axp803_pmic *this = to_axp803_pmic(dev);
+
+	/* Trigger soft power resume. */
+	return axp803_reg_setbits(&this->bus, WAKEUP_CTRL_REG, BIT(5));
+}
+
+static int
 axp803_pmic_shutdown(struct device *dev)
 {
 	struct axp803_pmic *this = to_axp803_pmic(dev);
@@ -89,18 +98,9 @@ axp803_pmic_suspend(struct device *dev)
 {
 	struct axp803_pmic *this = to_axp803_pmic(dev);
 
-	/* Enable wakeup, allow IRQs during suspend. */
+	/* Enable resume, allow IRQs during suspend. */
 	return axp803_reg_setbits(&this->bus, WAKEUP_CTRL_REG,
 	                          BIT(4) | BIT(3));
-}
-
-static int
-axp803_pmic_wakeup(struct device *dev)
-{
-	struct axp803_pmic *this = to_axp803_pmic(dev);
-
-	/* Trigger soft power wakeup. */
-	return axp803_reg_setbits(&this->bus, WAKEUP_CTRL_REG, BIT(5));
 }
 
 static int
@@ -145,9 +145,9 @@ static const struct pmic_driver axp803_pmic_driver = {
 	},
 	.ops = {
 		.reset    = axp803_pmic_reset,
+		.resume   = axp803_pmic_resume,
 		.shutdown = axp803_pmic_shutdown,
 		.suspend  = axp803_pmic_suspend,
-		.wakeup   = axp803_pmic_wakeup,
 	},
 };
 

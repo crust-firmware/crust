@@ -81,7 +81,7 @@ system_wakeup(void)
 	is_suspended = false;
 
 	/* Tell the PMIC to turn everything back on. */
-	pmic_wakeup(pmic);
+	pmic_resume(pmic);
 
 	/* Resume execution on the CSS. */
 	css_set_css_state(SCPI_CSS_ON);

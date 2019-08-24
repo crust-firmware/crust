@@ -14,9 +14,9 @@
 
 struct pmic_driver_ops {
 	int (*reset)(struct device *dev);
+	int (*resume)(struct device *dev);
 	int (*shutdown)(struct device *dev);
 	int (*suspend)(struct device *dev);
-	int (*wakeup)(struct device *dev);
 };
 
 struct pmic_driver {
@@ -43,6 +43,17 @@ pmic_reset(struct device *dev)
 }
 
 /**
+ * Initiate the PMIC resume process.
+ *
+ * @param dev The device containing the PMIC functionality.
+ */
+static inline int
+pmic_resume(struct device *dev)
+{
+	return PMIC_OPS(dev)->resume(dev);
+}
+
+/**
  * Initiate the PMIC shutdown process.
  *
  * @param dev The device containing the PMIC functionality.
@@ -62,17 +73,6 @@ static inline int
 pmic_suspend(struct device *dev)
 {
 	return PMIC_OPS(dev)->suspend(dev);
-}
-
-/**
- * Initiate the PMIC wakeup process.
- *
- * @param dev The device containing the PMIC functionality.
- */
-static inline int
-pmic_wakeup(struct device *dev)
-{
-	return PMIC_OPS(dev)->wakeup(dev);
 }
 
 #endif /* DRIVERS_PMIC_H */
