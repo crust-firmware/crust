@@ -6,4 +6,3 @@
 obj-y += irq.o
 
 obj-y += sun4i-intc.o
-obj-y += sunxi-gpio.o
