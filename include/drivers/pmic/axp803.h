@@ -13,7 +13,6 @@
 struct axp803_pmic {
 	struct device     dev;
 	struct rsb_handle bus;
-	struct irq_handle irq;
 };
 
 extern struct axp803_pmic axp803_pmic;
