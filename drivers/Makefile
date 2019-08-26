@@ -9,7 +9,6 @@ obj-y += gpio/
 obj-$(CONFIG_I2C) += i2c/
 obj-y += irq/
 obj-y += mfd/
-obj-y += misc/
 obj-y += msgbox/
 obj-y += pmic/
 obj-$(CONFIG_RSB) += rsb/

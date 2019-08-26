@@ -16,7 +16,6 @@
 #include <wallclock.h>
 #include <watchdog.h>
 #include <irq/sun4i-intc.h>
-#include <misc/gpio-button.h>
 #include <msgbox/sunxi-msgbox.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/devices.h>
@@ -50,10 +49,6 @@ main(uint32_t exception)
 	/* Initialize the power management IC. */
 	pmic_detect();
 	device_probe(pmic);
-
-	/* Initialize wakeup sources. */
-	if (IS_ENABLED(CONFIG_GPIO_BUTTON))
-		device_probe(&power_button.dev);
 
 	/* Inform SCPI clients that the firmware has finished booting. */
 	scpi_init();
