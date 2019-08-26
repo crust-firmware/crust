@@ -34,7 +34,6 @@
 
 #define WAKEUP_CTRL_REG   0x31
 #define POWER_DISABLE_REG 0x32
-#define POK_CTRL_REG      0x59
 #define PIN_FUNCTION_REG  0x8f
 
 static inline struct axp803_pmic *
@@ -110,10 +109,6 @@ axp803_pmic_probe(struct device *dev)
 	int err;
 
 	if ((err = axp803_probe(&this->bus)))
-		return err;
-
-	/* Set up the power button. */
-	if ((err = rsb_write(&this->bus, POK_CTRL_REG, BIT(4))))
 		return err;
 
 	/* Set up IRQs; disable all but the relevant ones. */
