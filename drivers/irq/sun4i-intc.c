@@ -8,6 +8,7 @@
 #include <intrusive.h>
 #include <limits.h>
 #include <mmio.h>
+#include <system_power.h>
 #include <util.h>
 #include <irq/sun4i-intc.h>
 #include <platform/devices.h>
@@ -55,10 +56,13 @@ sun4i_intc_poll(struct device *dev)
 					break;
 				handle = handle->next;
 			}
-			/* Clear the IRQ pending status if handled. */
 			if (handle != NULL) {
+				/* Clear the IRQ pending status if handled. */
 				mmio_write_32(dev->regs + INTC_IRQ_PEND_REG,
 				              BIT(i));
+			} else {
+				/* Wake the system on an unhandled IRQ. */
+				system_wakeup();
 			}
 		}
 	}
