@@ -1,0 +1,23 @@
+/*
+ * Copyright © 2017-2019 The Crust Firmware Authors.
+ * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+ */
+
+#ifndef PLATFORM_MEMORY_H
+#define PLATFORM_MEMORY_H
+
+#define FIRMWARE_BASE  0x00010000
+#define FIRMWARE_LIMIT SCPI_MEM_BASE
+#define FIRMWARE_SIZE  (FIRMWARE_LIMIT - FIRMWARE_BASE)
+
+#define SCPI_MEM_BASE  0x00013c00
+#define SCPI_MEM_LIMIT SRAM_A2_LIMIT
+#define SCPI_MEM_SIZE  (SCPI_MEM_LIMIT - SCPI_MEM_BASE)
+
+#define SRAM_A2_BASE   0x00000000
+#define SRAM_A2_LIMIT  0x00014000
+#define SRAM_A2_SIZE   (SRAM_A2_LIMIT - SRAM_A2_BASE)
+
+#define STACK_SIZE     0x00000400
+
+#endif /* PLATFORM_MEMORY_H */

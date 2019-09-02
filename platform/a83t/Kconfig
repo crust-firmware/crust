@@ -1,0 +1,16 @@
+#
+# Copyright © 2019 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+config SOC
+	string
+	default "A83T" if SOC_A83T
+
+choice
+	prompt "SoC"
+
+config SOC_A83T
+	bool "A83T"
+
+endchoice

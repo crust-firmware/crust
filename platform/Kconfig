@@ -5,7 +5,8 @@
 
 config PLATFORM
 	string
-	default "a64" if PLATFORM_A64
+	default "a64"  if PLATFORM_A64
+	default "a83t" if PLATFORM_A83T
 
 choice
 	prompt "Platform selection"
@@ -13,10 +14,19 @@ choice
 config PLATFORM_A64
 	bool "A64/H5"
 
+config PLATFORM_A83T
+	bool "A83T"
+
 endchoice
 
 if PLATFORM_A64
 
 source "a64/Kconfig"
+
+endif
+
+if PLATFORM_A83T
+
+source "a83t/Kconfig"
 
 endif
