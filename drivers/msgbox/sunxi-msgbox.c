@@ -37,25 +37,37 @@
 
 #define MSG_DATA_REG(n)     (0x0180 + 0x4 * (n))
 
+static inline struct sunxi_msgbox *
+to_sunxi_msgbox(struct device *dev)
+{
+	return container_of(dev, struct sunxi_msgbox, dev);
+}
+
 static bool
 sunxi_msgbox_peek_data(struct device *dev, uint8_t chan)
 {
-	return mmio_read_32(dev->regs + MSG_STAT_REG(chan)) & MSG_STAT_MASK;
+	struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+
+	return mmio_read_32(self->regs + MSG_STAT_REG(chan)) & MSG_STAT_MASK;
 }
 
 static void
 sunxi_msgbox_ack_rx(struct device *dev, uint8_t chan)
 {
-	mmio_write_32(dev->regs + IRQ_STAT_REG, RX_IRQ(chan));
+	struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+
+	mmio_write_32(self->regs + IRQ_STAT_REG, RX_IRQ(chan));
 }
 
 static int
 sunxi_msgbox_disable(struct device *dev, uint8_t chan)
 {
+	struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
 	/* Disable the receive IRQ. */
-	mmio_clr_32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
+	mmio_clr_32(self->regs + IRQ_EN_REG, RX_IRQ(chan));
 
 	return SUCCESS;
 }
@@ -63,11 +75,13 @@ sunxi_msgbox_disable(struct device *dev, uint8_t chan)
 static int
 sunxi_msgbox_enable(struct device *dev, uint8_t chan)
 {
+	struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
 	/* Clear and enable the receive IRQ. */
-	mmio_write_32(dev->regs + IRQ_STAT_REG, RX_IRQ(chan));
-	mmio_set_32(dev->regs + IRQ_EN_REG, RX_IRQ(chan));
+	mmio_write_32(self->regs + IRQ_STAT_REG, RX_IRQ(chan));
+	mmio_set_32(self->regs + IRQ_EN_REG, RX_IRQ(chan));
 
 	return SUCCESS;
 }
@@ -75,20 +89,25 @@ sunxi_msgbox_enable(struct device *dev, uint8_t chan)
 static bool
 sunxi_msgbox_last_tx_done(struct device *dev, uint8_t chan)
 {
+	struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
-	return !(mmio_read_32(dev->regs + REMOTE_IRQ_STAT_REG) & RX_IRQ(chan));
+	return !(mmio_read_32(self->regs + REMOTE_IRQ_STAT_REG) &
+	         RX_IRQ(chan));
 }
 
 static int
 sunxi_msgbox_send(struct device *dev, uint8_t chan, uint32_t msg)
 {
+	struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
 	/* Reject the message if the FIFO is full. */
-	if (mmio_read_32(dev->regs + FIFO_STAT_REG(chan)) & FIFO_STAT_MASK)
+	if (mmio_read_32(self->regs + FIFO_STAT_REG(chan)) & FIFO_STAT_MASK)
 		return EBUSY;
-	mmio_write_32(dev->regs + MSG_DATA_REG(chan), msg);
+	mmio_write_32(self->regs + MSG_DATA_REG(chan), msg);
 
 	return SUCCESS;
 }
@@ -96,7 +115,8 @@ sunxi_msgbox_send(struct device *dev, uint8_t chan, uint32_t msg)
 static void
 sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan)
 {
-	uint32_t msg = mmio_read_32(dev->regs + MSG_DATA_REG(chan));
+	struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+	uint32_t msg = mmio_read_32(self->regs + MSG_DATA_REG(chan));
 
 	switch (chan) {
 	case MSGBOX_CHAN_SCPI_EL3_RX:
@@ -113,7 +133,8 @@ sunxi_msgbox_handle_msg(struct device *dev, uint8_t chan)
 static void
 sunxi_msgbox_poll(struct device *dev)
 {
-	uint32_t status = mmio_read_32(dev->regs + IRQ_STAT_REG);
+	struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+	uint32_t status = mmio_read_32(self->regs + IRQ_STAT_REG);
 
 	if (!(status & RX_IRQ_MASK))
 		return;
@@ -129,26 +150,25 @@ sunxi_msgbox_poll(struct device *dev)
 static int
 sunxi_msgbox_probe(struct device *dev)
 {
-	struct sunxi_msgbox *this =
-		container_of(dev, struct sunxi_msgbox, dev);
+	struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
 	int err;
 
-	if ((err = clock_get(&this->clock)))
+	if ((err = clock_get(&self->clock)))
 		return err;
 
 	/* Set even channels ARM -> SCP and odd channels SCP -> ARM. */
-	mmio_write_32(dev->regs + CTRL_REG0, CTRL_NORMAL);
-	mmio_write_32(dev->regs + CTRL_REG1, CTRL_NORMAL);
+	mmio_write_32(self->regs + CTRL_REG0, CTRL_NORMAL);
+	mmio_write_32(self->regs + CTRL_REG1, CTRL_NORMAL);
 
 	/* Drain messages in RX channels (required to clear IRQs). */
 	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; chan += 2) {
 		while (sunxi_msgbox_peek_data(dev, chan))
-			mmio_read_32(dev->regs + MSG_DATA_REG(chan));
+			mmio_read_32(self->regs + MSG_DATA_REG(chan));
 	}
 
 	/* Disable and clear all IRQ. */
-	mmio_write_32(dev->regs + IRQ_EN_REG, 0);
-	mmio_write_32(dev->regs + IRQ_STAT_REG, GENMASK(15, 0));
+	mmio_write_32(self->regs + IRQ_EN_REG, 0);
+	mmio_write_32(self->regs + IRQ_STAT_REG, GENMASK(15, 0));
 
 	return SUCCESS;
 }
@@ -170,8 +190,8 @@ static const struct msgbox_driver sunxi_msgbox_driver = {
 struct sunxi_msgbox msgbox = {
 	.dev = {
 		.name = "msgbox",
-		.regs = DEV_MSGBOX,
 		.drv  = &sunxi_msgbox_driver.drv,
 	},
 	.clock = { .dev = &ccu.dev, .id = CCU_CLOCK_MSGBOX },
+	.regs  = DEV_MSGBOX,
 };

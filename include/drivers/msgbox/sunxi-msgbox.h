@@ -15,6 +15,7 @@
 struct sunxi_msgbox {
 	struct device       dev;
 	struct clock_handle clock;
+	uintptr_t           regs;
 };
 
 extern struct sunxi_msgbox msgbox;
