@@ -518,7 +518,6 @@ sp_cond_ternary_short           = remove
 sp_cparen_oparen                = remove
 sp_cpp_cast_paren               = ignore
 sp_cpp_lambda_assign            = ignore
-sp_cpp_lambda_paren             = ignore
 sp_d_array_colon                = ignore
 sp_defined_paren                = remove
 sp_deref                        = remove
