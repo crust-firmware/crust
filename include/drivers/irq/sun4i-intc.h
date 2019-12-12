@@ -12,6 +12,7 @@
 struct sun4i_intc {
 	struct device      dev;
 	struct irq_handle *list;
+	uintptr_t          regs;
 };
 
 extern struct sun4i_intc r_intc;
