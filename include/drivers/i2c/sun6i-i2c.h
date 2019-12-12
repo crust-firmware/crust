@@ -14,6 +14,7 @@ struct sun6i_i2c {
 	struct device       dev;
 	struct clock_handle clock;
 	struct gpio_handle  pins[I2C_NUM_PINS];
+	uintptr_t           regs;
 };
 
 extern struct sun6i_i2c r_i2c;
