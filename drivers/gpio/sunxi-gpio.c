@@ -32,13 +32,20 @@
 /* The most implemented ports on any supported device. */
 #define MAX_PORTS               8
 
+static inline struct sunxi_gpio *
+to_sunxi_gpio(struct device *dev)
+{
+	return container_of(dev, struct sunxi_gpio, dev);
+}
+
 static int
 sunxi_gpio_get_value(struct device *dev, uint8_t pin, bool *value)
 {
+	struct sunxi_gpio *self = to_sunxi_gpio(dev);
 	uint8_t index = PIN_INDEX(pin);
 	uint8_t port  = PIN_PORT(pin);
 
-	*value = mmio_read_32(dev->regs + DATA_REG(port)) & BIT(index);
+	*value = mmio_read_32(self->regs + DATA_REG(port)) & BIT(index);
 
 	return SUCCESS;
 }
@@ -46,11 +53,12 @@ sunxi_gpio_get_value(struct device *dev, uint8_t pin, bool *value)
 static int
 sunxi_gpio_set_mode(struct device *dev, uint8_t pin, uint8_t mode)
 {
+	struct sunxi_gpio *self = to_sunxi_gpio(dev);
 	uint8_t index = PIN_INDEX(pin);
 	uint8_t port  = PIN_PORT(pin);
 
 	/* Set pin function configuration. */
-	mmio_clrset_32(dev->regs + CONFIG_REG(port, index),
+	mmio_clrset_32(self->regs + CONFIG_REG(port, index),
 	               CONFIG_MASK(index), mode << CONFIG_OFFSET(index));
 
 	return SUCCESS;
@@ -59,11 +67,12 @@ sunxi_gpio_set_mode(struct device *dev, uint8_t pin, uint8_t mode)
 static int
 sunxi_gpio_set_value(struct device *dev, uint8_t pin, bool value)
 {
+	struct sunxi_gpio *self = to_sunxi_gpio(dev);
 	uint8_t index = PIN_INDEX(pin);
 	uint8_t port  = PIN_PORT(pin);
 
 	/* Set the pin to the specified value. */
-	mmio_clrset_32(dev->regs + DATA_REG(port),
+	mmio_clrset_32(self->regs + DATA_REG(port),
 	               BIT(index), value << index);
 
 	return SUCCESS;
@@ -72,10 +81,10 @@ sunxi_gpio_set_value(struct device *dev, uint8_t pin, bool value)
 static int
 sunxi_gpio_probe(struct device *dev)
 {
-	struct sunxi_gpio *this = container_of(dev, struct sunxi_gpio, dev);
+	struct sunxi_gpio *self = to_sunxi_gpio(dev);
 	int err;
 
-	if ((err = clock_get(&this->clock)))
+	if ((err = clock_get(&self->clock)))
 		return err;
 
 	return SUCCESS;
@@ -95,8 +104,8 @@ static const struct gpio_driver sunxi_gpio_driver = {
 struct sunxi_gpio r_pio = {
 	.dev = {
 		.name = "r_pio",
-		.regs = DEV_R_PIO,
 		.drv  = &sunxi_gpio_driver.drv,
 	},
 	.clock = { .dev = &r_ccu.dev, .id = R_CCU_CLOCK_R_PIO },
+	.regs  = DEV_R_PIO,
 };

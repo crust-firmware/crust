@@ -14,6 +14,7 @@
 struct sunxi_gpio {
 	struct device       dev;
 	struct clock_handle clock;
+	uintptr_t           regs;
 };
 
 extern struct sunxi_gpio r_pio;
