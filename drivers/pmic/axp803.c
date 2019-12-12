@@ -27,52 +27,52 @@ to_axp803_pmic(struct device *dev)
 static int
 axp803_pmic_reset(struct device *dev)
 {
-	struct axp803_pmic *this = to_axp803_pmic(dev);
+	struct axp803_pmic *self = to_axp803_pmic(dev);
 
 	/* Trigger soft power restart. */
-	return axp803_reg_setbits(&this->bus, WAKEUP_CTRL_REG, BIT(6));
+	return axp803_reg_setbits(&self->bus, WAKEUP_CTRL_REG, BIT(6));
 }
 
 static int
 axp803_pmic_resume(struct device *dev)
 {
-	struct axp803_pmic *this = to_axp803_pmic(dev);
+	struct axp803_pmic *self = to_axp803_pmic(dev);
 
 	/* Trigger soft power resume. */
-	return axp803_reg_setbits(&this->bus, WAKEUP_CTRL_REG, BIT(5));
+	return axp803_reg_setbits(&self->bus, WAKEUP_CTRL_REG, BIT(5));
 }
 
 static int
 axp803_pmic_shutdown(struct device *dev)
 {
-	struct axp803_pmic *this = to_axp803_pmic(dev);
+	struct axp803_pmic *self = to_axp803_pmic(dev);
 
 	/* Trigger soft power off. */
-	return axp803_reg_setbits(&this->bus, POWER_DISABLE_REG, BIT(7));
+	return axp803_reg_setbits(&self->bus, POWER_DISABLE_REG, BIT(7));
 }
 
 static int
 axp803_pmic_suspend(struct device *dev)
 {
-	struct axp803_pmic *this = to_axp803_pmic(dev);
+	struct axp803_pmic *self = to_axp803_pmic(dev);
 
 	/* Enable resume, allow IRQs during suspend. */
-	return axp803_reg_setbits(&this->bus, WAKEUP_CTRL_REG,
+	return axp803_reg_setbits(&self->bus, WAKEUP_CTRL_REG,
 	                          BIT(4) | BIT(3));
 }
 
 static int
 axp803_pmic_probe(struct device *dev)
 {
-	struct axp803_pmic *this = to_axp803_pmic(dev);
+	struct axp803_pmic *self = to_axp803_pmic(dev);
 	int err;
 
-	if ((err = axp803_probe(&this->bus)))
+	if ((err = axp803_probe(&self->bus)))
 		return err;
 
 	/* Enable shutdown on PMIC overheat or >16 seconds button press;
 	 * remember previous voltages when waking up from suspend. */
-	if ((err = axp803_reg_setbits(&this->bus, PIN_FUNCTION_REG,
+	if ((err = axp803_reg_setbits(&self->bus, PIN_FUNCTION_REG,
 	                              GENMASK(3, 1))))
 		return err;
 
