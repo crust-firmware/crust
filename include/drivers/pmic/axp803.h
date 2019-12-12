@@ -6,7 +6,6 @@
 #ifndef DRIVERS_PMIC_AXP803_H
 #define DRIVERS_PMIC_AXP803_H
 
-#include <irq.h>
 #include <pmic.h>
 #include <rsb.h>
 

@@ -6,10 +6,8 @@
 #include <dm.h>
 #include <error.h>
 #include <intrusive.h>
-#include <limits.h>
 #include <mmio.h>
 #include <system_power.h>
-#include <util.h>
 #include <irq/sun4i-intc.h>
 #include <platform/devices.h>
 
@@ -28,21 +26,6 @@ to_sun4i_intc(struct device *dev)
 	return container_of(dev, struct sun4i_intc, dev);
 }
 
-static int
-sun4i_intc_enable(struct device *dev, struct irq_handle *handle)
-{
-	struct sun4i_intc *self = to_sun4i_intc(dev);
-
-	/* Prepend the handle onto the list of IRQs. */
-	handle->next = self->list;
-	self->list   = handle;
-
-	/* Enable the IRQ. */
-	mmio_set_32(self->regs + INTC_EN_REG, BIT(handle->irq));
-
-	return SUCCESS;
-}
-
 static void
 sun4i_intc_poll(struct device *dev)
 {
@@ -51,26 +34,9 @@ sun4i_intc_poll(struct device *dev)
 	uint32_t status = mmio_read_32(self->regs + INTC_EN_REG) &
 	                  mmio_read_32(self->regs + INTC_IRQ_PEND_REG);
 
-	for (int i = 0; i < WORD_BIT; ++i) {
-		if (status & BIT(i)) {
-			const struct irq_handle *handle = self->list;
-			/* Call the registered callback. */
-			while (handle != NULL) {
-				if (handle->irq == i &&
-				    handle->handler(handle))
-					break;
-				handle = handle->next;
-			}
-			if (handle != NULL) {
-				/* Clear the IRQ pending status if handled. */
-				mmio_write_32(self->regs + INTC_IRQ_PEND_REG,
-				              BIT(i));
-			} else {
-				/* Wake the system on an unhandled IRQ. */
-				system_wakeup();
-			}
-		}
-	}
+	/* Wake the system on an incoming IRQ. */
+	if (status)
+		system_wakeup();
 }
 
 static int
@@ -89,20 +55,15 @@ sun4i_intc_probe(struct device *dev)
 	return SUCCESS;
 }
 
-static const struct irq_driver sun4i_intc_driver = {
-	.drv = {
-		.probe = sun4i_intc_probe,
-		.poll  = sun4i_intc_poll,
-	},
-	.ops = {
-		.enable = sun4i_intc_enable,
-	},
+static const struct driver sun4i_intc_driver = {
+	.probe = sun4i_intc_probe,
+	.poll  = sun4i_intc_poll,
 };
 
 struct sun4i_intc r_intc = {
 	.dev = {
 		.name = "r_intc",
-		.drv  = &sun4i_intc_driver.drv,
+		.drv  = &sun4i_intc_driver,
 	},
 	.regs = DEV_R_INTC,
 };

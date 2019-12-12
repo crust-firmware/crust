@@ -6,13 +6,11 @@
 #ifndef DRIVERS_IRQ_SUN4I_INTC_H
 #define DRIVERS_IRQ_SUN4I_INTC_H
 
-#include <irq.h>
-#include <platform/irq.h>
+#include <dm.h>
 
 struct sun4i_intc {
-	struct device      dev;
-	struct irq_handle *list;
-	uintptr_t          regs;
+	struct device dev;
+	uintptr_t     regs;
 };
 
 extern struct sun4i_intc r_intc;
