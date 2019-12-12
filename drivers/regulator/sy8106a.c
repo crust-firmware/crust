@@ -31,6 +31,12 @@ static struct regulator_info sy8106a_regulator_info = {
 	.flags = REGL_READABLE,
 };
 
+static inline struct sy8106a *
+to_sy8106a(struct device *dev)
+{
+	return container_of(dev, struct sy8106a, dev);
+}
+
 static struct regulator_info *
 sy8106a_get_info(struct device *dev __unused, uint8_t id __unused)
 {
@@ -42,11 +48,11 @@ sy8106a_get_info(struct device *dev __unused, uint8_t id __unused)
 static int
 sy8106a_get_state(struct device *dev, uint8_t id __unused)
 {
-	struct sy8106a *this = container_of(dev, struct sy8106a, dev);
+	struct sy8106a *self = to_sy8106a(dev);
 	uint8_t reg;
 	int err;
 
-	if ((err = i2c_read_reg(&this->bus, VOUT_COM_REG, &reg)))
+	if ((err = i2c_read_reg(&self->bus, VOUT_COM_REG, &reg)))
 		return err;
 
 	return (reg & BIT(0)) == 0;
@@ -55,11 +61,11 @@ sy8106a_get_state(struct device *dev, uint8_t id __unused)
 static int
 sy8106a_read_raw(struct device *dev, uint8_t id __unused, uint32_t *raw)
 {
-	struct sy8106a *this = container_of(dev, struct sy8106a, dev);
+	struct sy8106a *self = to_sy8106a(dev);
 	uint8_t reg;
 	int err;
 
-	if ((err = i2c_read_reg(&this->bus, VOUT_SEL_REG, &reg)))
+	if ((err = i2c_read_reg(&self->bus, VOUT_SEL_REG, &reg)))
 		return err;
 	*raw = reg & ~BIT(7);
 
@@ -69,14 +75,14 @@ sy8106a_read_raw(struct device *dev, uint8_t id __unused, uint32_t *raw)
 static int
 sy8106a_set_state(struct device *dev, uint8_t id __unused, bool enabled)
 {
-	struct sy8106a *this = container_of(dev, struct sy8106a, dev);
+	struct sy8106a *self = to_sy8106a(dev);
 	uint8_t reg;
 	int err;
 
-	if ((err = i2c_read_reg(&this->bus, VOUT_COM_REG, &reg)))
+	if ((err = i2c_read_reg(&self->bus, VOUT_COM_REG, &reg)))
 		return err;
 	reg = enabled ? reg & ~BIT(0) : reg | BIT(0);
-	if ((err = i2c_write_reg(&this->bus, VOUT_COM_REG, reg)))
+	if ((err = i2c_write_reg(&self->bus, VOUT_COM_REG, reg)))
 		return err;
 	/* Wait for the regulator to start up (5 ms). */
 	if (enabled)
@@ -88,20 +94,20 @@ sy8106a_set_state(struct device *dev, uint8_t id __unused, bool enabled)
 static int
 sy8106a_write_raw(struct device *dev, uint8_t id __unused, uint32_t raw)
 {
-	struct sy8106a *this = container_of(dev, struct sy8106a, dev);
+	struct sy8106a *self = to_sy8106a(dev);
 
 	assert(raw <= UINT8_MAX);
 
-	return i2c_write_reg(&this->bus, VOUT_SEL_REG, raw | BIT(7));
+	return i2c_write_reg(&self->bus, VOUT_SEL_REG, raw | BIT(7));
 }
 
 static int
 sy8106a_probe(struct device *dev)
 {
-	struct sy8106a *this = container_of(dev, struct sy8106a, dev);
+	struct sy8106a *self = to_sy8106a(dev);
 	int err;
 
-	if ((err = i2c_probe(&this->bus)))
+	if ((err = i2c_probe(&self->bus)))
 		return err;
 
 	return SUCCESS;
