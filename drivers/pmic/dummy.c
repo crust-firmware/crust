@@ -10,15 +10,21 @@
 #include <pmic/dummy.h>
 #include <regulator/sy8106a.h>
 
+static inline struct dummy_pmic *
+to_dummy_pmic(struct device *dev)
+{
+	return container_of(dev, struct dummy_pmic, dev);
+}
+
 static int
 dummy_pmic_power_off(struct device *dev)
 {
-	struct dummy_pmic *this = container_of(dev, struct dummy_pmic, dev);
+	struct dummy_pmic *self = to_dummy_pmic(dev);
 	int err;
 
 	/* Turn CPU power off. */
-	if (this->vdd_cpux.dev &&
-	    (err = regulator_disable(this->vdd_cpux.dev, this->vdd_cpux.id)))
+	if (self->vdd_cpux.dev &&
+	    (err = regulator_disable(self->vdd_cpux.dev, self->vdd_cpux.id)))
 		return err;
 
 	return SUCCESS;
@@ -27,12 +33,12 @@ dummy_pmic_power_off(struct device *dev)
 static int
 dummy_pmic_power_on(struct device *dev)
 {
-	struct dummy_pmic *this = container_of(dev, struct dummy_pmic, dev);
+	struct dummy_pmic *self = to_dummy_pmic(dev);
 	int err;
 
 	/* Turn CPU power on. */
-	if (this->vdd_cpux.dev &&
-	    (err = regulator_enable(this->vdd_cpux.dev, this->vdd_cpux.id)))
+	if (self->vdd_cpux.dev &&
+	    (err = regulator_enable(self->vdd_cpux.dev, self->vdd_cpux.id)))
 		return err;
 
 	return SUCCESS;
@@ -41,10 +47,10 @@ dummy_pmic_power_on(struct device *dev)
 static int
 dummy_pmic_probe(struct device *dev)
 {
-	struct dummy_pmic *this = container_of(dev, struct dummy_pmic, dev);
+	struct dummy_pmic *self = to_dummy_pmic(dev);
 
-	if (this->vdd_cpux.dev)
-		device_probe(this->vdd_cpux.dev);
+	if (self->vdd_cpux.dev)
+		device_probe(self->vdd_cpux.dev);
 
 	return SUCCESS;
 }
