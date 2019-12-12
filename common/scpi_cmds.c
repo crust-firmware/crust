@@ -26,16 +26,16 @@ enum {
 
 struct scpi_cmd {
 	/** Handler that can process a message and create a dynamic reply. */
-	int       (*handler)(uint32_t *rx_payload, uint32_t *tx_payload,
-	                     uint16_t *tx_size);
+	int             (*handler)(uint32_t *rx_payload, uint32_t *tx_payload,
+	                           uint16_t *tx_size);
 	/** Fixed reply payload. */
-	uint32_t *tx_payload;
+	const uint32_t *tx_payload;
 	/** Expected size of received payload. */
-	uint8_t   rx_size;
+	uint8_t         rx_size;
 	/** Size of fixed reply payload, if present. */
-	uint8_t   tx_size;
+	uint8_t         tx_size;
 	/** Any combination of flags from above, if applicable. */
-	uint8_t   flags;
+	uint8_t         flags;
 };
 
 static const uint8_t scpi_error_map[] = {
@@ -64,7 +64,7 @@ scpi_map_error(int err)
 #define SCPI_PAYLOAD_LIMITS(x, y)   (((x) & 0x01ff) << 16 | ((y) & 0x01ff))
 #define SCPI_PROTOCOL_VERSION(x, y) (((x) & 0xffff) << 16 | ((y) & 0xffff))
 
-static uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
+static const uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
 	/* SCPI protocol version. */
 	SCPI_PROTOCOL_VERSION(1, 2),
 	/* Payload size limits. */
