@@ -13,10 +13,10 @@
 	(&container_of((dev)->drv, struct pmic_driver, drv)->ops)
 
 struct pmic_driver_ops {
-	int (*reset)(struct device *dev);
-	int (*resume)(struct device *dev);
-	int (*shutdown)(struct device *dev);
-	int (*suspend)(struct device *dev);
+	int (*reset)(const struct device *dev);
+	int (*resume)(const struct device *dev);
+	int (*shutdown)(const struct device *dev);
+	int (*suspend)(const struct device *dev);
 };
 
 struct pmic_driver {
@@ -24,7 +24,7 @@ struct pmic_driver {
 	const struct pmic_driver_ops ops;
 };
 
-extern struct device *pmic;
+extern const struct device *pmic;
 
 /**
  * Find and select the best available PMIC.
@@ -37,7 +37,7 @@ void pmic_detect(void);
  * @param dev The device containing the PMIC functionality.
  */
 static inline int
-pmic_reset(struct device *dev)
+pmic_reset(const struct device *dev)
 {
 	return PMIC_OPS(dev)->reset(dev);
 }
@@ -48,7 +48,7 @@ pmic_reset(struct device *dev)
  * @param dev The device containing the PMIC functionality.
  */
 static inline int
-pmic_resume(struct device *dev)
+pmic_resume(const struct device *dev)
 {
 	return PMIC_OPS(dev)->resume(dev);
 }
@@ -59,7 +59,7 @@ pmic_resume(struct device *dev)
  * @param dev The device containing the PMIC functionality.
  */
 static inline int
-pmic_shutdown(struct device *dev)
+pmic_shutdown(const struct device *dev)
 {
 	return PMIC_OPS(dev)->shutdown(dev);
 }
@@ -70,7 +70,7 @@ pmic_shutdown(struct device *dev)
  * @param dev The device containing the PMIC functionality.
  */
 static inline int
-pmic_suspend(struct device *dev)
+pmic_suspend(const struct device *dev)
 {
 	return PMIC_OPS(dev)->suspend(dev);
 }

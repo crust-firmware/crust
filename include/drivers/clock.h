@@ -42,7 +42,7 @@ enum {
 };
 
 struct clock_handle {
-	struct device *const dev;  /**< The device containing this clock. */
+	const struct device *dev;  /**< The device containing this clock. */
 	const uint8_t        id;   /**< The per-device clock identifier. */
 	const uint8_t        vdiv; /**< Optional variable post-divider. */
 };
@@ -56,14 +56,16 @@ struct clock_info {
 };
 
 struct clock_driver_ops {
-	struct clock_info   *(*get_info)(struct device *dev, uint8_t id);
-	struct clock_handle *(*get_parent)(struct device *dev, uint8_t id);
-	int                  (*get_rate)(struct device *dev, uint8_t id,
+	struct clock_info   *(*get_info)(const struct device *dev, uint8_t id);
+	struct clock_handle *(*get_parent)(const struct device *dev,
+	                                   uint8_t id);
+	int                  (*get_rate)(const struct device *dev, uint8_t id,
 	                                 uint32_t *rate);
-	int                  (*get_state)(struct device *dev, uint8_t id);
-	int                  (*set_rate)(struct device *dev, uint8_t id,
+	int                  (*get_state)(const struct device *dev,
+	                                  uint8_t id);
+	int                  (*set_rate)(const struct device *dev, uint8_t id,
 	                                 uint32_t rate);
-	int                  (*set_state)(struct device *dev, uint8_t id,
+	int                  (*set_state)(const struct device *dev, uint8_t id,
 	                                  bool enable);
 };
 
@@ -85,7 +87,7 @@ struct clock_driver {
  * @param id  The device-specific identifier for this clock.
  * @return    Zero on success; a defined error code on failure.
  */
-int clock_disable(struct device *dev, uint8_t id);
+int clock_disable(const struct device *dev, uint8_t id);
 
 /**
  * Enable a clock. If the clock does not have a gate, this may have no effect
@@ -101,14 +103,14 @@ int clock_disable(struct device *dev, uint8_t id);
  * @param id  The device-specific identifier for this clock.
  * @return    Zero on success; a defined error code on failure.
  */
-int clock_enable(struct device *dev, uint8_t id);
+int clock_enable(const struct device *dev, uint8_t id);
 
 /**
  * Get a reference to a clock and its controller device, and enable the clock.
  *
  * @param clock A handle for the clock.
  */
-int clock_get(struct clock_handle *clock);
+int clock_get(const struct clock_handle *clock);
 
 /**
  * Get generic information about a clock.
@@ -120,7 +122,7 @@ int clock_get(struct clock_handle *clock);
  * @return    A pointer to the information structure.
  */
 static inline struct clock_info *
-clock_get_info(struct device *dev, uint8_t id)
+clock_get_info(const struct device *dev, uint8_t id)
 {
 	return CLOCK_OPS(dev)->get_info(dev, id);
 }
@@ -135,7 +137,7 @@ clock_get_info(struct device *dev, uint8_t id)
  * @return    A pointer to the handle; NULL if the clock has no parent.
  */
 static inline struct clock_handle *
-clock_get_parent(struct device *dev, uint8_t id)
+clock_get_parent(const struct device *dev, uint8_t id)
 {
 	return CLOCK_OPS(dev)->get_parent(dev, id);
 }
@@ -152,7 +154,7 @@ clock_get_parent(struct device *dev, uint8_t id)
  * @return     Zero on success; a defined error code on failure.
  */
 static inline int
-clock_get_rate(struct device *dev, uint8_t id, uint32_t *rate)
+clock_get_rate(const struct device *dev, uint8_t id, uint32_t *rate)
 {
 	return CLOCK_OPS(dev)->get_rate(dev, id, rate);
 }
@@ -168,7 +170,7 @@ clock_get_rate(struct device *dev, uint8_t id, uint32_t *rate)
  * @return     On success, boolean true or false for if the clock is enabled; a
  *             defined error code on failure.
  */
-int clock_get_state(struct device *dev, uint8_t id);
+int clock_get_state(const struct device *dev, uint8_t id);
 
 /**
  * Set the rate of a clock. This function takes into account the current rates
@@ -186,6 +188,6 @@ int clock_get_state(struct device *dev, uint8_t id);
  * @param rate The requested clock rate.
  * @return     Zero on success; a defined error code on failure.
  */
-int clock_set_rate(struct device *dev, uint8_t id, uint32_t rate);
+int clock_set_rate(const struct device *dev, uint8_t id, uint32_t rate);
 
 #endif /* DRIVERS_CLOCK_H */

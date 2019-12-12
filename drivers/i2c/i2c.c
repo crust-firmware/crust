@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 int
-i2c_probe(struct i2c_handle *bus)
+i2c_probe(const struct i2c_handle *bus)
 {
 	const struct i2c_driver_ops *ops = I2C_OPS(bus->dev);
 	uint8_t dummy;
@@ -33,7 +33,7 @@ abort:
 }
 
 int
-i2c_read_reg(struct i2c_handle *bus, uint8_t addr, uint8_t *data)
+i2c_read_reg(const struct i2c_handle *bus, uint8_t addr, uint8_t *data)
 {
 	const struct i2c_driver_ops *ops = I2C_OPS(bus->dev);
 	int err;
@@ -62,7 +62,7 @@ abort:
 }
 
 int
-i2c_write_reg(struct i2c_handle *bus, uint8_t addr, uint8_t data)
+i2c_write_reg(const struct i2c_handle *bus, uint8_t addr, uint8_t data)
 {
 	const struct i2c_driver_ops *ops = I2C_OPS(bus->dev);
 	int err;

@@ -8,11 +8,11 @@
 #include <gpio.h>
 
 int
-gpio_get(struct gpio_handle *gpio)
+gpio_get(const struct gpio_handle *gpio)
 {
-	struct device *dev = gpio->dev;
-	uint8_t pin        = gpio->pin;
-	uint8_t mode       = gpio->mode;
+	const struct device *dev = gpio->dev;
+	uint8_t pin  = gpio->pin;
+	uint8_t mode = gpio->mode;
 	int err;
 
 	/* Ensure the controller's driver is loaded. */

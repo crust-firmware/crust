@@ -22,11 +22,11 @@ enum {
 };
 
 struct msgbox_driver_ops {
-	void (*ack_rx)(struct device *dev, uint8_t chan);
-	int  (*disable)(struct device *dev, uint8_t chan);
-	int  (*enable)(struct device *dev, uint8_t chan);
-	bool (*last_tx_done)(struct device *dev, uint8_t chan);
-	int  (*send)(struct device *dev, uint8_t chan,
+	void (*ack_rx)(const struct device *dev, uint8_t chan);
+	int  (*disable)(const struct device *dev, uint8_t chan);
+	int  (*enable)(const struct device *dev, uint8_t chan);
+	bool (*last_tx_done)(const struct device *dev, uint8_t chan);
+	int  (*send)(const struct device *dev, uint8_t chan,
 	             uint32_t message);
 };
 
@@ -42,7 +42,7 @@ struct msgbox_driver {
  * @param chan The message box channel.
  */
 static inline void
-msgbox_ack_rx(struct device *dev, uint8_t chan)
+msgbox_ack_rx(const struct device *dev, uint8_t chan)
 {
 	MSGBOX_OPS(dev)->ack_rx(dev, chan);
 }
@@ -54,7 +54,7 @@ msgbox_ack_rx(struct device *dev, uint8_t chan)
  * @param chan The message box channel.
  */
 static inline int
-msgbox_disable(struct device *dev, uint8_t chan)
+msgbox_disable(const struct device *dev, uint8_t chan)
 {
 	return MSGBOX_OPS(dev)->disable(dev, chan);
 }
@@ -66,7 +66,7 @@ msgbox_disable(struct device *dev, uint8_t chan)
  * @param chan    The message box channel.
  */
 static inline int
-msgbox_enable(struct device *dev, uint8_t chan)
+msgbox_enable(const struct device *dev, uint8_t chan)
 {
 	return MSGBOX_OPS(dev)->enable(dev, chan);
 }
@@ -80,7 +80,7 @@ msgbox_enable(struct device *dev, uint8_t chan)
  * @param chan The message box channel.
  */
 static inline bool
-msgbox_last_tx_done(struct device *dev, uint8_t chan)
+msgbox_last_tx_done(const struct device *dev, uint8_t chan)
 {
 	return MSGBOX_OPS(dev)->last_tx_done(dev, chan);
 }
@@ -94,7 +94,7 @@ msgbox_last_tx_done(struct device *dev, uint8_t chan)
  * @param message The message to send.
  */
 static inline int
-msgbox_send(struct device *dev, uint8_t chan, uint32_t message)
+msgbox_send(const struct device *dev, uint8_t chan, uint32_t message)
 {
 	return MSGBOX_OPS(dev)->send(dev, chan, message);
 }

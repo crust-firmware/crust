@@ -20,7 +20,7 @@
 static bool initialized;
 
 int
-axp803_probe(struct rsb_handle *bus)
+axp803_probe(const struct rsb_handle *bus)
 {
 	uint8_t reg;
 	int err;
@@ -41,7 +41,7 @@ axp803_probe(struct rsb_handle *bus)
 }
 
 int
-axp803_reg_setbits(struct rsb_handle *bus, uint8_t addr, uint8_t bits)
+axp803_reg_setbits(const struct rsb_handle *bus, uint8_t addr, uint8_t bits)
 {
 	uint8_t tmp;
 	int err;

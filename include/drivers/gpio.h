@@ -15,15 +15,15 @@
 	(&container_of((dev)->drv, struct gpio_driver, drv)->ops)
 
 struct gpio_handle {
-	struct device *const dev;
+	const struct device *dev;
 	const uint8_t        pin;
 	const uint8_t        mode;
 };
 
 struct gpio_driver_ops {
-	int (*get_value)(struct device *dev, uint8_t pin, bool *value);
-	int (*set_mode)(struct device *dev, uint8_t pin, uint8_t mode);
-	int (*set_value)(struct device *dev, uint8_t pin, bool value);
+	int (*get_value)(const struct device *dev, uint8_t pin, bool *value);
+	int (*set_mode)(const struct device *dev, uint8_t pin, uint8_t mode);
+	int (*set_value)(const struct device *dev, uint8_t pin, bool value);
 };
 
 struct gpio_driver {
@@ -36,7 +36,7 @@ struct gpio_driver {
  *
  * @param gpio A handle for the GPIO pin.
  */
-int gpio_get(struct gpio_handle *gpio);
+int gpio_get(const struct gpio_handle *gpio);
 
 /**
  * Get the value of a pin.
@@ -46,7 +46,7 @@ int gpio_get(struct gpio_handle *gpio);
  * @param value The location to store the value read from the specified pin.
  */
 static inline int
-gpio_get_value(struct device *dev, uint8_t pin, bool *value)
+gpio_get_value(const struct device *dev, uint8_t pin, bool *value)
 {
 	return GPIO_OPS(dev)->get_value(dev, pin, value);
 }
@@ -59,7 +59,7 @@ gpio_get_value(struct device *dev, uint8_t pin, bool *value)
  * @param mode The mode to set for the specified pin.
  */
 static inline int
-gpio_set_mode(struct device *dev, uint8_t pin, uint8_t mode)
+gpio_set_mode(const struct device *dev, uint8_t pin, uint8_t mode)
 {
 	return GPIO_OPS(dev)->set_mode(dev, pin, mode);
 }
@@ -72,7 +72,7 @@ gpio_set_mode(struct device *dev, uint8_t pin, uint8_t mode)
  * @param value The value to set for the specified pin.
  */
 static inline int
-gpio_set_value(struct device *dev, uint8_t pin, bool value)
+gpio_set_value(const struct device *dev, uint8_t pin, bool value)
 {
 	return GPIO_OPS(dev)->set_value(dev, pin, value);
 }

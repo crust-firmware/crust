@@ -8,7 +8,7 @@
 #include <pmic/axp803.h>
 #include <pmic/dummy.h>
 
-struct device *pmic;
+const struct device *pmic;
 
 void
 pmic_detect(void)

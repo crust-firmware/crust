@@ -10,7 +10,7 @@
 #include <stdint.h>
 
 int
-clock_disable(struct device *dev, uint8_t id)
+clock_disable(const struct device *dev, uint8_t id)
 {
 	const struct clock_driver_ops *ops = CLOCK_OPS(dev);
 	struct clock_handle *parent;
@@ -36,7 +36,7 @@ clock_disable(struct device *dev, uint8_t id)
 }
 
 int
-clock_enable(struct device *dev, uint8_t id)
+clock_enable(const struct device *dev, uint8_t id)
 {
 	const struct clock_driver_ops *ops = CLOCK_OPS(dev);
 	struct clock_handle *parent;
@@ -70,10 +70,10 @@ clock_enable(struct device *dev, uint8_t id)
 }
 
 int
-clock_get(struct clock_handle *clock)
+clock_get(const struct clock_handle *clock)
 {
-	struct device *dev = clock->dev;
-	uint8_t id         = clock->id;
+	const struct device *dev = clock->dev;
+	uint8_t id = clock->id;
 	int err;
 
 	/* Ensure the controller's driver is loaded. */
@@ -87,7 +87,7 @@ clock_get(struct clock_handle *clock)
 }
 
 int
-clock_get_state(struct device *dev, uint8_t id)
+clock_get_state(const struct device *dev, uint8_t id)
 {
 	const struct clock_driver_ops *ops = CLOCK_OPS(dev);
 	struct clock_handle *parent;
@@ -110,7 +110,7 @@ clock_get_state(struct device *dev, uint8_t id)
 }
 
 int
-clock_set_rate(struct device *dev, uint8_t id, uint32_t rate)
+clock_set_rate(const struct device *dev, uint8_t id, uint32_t rate)
 {
 	const struct clock_driver_ops *ops = CLOCK_OPS(dev);
 	struct clock_info *info = ops->get_info(dev, id);

@@ -26,16 +26,16 @@
 
 #define I2C_BCAST_ADDR 0
 
-static int sunxi_rsb_set_rate(struct device *dev, uint32_t rate);
+static int sunxi_rsb_set_rate(const struct device *dev, uint32_t rate);
 
-static inline struct sunxi_rsb *
-to_sunxi_rsb(struct device *dev)
+static inline const struct sunxi_rsb *
+to_sunxi_rsb(const struct device *dev)
 {
 	return container_of(dev, struct sunxi_rsb, dev);
 }
 
 static int
-sunxi_rsb_do_command(struct sunxi_rsb *self, uint32_t addr, uint32_t cmd)
+sunxi_rsb_do_command(const struct sunxi_rsb *self, uint32_t addr, uint32_t cmd)
 {
 	mmio_write_32(self->regs + RSB_CMD_REG, cmd);
 	mmio_write_32(self->regs + RSB_SADDR_REG, addr);
@@ -48,10 +48,10 @@ sunxi_rsb_do_command(struct sunxi_rsb *self, uint32_t addr, uint32_t cmd)
 }
 
 static int
-sunxi_rsb_probe_dev(struct rsb_handle *bus, uint16_t hwaddr,
+sunxi_rsb_probe_dev(const struct rsb_handle *bus, uint16_t hwaddr,
                     uint8_t addr, uint8_t data)
 {
-	struct sunxi_rsb *self = to_sunxi_rsb(bus->dev);
+	const struct sunxi_rsb *self = to_sunxi_rsb(bus->dev);
 	int err;
 
 	/* Switch the PMIC to RSB mode. */
@@ -69,9 +69,9 @@ sunxi_rsb_probe_dev(struct rsb_handle *bus, uint16_t hwaddr,
 }
 
 static int
-sunxi_rsb_read(struct rsb_handle *bus, uint8_t addr, uint8_t *data)
+sunxi_rsb_read(const struct rsb_handle *bus, uint8_t addr, uint8_t *data)
 {
-	struct sunxi_rsb *self = to_sunxi_rsb(bus->dev);
+	const struct sunxi_rsb *self = to_sunxi_rsb(bus->dev);
 	int err;
 
 	mmio_write_32(self->regs + RSB_ADDR_REG, addr);
@@ -85,10 +85,10 @@ sunxi_rsb_read(struct rsb_handle *bus, uint8_t addr, uint8_t *data)
 }
 
 static int
-sunxi_rsb_set_rate(struct device *dev, uint32_t rate)
+sunxi_rsb_set_rate(const struct device *dev, uint32_t rate)
 {
-	struct sunxi_rsb *self     = to_sunxi_rsb(dev);
-	struct clock_handle *clock = &self->clock;
+	const struct sunxi_rsb *self     = to_sunxi_rsb(dev);
+	const struct clock_handle *clock = &self->clock;
 	uint32_t dev_rate;
 	uint8_t  divider;
 	int err;
@@ -107,9 +107,9 @@ sunxi_rsb_set_rate(struct device *dev, uint32_t rate)
 }
 
 static int
-sunxi_rsb_write(struct rsb_handle *bus, uint8_t addr, uint8_t data)
+sunxi_rsb_write(const struct rsb_handle *bus, uint8_t addr, uint8_t data)
 {
-	struct sunxi_rsb *self = to_sunxi_rsb(bus->dev);
+	const struct sunxi_rsb *self = to_sunxi_rsb(bus->dev);
 
 	mmio_write_32(self->regs + RSB_ADDR_REG, addr);
 	mmio_write_32(self->regs + RSB_DATA_REG, data);
@@ -118,9 +118,9 @@ sunxi_rsb_write(struct rsb_handle *bus, uint8_t addr, uint8_t data)
 }
 
 static int
-sunxi_rsb_probe(struct device *dev)
+sunxi_rsb_probe(const struct device *dev)
 {
-	struct sunxi_rsb *self = to_sunxi_rsb(dev);
+	const struct sunxi_rsb *self = to_sunxi_rsb(dev);
 	int err;
 
 	if ((err = clock_get(&self->clock)))
@@ -153,10 +153,11 @@ static const struct rsb_driver sunxi_rsb_driver = {
 	},
 };
 
-struct sunxi_rsb r_rsb = {
+const struct sunxi_rsb r_rsb = {
 	.dev = {
-		.name = "r_rsb",
-		.drv  = &sunxi_rsb_driver.drv,
+		.name  = "r_rsb",
+		.drv   = &sunxi_rsb_driver.drv,
+		.state = DEVICE_STATE_INIT,
 	},
 	.clock = { .dev = &r_ccu.dev, .id = R_CCU_CLOCK_R_RSB },
 	.pins  = {

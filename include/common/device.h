@@ -11,26 +11,30 @@
 #include <stdint.h>
 #include <util.h>
 
-enum {
-	DEVICE_FLAG_RUNNING = BIT(0),
-};
+#define DEVICE_STATE_INIT &(struct device_state) { 0 }
 
+struct device_state;
 struct driver;
 
 struct device {
 	/** A unique name for this device. */
-	const char *const          name;
+	const char          *name;
 	/** The driver for this device. */
-	const struct driver *const drv;
-	/** Flags describing this device's state. */
-	uint8_t                    flags;
+	const struct driver *drv;
+	/** Mutable state for this device. */
+	struct device_state *state;
+};
+
+struct device_state {
+	/** Reference count for this device. */
+	uint8_t refcount;
 };
 
 struct driver {
 	/** A function called to check for new work or state changes. */
-	void (*poll)(struct device *dev);
+	void (*poll)(const struct device *dev);
 	/** A function called to detect and initialize new devices. */
-	int  (*probe)(struct device *dev);
+	int  (*probe)(const struct device *dev);
 };
 
 /**
@@ -39,6 +43,6 @@ struct driver {
  *
  * @param dev  A device
  */
-void device_probe(struct device *dev);
+void device_probe(const struct device *dev);
 
 #endif /* COMMON_DM_H */

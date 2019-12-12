@@ -41,14 +41,14 @@ enum {
 	IDLE                 = 0xf8,
 };
 
-static inline struct sun6i_i2c *
-to_sun6i_i2c(struct device *dev)
+static inline const struct sun6i_i2c *
+to_sun6i_i2c(const struct device *dev)
 {
 	return container_of(dev, struct sun6i_i2c, dev);
 }
 
 static bool
-sun6i_i2c_wait_idle(struct sun6i_i2c *self)
+sun6i_i2c_wait_idle(const struct sun6i_i2c *self)
 {
 	/* With a single master on the bus, this should only take one cycle. */
 	int timeout = 2;
@@ -64,7 +64,7 @@ sun6i_i2c_wait_idle(struct sun6i_i2c *self)
 }
 
 static bool
-sun6i_i2c_wait_start(struct sun6i_i2c *self)
+sun6i_i2c_wait_start(const struct sun6i_i2c *self)
 {
 	/* With a single master on the bus, this should only take one cycle. */
 	int timeout = 2;
@@ -80,7 +80,7 @@ sun6i_i2c_wait_start(struct sun6i_i2c *self)
 }
 
 static bool
-sun6i_i2c_wait_state(struct sun6i_i2c *self, uint8_t state)
+sun6i_i2c_wait_state(const struct sun6i_i2c *self, uint8_t state)
 {
 	/* Wait for up to 8 transfer cycles, one ACK, and one extra cycle. */
 	int timeout = 10;
@@ -96,9 +96,9 @@ sun6i_i2c_wait_state(struct sun6i_i2c *self, uint8_t state)
 }
 
 static int
-sun6i_i2c_read(struct i2c_handle *bus, uint8_t *data)
+sun6i_i2c_read(const struct i2c_handle *bus, uint8_t *data)
 {
-	struct sun6i_i2c *self = to_sun6i_i2c(bus->dev);
+	const struct sun6i_i2c *self = to_sun6i_i2c(bus->dev);
 
 	/* Disable sending an ACK and trigger a state change. */
 	mmio_clrset_32(self->regs + I2C_CTRL_REG, BIT(2), BIT(3));
@@ -114,10 +114,10 @@ sun6i_i2c_read(struct i2c_handle *bus, uint8_t *data)
 }
 
 static int
-sun6i_i2c_start(struct i2c_handle *bus, uint8_t direction)
+sun6i_i2c_start(const struct i2c_handle *bus, uint8_t direction)
 {
-	struct sun6i_i2c *self = to_sun6i_i2c(bus->dev);
-	uint8_t init_state     = mmio_read_32(self->regs + I2C_STAT_REG);
+	const struct sun6i_i2c *self = to_sun6i_i2c(bus->dev);
+	uint8_t init_state = mmio_read_32(self->regs + I2C_STAT_REG);
 	uint8_t state;
 
 	/* Send a start condition. */
@@ -146,9 +146,9 @@ sun6i_i2c_start(struct i2c_handle *bus, uint8_t direction)
 }
 
 static void
-sun6i_i2c_stop(struct i2c_handle *bus)
+sun6i_i2c_stop(const struct i2c_handle *bus)
 {
-	struct sun6i_i2c *self = to_sun6i_i2c(bus->dev);
+	const struct sun6i_i2c *self = to_sun6i_i2c(bus->dev);
 
 	/* Send a stop condition. */
 	mmio_set_32(self->regs + I2C_CTRL_REG, BIT(4) | BIT(3));
@@ -158,9 +158,9 @@ sun6i_i2c_stop(struct i2c_handle *bus)
 }
 
 static int
-sun6i_i2c_write(struct i2c_handle *bus, uint8_t data)
+sun6i_i2c_write(const struct i2c_handle *bus, uint8_t data)
 {
-	struct sun6i_i2c *self = to_sun6i_i2c(bus->dev);
+	const struct sun6i_i2c *self = to_sun6i_i2c(bus->dev);
 
 	/* Write data, then trigger a state change. */
 	mmio_write_32(self->regs + I2C_DATA_REG, data);
@@ -174,9 +174,9 @@ sun6i_i2c_write(struct i2c_handle *bus, uint8_t data)
 }
 
 static int
-sun6i_i2c_probe(struct device *dev)
+sun6i_i2c_probe(const struct device *dev)
 {
-	struct sun6i_i2c *self = to_sun6i_i2c(dev);
+	const struct sun6i_i2c *self = to_sun6i_i2c(dev);
 	int err;
 
 	if ((err = clock_get(&self->clock)))
@@ -221,10 +221,11 @@ static const struct i2c_driver sun6i_i2c_driver = {
 	},
 };
 
-struct sun6i_i2c r_i2c = {
+const struct sun6i_i2c r_i2c = {
 	.dev = {
-		.name = "r_i2c",
-		.drv  = &sun6i_i2c_driver.drv,
+		.name  = "r_i2c",
+		.drv   = &sun6i_i2c_driver.drv,
+		.state = DEVICE_STATE_INIT,
 	},
 	.clock = { .dev = &r_ccu.dev, .id = R_CCU_CLOCK_R_I2C },
 	.pins  = {

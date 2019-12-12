@@ -10,7 +10,7 @@
 #include <stdint.h>
 
 int
-regulator_disable(struct device *dev, uint8_t id)
+regulator_disable(const struct device *dev, uint8_t id)
 {
 	const struct regulator_driver_ops *ops = REGULATOR_OPS(dev);
 	struct regulator_info *info = ops->get_info(dev, id);
@@ -22,7 +22,7 @@ regulator_disable(struct device *dev, uint8_t id)
 }
 
 int
-regulator_get_value(struct device *dev, uint8_t id, uint16_t *value)
+regulator_get_value(const struct device *dev, uint8_t id, uint16_t *value)
 {
 	const struct regulator_driver_ops *ops = REGULATOR_OPS(dev);
 	struct regulator_info *info = ops->get_info(dev, id);
@@ -46,7 +46,7 @@ regulator_get_value(struct device *dev, uint8_t id, uint16_t *value)
 }
 
 int
-regulator_set_value(struct device *dev, uint8_t id, uint16_t value)
+regulator_set_value(const struct device *dev, uint8_t id, uint16_t value)
 {
 	const struct regulator_driver_ops *ops = REGULATOR_OPS(dev);
 	struct regulator_info *info = ops->get_info(dev, id);

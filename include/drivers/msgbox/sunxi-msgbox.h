@@ -18,6 +18,6 @@ struct sunxi_msgbox {
 	uintptr_t           regs;
 };
 
-extern struct sunxi_msgbox msgbox;
+extern const struct sunxi_msgbox msgbox;
 
 #endif /* DRIVERS_MSGBOX_SUNXI_MSGBOX_H */

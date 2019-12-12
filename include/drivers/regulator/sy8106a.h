@@ -21,6 +21,6 @@ struct sy8106a {
 	struct i2c_handle bus;
 };
 
-extern struct sy8106a sy8106a;
+extern const struct sy8106a sy8106a;
 
 #endif /* DRIVERS_REGULATOR_SY8106A_H */

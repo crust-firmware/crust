@@ -17,6 +17,6 @@ struct sunxi_rsb {
 	uintptr_t           regs;
 };
 
-extern struct sunxi_rsb r_rsb;
+extern const struct sunxi_rsb r_rsb;
 
 #endif /* DRIVERS_RSB_SUNXI_RSB_H */

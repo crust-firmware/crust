@@ -15,6 +15,6 @@ struct sunxi_twd {
 	uintptr_t           regs;
 };
 
-extern struct sunxi_twd r_twd;
+extern const struct sunxi_twd r_twd;
 
 #endif /* DRIVERS_WATCHDOG_SUNXI_TWD_H */

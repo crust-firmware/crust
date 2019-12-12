@@ -24,7 +24,7 @@
  * @return     Zero if an AXP803 is present and successfully initialized; any
  *             other value if it is not.
  */
-int axp803_probe(struct rsb_handle *bus);
+int axp803_probe(const struct rsb_handle *bus);
 
 /**
  * Set one or more bits in a register in the AXP803 PMIC.
@@ -38,6 +38,7 @@ int axp803_probe(struct rsb_handle *bus);
  *             will be set in the register; zeroes here will be left unchanged.
  * @return     Zero on success; a defined error code on failure.
  */
-int axp803_reg_setbits(struct rsb_handle *bus, uint8_t addr, uint8_t bits);
+int axp803_reg_setbits(const struct rsb_handle *bus, uint8_t addr,
+                       uint8_t bits);
 
 #endif /* DRIVERS_MFD_AXP803_H */

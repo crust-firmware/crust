@@ -13,6 +13,6 @@ struct sun4i_intc {
 	uintptr_t     regs;
 };
 
-extern struct sun4i_intc r_intc;
+extern const struct sun4i_intc r_intc;
 
 #endif /* DRIVERS_IRQ_SUN4I_INTC_H */

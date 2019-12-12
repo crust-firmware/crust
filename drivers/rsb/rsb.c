@@ -7,7 +7,8 @@
 #include <rsb.h>
 
 int
-rsb_probe(struct rsb_handle *bus, uint16_t hwaddr, uint8_t addr, uint8_t data)
+rsb_probe(const struct rsb_handle *bus, uint16_t hwaddr, uint8_t addr,
+          uint8_t data)
 {
 	/* Ensure the controller's driver is loaded. */
 	device_probe(bus->dev);

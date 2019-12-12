@@ -17,7 +17,7 @@ struct sunxi_ccu {
 	uintptr_t               regs;
 };
 
-extern struct sunxi_ccu ccu;
-extern struct sunxi_ccu r_ccu;
+extern const struct sunxi_ccu ccu;
+extern const struct sunxi_ccu r_ccu;
 
 #endif /* DRIVERS_CLOCK_SUNXI_CCU_H */

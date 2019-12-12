@@ -7,19 +7,17 @@
 #include <device.h>
 
 void
-device_probe(struct device *dev)
+device_probe(const struct device *dev)
 {
 	int err;
 
 	/* Skip already-probed devices. */
-	if (dev->flags & DEVICE_FLAG_RUNNING)
+	if (dev->state->refcount++)
 		return;
 
 	/* Probe the device itself, and report any errors. */
 	if ((err = dev->drv->probe(dev)))
 		panic("dm: Failed to probe %s (%d)", dev->name, err);
-
-	dev->flags |= DEVICE_FLAG_RUNNING;
 
 	debug("dm: Probed %s", dev->name);
 }

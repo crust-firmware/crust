@@ -20,16 +20,16 @@
 #define INTC_MASK_REG      0x0050
 #define INTC_RESP_REG      0x0060
 
-static inline struct sun4i_intc *
-to_sun4i_intc(struct device *dev)
+static inline const struct sun4i_intc *
+to_sun4i_intc(const struct device *dev)
 {
 	return container_of(dev, struct sun4i_intc, dev);
 }
 
 static void
-sun4i_intc_poll(struct device *dev)
+sun4i_intc_poll(const struct device *dev)
 {
-	struct sun4i_intc *self = to_sun4i_intc(dev);
+	const struct sun4i_intc *self = to_sun4i_intc(dev);
 
 	uint32_t status = mmio_read_32(self->regs + INTC_EN_REG) &
 	                  mmio_read_32(self->regs + INTC_IRQ_PEND_REG);
@@ -40,9 +40,9 @@ sun4i_intc_poll(struct device *dev)
 }
 
 static int
-sun4i_intc_probe(struct device *dev)
+sun4i_intc_probe(const struct device *dev)
 {
-	struct sun4i_intc *self = to_sun4i_intc(dev);
+	const struct sun4i_intc *self = to_sun4i_intc(dev);
 
 	/* Clear the table base address (just return IRQ numbers). */
 	mmio_write_32(self->regs + INTC_BASE_ADDR_REG, 0);
@@ -60,10 +60,11 @@ static const struct driver sun4i_intc_driver = {
 	.poll  = sun4i_intc_poll,
 };
 
-struct sun4i_intc r_intc = {
+const struct sun4i_intc r_intc = {
 	.dev = {
-		.name = "r_intc",
-		.drv  = &sun4i_intc_driver,
+		.name  = "r_intc",
+		.drv   = &sun4i_intc_driver,
+		.state = DEVICE_STATE_INIT,
 	},
 	.regs = DEV_R_INTC,
 };

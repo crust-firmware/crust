@@ -23,8 +23,8 @@ enum {
 };
 
 struct regulator_handle {
-	struct device *dev; /**< The device containing this regulator. */
-	uint8_t        id;  /**< The per-device regulator identifier. */
+	const struct device *dev; /**< The device containing this regulator. */
+	uint8_t              id;  /**< The per-device regulator identifier. */
 };
 
 struct regulator_range {
@@ -42,14 +42,16 @@ struct regulator_info {
 };
 
 struct regulator_driver_ops {
-	struct regulator_info *(*get_info)(struct device *dev, uint8_t id);
-	int                    (*get_state)(struct device *dev, uint8_t id);
-	int                    (*read_raw)(struct device *dev, uint8_t id,
-	                                   uint32_t *raw);
-	int                    (*set_state)(struct device *dev, uint8_t id,
-	                                    bool enable);
-	int                    (*write_raw)(struct device *dev, uint8_t id,
-	                                    uint32_t raw);
+	struct regulator_info *(*get_info)(const struct device *dev,
+	                                   uint8_t id);
+	int                    (*get_state)(const struct device *dev,
+	                                    uint8_t id);
+	int                    (*read_raw)(const struct device *dev,
+	                                   uint8_t id, uint32_t *raw);
+	int                    (*set_state)(const struct device *dev,
+	                                    uint8_t id, bool enable);
+	int                    (*write_raw)(const struct device *dev,
+	                                    uint8_t id, uint32_t raw);
 };
 
 struct regulator_driver {
@@ -69,7 +71,7 @@ struct regulator_driver {
  * @param id    The device-specific identifier for this regulator.
  * @return      Zero on success; a defined error code on failure.
  */
-int regulator_disable(struct device *dev, uint8_t id);
+int regulator_disable(const struct device *dev, uint8_t id);
 
 /**
  * Enable the output of a regulator. If the regulator does not have output
@@ -83,7 +85,7 @@ int regulator_disable(struct device *dev, uint8_t id);
  * @return      Zero on success; a defined error code on failure.
  */
 static inline int
-regulator_enable(struct device *dev, uint8_t id)
+regulator_enable(const struct device *dev, uint8_t id)
 {
 	return REGULATOR_OPS(dev)->set_state(dev, id, true);
 }
@@ -98,7 +100,7 @@ regulator_enable(struct device *dev, uint8_t id)
  * @return      A pointer to the information structure.
  */
 static inline struct regulator_info *
-regulator_get_info(struct device *dev, uint8_t id)
+regulator_get_info(const struct device *dev, uint8_t id)
 {
 	return REGULATOR_OPS(dev)->get_info(dev, id);
 }
@@ -115,7 +117,7 @@ regulator_get_info(struct device *dev, uint8_t id)
  *              enabled; a defined error code on failure.
  */
 static inline int
-regulator_get_state(struct device *dev, uint8_t id)
+regulator_get_state(const struct device *dev, uint8_t id)
 {
 	return REGULATOR_OPS(dev)->get_state(dev, id);
 }
@@ -133,7 +135,7 @@ regulator_get_state(struct device *dev, uint8_t id)
  * @param value The location to store the value read from the regulator.
  * @return      Zero on success; a defined error code on failure.
  */
-int regulator_get_value(struct device *dev, uint8_t id, uint16_t *value);
+int regulator_get_value(const struct device *dev, uint8_t id, uint16_t *value);
 
 /**
  * Set the value of a regulator. If the regulator is currently disabled, this
@@ -149,6 +151,6 @@ int regulator_get_value(struct device *dev, uint8_t id, uint16_t *value);
  * @param value The new value for this regulator.
  * @return      Zero on success; a defined error code on failure.
  */
-int regulator_set_value(struct device *dev, uint8_t id, uint16_t value);
+int regulator_set_value(const struct device *dev, uint8_t id, uint16_t value);
 
 #endif /* DRIVERS_REGULATOR_H */

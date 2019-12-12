@@ -420,14 +420,14 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 };
 
-static inline struct axp803_regulator *
-to_axp803_regulator(struct device *dev)
+static inline const struct axp803_regulator *
+to_axp803_regulator(const struct device *dev)
 {
 	return container_of(dev, struct axp803_regulator, dev);
 }
 
 static struct regulator_info *
-axp803_regulator_get_info(struct device *dev __unused, uint8_t id)
+axp803_regulator_get_info(const struct device *dev __unused, uint8_t id)
 {
 	assert(id < AXP803_REGL_COUNT);
 
@@ -435,9 +435,9 @@ axp803_regulator_get_info(struct device *dev __unused, uint8_t id)
 }
 
 static int
-axp803_regulator_get_state(struct device *dev, uint8_t id)
+axp803_regulator_get_state(const struct device *dev, uint8_t id)
 {
-	struct axp803_regulator *self = to_axp803_regulator(dev);
+	const struct axp803_regulator *self = to_axp803_regulator(dev);
 	uint8_t regaddr = axp803_regulators[id].enable_register;
 	uint8_t regmask = axp803_regulators[id].enable_mask;
 	uint8_t reg;
@@ -451,9 +451,9 @@ axp803_regulator_get_state(struct device *dev, uint8_t id)
 }
 
 static int
-axp803_regulator_read_raw(struct device *dev, uint8_t id, uint32_t *raw)
+axp803_regulator_read_raw(const struct device *dev, uint8_t id, uint32_t *raw)
 {
-	struct axp803_regulator *self = to_axp803_regulator(dev);
+	const struct axp803_regulator *self = to_axp803_regulator(dev);
 	uint8_t regaddr = axp803_regulators[id].value_register;
 	uint8_t regmask = axp803_regulators[id].status_mask;
 	uint8_t reg;
@@ -468,9 +468,9 @@ axp803_regulator_read_raw(struct device *dev, uint8_t id, uint32_t *raw)
 }
 
 static int
-axp803_regulator_set_state(struct device *dev, uint8_t id, bool enabled)
+axp803_regulator_set_state(const struct device *dev, uint8_t id, bool enabled)
 {
-	struct axp803_regulator *self = to_axp803_regulator(dev);
+	const struct axp803_regulator *self = to_axp803_regulator(dev);
 	uint8_t regaddr = axp803_regulators[id].enable_register;
 	uint8_t regmask = axp803_regulators[id].enable_mask;
 	uint8_t reg;
@@ -486,9 +486,9 @@ axp803_regulator_set_state(struct device *dev, uint8_t id, bool enabled)
 }
 
 static int
-axp803_regulator_write_raw(struct device *dev, uint8_t id, uint32_t raw)
+axp803_regulator_write_raw(const struct device *dev, uint8_t id, uint32_t raw)
 {
-	struct axp803_regulator *self = to_axp803_regulator(dev);
+	const struct axp803_regulator *self = to_axp803_regulator(dev);
 	uint8_t regaddr = axp803_regulators[id].value_register;
 
 	assert(raw <= UINT8_MAX);
@@ -502,9 +502,9 @@ axp803_regulator_write_raw(struct device *dev, uint8_t id, uint32_t raw)
 }
 
 static int
-axp_regulator_probe(struct device *dev)
+axp_regulator_probe(const struct device *dev)
 {
-	struct axp803_regulator *self = to_axp803_regulator(dev);
+	const struct axp803_regulator *self = to_axp803_regulator(dev);
 	int err;
 
 	if ((err = axp803_probe(&self->bus)))
@@ -526,10 +526,11 @@ static const struct regulator_driver axp803_regulator_driver = {
 	},
 };
 
-struct axp803_regulator axp803_regulator = {
+const struct axp803_regulator axp803_regulator = {
 	.dev = {
-		.name = "axp803-regulator",
-		.drv  = &axp803_regulator_driver.drv,
+		.name  = "axp803-regulator",
+		.drv   = &axp803_regulator_driver.drv,
+		.state = DEVICE_STATE_INIT,
 	},
 	.bus = {
 		.dev  = &r_rsb.dev,

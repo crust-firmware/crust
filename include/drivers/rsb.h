@@ -28,16 +28,16 @@ enum {
 };
 
 struct rsb_handle {
-	struct device *dev;
-	uint8_t        addr;
+	const struct device *dev;
+	uint8_t              addr;
 };
 
 struct rsb_driver_ops {
-	int (*probe)(struct rsb_handle *bus, uint16_t hwaddr, uint8_t addr,
-	             uint8_t data);
-	int (*read)(struct rsb_handle *bus, uint8_t addr, uint8_t *data);
-	int (*set_rate)(struct device *dev, uint32_t rate);
-	int (*write)(struct rsb_handle *bus, uint8_t addr, uint8_t data);
+	int (*probe)(const struct rsb_handle *bus, uint16_t hwaddr,
+	             uint8_t addr, uint8_t data);
+	int (*read)(const struct rsb_handle *bus, uint8_t addr, uint8_t *data);
+	int (*set_rate)(const struct device *dev, uint32_t rate);
+	int (*write)(const struct rsb_handle *bus, uint8_t addr, uint8_t data);
 };
 
 struct rsb_driver {
@@ -53,7 +53,7 @@ struct rsb_driver {
  * @param addr   The register used to switch the PMIC to RSB mode.
  * @param data   The data value that will switch the PMIC to RSB mode.
  */
-int rsb_probe(struct rsb_handle *bus, uint16_t hwaddr, uint8_t addr,
+int rsb_probe(const struct rsb_handle *bus, uint16_t hwaddr, uint8_t addr,
               uint8_t data);
 
 /**
@@ -64,13 +64,13 @@ int rsb_probe(struct rsb_handle *bus, uint16_t hwaddr, uint8_t addr,
  * @param data  The location to save the data read from the register.
  */
 static inline int
-rsb_read(struct rsb_handle *bus, uint8_t addr, uint8_t *data)
+rsb_read(const struct rsb_handle *bus, uint8_t addr, uint8_t *data)
 {
 	return RSB_OPS(bus->dev)->read(bus, addr, data);
 }
 
 static inline int
-rsb_set_rate(struct rsb_handle *bus, uint32_t rate)
+rsb_set_rate(const struct rsb_handle *bus, uint32_t rate)
 {
 	return RSB_OPS(bus->dev)->set_rate(bus->dev, rate);
 }
@@ -83,7 +83,7 @@ rsb_set_rate(struct rsb_handle *bus, uint32_t rate)
  * @param data  The data to write to the register.
  */
 static inline int
-rsb_write(struct rsb_handle *bus, uint8_t addr, uint8_t data)
+rsb_write(const struct rsb_handle *bus, uint8_t addr, uint8_t data)
 {
 	return RSB_OPS(bus->dev)->write(bus, addr, data);
 }

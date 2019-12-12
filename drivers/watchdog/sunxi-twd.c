@@ -17,25 +17,25 @@
 
 #define TWD_RESTART_KEY (0xD14 << 16)
 
-static inline struct sunxi_twd *
-to_sunxi_twd(struct device *dev)
+static inline const struct sunxi_twd *
+to_sunxi_twd(const struct device *dev)
 {
 	return container_of(dev, struct sunxi_twd, dev);
 }
 
 static void
-sunxi_twd_restart(struct device *dev)
+sunxi_twd_restart(const struct device *dev)
 {
-	struct sunxi_twd *self = to_sunxi_twd(dev);
+	const struct sunxi_twd *self = to_sunxi_twd(dev);
 
 	/* Enable and perform restart. */
 	mmio_write_32(self->regs + TWD_RESTART_REG, TWD_RESTART_KEY | BIT(0));
 }
 
 static int
-sunxi_twd_disable(struct device *dev)
+sunxi_twd_disable(const struct device *dev)
 {
-	struct sunxi_twd *self = to_sunxi_twd(dev);
+	const struct sunxi_twd *self = to_sunxi_twd(dev);
 
 	/* Disable system reset, stop watchdog counter. */
 	mmio_clrset_32(self->regs + TWD_CTRL_REG, BIT(9), BIT(1));
@@ -44,9 +44,9 @@ sunxi_twd_disable(struct device *dev)
 }
 
 static int
-sunxi_twd_enable(struct device *dev, uint32_t timeout)
+sunxi_twd_enable(const struct device *dev, uint32_t timeout)
 {
-	struct sunxi_twd *self = to_sunxi_twd(dev);
+	const struct sunxi_twd *self = to_sunxi_twd(dev);
 
 	/* Program interval until watchdog fires. */
 	mmio_write_32(self->regs + TWD_INTV_REG, timeout);
@@ -61,9 +61,9 @@ sunxi_twd_enable(struct device *dev, uint32_t timeout)
 }
 
 static int
-sunxi_twd_probe(struct device *dev)
+sunxi_twd_probe(const struct device *dev)
 {
-	struct sunxi_twd *self = to_sunxi_twd(dev);
+	const struct sunxi_twd *self = to_sunxi_twd(dev);
 	int err;
 
 	if ((err = clock_get(&self->clock)))
@@ -89,10 +89,11 @@ static const struct watchdog_driver sunxi_twd_driver = {
 	},
 };
 
-struct sunxi_twd r_twd = {
+const struct sunxi_twd r_twd = {
 	.dev = {
-		.name = "r_twd",
-		.drv  = &sunxi_twd_driver.drv,
+		.name  = "r_twd",
+		.drv   = &sunxi_twd_driver.drv,
+		.state = DEVICE_STATE_INIT,
 	},
 	.clock = { .dev = &r_ccu.dev, .id = R_CCU_CLOCK_R_TWD },
 	.regs  = DEV_R_TWD,

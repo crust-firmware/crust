@@ -39,6 +39,6 @@ struct axp803_regulator {
 	struct rsb_handle bus;
 };
 
-extern struct axp803_regulator axp803_regulator;
+extern const struct axp803_regulator axp803_regulator;
 
 #endif /* DRIVERS_REGULATOR_AXP803_H */

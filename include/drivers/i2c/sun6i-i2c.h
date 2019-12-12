@@ -17,6 +17,6 @@ struct sun6i_i2c {
 	uintptr_t           regs;
 };
 
-extern struct sun6i_i2c r_i2c;
+extern const struct sun6i_i2c r_i2c;
 
 #endif /* DRIVERS_I2C_SUN6I_I2C_H */

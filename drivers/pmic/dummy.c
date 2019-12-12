@@ -10,16 +10,16 @@
 #include <pmic/dummy.h>
 #include <regulator/sy8106a.h>
 
-static inline struct dummy_pmic *
-to_dummy_pmic(struct device *dev)
+static inline const struct dummy_pmic *
+to_dummy_pmic(const struct device *dev)
 {
 	return container_of(dev, struct dummy_pmic, dev);
 }
 
 static int
-dummy_pmic_power_off(struct device *dev)
+dummy_pmic_power_off(const struct device *dev)
 {
-	struct dummy_pmic *self = to_dummy_pmic(dev);
+	const struct dummy_pmic *self = to_dummy_pmic(dev);
 	int err;
 
 	/* Turn CPU power off. */
@@ -31,9 +31,9 @@ dummy_pmic_power_off(struct device *dev)
 }
 
 static int
-dummy_pmic_power_on(struct device *dev)
+dummy_pmic_power_on(const struct device *dev)
 {
-	struct dummy_pmic *self = to_dummy_pmic(dev);
+	const struct dummy_pmic *self = to_dummy_pmic(dev);
 	int err;
 
 	/* Turn CPU power on. */
@@ -45,9 +45,9 @@ dummy_pmic_power_on(struct device *dev)
 }
 
 static int
-dummy_pmic_probe(struct device *dev)
+dummy_pmic_probe(const struct device *dev)
 {
-	struct dummy_pmic *self = to_dummy_pmic(dev);
+	const struct dummy_pmic *self = to_dummy_pmic(dev);
 
 	if (self->vdd_cpux.dev)
 		device_probe(self->vdd_cpux.dev);
@@ -67,10 +67,11 @@ static const struct pmic_driver dummy_pmic_driver = {
 	},
 };
 
-struct dummy_pmic dummy_pmic = {
+const struct dummy_pmic dummy_pmic = {
 	.dev = {
-		.name = "dummy-pmic",
-		.drv  = &dummy_pmic_driver.drv,
+		.name  = "dummy-pmic",
+		.drv   = &dummy_pmic_driver.drv,
+		.state = DEVICE_STATE_INIT,
 	},
 #if CONFIG_REGULATOR_SY8106A
 	.vdd_cpux = {

@@ -44,14 +44,14 @@ struct sunxi_ccu_factors {
 	uint8_t p;   /**< Exponential P ("power") divider. */
 };
 
-static inline struct sunxi_ccu *
-to_sunxi_ccu(struct device *dev)
+static inline const struct sunxi_ccu *
+to_sunxi_ccu(const struct device *dev)
 {
 	return container_of(dev, struct sunxi_ccu, dev);
 }
 
 static struct sunxi_ccu_clock *
-get_clock(struct sunxi_ccu *self, uint8_t id)
+get_clock(const struct sunxi_ccu *self, uint8_t id)
 {
 	return &self->clocks[id];
 }
@@ -139,17 +139,17 @@ find_factors(struct sunxi_ccu_clock *clock, struct sunxi_ccu_factors *factors,
 }
 
 static struct clock_info *
-sunxi_ccu_get_info(struct device *dev, uint8_t id)
+sunxi_ccu_get_info(const struct device *dev, uint8_t id)
 {
-	struct sunxi_ccu *self = to_sunxi_ccu(dev);
+	const struct sunxi_ccu *self = to_sunxi_ccu(dev);
 
 	return &get_clock(self, id)->info;
 }
 
 static struct clock_handle *
-sunxi_ccu_get_parent(struct device *dev, uint8_t id)
+sunxi_ccu_get_parent(const struct device *dev, uint8_t id)
 {
-	struct sunxi_ccu *self        = to_sunxi_ccu(dev);
+	const struct sunxi_ccu *self  = to_sunxi_ccu(dev);
 	struct sunxi_ccu_clock *clock = get_clock(self, id);
 	size_t index = 0;
 
@@ -162,10 +162,10 @@ sunxi_ccu_get_parent(struct device *dev, uint8_t id)
 }
 
 static int
-sunxi_ccu_get_rate(struct device *dev, uint8_t id, uint32_t *rate)
+sunxi_ccu_get_rate(const struct device *dev, uint8_t id, uint32_t *rate)
 {
 	struct clock_handle *parent = sunxi_ccu_get_parent(dev, id);
-	struct sunxi_ccu *self = to_sunxi_ccu(dev);
+	const struct sunxi_ccu *self = to_sunxi_ccu(dev);
 	struct sunxi_ccu_clock *clock = get_clock(self, id);
 	uint32_t reg, tmp;
 	int err;
@@ -189,9 +189,9 @@ sunxi_ccu_get_rate(struct device *dev, uint8_t id, uint32_t *rate)
 }
 
 static int
-sunxi_ccu_get_state(struct device *dev, uint8_t id)
+sunxi_ccu_get_state(const struct device *dev, uint8_t id)
 {
-	struct sunxi_ccu *self        = to_sunxi_ccu(dev);
+	const struct sunxi_ccu *self  = to_sunxi_ccu(dev);
 	struct sunxi_ccu_clock *clock = get_clock(self, id);
 	uint16_t gate  = clock->gate;
 	uint16_t reset = clock->reset;
@@ -207,9 +207,9 @@ sunxi_ccu_get_state(struct device *dev, uint8_t id)
 }
 
 static int
-sunxi_ccu_set_rate(struct device *dev, uint8_t id, uint32_t rate)
+sunxi_ccu_set_rate(const struct device *dev, uint8_t id, uint32_t rate)
 {
-	struct sunxi_ccu *self         = to_sunxi_ccu(dev);
+	const struct sunxi_ccu  *self  = to_sunxi_ccu(dev);
 	struct sunxi_ccu_clock  *clock = get_clock(self, id);
 	struct sunxi_ccu_factors factors;
 	uint32_t chosen_rate, old_rate, old_reg, reg;
@@ -254,9 +254,9 @@ sunxi_ccu_set_rate(struct device *dev, uint8_t id, uint32_t rate)
 }
 
 static int
-sunxi_ccu_set_state(struct device *dev, uint8_t id, bool enable)
+sunxi_ccu_set_state(const struct device *dev, uint8_t id, bool enable)
 {
-	struct sunxi_ccu *self        = to_sunxi_ccu(dev);
+	const struct sunxi_ccu *self  = to_sunxi_ccu(dev);
 	struct sunxi_ccu_clock *clock = get_clock(self, id);
 	uint16_t gate  = clock->gate;
 	uint16_t reset = clock->reset;
@@ -293,7 +293,7 @@ sunxi_ccu_set_state(struct device *dev, uint8_t id, bool enable)
 }
 
 static int
-sunxi_ccu_probe(struct device *dev __unused)
+sunxi_ccu_probe(const struct device *dev __unused)
 {
 	return SUCCESS;
 }
@@ -345,10 +345,11 @@ static struct sunxi_ccu_clock ccu_clocks[CCU_CLOCK_COUNT] = {
 	},
 };
 
-struct sunxi_ccu ccu = {
+const struct sunxi_ccu ccu = {
 	.dev = {
-		.name = "ccu",
-		.drv  = &sunxi_ccu_driver.drv,
+		.name  = "ccu",
+		.drv   = &sunxi_ccu_driver.drv,
+		.state = DEVICE_STATE_INIT,
 	},
 	.clocks = ccu_clocks,
 	.regs   = DEV_CCU,
@@ -443,10 +444,11 @@ static struct sunxi_ccu_clock r_ccu_clocks[R_CCU_CLOCK_COUNT] = {
 	},
 };
 
-struct sunxi_ccu r_ccu = {
+const struct sunxi_ccu r_ccu = {
 	.dev = {
-		.name = "r_ccu",
-		.drv  = &sunxi_ccu_driver.drv,
+		.name  = "r_ccu",
+		.drv   = &sunxi_ccu_driver.drv,
+		.state = DEVICE_STATE_INIT,
 	},
 	.clocks = r_ccu_clocks,
 	.regs   = DEV_R_PRCM,

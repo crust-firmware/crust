@@ -31,14 +31,14 @@ static struct regulator_info sy8106a_regulator_info = {
 	.flags = REGL_READABLE,
 };
 
-static inline struct sy8106a *
-to_sy8106a(struct device *dev)
+static inline const struct sy8106a *
+to_sy8106a(const struct device *dev)
 {
 	return container_of(dev, struct sy8106a, dev);
 }
 
 static struct regulator_info *
-sy8106a_get_info(struct device *dev __unused, uint8_t id __unused)
+sy8106a_get_info(const struct device *dev __unused, uint8_t id __unused)
 {
 	assert(id < SY8106A_REGL_COUNT);
 
@@ -46,9 +46,9 @@ sy8106a_get_info(struct device *dev __unused, uint8_t id __unused)
 }
 
 static int
-sy8106a_get_state(struct device *dev, uint8_t id __unused)
+sy8106a_get_state(const struct device *dev, uint8_t id __unused)
 {
-	struct sy8106a *self = to_sy8106a(dev);
+	const struct sy8106a *self = to_sy8106a(dev);
 	uint8_t reg;
 	int err;
 
@@ -59,9 +59,9 @@ sy8106a_get_state(struct device *dev, uint8_t id __unused)
 }
 
 static int
-sy8106a_read_raw(struct device *dev, uint8_t id __unused, uint32_t *raw)
+sy8106a_read_raw(const struct device *dev, uint8_t id __unused, uint32_t *raw)
 {
-	struct sy8106a *self = to_sy8106a(dev);
+	const struct sy8106a *self = to_sy8106a(dev);
 	uint8_t reg;
 	int err;
 
@@ -73,9 +73,9 @@ sy8106a_read_raw(struct device *dev, uint8_t id __unused, uint32_t *raw)
 }
 
 static int
-sy8106a_set_state(struct device *dev, uint8_t id __unused, bool enabled)
+sy8106a_set_state(const struct device *dev, uint8_t id __unused, bool enabled)
 {
-	struct sy8106a *self = to_sy8106a(dev);
+	const struct sy8106a *self = to_sy8106a(dev);
 	uint8_t reg;
 	int err;
 
@@ -92,9 +92,9 @@ sy8106a_set_state(struct device *dev, uint8_t id __unused, bool enabled)
 }
 
 static int
-sy8106a_write_raw(struct device *dev, uint8_t id __unused, uint32_t raw)
+sy8106a_write_raw(const struct device *dev, uint8_t id __unused, uint32_t raw)
 {
-	struct sy8106a *self = to_sy8106a(dev);
+	const struct sy8106a *self = to_sy8106a(dev);
 
 	assert(raw <= UINT8_MAX);
 
@@ -102,9 +102,9 @@ sy8106a_write_raw(struct device *dev, uint8_t id __unused, uint32_t raw)
 }
 
 static int
-sy8106a_probe(struct device *dev)
+sy8106a_probe(const struct device *dev)
 {
-	struct sy8106a *self = to_sy8106a(dev);
+	const struct sy8106a *self = to_sy8106a(dev);
 	int err;
 
 	if ((err = i2c_probe(&self->bus)))
@@ -126,10 +126,11 @@ static const struct regulator_driver sy8106a_driver = {
 	},
 };
 
-struct sy8106a sy8106a = {
+const struct sy8106a sy8106a = {
 	.dev = {
-		.name = "sy8106a",
-		.drv  = &sy8106a_driver.drv,
+		.name  = "sy8106a",
+		.drv   = &sy8106a_driver.drv,
+		.state = DEVICE_STATE_INIT,
 	},
 	.bus = {
 		.dev  = &r_i2c.dev,

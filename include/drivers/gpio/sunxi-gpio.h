@@ -17,6 +17,6 @@ struct sunxi_gpio {
 	uintptr_t           regs;
 };
 
-extern struct sunxi_gpio r_pio;
+extern const struct sunxi_gpio r_pio;
 
 #endif /* DRIVERS_GPIO_SUNXI_GPIO_H */

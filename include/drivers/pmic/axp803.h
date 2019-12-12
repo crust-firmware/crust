@@ -14,6 +14,6 @@ struct axp803_pmic {
 	struct rsb_handle bus;
 };
 
-extern struct axp803_pmic axp803_pmic;
+extern const struct axp803_pmic axp803_pmic;
 
 #endif /* DRIVERS_PMIC_AXP803_H */

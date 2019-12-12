@@ -15,6 +15,6 @@ struct dummy_pmic {
 	struct regulator_handle vdd_cpux;
 };
 
-extern struct dummy_pmic dummy_pmic;
+extern const struct dummy_pmic dummy_pmic;
 
 #endif /* DRIVERS_PMIC_DUMMY_H */
