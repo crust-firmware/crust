@@ -437,13 +437,13 @@ axp803_regulator_get_info(struct device *dev __unused, uint8_t id)
 static int
 axp803_regulator_get_state(struct device *dev, uint8_t id)
 {
-	struct axp803_regulator *this = to_axp803_regulator(dev);
+	struct axp803_regulator *self = to_axp803_regulator(dev);
 	uint8_t regaddr = axp803_regulators[id].enable_register;
 	uint8_t regmask = axp803_regulators[id].enable_mask;
 	uint8_t reg;
 	int err;
 
-	if ((err = rsb_read(&this->bus, regaddr, &reg)))
+	if ((err = rsb_read(&self->bus, regaddr, &reg)))
 		return err;
 
 	/* GPIO LDOs have their status bit inverted. */
@@ -453,13 +453,13 @@ axp803_regulator_get_state(struct device *dev, uint8_t id)
 static int
 axp803_regulator_read_raw(struct device *dev, uint8_t id, uint32_t *raw)
 {
-	struct axp803_regulator *this = to_axp803_regulator(dev);
+	struct axp803_regulator *self = to_axp803_regulator(dev);
 	uint8_t regaddr = axp803_regulators[id].value_register;
 	uint8_t regmask = axp803_regulators[id].status_mask;
 	uint8_t reg;
 	int err;
 
-	if ((err = rsb_read(&this->bus, regaddr, &reg)))
+	if ((err = rsb_read(&self->bus, regaddr, &reg)))
 		return err;
 	/* Mask out a possible status bit. */
 	*raw = reg & ~regmask;
@@ -470,25 +470,25 @@ axp803_regulator_read_raw(struct device *dev, uint8_t id, uint32_t *raw)
 static int
 axp803_regulator_set_state(struct device *dev, uint8_t id, bool enabled)
 {
-	struct axp803_regulator *this = to_axp803_regulator(dev);
+	struct axp803_regulator *self = to_axp803_regulator(dev);
 	uint8_t regaddr = axp803_regulators[id].enable_register;
 	uint8_t regmask = axp803_regulators[id].enable_mask;
 	uint8_t reg;
 	int err;
 
-	if ((err = rsb_read(&this->bus, regaddr, &reg)))
+	if ((err = rsb_read(&self->bus, regaddr, &reg)))
 		return err;
 	/* GPIO LDOs have their status bit inverted. */
 	enabled ^= (id >= AXP803_REGL_GPIO0);
 	reg      = enabled ? reg | regmask : reg & ~regmask;
 
-	return rsb_write(&this->bus, regaddr, reg);
+	return rsb_write(&self->bus, regaddr, reg);
 }
 
 static int
 axp803_regulator_write_raw(struct device *dev, uint8_t id, uint32_t raw)
 {
-	struct axp803_regulator *this = to_axp803_regulator(dev);
+	struct axp803_regulator *self = to_axp803_regulator(dev);
 	uint8_t regaddr = axp803_regulators[id].value_register;
 
 	assert(raw <= UINT8_MAX);
@@ -498,16 +498,16 @@ axp803_regulator_write_raw(struct device *dev, uint8_t id, uint32_t raw)
 	if (id == AXP803_REGL_DC1SW)
 		return SUCCESS;
 
-	return rsb_write(&this->bus, regaddr, raw);
+	return rsb_write(&self->bus, regaddr, raw);
 }
 
 static int
 axp_regulator_probe(struct device *dev)
 {
-	struct axp803_regulator *this = to_axp803_regulator(dev);
+	struct axp803_regulator *self = to_axp803_regulator(dev);
 	int err;
 
-	if ((err = axp803_probe(&this->bus)))
+	if ((err = axp803_probe(&self->bus)))
 		return err;
 
 	return SUCCESS;
