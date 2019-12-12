@@ -14,6 +14,7 @@ struct sunxi_rsb {
 	struct device       dev;
 	struct clock_handle clock;
 	struct gpio_handle  pins[RSB_NUM_PINS];
+	uintptr_t           regs;
 };
 
 extern struct sunxi_rsb r_rsb;
