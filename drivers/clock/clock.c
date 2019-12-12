@@ -13,7 +13,7 @@ int
 clock_disable(const struct device *dev, uint8_t id)
 {
 	const struct clock_driver_ops *ops = CLOCK_OPS(dev);
-	struct clock_handle *parent;
+	const struct clock_handle *parent;
 	struct clock_info *info = ops->get_info(dev, id);
 	int err;
 
@@ -39,7 +39,7 @@ int
 clock_enable(const struct device *dev, uint8_t id)
 {
 	const struct clock_driver_ops *ops = CLOCK_OPS(dev);
-	struct clock_handle *parent;
+	const struct clock_handle *parent;
 	struct clock_info *info = ops->get_info(dev, id);
 	uint32_t rate;
 	int err;
@@ -90,7 +90,7 @@ int
 clock_get_state(const struct device *dev, uint8_t id)
 {
 	const struct clock_driver_ops *ops = CLOCK_OPS(dev);
-	struct clock_handle *parent;
+	const struct clock_handle *parent;
 	struct clock_info *info = ops->get_info(dev, id);
 	int err;
 

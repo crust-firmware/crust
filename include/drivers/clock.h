@@ -16,12 +16,12 @@
 	(&container_of((dev)->drv, struct clock_driver, drv)->ops)
 
 #define CLOCK_PARENT(d, i) \
-	& (struct clock_handle) { \
+	& (const struct clock_handle) { \
 		.dev = &(d).dev, \
 		.id  = (i), \
 	}
 
-#define CLOCK_PARENTS(n) (struct clock_handle[n])
+#define CLOCK_PARENTS(n) (const struct clock_handle[n])
 
 #define FIXED_CLOCK(n, r, f) \
 	{ \
@@ -56,17 +56,18 @@ struct clock_info {
 };
 
 struct clock_driver_ops {
-	struct clock_info   *(*get_info)(const struct device *dev, uint8_t id);
-	struct clock_handle *(*get_parent)(const struct device *dev,
-	                                   uint8_t id);
-	int                  (*get_rate)(const struct device *dev, uint8_t id,
-	                                 uint32_t *rate);
-	int                  (*get_state)(const struct device *dev,
-	                                  uint8_t id);
-	int                  (*set_rate)(const struct device *dev, uint8_t id,
-	                                 uint32_t rate);
-	int                  (*set_state)(const struct device *dev, uint8_t id,
-	                                  bool enable);
+	struct clock_info         *(*get_info)(const struct device *dev,
+	                                       uint8_t id);
+	const struct clock_handle *(*get_parent)(const struct device *dev,
+	                                         uint8_t id);
+	int                        (*get_rate)(const struct device *dev,
+	                                       uint8_t id, uint32_t *rate);
+	int                        (*get_state)(const struct device *dev,
+	                                        uint8_t id);
+	int                        (*set_rate)(const struct device *dev,
+	                                       uint8_t id, uint32_t rate);
+	int                        (*set_state)(const struct device *dev,
+	                                        uint8_t id, bool enable);
 };
 
 struct clock_driver {
@@ -136,7 +137,7 @@ clock_get_info(const struct device *dev, uint8_t id)
  * @param id  The device-specific identifier for this clock.
  * @return    A pointer to the handle; NULL if the clock has no parent.
  */
-static inline struct clock_handle *
+static inline const struct clock_handle *
 clock_get_parent(const struct device *dev, uint8_t id)
 {
 	return CLOCK_OPS(dev)->get_parent(dev, id);

@@ -22,7 +22,7 @@ struct sunxi_ccu_clock {
 	/** Generic clock information shared by all drivers. */
 	struct clock_info          info;
 	/** Handles to parent clocks (one for each possible mux value). */
-	struct clock_handle *const parents;
+	const struct clock_handle *parents;
 	/** Offset into the CCU of the clock gate bit, zero for none. */
 	const uint16_t             gate;
 	/** Offset into the CCU of the module reset bit, zero for none. */
@@ -146,7 +146,7 @@ sunxi_ccu_get_info(const struct device *dev, uint8_t id)
 	return &get_clock(self, id)->info;
 }
 
-static struct clock_handle *
+static const struct clock_handle *
 sunxi_ccu_get_parent(const struct device *dev, uint8_t id)
 {
 	const struct sunxi_ccu *self  = to_sunxi_ccu(dev);
@@ -164,7 +164,7 @@ sunxi_ccu_get_parent(const struct device *dev, uint8_t id)
 static int
 sunxi_ccu_get_rate(const struct device *dev, uint8_t id, uint32_t *rate)
 {
-	struct clock_handle *parent = sunxi_ccu_get_parent(dev, id);
+	const struct clock_handle *parent = sunxi_ccu_get_parent(dev, id);
 	const struct sunxi_ccu *self = to_sunxi_ccu(dev);
 	struct sunxi_ccu_clock *clock = get_clock(self, id);
 	uint32_t reg, tmp;
