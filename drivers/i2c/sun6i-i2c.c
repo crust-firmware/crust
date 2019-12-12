@@ -4,7 +4,7 @@
  */
 
 #include <delay.h>
-#include <dm.h>
+#include <device.h>
 #include <error.h>
 #include <i2c.h>
 #include <kconfig.h>

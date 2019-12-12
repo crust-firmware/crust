@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <dm.h>
+#include <device.h>
 #include <error.h>
 #include <gpio.h>
 #include <mmio.h>

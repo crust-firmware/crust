@@ -5,7 +5,7 @@
 
 #include <css.h>
 #include <debug.h>
-#include <dm.h>
+#include <device.h>
 #include <error.h>
 #include <scpi.h>
 #include <stdbool.h>

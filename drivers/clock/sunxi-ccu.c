@@ -9,7 +9,7 @@
 #include <compiler.h>
 #include <debug.h>
 #include <delay.h>
-#include <dm.h>
+#include <device.h>
 #include <error.h>
 #include <intrusive.h>
 #include <limits.h>

@@ -6,7 +6,7 @@
 #ifndef DRIVERS_MFD_AXP803_H
 #define DRIVERS_MFD_AXP803_H
 
-#include <dm.h>
+#include <device.h>
 #include <rsb.h>
 #include <stdint.h>
 

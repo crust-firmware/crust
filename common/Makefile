@@ -8,7 +8,7 @@ $(call linker_scripts,crust.ld)
 obj-y += console.o
 obj-y += debug.o
 obj-y += delay.o
-obj-y += dm.o
+obj-y += device.o
 obj-y += main.o
 obj-y += panic.o
 obj-y += scpi.o

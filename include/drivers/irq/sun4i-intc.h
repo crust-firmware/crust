@@ -6,7 +6,7 @@
 #ifndef DRIVERS_IRQ_SUN4I_INTC_H
 #define DRIVERS_IRQ_SUN4I_INTC_H
 
-#include <dm.h>
+#include <device.h>
 
 struct sun4i_intc {
 	struct device dev;

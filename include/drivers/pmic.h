@@ -6,7 +6,7 @@
 #ifndef DRIVERS_PMIC_H
 #define DRIVERS_PMIC_H
 
-#include <dm.h>
+#include <device.h>
 #include <intrusive.h>
 
 #define PMIC_OPS(dev) \

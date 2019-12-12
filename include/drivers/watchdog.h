@@ -6,7 +6,7 @@
 #ifndef DRIVERS_WATCHDOG_H
 #define DRIVERS_WATCHDOG_H
 
-#include <dm.h>
+#include <device.h>
 #include <intrusive.h>
 #include <stdint.h>
 

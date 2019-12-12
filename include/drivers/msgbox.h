@@ -6,7 +6,7 @@
 #ifndef DRIVERS_MSGBOX_H
 #define DRIVERS_MSGBOX_H
 
-#include <dm.h>
+#include <device.h>
 #include <intrusive.h>
 #include <stdbool.h>
 #include <stdint.h>

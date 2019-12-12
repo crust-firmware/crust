@@ -7,7 +7,7 @@
 #define DRIVERS_CLOCK_SUNXI_CCU_H
 
 #include <clock.h>
-#include <dm.h>
+#include <device.h>
 #include <platform/ccu.h>
 #include <platform/r_ccu.h>
 

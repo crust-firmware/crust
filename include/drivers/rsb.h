@@ -6,7 +6,7 @@
 #ifndef DRIVERS_RSB_H
 #define DRIVERS_RSB_H
 
-#include <dm.h>
+#include <device.h>
 #include <intrusive.h>
 #include <stdint.h>
 

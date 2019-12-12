@@ -6,7 +6,7 @@
 #ifndef DRIVERS_I2C_H
 #define DRIVERS_I2C_H
 
-#include <dm.h>
+#include <device.h>
 #include <intrusive.h>
 #include <stdint.h>
 

@@ -6,7 +6,7 @@
 #ifndef DRIVERS_PMIC_DUMMY_H
 #define DRIVERS_PMIC_DUMMY_H
 
-#include <dm.h>
+#include <device.h>
 #include <pmic.h>
 #include <regulator.h>
 

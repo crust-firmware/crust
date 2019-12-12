@@ -4,7 +4,7 @@
  */
 
 #include <debug.h>
-#include <dm.h>
+#include <device.h>
 #include <error.h>
 #include <mmio.h>
 #include <msgbox.h>

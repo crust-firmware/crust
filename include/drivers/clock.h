@@ -6,7 +6,7 @@
 #ifndef DRIVERS_CLOCK_H
 #define DRIVERS_CLOCK_H
 
-#include <dm.h>
+#include <device.h>
 #include <intrusive.h>
 #include <stdbool.h>
 #include <stdint.h>

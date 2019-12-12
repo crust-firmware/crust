@@ -6,7 +6,7 @@
 #include <compiler.h>
 #include <console.h>
 #include <debug.h>
-#include <dm.h>
+#include <device.h>
 #include <kconfig.h>
 #include <pmic.h>
 #include <scpi.h>

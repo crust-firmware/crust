@@ -4,7 +4,7 @@
  */
 
 #include <debug.h>
-#include <dm.h>
+#include <device.h>
 
 void
 device_probe(struct device *dev)
