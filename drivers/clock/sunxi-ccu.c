@@ -44,12 +44,16 @@ struct sunxi_ccu_factors {
 	uint8_t p;   /**< Exponential P ("power") divider. */
 };
 
-static struct sunxi_ccu_clock *
-get_clock(struct device *dev, uint8_t id)
+static inline struct sunxi_ccu *
+to_sunxi_ccu(struct device *dev)
 {
-	struct sunxi_ccu *this_ccu = container_of(dev, struct sunxi_ccu, dev);
+	return container_of(dev, struct sunxi_ccu, dev);
+}
 
-	return &this_ccu->clocks[id];
+static struct sunxi_ccu_clock *
+get_clock(struct sunxi_ccu *self, uint8_t id)
+{
+	return &self->clocks[id];
 }
 
 /*
@@ -137,17 +141,20 @@ find_factors(struct sunxi_ccu_clock *clock, struct sunxi_ccu_factors *factors,
 static struct clock_info *
 sunxi_ccu_get_info(struct device *dev, uint8_t id)
 {
-	return &get_clock(dev, id)->info;
+	struct sunxi_ccu *self = to_sunxi_ccu(dev);
+
+	return &get_clock(self, id)->info;
 }
 
 static struct clock_handle *
 sunxi_ccu_get_parent(struct device *dev, uint8_t id)
 {
-	struct sunxi_ccu_clock *clock = get_clock(dev, id);
+	struct sunxi_ccu *self        = to_sunxi_ccu(dev);
+	struct sunxi_ccu_clock *clock = get_clock(self, id);
 	size_t index = 0;
 
 	if (BF_PRESENT(clock->mux)) {
-		uint32_t reg = mmio_read_32(dev->regs + clock->reg);
+		uint32_t reg = mmio_read_32(self->regs + clock->reg);
 		index = bitfield_get(reg, clock->mux);
 	}
 
@@ -158,7 +165,8 @@ static int
 sunxi_ccu_get_rate(struct device *dev, uint8_t id, uint32_t *rate)
 {
 	struct clock_handle *parent = sunxi_ccu_get_parent(dev, id);
-	struct sunxi_ccu_clock *clock = get_clock(dev, id);
+	struct sunxi_ccu *self = to_sunxi_ccu(dev);
+	struct sunxi_ccu_clock *clock = get_clock(self, id);
 	uint32_t reg, tmp;
 	int err;
 
@@ -171,7 +179,7 @@ sunxi_ccu_get_rate(struct device *dev, uint8_t id, uint32_t *rate)
 	/* Otherwise, the rate is the parent's rate divided by some factors. */
 	if ((err = clock_get_rate(parent->dev, parent->id, &tmp)))
 		return err;
-	reg   = mmio_read_32(dev->regs + clock->reg);
+	reg   = mmio_read_32(self->regs + clock->reg);
 	tmp  /= bitfield_get(reg, parent->vdiv) + 1;
 	tmp  /= bitfield_get(reg, clock->m) + 1;
 	tmp >>= bitfield_get(reg, clock->p);
@@ -183,15 +191,16 @@ sunxi_ccu_get_rate(struct device *dev, uint8_t id, uint32_t *rate)
 static int
 sunxi_ccu_get_state(struct device *dev, uint8_t id)
 {
-	struct sunxi_ccu_clock *clock = get_clock(dev, id);
+	struct sunxi_ccu *self        = to_sunxi_ccu(dev);
+	struct sunxi_ccu_clock *clock = get_clock(self, id);
 	uint16_t gate  = clock->gate;
 	uint16_t reset = clock->reset;
 
 	/* Check the bus clock gate. */
-	if (gate != 0 && !bitmap_get(dev->regs, gate))
+	if (gate != 0 && !bitmap_get(self->regs, gate))
 		return false;
 	/* Check the reset line. */
-	if (reset != 0 && !bitmap_get(dev->regs, reset))
+	if (reset != 0 && !bitmap_get(self->regs, reset))
 		return false;
 
 	return true;
@@ -200,7 +209,8 @@ sunxi_ccu_get_state(struct device *dev, uint8_t id)
 static int
 sunxi_ccu_set_rate(struct device *dev, uint8_t id, uint32_t rate)
 {
-	struct sunxi_ccu_clock  *clock = get_clock(dev, id);
+	struct sunxi_ccu *self         = to_sunxi_ccu(dev);
+	struct sunxi_ccu_clock  *clock = get_clock(self, id);
 	struct sunxi_ccu_factors factors;
 	uint32_t chosen_rate, old_rate, old_reg, reg;
 	int err;
@@ -220,23 +230,23 @@ sunxi_ccu_set_rate(struct device *dev, uint8_t id, uint32_t rate)
 		return SUCCESS;
 
 	/* Set the dividers for this clock. */
-	reg = old_reg = mmio_read_32(dev->regs + clock->reg);
+	reg = old_reg = mmio_read_32(self->regs + clock->reg);
 	reg = bitfield_set(reg, clock->parents[factors.mux].vdiv, factors.pd);
 	reg = bitfield_set(reg, clock->m, factors.m);
 	reg = bitfield_set(reg, clock->p, factors.p);
 	if (reg != old_reg) {
-		mmio_write_32(dev->regs + clock->reg, reg);
+		mmio_write_32(self->regs + clock->reg, reg);
 		udelay(1);
-		if (mmio_read_32(dev->regs + clock->reg) != reg)
+		if (mmio_read_32(self->regs + clock->reg) != reg)
 			return EIO;
 	}
 
 	/* Set the parent in the mux for this clock. */
 	reg = bitfield_set(reg, clock->mux, factors.mux);
 	if (reg != old_reg) {
-		mmio_write_32(dev->regs + clock->reg, reg);
+		mmio_write_32(self->regs + clock->reg, reg);
 		udelay(1);
-		if (mmio_read_32(dev->regs + clock->reg) != reg)
+		if (mmio_read_32(self->regs + clock->reg) != reg)
 			return EIO;
 	}
 
@@ -246,34 +256,35 @@ sunxi_ccu_set_rate(struct device *dev, uint8_t id, uint32_t rate)
 static int
 sunxi_ccu_set_state(struct device *dev, uint8_t id, bool enable)
 {
-	struct sunxi_ccu_clock *clock = get_clock(dev, id);
+	struct sunxi_ccu *self        = to_sunxi_ccu(dev);
+	struct sunxi_ccu_clock *clock = get_clock(self, id);
 	uint16_t gate  = clock->gate;
 	uint16_t reset = clock->reset;
 
 	if (enable) {
 		/* Enable the clock before taking the device out of reset. */
 		if (gate != 0) {
-			bitmap_set(dev->regs, gate);
-			if (!bitmap_get(dev->regs, gate))
+			bitmap_set(self->regs, gate);
+			if (!bitmap_get(self->regs, gate))
 				return EIO;
 		}
 		/* Deassert the reset once the device has a running clock. */
 		if (reset != 0) {
-			bitmap_set(dev->regs, reset);
-			if (!bitmap_get(dev->regs, reset))
+			bitmap_set(self->regs, reset);
+			if (!bitmap_get(self->regs, reset))
 				return EIO;
 		}
 	} else {
 		/* Put the device in reset before turning off its clock. */
 		if (reset != 0) {
-			bitmap_clear(dev->regs, reset);
-			if (bitmap_get(dev->regs, reset))
+			bitmap_clear(self->regs, reset);
+			if (bitmap_get(self->regs, reset))
 				return EIO;
 		}
 		/* Finally gate the bus clock. */
 		if (gate != 0) {
-			bitmap_clear(dev->regs, gate);
-			if (bitmap_get(dev->regs, gate))
+			bitmap_clear(self->regs, gate);
+			if (bitmap_get(self->regs, gate))
 				return EIO;
 		}
 	}
@@ -337,10 +348,10 @@ static struct sunxi_ccu_clock ccu_clocks[CCU_CLOCK_COUNT] = {
 struct sunxi_ccu ccu = {
 	.dev = {
 		.name = "ccu",
-		.regs = DEV_CCU,
 		.drv  = &sunxi_ccu_driver.drv,
 	},
 	.clocks = ccu_clocks,
+	.regs   = DEV_CCU,
 };
 
 static struct sunxi_ccu_clock r_ccu_clocks[R_CCU_CLOCK_COUNT] = {
@@ -435,8 +446,8 @@ static struct sunxi_ccu_clock r_ccu_clocks[R_CCU_CLOCK_COUNT] = {
 struct sunxi_ccu r_ccu = {
 	.dev = {
 		.name = "r_ccu",
-		.regs = DEV_R_PRCM,
 		.drv  = &sunxi_ccu_driver.drv,
 	},
 	.clocks = r_ccu_clocks,
+	.regs   = DEV_R_PRCM,
 };

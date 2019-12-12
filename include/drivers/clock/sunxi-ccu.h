@@ -14,6 +14,7 @@
 struct sunxi_ccu {
 	struct device           dev;
 	struct sunxi_ccu_clock *clocks;
+	uintptr_t               regs;
 };
 
 extern struct sunxi_ccu ccu;
