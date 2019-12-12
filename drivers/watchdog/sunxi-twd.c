@@ -17,18 +17,28 @@
 
 #define TWD_RESTART_KEY (0xD14 << 16)
 
+static inline struct sunxi_twd *
+to_sunxi_twd(struct device *dev)
+{
+	return container_of(dev, struct sunxi_twd, dev);
+}
+
 static void
 sunxi_twd_restart(struct device *dev)
 {
+	struct sunxi_twd *self = to_sunxi_twd(dev);
+
 	/* Enable and perform restart. */
-	mmio_write_32(dev->regs + TWD_RESTART_REG, TWD_RESTART_KEY | BIT(0));
+	mmio_write_32(self->regs + TWD_RESTART_REG, TWD_RESTART_KEY | BIT(0));
 }
 
 static int
 sunxi_twd_disable(struct device *dev)
 {
+	struct sunxi_twd *self = to_sunxi_twd(dev);
+
 	/* Disable system reset, stop watchdog counter. */
-	mmio_clrset_32(dev->regs + TWD_CTRL_REG, BIT(9), BIT(1));
+	mmio_clrset_32(self->regs + TWD_CTRL_REG, BIT(9), BIT(1));
 
 	return SUCCESS;
 }
@@ -36,11 +46,13 @@ sunxi_twd_disable(struct device *dev)
 static int
 sunxi_twd_enable(struct device *dev, uint32_t timeout)
 {
+	struct sunxi_twd *self = to_sunxi_twd(dev);
+
 	/* Program interval until watchdog fires. */
-	mmio_write_32(dev->regs + TWD_INTV_REG, timeout);
+	mmio_write_32(self->regs + TWD_INTV_REG, timeout);
 
 	/* Resume watchdog counter, enable system reset. */
-	mmio_clrset_32(dev->regs + TWD_CTRL_REG, BIT(1), BIT(9));
+	mmio_clrset_32(self->regs + TWD_CTRL_REG, BIT(1), BIT(9));
 
 	/* Start the counter rolling. */
 	sunxi_twd_restart(dev);
@@ -51,17 +63,17 @@ sunxi_twd_enable(struct device *dev, uint32_t timeout)
 static int
 sunxi_twd_probe(struct device *dev)
 {
-	struct sunxi_twd *this = container_of(dev, struct sunxi_twd, dev);
+	struct sunxi_twd *self = to_sunxi_twd(dev);
 	int err;
 
-	if ((err = clock_get(&this->clock)))
+	if ((err = clock_get(&self->clock)))
 		return err;
 
 	/* Disable watchdog. */
 	sunxi_twd_disable(dev);
 
 	/* Set counter clock source to OSC24M. */
-	mmio_set_32(dev->regs + TWD_CTRL_REG, BIT(31));
+	mmio_set_32(self->regs + TWD_CTRL_REG, BIT(31));
 
 	return SUCCESS;
 }
@@ -80,8 +92,8 @@ static const struct watchdog_driver sunxi_twd_driver = {
 struct sunxi_twd r_twd = {
 	.dev = {
 		.name = "r_twd",
-		.regs = DEV_R_TWD,
 		.drv  = &sunxi_twd_driver.drv,
 	},
 	.clock = { .dev = &r_ccu.dev, .id = R_CCU_CLOCK_R_TWD },
+	.regs  = DEV_R_TWD,
 };
