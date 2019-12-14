@@ -5,7 +5,8 @@
 # Based in part on scripts/kconfig/Makefile from Linux v4.19.
 #
 
-ccflags-y	+= -std=gnu11 \
+ccflags-y	+= -D_GNU_SOURCE \
+		   -std=gnu11 \
 		   -Wno-implicit-fallthrough \
 		   -Wno-pedantic \
 		   -Wno-shadow \
@@ -24,8 +25,10 @@ HOSTLDLIBS_nconf := $(shell \
 	|| echo "-lmenu -lpanel -lncurses")
 
 hostprogs-y	+= conf nconf
-conf-objs	:= conf.o zconf.tab.o
-nconf-objs	:= nconf.o nconf.gui.o zconf.tab.o
+common-objs	:= confdata.o expr.o lexer.lex.o parser.tab.o \
+		   preprocess.o symbol.o
+conf-objs	:= $(common-objs) conf.o
+nconf-objs	:= $(common-objs) nconf.o nconf.gui.o
 
 silent := $(if $(filter-out 0,$(V)),,-s)
 
@@ -52,6 +55,7 @@ nconfig: $(obj)/nconf
 savedefconfig: $(obj)/conf
 	$(Q) $< $(silent) --$@=defconfig $(SRC)/Kconfig
 
-$(obj)/zconf.tab.o: $(obj)/zconf.lex.c
+$(obj)/lexer.lex.c: | $(obj)/.
+$(obj)/lexer.lex.o: $(obj)/parser.tab.c
 
 .PHONY: $(simple-targets) config defconfig %_defconfig nconfig savedefconfig
