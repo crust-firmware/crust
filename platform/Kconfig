@@ -5,18 +5,18 @@
 
 config PLATFORM
 	string
-	default "sun50i" if PLATFORM_SUN50I
+	default "a64" if PLATFORM_A64
 
 choice
 	prompt "Platform selection"
 
-config PLATFORM_SUN50I
-	bool "sun50i (A64/H5)"
+config PLATFORM_A64
+	bool "A64/H5"
 
 endchoice
 
-if PLATFORM_SUN50I
+if PLATFORM_A64
 
-source "sun50i/Kconfig"
+source "a64/Kconfig"
 
 endif
