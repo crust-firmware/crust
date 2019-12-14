@@ -132,7 +132,7 @@ $(OBJ)/%: $(OBJ)/%.o
 	$(M) HOSTLD $@
 	$(Q) $(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^ $(HOSTLDLIBS)
 
-$(test-all): $(OBJ)/lib.a $(OBJ)/3rdparty/unity/unity.o
+$(test-all): $(OBJ)/lib.a
 $(tools-all): $(OBJ)/lib.a
 
 $(OBJ)/lib.a:
