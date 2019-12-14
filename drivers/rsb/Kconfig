@@ -5,5 +5,3 @@
 
 config RSB
 	bool
-	default y
-	depends on SOC_A64

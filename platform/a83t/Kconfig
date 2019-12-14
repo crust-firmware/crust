@@ -12,5 +12,6 @@ choice
 
 config SOC_A83T
 	bool "A83T"
+	imply RSB
 
 endchoice
