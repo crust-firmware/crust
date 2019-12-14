@@ -3,18 +3,17 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <compiler.h>
+#include <counter.h>
 #include <mmio.h>
 #include <util.h>
-#include <wallclock.h>
 #include <platform/devices.h>
 
 #define CNT64_CTRL_REG 0x280
 #define CNT64_LOW_REG  0x284
 #define CNT64_HIGH_REG 0x288
 
-uint64_t __weak
-wallclock_read(void)
+uint64_t
+counter_read(void)
 {
 	uint32_t high_reg;
 	uint32_t low_reg;

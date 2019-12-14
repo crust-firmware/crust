@@ -15,4 +15,3 @@ obj-y += scpi.o
 obj-y += scpi_cmds.o
 obj-y += start.o
 obj-y += system_power.o
-obj-y += wallclock.o

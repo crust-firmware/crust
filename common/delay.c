@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
+#include <counter.h>
 #include <debug.h>
 #include <delay.h>
 #include <limits.h>
 #include <stdint.h>
-#include <wallclock.h>
 #include <platform/time.h>
 
 /**
@@ -18,9 +18,9 @@
 static void
 delay_cycles(uint32_t cycles)
 {
-	uint64_t start = wallclock_read();
+	uint64_t start = counter_read();
 
-	while (wallclock_read() < start + cycles) {
+	while (counter_read() < start + cycles) {
 		/* Wait for time to pass. */
 	}
 }

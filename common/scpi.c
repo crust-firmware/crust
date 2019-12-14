@@ -4,6 +4,7 @@
  */
 
 #include <compiler.h>
+#include <counter.h>
 #include <css.h>
 #include <debug.h>
 #include <error.h>
@@ -12,7 +13,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <wallclock.h>
 #include <msgbox/sunxi-msgbox.h>
 #include <platform/time.h>
 
@@ -49,7 +49,7 @@ scpi_send_message(uint8_t client)
 	barrier();
 
 	/* Ensure the timeout is updated before triggering transmission. */
-	state->timeout = wallclock_read() + SCPI_TX_TIMEOUT;
+	state->timeout = counter_read() + SCPI_TX_TIMEOUT;
 	state->tx_full = true;
 	barrier();
 
@@ -96,7 +96,7 @@ scpi_poll(void)
 		if (state->tx_full) {
 			if (msgbox_last_tx_done(&msgbox.dev,
 			                        TX_CHAN(client)) ||
-			    wallclock_read() > state->timeout)
+			    counter_read() > state->timeout)
 				state->tx_full = false;
 		}
 

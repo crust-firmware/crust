@@ -5,6 +5,7 @@
 
 #include <compiler.h>
 #include <console.h>
+#include <counter.h>
 #include <debug.h>
 #include <device.h>
 #include <kconfig.h>
@@ -13,7 +14,6 @@
 #include <spr.h>
 #include <stdbool.h>
 #include <system_power.h>
-#include <wallclock.h>
 #include <watchdog.h>
 #include <irq/sun4i-intc.h>
 #include <msgbox/sunxi-msgbox.h>
@@ -28,7 +28,7 @@ noreturn void main(uint32_t exception);
 noreturn void
 main(uint32_t exception)
 {
-	uint64_t next_tick = wallclock_read() + REFCLK_HZ;
+	uint64_t next_tick = counter_read() + REFCLK_HZ;
 
 	console_init(DEV_UART0);
 
@@ -65,7 +65,7 @@ main(uint32_t exception)
 		scpi_poll();
 		system_state_machine();
 
-		if (wallclock_read() > next_tick) {
+		if (counter_read() > next_tick) {
 			next_tick += REFCLK_HZ;
 
 			/* Perform 1Hz operations. */
