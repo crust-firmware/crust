@@ -12,12 +12,8 @@
 enum {
 	CCU_CLOCK_PLL_PERIPH0,
 	CCU_CLOCK_MSGBOX,
-	CCU_CLOCK_THS,
-	CCU_CLOCK_THS_MOD,
 	CCU_CLOCK_COUNT
 };
-
-#define CCU_CLOCK_THS_REG     0x0074
 
 #define CCU_GATE_BASE         (0x0060 / sizeof(uint32_t))
 
