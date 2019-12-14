@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <console.h>
 #include <ctype.h>
 #include <debug.h>
 #include <math.h>
+#include <serial.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -47,11 +47,11 @@ hexdump(uintptr_t addr, uint32_t bytes)
 		 * individual bytes, we must reverse each group of 4 bytes. */
 		for (int i = BYTES_PER_WORD - 1; i < BYTES_PER_ROW; --i) {
 			char c = ((char *)addr)[i];
-			console_putc(isprint(c) ? c : '.');
+			serial_putc(isprint(c) ? c : '.');
 			if (i % BYTES_PER_WORD == 0)
 				i += 2 * BYTES_PER_WORD;
 		}
-		console_putc('\n');
+		serial_putc('\n');
 	}
 }
 
@@ -74,12 +74,12 @@ log(const char *fmt, ...)
 	va_start(args, fmt);
 	while ((c = *fmt++)) {
 		if (c != '%') {
-			console_putc(c);
+			serial_putc(c);
 			continue;
 		}
 		if (*fmt == '%') {
 			++fmt;
-			console_putc(c);
+			serial_putc(c);
 			continue;
 		}
 		arg   = va_arg(args, uintptr_t);
@@ -88,7 +88,7 @@ log(const char *fmt, ...)
 conversion:
 		switch ((c = *fmt++)) {
 		case 'c':
-			console_putc(arg);
+			serial_putc(arg);
 			break;
 		case 'd':
 		case 'i':
@@ -120,7 +120,7 @@ conversion:
 	}
 	va_end(args);
 	if (level < LOG_LEVELS)
-		console_putc('\n');
+		serial_putc('\n');
 }
 
 static void
@@ -134,16 +134,16 @@ print_number(uint32_t num, int base, int width, bool zero)
 		digits[i++] = chars[udivmod(&num, base)];
 	} while (num);
 	while (width-- > i)
-		console_putc(zero ? '0' : ' ');
+		serial_putc(zero ? '0' : ' ');
 	while (i--)
-		console_putc(digits[i]);
+		serial_putc(digits[i]);
 }
 
 static void
 print_signed(int32_t num, int base, int width, bool zero)
 {
 	if (num < 0) {
-		console_putc('-');
+		serial_putc('-');
 		print_number(-num, base, width ? width - 1 : width, zero);
 	} else {
 		print_number(num, base, width, zero);
@@ -156,5 +156,5 @@ print_string(const char *s)
 	char c;
 
 	while ((c = *s++))
-		console_putc(c);
+		serial_putc(c);
 }

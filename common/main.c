@@ -4,7 +4,6 @@
  */
 
 #include <compiler.h>
-#include <console.h>
 #include <counter.h>
 #include <debug.h>
 #include <device.h>
@@ -29,8 +28,6 @@ noreturn void
 main(uint32_t exception)
 {
 	uint64_t next_tick = counter_read() + REFCLK_HZ;
-
-	console_init(DEV_UART0);
 
 	if (exception) {
 		error("Unhandled exception %u at %p!",
