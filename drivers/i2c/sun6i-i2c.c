@@ -7,7 +7,6 @@
 #include <device.h>
 #include <error.h>
 #include <i2c.h>
-#include <kconfig.h>
 #include <mmio.h>
 #include <stdbool.h>
 #include <stdint.h>

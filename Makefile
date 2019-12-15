@@ -40,6 +40,10 @@ COMMON_CPPFLAGS	 = -I$(OBJ)/include \
 		   -I$(SRC)/include/common \
 		   -I$(SRC)/include/lib
 
+HEADERS		 = $(OBJ)/include/config.h \
+		   $(SRC)/lib/compiler.h \
+		   $(SRC)/lib/kconfig.h
+
 AFLAGS		 = -Wa,--fatal-warnings
 CFLAGS		 = $(COMMON_CFLAGS) \
 		   -ffixed-r2 \
@@ -57,7 +61,7 @@ CPPFLAGS	 = $(COMMON_CPPFLAGS) \
 		   -I$(SRC)/include/drivers \
 		   -I$(SRC)/include/stdlib \
 		   -I$(SRC)/platform/$(CONFIG_PLATFORM)/include \
-		   -include config.h \
+		   $(foreach header,$(HEADERS),-include $(notdir $(header))) \
 		   -nostdinc \
 		   -Werror=missing-include-dirs
 LDFLAGS		 = -nostdlib \

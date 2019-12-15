@@ -6,7 +6,6 @@
 #ifndef COMMON_SPR_H
 #define COMMON_SPR_H
 
-#include <compiler.h>
 #include <stdint.h>
 #include <arch/spr.h>
 

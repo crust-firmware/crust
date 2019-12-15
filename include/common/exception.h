@@ -6,7 +6,6 @@
 #ifndef COMMON_EXCEPTION_H
 #define COMMON_EXCEPTION_H
 
-#include <compiler.h>
 #include <stdint.h>
 #include <arch/exception.h>
 

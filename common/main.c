@@ -3,11 +3,9 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <compiler.h>
 #include <counter.h>
 #include <debug.h>
 #include <device.h>
-#include <kconfig.h>
 #include <pmic.h>
 #include <scpi.h>
 #include <spr.h>

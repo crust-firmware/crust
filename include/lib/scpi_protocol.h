@@ -7,7 +7,6 @@
 #ifndef COMMON_SCPI_PROTOCOL_H
 #define COMMON_SCPI_PROTOCOL_H
 
-#include <compiler.h>
 #include <stdint.h>
 
 /** The SCPI message header is specified to be 64 bits long. */

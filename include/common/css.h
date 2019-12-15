@@ -6,7 +6,6 @@
 #ifndef COMMON_CSS_H
 #define COMMON_CSS_H
 
-#include <compiler.h>
 #include <stdint.h>
 
 /**

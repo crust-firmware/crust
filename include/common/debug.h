@@ -6,7 +6,6 @@
 #ifndef COMMON_DEBUG_H
 #define COMMON_DEBUG_H
 
-#include <compiler.h>
 #include <stdint.h>
 
 #define LOG_STRING_PANIC   "\x01"

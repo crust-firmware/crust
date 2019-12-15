@@ -6,7 +6,6 @@
 #include <bitfield.h>
 #include <bitmap.h>
 #include <clock.h>
-#include <compiler.h>
 #include <debug.h>
 #include <delay.h>
 #include <device.h>

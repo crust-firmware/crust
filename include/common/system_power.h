@@ -6,7 +6,6 @@
 #ifndef COMMON_SYSTEM_POWER_H
 #define COMMON_SYSTEM_POWER_H
 
-#include <compiler.h>
 #include <stdbool.h>
 
 enum {

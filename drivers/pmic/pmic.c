@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <kconfig.h>
 #include <pmic.h>
 #include <pmic/axp803.h>
 #include <pmic/dummy.h>
