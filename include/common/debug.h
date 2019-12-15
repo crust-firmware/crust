@@ -36,8 +36,8 @@ enum {
 };
 
 void hexdump(uintptr_t addr, uint32_t bytes);
-void log(const char *fmt, ...) __printf(1, 2);
-noreturn void panic(const char *fmt, ...) __printf(1, 2);
+void log(const char *fmt, ...) ATTRIBUTE(format(printf, 1, 2));
+noreturn void panic(const char *fmt, ...) ATTRIBUTE(format(printf, 1, 2));
 
 #define panic(...) panic(LOG_STRING_PANIC __VA_ARGS__)
 #define error(...) log(LOG_STRING_ERROR __VA_ARGS__)

@@ -13,14 +13,14 @@
 
 static uint8_t system_state;
 
-bool __pure
+bool
 system_can_wake(void)
 {
 	return system_state == SYSTEM_INACTIVE ||
 	       system_state == SYSTEM_OFF;
 }
 
-bool __pure
+bool
 system_is_running(void)
 {
 	return system_state == SYSTEM_ACTIVE;

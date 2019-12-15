@@ -38,7 +38,7 @@ to_sy8106a(const struct device *dev)
 }
 
 static struct regulator_info *
-sy8106a_get_info(const struct device *dev __unused, uint8_t id __unused)
+sy8106a_get_info(const struct device *dev UNUSED, uint8_t id UNUSED)
 {
 	assert(id < SY8106A_REGL_COUNT);
 
@@ -46,7 +46,7 @@ sy8106a_get_info(const struct device *dev __unused, uint8_t id __unused)
 }
 
 static int
-sy8106a_get_state(const struct device *dev, uint8_t id __unused)
+sy8106a_get_state(const struct device *dev, uint8_t id UNUSED)
 {
 	const struct sy8106a *self = to_sy8106a(dev);
 	uint8_t reg;
@@ -59,7 +59,7 @@ sy8106a_get_state(const struct device *dev, uint8_t id __unused)
 }
 
 static int
-sy8106a_read_raw(const struct device *dev, uint8_t id __unused, uint32_t *raw)
+sy8106a_read_raw(const struct device *dev, uint8_t id UNUSED, uint32_t *raw)
 {
 	const struct sy8106a *self = to_sy8106a(dev);
 	uint8_t reg;
@@ -73,7 +73,7 @@ sy8106a_read_raw(const struct device *dev, uint8_t id __unused, uint32_t *raw)
 }
 
 static int
-sy8106a_set_state(const struct device *dev, uint8_t id __unused, bool enabled)
+sy8106a_set_state(const struct device *dev, uint8_t id UNUSED, bool enabled)
 {
 	const struct sy8106a *self = to_sy8106a(dev);
 	uint8_t reg;
@@ -92,7 +92,7 @@ sy8106a_set_state(const struct device *dev, uint8_t id __unused, bool enabled)
 }
 
 static int
-sy8106a_write_raw(const struct device *dev, uint8_t id __unused, uint32_t raw)
+sy8106a_write_raw(const struct device *dev, uint8_t id UNUSED, uint32_t raw)
 {
 	const struct sy8106a *self = to_sy8106a(dev);
 

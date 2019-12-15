@@ -92,7 +92,7 @@ set_power_switch(uint8_t cluster, uint8_t core, bool enable)
 	}
 }
 
-uint8_t __const
+uint8_t
 css_get_cluster_count(void)
 {
 	return CLUSTER_MAX;
@@ -117,8 +117,8 @@ css_get_cluster_state(uint8_t cluster)
 	return SCPI_CSS_ON;
 }
 
-uint8_t __const
-css_get_core_count(uint8_t cluster __unused)
+uint8_t
+css_get_core_count(uint8_t cluster UNUSED)
 {
 	return CORE_MAX;
 }
@@ -144,7 +144,7 @@ css_get_core_state(uint8_t cluster, uint8_t core)
 }
 
 int
-css_set_css_state(uint8_t state __unused)
+css_set_css_state(uint8_t state UNUSED)
 {
 	/* Nothing to do. */
 	return SUCCESS;

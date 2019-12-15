@@ -50,7 +50,9 @@ static const uint8_t scpi_error_map[] = {
 	SCPI_E_RANGE,   /* ERANGE */
 };
 
-static uint32_t __const
+static uint32_t scpi_map_error(int err) ATTRIBUTE(const);
+
+static uint32_t
 scpi_map_error(int err)
 {
 	return scpi_error_map[-err];
@@ -97,8 +99,8 @@ static const uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
  */
 static int
 scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
-                             uint32_t *tx_payload __unused,
-                             uint16_t *tx_size __unused)
+                             uint32_t *tx_payload UNUSED,
+                             uint16_t *tx_size UNUSED)
 {
 	uint32_t descriptor    = rx_payload[0];
 	uint8_t  core          = (descriptor >> 0x00) & GENMASK(3, 0);
@@ -137,7 +139,7 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
 #define CLUSTER_POWER_STATE(x) (((x) & GENMASK(3, 0)) << 4)
 #define CORE_POWER_STATES(x)   ((x) << 8)
 static int
-scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload __unused,
+scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload UNUSED,
                              uint32_t *tx_payload, uint16_t *tx_size)
 {
 	uint8_t  clusters = css_get_cluster_count();
@@ -162,8 +164,8 @@ scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload __unused,
  */
 static int
 scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
-                               uint32_t *tx_payload __unused,
-                               uint16_t *tx_size __unused)
+                               uint32_t *tx_payload UNUSED,
+                               uint16_t *tx_size UNUSED)
 {
 	uint8_t state = rx_payload[0];
 

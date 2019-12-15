@@ -22,7 +22,7 @@
  * the generic setters prevent changing the CSS state, the CSS must always be
  * running.
  */
-uint8_t __weak
+uint8_t WEAK
 css_get_css_state(void)
 {
 	/* Assume the CSS is always on. */
@@ -33,7 +33,7 @@ css_get_css_state(void)
  * Generic implementation used when no platform support is available. Assume
  * the minimum possible number of clusters is present.
  */
-uint8_t __const __weak
+uint8_t WEAK
 css_get_cluster_count(void)
 {
 	/* Assume the CSS contains a single cluster with a single core. */
@@ -45,8 +45,8 @@ css_get_cluster_count(void)
  * the generic setters prevent changing any cluster state, the set of running
  * clusters is always equal to the set of clusters initialized by the boot ROM.
  */
-uint8_t __weak
-css_get_cluster_state(uint8_t cluster __unused)
+uint8_t WEAK
+css_get_cluster_state(uint8_t cluster UNUSED)
 {
 	/* Assume present clusters/cores are always on. */
 	if (cluster >= css_get_cluster_count())
@@ -59,8 +59,8 @@ css_get_cluster_state(uint8_t cluster __unused)
  * Generic implementation used when no platform support is available. Assume
  * the minimum possible number of cores is present in each cluster.
  */
-uint8_t __const __weak
-css_get_core_count(uint8_t cluster __unused)
+uint8_t WEAK
+css_get_core_count(uint8_t cluster UNUSED)
 {
 	/* Assume the CSS contains a single cluster with a single core. */
 	return 1;
@@ -71,7 +71,7 @@ css_get_core_count(uint8_t cluster __unused)
  * the generic setters prevent changing any core state, the set of running
  * cores is always equal to the set of cores initialized by the boot ROM.
  */
-uint8_t __weak
+uint8_t WEAK
 css_get_core_state(uint8_t cluster, uint8_t core)
 {
 	/* Assume present clusters/cores are always on. */
@@ -89,7 +89,7 @@ css_get_core_state(uint8_t cluster, uint8_t core)
  * lower-level core state API. However, this definition is declared weak for
  * consistency with the other functions and flexibility for future platforms.
  */
-uint8_t __weak
+uint8_t WEAK
 css_get_online_cores(uint8_t cluster)
 {
 	uint8_t cores;
@@ -111,7 +111,7 @@ css_get_online_cores(uint8_t cluster)
  * the generic code does not know how to control the hardware, prohibit changes
  * to the CSS state by default without a platform-specific implementation.
  */
-int __weak
+int WEAK
 css_set_css_state(uint8_t state)
 {
 	/* Reject any attempts to change CSS, cluster, or core power states. */
@@ -123,7 +123,7 @@ css_set_css_state(uint8_t state)
  * the generic code does not know how to control the hardware, prohibit changes
  * to the cluster state by default without a platform-specific implementation.
  */
-int __weak
+int WEAK
 css_set_cluster_state(uint8_t cluster, uint8_t state)
 {
 	/* Reject any attempts to change CSS, cluster, or core power states. */
@@ -135,7 +135,7 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
  * the generic code does not know how to control the hardware, prohibit changes
  * to the core state by default without a platform-specific implementation.
  */
-int __weak
+int WEAK
 css_set_core_state(uint8_t cluster, uint8_t core, uint8_t state)
 {
 	/* Reject any attempts to change CSS, cluster, or core power states. */

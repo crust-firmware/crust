@@ -427,7 +427,7 @@ to_axp803_regulator(const struct device *dev)
 }
 
 static struct regulator_info *
-axp803_regulator_get_info(const struct device *dev __unused, uint8_t id)
+axp803_regulator_get_info(const struct device *dev UNUSED, uint8_t id)
 {
 	assert(id < AXP803_REGL_COUNT);
 

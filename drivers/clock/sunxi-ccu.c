@@ -293,7 +293,7 @@ sunxi_ccu_set_state(const struct device *dev, uint8_t id, bool enable)
 }
 
 static int
-sunxi_ccu_probe(const struct device *dev __unused)
+sunxi_ccu_probe(const struct device *dev UNUSED)
 {
 	return SUCCESS;
 }
