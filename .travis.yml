@@ -6,7 +6,7 @@ env:
       # Generic
     - CONFIGS="allnoconfig allyesconfig defconfig randconfig randconfig randconfig"
       # A64
-    - CONFIGS="orangepi_win_defconfig pine64_plus_defconfig pinebook_defconfig"
+    - CONFIGS="orangepi_win_defconfig pine64_plus_defconfig pinebook_defconfig pinephone_defconfig"
       # A83T
     - CONFIGS="tbs_a711_defconfig"
       # H5
