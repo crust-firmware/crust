@@ -57,7 +57,6 @@ CFLAGS		 = $(COMMON_CFLAGS) \
 		   $(if $(HAVE_GCC9),-msfimm -mshftimm) \
 		   -static
 CPPFLAGS	 = $(COMMON_CPPFLAGS) \
-		   -I$(SRC)/include/common \
 		   -I$(SRC)/include/drivers \
 		   -I$(SRC)/include/stdlib \
 		   -I$(SRC)/platform/$(CONFIG_PLATFORM)/include \
