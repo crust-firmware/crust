@@ -40,18 +40,8 @@ sun4i_intc_poll(const struct device *dev)
 }
 
 static int
-sun4i_intc_probe(const struct device *dev)
+sun4i_intc_probe(const struct device *dev UNUSED)
 {
-	const struct sun4i_intc *self = to_sun4i_intc(dev);
-
-	/* Clear the table base address (just return IRQ numbers). */
-	mmio_write_32(self->regs + INTC_BASE_ADDR_REG, 0);
-
-	/* Disable, unmask, and clear the status of all IRQs. */
-	mmio_write_32(self->regs + INTC_EN_REG, 0);
-	mmio_write_32(self->regs + INTC_MASK_REG, 0);
-	mmio_write_32(self->regs + INTC_IRQ_PEND_REG, ~0);
-
 	return SUCCESS;
 }
 
