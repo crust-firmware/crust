@@ -11,6 +11,13 @@
 #include <stdint.h>
 #include <util.h>
 
+/**
+ * Default initializer for the device state pointer.
+ *
+ * The state pointer must be initialized for all devices. If additional mutable
+ * state is needed, wrap struct device_state intrusively. Otherwise, use this
+ * macro.
+ */
 #define DEVICE_STATE_INIT &(struct device_state) { 0 }
 
 struct device_state;
