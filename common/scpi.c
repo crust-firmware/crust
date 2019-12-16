@@ -142,21 +142,10 @@ scpi_receive_message(uint8_t client, uint32_t msg)
 void
 scpi_init(void)
 {
-	int err;
-
 	/* Bail if there is no mailbox available. */
 	mailbox = device_get(&msgbox.dev);
 	if (!mailbox)
 		return;
-
-	/* Secure client channel. */
-	if ((err = msgbox_enable(mailbox, RX_CHAN(SCPI_CLIENT_EL3))))
-		panic("SCPI.%u: Error enabling channel: %d",
-		      SCPI_CLIENT_EL3, err);
-	/* Non-secure client channel. */
-	if ((err = msgbox_enable(mailbox, RX_CHAN(SCPI_CLIENT_EL2))))
-		panic("SCPI.%u: Error enabling channel: %d",
-		      SCPI_CLIENT_EL2, err);
 
 	/* Only send the ready message once. Assume that if the system is
 	 * already booted, some secondary CPUs will have been turned on. */

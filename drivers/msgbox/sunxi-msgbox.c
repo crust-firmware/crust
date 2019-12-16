@@ -59,33 +59,6 @@ sunxi_msgbox_ack_rx(const struct device *dev, uint8_t chan)
 	mmio_write_32(self->regs + IRQ_STAT_REG, RX_IRQ(chan));
 }
 
-static int
-sunxi_msgbox_disable(const struct device *dev, uint8_t chan)
-{
-	const struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
-
-	assert(chan < SUNXI_MSGBOX_CHANS);
-
-	/* Disable the receive IRQ. */
-	mmio_clr_32(self->regs + IRQ_EN_REG, RX_IRQ(chan));
-
-	return SUCCESS;
-}
-
-static int
-sunxi_msgbox_enable(const struct device *dev, uint8_t chan)
-{
-	const struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
-
-	assert(chan < SUNXI_MSGBOX_CHANS);
-
-	/* Clear and enable the receive IRQ. */
-	mmio_write_32(self->regs + IRQ_STAT_REG, RX_IRQ(chan));
-	mmio_set_32(self->regs + IRQ_EN_REG, RX_IRQ(chan));
-
-	return SUCCESS;
-}
-
 static bool
 sunxi_msgbox_last_tx_done(const struct device *dev, uint8_t chan)
 {
@@ -180,8 +153,6 @@ static const struct msgbox_driver sunxi_msgbox_driver = {
 	},
 	.ops = {
 		.ack_rx       = sunxi_msgbox_ack_rx,
-		.disable      = sunxi_msgbox_disable,
-		.enable       = sunxi_msgbox_enable,
 		.last_tx_done = sunxi_msgbox_last_tx_done,
 		.send         = sunxi_msgbox_send,
 	},

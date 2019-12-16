@@ -23,8 +23,6 @@ enum {
 
 struct msgbox_driver_ops {
 	void (*ack_rx)(const struct device *dev, uint8_t chan);
-	int  (*disable)(const struct device *dev, uint8_t chan);
-	int  (*enable)(const struct device *dev, uint8_t chan);
 	bool (*last_tx_done)(const struct device *dev, uint8_t chan);
 	int  (*send)(const struct device *dev, uint8_t chan,
 	             uint32_t message);
@@ -48,30 +46,6 @@ msgbox_ack_rx(const struct device *dev, uint8_t chan)
 }
 
 /**
- * Disable a message channel, so it will no longer be able to receive messages.
- *
- * @param dev  The message box device.
- * @param chan The message box channel.
- */
-static inline int
-msgbox_disable(const struct device *dev, uint8_t chan)
-{
-	return MSGBOX_OPS(dev)->disable(dev, chan);
-}
-
-/**
- * Enable a message box channel to receive messages.
- *
- * @param dev     The message box device.
- * @param chan    The message box channel.
- */
-static inline int
-msgbox_enable(const struct device *dev, uint8_t chan)
-{
-	return MSGBOX_OPS(dev)->enable(dev, chan);
-}
-
-/**
  * Check if the last transmission on a message box channel has completed, or if
  * it is still pending. A message is pending until the reception IRQ has been
  * cleared on the remote interface.
@@ -86,8 +60,7 @@ msgbox_last_tx_done(const struct device *dev, uint8_t chan)
 }
 
 /**
- * Send a message via a message box device. The message box channel must have
- * previously been enabled.
+ * Send a message via a message box channel.
  *
  * @param dev     The message box device.
  * @param chan    The channel to use within the message box.
