@@ -4,12 +4,16 @@
  */
 
 #include <css.h>
+#include <device.h>
 #include <pmic.h>
 #include <scpi_protocol.h>
 #include <stdbool.h>
 #include <system_power.h>
+#include <watchdog.h>
+#include <irq/sun4i-intc.h>
 #include <watchdog/sunxi-twd.h>
 
+static const struct device *pmic;
 static uint8_t system_state;
 
 bool
@@ -26,9 +30,26 @@ system_is_running(void)
 }
 
 void
+system_state_init(void)
+{
+	pmic = pmic_get();
+}
+
+void
 system_state_machine(void)
 {
+	const struct device *intc, *watchdog;
+
 	switch (system_state) {
+	case SYSTEM_INACTIVE:
+	case SYSTEM_OFF:
+		/* Poll wakeup sources. */
+		if ((intc = device_get(&r_intc.dev))) {
+			device_poll(intc);
+			device_put(intc);
+		}
+
+		break;
 	case SYSTEM_SUSPEND:
 		/* Enable wakeup sources. */
 
@@ -78,8 +99,11 @@ system_state_machine(void)
 		pmic_reset(pmic);
 
 		/* Attempt to reset the SoC using the watchdog. */
-		watchdog_disable(&r_twd.dev);
-		watchdog_enable(&r_twd.dev, 0);
+		if ((watchdog = device_get(&r_twd.dev))) {
+			watchdog_disable(watchdog);
+			watchdog_enable(watchdog, 0);
+			device_put(watchdog);
+		}
 
 		/* Leave the system state as is; continue making reset
 		 * attempts each time this function is called. */

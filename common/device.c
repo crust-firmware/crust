@@ -5,19 +5,43 @@
 
 #include <debug.h>
 #include <device.h>
+#include <stddef.h>
 
-void
-device_probe(const struct device *dev)
+const struct device *
+device_get(const struct device *dev)
 {
 	int err;
 
-	/* Skip already-probed devices. */
-	if (dev->state->refcount++)
-		return;
+	/* Skip already-running devices. */
+	if (device_is_running(dev))
+		return dev;
 
-	/* Probe the device itself, and report any errors. */
-	if ((err = dev->drv->probe(dev)))
-		panic("dm: Failed to probe %s (%d)", dev->name, err);
+	debug("%s: Probing", dev->name);
+	if ((err = dev->drv->probe(dev))) {
+		error("%s: Probe failed: %d", dev->name, err);
+		return NULL;
+	}
 
-	debug("dm: Probed %s", dev->name);
+	/* Only increase the refcount if probing succeeded. */
+	++dev->state->refcount;
+
+	return dev;
+}
+
+bool
+device_is_running(const struct device *dev)
+{
+	return dev->state->refcount;
+}
+
+void
+device_poll(const struct device *dev)
+{
+	dev->drv->poll(dev);
+}
+
+void
+device_put(const struct device *dev)
+{
+	--dev->state->refcount;
 }

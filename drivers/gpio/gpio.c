@@ -10,13 +10,14 @@
 int
 gpio_get(const struct gpio_handle *gpio)
 {
-	const struct device *dev = gpio->dev;
+	const struct device *dev = device_get(gpio->dev);
 	uint8_t pin  = gpio->pin;
 	uint8_t mode = gpio->mode;
 	int err;
 
 	/* Ensure the controller's driver is loaded. */
-	device_probe(dev);
+	if (!dev)
+		return ENODEV;
 
 	/* Set the GPIO pin mode. */
 	if ((err = gpio_set_mode(dev, pin, mode)))

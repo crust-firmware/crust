@@ -11,12 +11,14 @@
 int
 i2c_probe(const struct i2c_handle *bus)
 {
+	const struct device *dev         = device_get(bus->dev);
 	const struct i2c_driver_ops *ops = I2C_OPS(bus->dev);
 	uint8_t dummy;
 	int err;
 
 	/* Ensure the controller's driver is loaded. */
-	device_probe(bus->dev);
+	if (!dev)
+		return ENODEV;
 
 	/* Start a read transaction. */
 	if ((err = ops->start(bus, I2C_READ)))

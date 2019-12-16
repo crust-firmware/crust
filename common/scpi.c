@@ -28,6 +28,8 @@ struct scpi_state {
 	bool     tx_full;
 };
 
+static const struct device *mailbox;
+
 /** The shared memory area, with an address defined in the linker script. */
 extern struct scpi_mem __scpi_mem[SCPI_CLIENTS];
 
@@ -53,7 +55,7 @@ scpi_send_message(uint8_t client)
 	barrier();
 
 	/* Notify the client that the message has been sent. */
-	if ((err = msgbox_send(&msgbox.dev, TX_CHAN(client),
+	if ((err = msgbox_send(mailbox, TX_CHAN(client),
 	                       SCPI_VIRTUAL_CHANNEL)))
 		error("SCPI.%u: Send error: %d", client, err);
 }
@@ -86,6 +88,13 @@ scpi_create_message(uint8_t client, uint8_t command)
 void
 scpi_poll(void)
 {
+	/* Do nothing if there was no mailbox available. */
+	if (!mailbox)
+		return;
+
+	/* Poll for incoming messages (will call scpi_receive_message). */
+	device_poll(mailbox);
+
 	for (uint8_t client = 0; client < SCPI_CLIENTS; ++client) {
 		struct scpi_mem *mem     = &SCPI_MEM_AREA(client);
 		struct scpi_state *state = &scpi_state[client];
@@ -93,7 +102,7 @@ scpi_poll(void)
 		/* Flush any outgoing messages. The TX buffer becomes free
 		 * when the message is acknowledged or when it times out. */
 		if (state->tx_full) {
-			if (msgbox_last_tx_done(&msgbox.dev,
+			if (msgbox_last_tx_done(mailbox,
 			                        TX_CHAN(client)) ||
 			    counter_read() > state->timeout)
 				state->tx_full = false;
@@ -104,7 +113,7 @@ scpi_poll(void)
 			bool reply_needed = scpi_handle_cmd(client, mem);
 
 			/* Acknowledge the request as soon as possible. */
-			msgbox_ack_rx(&msgbox.dev, RX_CHAN(client));
+			msgbox_ack_rx(mailbox, RX_CHAN(client));
 			state->rx_full = false;
 
 			if (reply_needed) {
@@ -122,7 +131,7 @@ scpi_receive_message(uint8_t client, uint32_t msg)
 
 	/* Do not try to parse messages sent with a different protocol. */
 	if (msg != SCPI_VIRTUAL_CHANNEL) {
-		msgbox_ack_rx(&msgbox.dev, RX_CHAN(client));
+		msgbox_ack_rx(mailbox, RX_CHAN(client));
 		return;
 	}
 
@@ -135,12 +144,17 @@ scpi_init(void)
 {
 	int err;
 
+	/* Bail if there is no mailbox available. */
+	mailbox = device_get(&msgbox.dev);
+	if (!mailbox)
+		return;
+
 	/* Secure client channel. */
-	if ((err = msgbox_enable(&msgbox.dev, RX_CHAN(SCPI_CLIENT_EL3))))
+	if ((err = msgbox_enable(mailbox, RX_CHAN(SCPI_CLIENT_EL3))))
 		panic("SCPI.%u: Error enabling channel: %d",
 		      SCPI_CLIENT_EL3, err);
 	/* Non-secure client channel. */
-	if ((err = msgbox_enable(&msgbox.dev, RX_CHAN(SCPI_CLIENT_EL2))))
+	if ((err = msgbox_enable(mailbox, RX_CHAN(SCPI_CLIENT_EL2))))
 		panic("SCPI.%u: Error enabling channel: %d",
 		      SCPI_CLIENT_EL2, err);
 

@@ -4,14 +4,18 @@
  */
 
 #include <device.h>
+#include <error.h>
 #include <rsb.h>
 
 int
 rsb_probe(const struct rsb_handle *bus, uint16_t hwaddr, uint8_t addr,
           uint8_t data)
 {
-	/* Ensure the controller's driver is loaded. */
-	device_probe(bus->dev);
+	const struct device *dev = device_get(bus->dev);
 
-	return RSB_OPS(bus->dev)->probe(bus, hwaddr, addr, data);
+	/* Ensure the controller's driver is loaded. */
+	if (!dev)
+		return ENODEV;
+
+	return RSB_OPS(dev)->probe(bus, hwaddr, addr, data);
 }

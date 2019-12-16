@@ -3,17 +3,19 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <pmic.h>
+#include <device.h>
 #include <pmic/axp803.h>
 #include <pmic/dummy.h>
 
-const struct device *pmic;
-
-void
-pmic_detect(void)
+const struct device *
+pmic_get(void)
 {
+	const struct device *pmic = NULL;
+
 	if (IS_ENABLED(CONFIG_PMIC_AXP803))
-		pmic = &axp803_pmic.dev;
-	else
-		pmic = &dummy_pmic.dev;
+		pmic = device_get(&axp803_pmic.dev);
+	if (!pmic)
+		pmic = device_get(&dummy_pmic.dev);
+
+	return pmic;
 }

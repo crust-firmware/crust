@@ -7,9 +7,7 @@
 #define COMMON_DEVICE_H
 
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
-#include <util.h>
 
 /**
  * Default initializer for the device state pointer.
@@ -45,11 +43,47 @@ struct driver {
 };
 
 /**
- * Ensure a device is probed (or in other words, its driver is initialized).
- * If a device's driver is already initialized, this function does nothing.
+ * Get a reference to a device.
  *
- * @param dev  A device
+ * If this is the first reference to a device, that device's driver will be
+ * initialized. Otherwise, this function only updates the reference count.
+ *
+ * The device will remain running as long as the reference is held (that is,
+ * until calling device_put()).
+ *
+ * If an error occurs during device initialization, this function will return
+ * NULL, and there is no need to call device_put().
+ *
+ * @param dev A device.
+ *
+ * @return A reference to the device that was acquired.
  */
-void device_probe(const struct device *dev);
+const struct device *device_get(const struct device *dev);
+
+/**
+ * Determine if a device is running.
+ *
+ * A device is considered running if it has been successfully initialized by
+ * its driver and has a nonzero refcount.
+ *
+ * @param dev A device.
+ *
+ * @return A Boolean representing the state of the device.
+ */
+bool device_is_running(const struct device *dev);
+
+/**
+ * Poll a device for new work or state changes.
+ *
+ * @param dev A reference to a device.
+ */
+void device_poll(const struct device *dev);
+
+/**
+ * Release a reference to a device.
+ *
+ * @param dev A reference to a device.
+ */
+void device_put(const struct device *dev);
 
 #endif /* COMMON_DEVICE_H */

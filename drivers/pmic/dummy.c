@@ -24,6 +24,7 @@ dummy_pmic_power_off(const struct device *dev)
 
 	/* Turn CPU power off. */
 	if (self->vdd_cpux.dev &&
+	    device_is_running(self->vdd_cpux.dev) &&
 	    (err = regulator_disable(self->vdd_cpux.dev, self->vdd_cpux.id)))
 		return err;
 
@@ -38,6 +39,7 @@ dummy_pmic_power_on(const struct device *dev)
 
 	/* Turn CPU power on. */
 	if (self->vdd_cpux.dev &&
+	    device_is_running(self->vdd_cpux.dev) &&
 	    (err = regulator_enable(self->vdd_cpux.dev, self->vdd_cpux.id)))
 		return err;
 
@@ -49,8 +51,9 @@ dummy_pmic_probe(const struct device *dev)
 {
 	const struct dummy_pmic *self = to_dummy_pmic(dev);
 
+	/* Ignore failure from device_get(), as it is checked above. */
 	if (self->vdd_cpux.dev)
-		device_probe(self->vdd_cpux.dev);
+		device_get(self->vdd_cpux.dev);
 
 	return SUCCESS;
 }

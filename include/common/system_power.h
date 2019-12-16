@@ -29,6 +29,11 @@ bool system_can_wake(void) ATTRIBUTE(pure);
 bool system_is_running(void) ATTRIBUTE(pure);
 
 /**
+ * Perform system state machine initialization.
+ */
+void system_state_init(void);
+
+/**
  * Perform system state transitions.
  */
 void system_state_machine(void);

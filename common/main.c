@@ -6,16 +6,11 @@
 #include <counter.h>
 #include <debug.h>
 #include <device.h>
-#include <pmic.h>
 #include <scpi.h>
 #include <spr.h>
-#include <stdbool.h>
 #include <system_power.h>
 #include <watchdog.h>
-#include <irq/sun4i-intc.h>
-#include <msgbox/sunxi-msgbox.h>
 #include <watchdog/sunxi-twd.h>
-#include <platform/devices.h>
 #include <platform/time.h>
 
 #define WATCHDOG_TIMEOUT 5 /* seconds */
@@ -25,7 +20,8 @@ noreturn void main(uint32_t exception);
 noreturn void
 main(uint32_t exception)
 {
-	uint64_t next_tick = counter_read() + REFCLK_HZ;
+	const struct device *watchdog;
+	uint64_t next_tick;
 
 	if (exception) {
 		error("Unhandled exception %u at %p!",
@@ -34,29 +30,20 @@ main(uint32_t exception)
 
 	/* Initialize and enable the watchdog first. This provides a failsafe
 	 * for the possibility that something below hangs. */
-	device_probe(&r_twd.dev);
-	watchdog_enable(&r_twd.dev, WATCHDOG_TIMEOUT * REFCLK_HZ);
-	info("Watchdog enabled");
+	if ((watchdog = device_get(&r_twd.dev))) {
+		watchdog_enable(watchdog, WATCHDOG_TIMEOUT * REFCLK_HZ);
+		info("Watchdog enabled");
+	}
 
-	/* Initialize the remaining devices needed to boot. */
-	device_probe(&msgbox.dev);
-
-	/* Initialize the power management IC. */
-	pmic_detect();
-	device_probe(pmic);
+	/* Initialize the power management state machine. */
+	system_state_init();
 
 	/* Inform SCPI clients that the firmware has finished booting. */
 	scpi_init();
 
-	while (true) {
+	next_tick = counter_read() + REFCLK_HZ;
+	for (;;) {
 		/* Perform every-iteration operations. */
-		if (system_is_running()) {
-			/* Poll communication channels. */
-			msgbox.dev.drv->poll(&msgbox.dev);
-		} else if (system_can_wake()) {
-			/* Poll wakeup sources. */
-			r_intc.dev.drv->poll(&r_intc.dev);
-		}
 		scpi_poll();
 		system_state_machine();
 
@@ -64,7 +51,8 @@ main(uint32_t exception)
 			next_tick += REFCLK_HZ;
 
 			/* Perform 1Hz operations. */
-			watchdog_restart(&r_twd.dev);
+			if (watchdog)
+				watchdog_restart(watchdog);
 		}
 	}
 }

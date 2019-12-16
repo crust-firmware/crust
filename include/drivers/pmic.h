@@ -24,12 +24,12 @@ struct pmic_driver {
 	const struct pmic_driver_ops ops;
 };
 
-extern const struct device *pmic;
-
 /**
- * Find and select the best available PMIC.
+ * Get a reference to an available PMIC device.
+ *
+ * @return A reference to a PMIC device.
  */
-void pmic_detect(void);
+const struct device *pmic_get(void);
 
 /**
  * Initiate the PMIC reset process.
