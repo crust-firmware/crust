@@ -12,8 +12,9 @@
 #define EINVAL  (-3) /**< The argument to the function was invalid. */
 #define EIO     (-4) /**< Communication with the hardware failed. */
 #define ENODEV  (-5) /**< The device does not exist. */
-#define ENOTSUP (-6) /**< The operation is not supported. */
-#define EPERM   (-7) /**< The operation is not permitted. */
-#define ERANGE  (-8) /**< The argument to the function was out of range. */
+#define ENOENT  (-6) /**< The entry does not exist. */
+#define ENOTSUP (-7) /**< The operation is not supported. */
+#define EPERM   (-8) /**< The operation is not permitted. */
+#define ERANGE  (-9) /**< The argument to the function was out of range. */
 
 #endif /* LIB_ERROR_H */

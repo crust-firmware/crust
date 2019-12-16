@@ -45,6 +45,7 @@ static const uint8_t scpi_error_map[] = {
 	SCPI_E_PARAM,   /* EINVAL */
 	SCPI_E_DEVICE,  /* EIO */
 	SCPI_E_PARAM,   /* ENODEV */
+	SCPI_E_PARAM,   /* ENOENT */
 	SCPI_E_SUPPORT, /* ENOTSUP */
 	SCPI_E_ACCESS,  /* EPERM */
 	SCPI_E_RANGE,   /* ERANGE */
