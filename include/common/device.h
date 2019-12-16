@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#ifndef COMMON_DM_H
-#define COMMON_DM_H
+#ifndef COMMON_DEVICE_H
+#define COMMON_DEVICE_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -45,4 +45,4 @@ struct driver {
  */
 void device_probe(const struct device *dev);
 
-#endif /* COMMON_DM_H */
+#endif /* COMMON_DEVICE_H */
