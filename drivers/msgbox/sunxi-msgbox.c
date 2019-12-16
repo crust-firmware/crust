@@ -71,6 +71,21 @@ sunxi_msgbox_last_tx_done(const struct device *dev, uint8_t chan)
 }
 
 static int
+sunxi_msgbox_receive(const struct device *dev, uint8_t chan, uint32_t *msg)
+{
+	const struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+
+	assert(chan < SUNXI_MSGBOX_CHANS);
+
+	/* Check if a new message is available before reading it. */
+	if (!sunxi_msgbox_peek_data(dev, chan))
+		return ENOENT;
+	*msg = mmio_read_32(self->regs + MSG_DATA_REG(chan));
+
+	return SUCCESS;
+}
+
+static int
 sunxi_msgbox_send(const struct device *dev, uint8_t chan, uint32_t msg)
 {
 	const struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
@@ -154,6 +169,7 @@ static const struct msgbox_driver sunxi_msgbox_driver = {
 	.ops = {
 		.ack_rx       = sunxi_msgbox_ack_rx,
 		.last_tx_done = sunxi_msgbox_last_tx_done,
+		.receive      = sunxi_msgbox_receive,
 		.send         = sunxi_msgbox_send,
 	},
 };

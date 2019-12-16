@@ -24,6 +24,8 @@ enum {
 struct msgbox_driver_ops {
 	void (*ack_rx)(const struct device *dev, uint8_t chan);
 	bool (*last_tx_done)(const struct device *dev, uint8_t chan);
+	int  (*receive)(const struct device *dev, uint8_t chan,
+	                uint32_t *message);
 	int  (*send)(const struct device *dev, uint8_t chan,
 	             uint32_t message);
 };
@@ -57,6 +59,19 @@ static inline bool
 msgbox_last_tx_done(const struct device *dev, uint8_t chan)
 {
 	return MSGBOX_OPS(dev)->last_tx_done(dev, chan);
+}
+
+/**
+ * Receive a message via a message box channel.
+ *
+ * @param dev     The message box device.
+ * @param chan    The channel to use within the message box.
+ * @param message The message to receive.
+ */
+static inline int
+msgbox_receive(const struct device *dev, uint8_t chan, uint32_t *message)
+{
+	return MSGBOX_OPS(dev)->receive(dev, chan, message);
 }
 
 /**
