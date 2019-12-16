@@ -135,11 +135,11 @@ scpi_init(void)
 {
 	int err;
 
-	/* Non-secure client channel. */
+	/* Secure client channel. */
 	if ((err = msgbox_enable(&msgbox.dev, RX_CHAN(SCPI_CLIENT_EL3))))
 		panic("SCPI.%u: Error enabling channel: %d",
 		      SCPI_CLIENT_EL3, err);
-	/* Secure client channel. */
+	/* Non-secure client channel. */
 	if ((err = msgbox_enable(&msgbox.dev, RX_CHAN(SCPI_CLIENT_EL2))))
 		panic("SCPI.%u: Error enabling channel: %d",
 		      SCPI_CLIENT_EL2, err);
