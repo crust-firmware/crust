@@ -40,9 +40,8 @@ static struct scpi_state scpi_state[SCPI_CLIENTS];
  * client must acknowledge the message.
  */
 static void
-scpi_send_message(uint8_t client)
+scpi_send_message(uint8_t client, struct scpi_state *state)
 {
-	struct scpi_state *state = &scpi_state[client];
 	int err;
 
 	/* Ensure the outgoing message is fully written at this point. */
@@ -62,9 +61,10 @@ scpi_send_message(uint8_t client)
 void
 scpi_create_message(uint8_t client, uint8_t command)
 {
-	struct scpi_mem *mem = &SCPI_MEM_AREA(client);
+	struct scpi_mem *mem     = &SCPI_MEM_AREA(client);
+	struct scpi_state *state = &scpi_state[client];
 
-	assert(!scpi_state[client].tx_full);
+	assert(!state->tx_full);
 
 	/* Write the message header. */
 	mem->tx_msg.command = command;
@@ -73,7 +73,7 @@ scpi_create_message(uint8_t client, uint8_t command)
 	mem->tx_msg.status  = SCPI_OK;
 
 	/* Send the message. */
-	scpi_send_message(client);
+	scpi_send_message(client, state);
 }
 
 /**
@@ -124,7 +124,7 @@ scpi_poll_one_client(uint8_t client)
 
 		/* If the TX buffer now contains a reply, send it. */
 		if (reply_needed)
-			scpi_send_message(client);
+			scpi_send_message(client, state);
 	}
 }
 
