@@ -36,10 +36,8 @@ struct device_state {
 };
 
 struct driver {
-	/** A function called to check for new work or state changes. */
-	void (*poll)(const struct device *dev);
 	/** A function called to detect and initialize new devices. */
-	int  (*probe)(const struct device *dev);
+	int (*probe)(const struct device *dev);
 };
 
 /**
@@ -71,13 +69,6 @@ const struct device *device_get(const struct device *dev);
  * @return A Boolean representing the state of the device.
  */
 bool device_is_running(const struct device *dev);
-
-/**
- * Poll a device for new work or state changes.
- *
- * @param dev A reference to a device.
- */
-void device_poll(const struct device *dev);
 
 /**
  * Release a reference to a device.

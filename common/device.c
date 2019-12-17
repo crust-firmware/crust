@@ -35,12 +35,6 @@ device_is_running(const struct device *dev)
 }
 
 void
-device_poll(const struct device *dev)
-{
-	dev->drv->poll(dev);
-}
-
-void
 device_put(const struct device *dev)
 {
 	--dev->state->refcount;
