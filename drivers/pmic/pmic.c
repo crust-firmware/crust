@@ -5,7 +5,6 @@
 
 #include <device.h>
 #include <pmic/axp803.h>
-#include <pmic/dummy.h>
 
 const struct device *
 pmic_get(void)
@@ -14,8 +13,6 @@ pmic_get(void)
 
 	if (IS_ENABLED(CONFIG_PMIC_AXP803))
 		pmic = device_get(&axp803_pmic.dev);
-	if (!pmic)
-		pmic = device_get(&dummy_pmic.dev);
 
 	return pmic;
 }

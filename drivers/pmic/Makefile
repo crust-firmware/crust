@@ -6,4 +6,3 @@
 obj-y += pmic.o
 
 obj-$(CONFIG_PMIC_AXP803) += axp803.o
-obj-y                     += dummy.o

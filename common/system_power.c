@@ -55,7 +55,8 @@ system_state_machine(void)
 		/* Enable wakeup sources. */
 
 		/* Perform PMIC-specific suspend actions. */
-		pmic_suspend(pmic);
+		if (pmic)
+			pmic_suspend(pmic);
 
 		/* Turn off all unnecessary power domains. */
 
@@ -70,7 +71,8 @@ system_state_machine(void)
 		/* Turn on previously-disabled power domains. */
 
 		/* Perform PMIC-specific resume actions. */
-		pmic_resume(pmic);
+		if (pmic)
+			pmic_resume(pmic);
 
 		/* Disable wakeup sources. */
 
@@ -92,7 +94,8 @@ system_state_machine(void)
 		/* Enable a subset of wakeup sources. */
 
 		/* Perform PMIC-specific shutdown actions. */
-		pmic_shutdown(pmic);
+		if (pmic)
+			pmic_shutdown(pmic);
 
 		/* Turn off all possible power domains. */
 
@@ -103,7 +106,8 @@ system_state_machine(void)
 		break;
 	case SYSTEM_RESET:
 		/* Attempt to reset the SoC using the PMIC. */
-		pmic_reset(pmic);
+		if (pmic)
+			pmic_reset(pmic);
 
 		/* Attempt to reset the SoC using the watchdog. */
 		if ((watchdog = device_get(&r_twd.dev))) {
