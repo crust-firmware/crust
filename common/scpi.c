@@ -24,7 +24,6 @@
 
 struct scpi_state {
 	uint64_t timeout;
-	bool     rx_full;
 	bool     tx_full;
 };
 
@@ -78,13 +77,57 @@ scpi_create_message(uint8_t client, uint8_t command)
 }
 
 /**
- * Attempt as much forward progress as possible for each client, by checking
+ * Attempt as much forward progress as possible for a client, by checking
  * for client ACKs and then responding to incoming messages.
  *
  * Dispatch handling of messages to the appropriate function for that specific
  * command. The functions for doing so are defined in a separate file to
  * separate the API functionality from communication/state management code.
  */
+static void
+scpi_poll_one_client(uint8_t client)
+{
+	struct scpi_state *state = &scpi_state[client];
+	uint8_t rx_chan = RX_CHAN(client);
+	uint8_t tx_chan = TX_CHAN(client);
+
+	/* Flush any outgoing messages. The TX buffer becomes free when a
+	 * previously-sent message is acknowledged or when it times out. */
+	if (state->tx_full) {
+		if (msgbox_last_tx_done(mailbox, tx_chan) ||
+		    counter_read() > state->timeout)
+			state->tx_full = false;
+	}
+
+	/* Once the TX buffer is free, we can process new messages, reading
+	 * from the RX buffer and generating responses in the TX buffer. */
+	if (!state->tx_full) {
+		bool reply_needed = false;
+		uint32_t msg;
+
+		/* Try to grab a new message. All errors are handled by
+		 * retrying on the next iteration through the main loop. */
+		if (msgbox_receive(mailbox, rx_chan, &msg) == SUCCESS) {
+			/* Only process messages sent with the correct
+			 * protocol, which SCPI calls a "virtual channel". */
+			if (msg == SCPI_VIRTUAL_CHANNEL) {
+				struct scpi_mem *mem = &SCPI_MEM_AREA(client);
+
+				/* The handler relays if a reply is needed. */
+				reply_needed = scpi_handle_cmd(client, mem);
+			}
+
+			/* Acknowledging the message allows the client to reuse
+			 * the RX buffer, so the handler must run first. */
+			msgbox_ack_rx(mailbox, rx_chan);
+		}
+
+		/* If the TX buffer now contains a reply, send it. */
+		if (reply_needed)
+			scpi_send_message(client);
+	}
+}
+
 void
 scpi_poll(void)
 {
@@ -92,51 +135,8 @@ scpi_poll(void)
 	if (!mailbox)
 		return;
 
-	/* Poll for incoming messages (will call scpi_receive_message). */
-	device_poll(mailbox);
-
-	for (uint8_t client = 0; client < SCPI_CLIENTS; ++client) {
-		struct scpi_mem *mem     = &SCPI_MEM_AREA(client);
-		struct scpi_state *state = &scpi_state[client];
-
-		/* Flush any outgoing messages. The TX buffer becomes free
-		 * when the message is acknowledged or when it times out. */
-		if (state->tx_full) {
-			if (msgbox_last_tx_done(mailbox,
-			                        TX_CHAN(client)) ||
-			    counter_read() > state->timeout)
-				state->tx_full = false;
-		}
-
-		/* Process incoming messages only if the TX buffer is free. */
-		if (state->rx_full && !state->tx_full) {
-			bool reply_needed = scpi_handle_cmd(client, mem);
-
-			/* Acknowledge the request as soon as possible. */
-			msgbox_ack_rx(mailbox, RX_CHAN(client));
-			state->rx_full = false;
-
-			if (reply_needed) {
-				state->tx_full = true;
-				scpi_send_message(client);
-			}
-		}
-	}
-}
-
-void
-scpi_receive_message(uint8_t client, uint32_t msg)
-{
-	assert(client == SCPI_CLIENT_EL2 || client == SCPI_CLIENT_EL3);
-
-	/* Do not try to parse messages sent with a different protocol. */
-	if (msg != SCPI_VIRTUAL_CHANNEL) {
-		msgbox_ack_rx(mailbox, RX_CHAN(client));
-		return;
-	}
-
-	/* Request handling this message as soon as the TX buffer is free. */
-	scpi_state[client].rx_full = true;
+	for (uint8_t client = 0; client < SCPI_CLIENTS; ++client)
+		scpi_poll_one_client(client);
 }
 
 void

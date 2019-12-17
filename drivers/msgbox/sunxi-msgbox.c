@@ -8,7 +8,6 @@
 #include <error.h>
 #include <mmio.h>
 #include <msgbox.h>
-#include <scpi.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <util.h>
@@ -100,41 +99,6 @@ sunxi_msgbox_send(const struct device *dev, uint8_t chan, uint32_t msg)
 	return SUCCESS;
 }
 
-static void
-sunxi_msgbox_handle_msg(const struct device *dev, uint8_t chan)
-{
-	const struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
-	uint32_t msg = mmio_read_32(self->regs + MSG_DATA_REG(chan));
-
-	switch (chan) {
-	case MSGBOX_CHAN_SCPI_EL3_RX:
-		scpi_receive_message(SCPI_CLIENT_EL3, msg);
-		return;
-	case MSGBOX_CHAN_SCPI_EL2_RX:
-		scpi_receive_message(SCPI_CLIENT_EL2, msg);
-		return;
-	}
-
-	debug("%s: %u: Unsolicited message 0x%08x", dev->name, chan, msg);
-}
-
-static void
-sunxi_msgbox_poll(const struct device *dev)
-{
-	const struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
-	uint32_t status = mmio_read_32(self->regs + IRQ_STAT_REG);
-
-	if (!(status & RX_IRQ_MASK))
-		return;
-
-	for (uint8_t chan = 0; chan < SUNXI_MSGBOX_CHANS; chan += 2) {
-		if (status & RX_IRQ(chan)) {
-			if (sunxi_msgbox_peek_data(dev, chan))
-				sunxi_msgbox_handle_msg(dev, chan);
-		}
-	}
-}
-
 static int
 sunxi_msgbox_probe(const struct device *dev)
 {
@@ -163,7 +127,6 @@ sunxi_msgbox_probe(const struct device *dev)
 
 static const struct msgbox_driver sunxi_msgbox_driver = {
 	.drv = {
-		.poll  = sunxi_msgbox_poll,
 		.probe = sunxi_msgbox_probe,
 	},
 	.ops = {
