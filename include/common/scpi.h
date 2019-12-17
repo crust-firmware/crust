@@ -57,6 +57,11 @@ void scpi_poll(void);
 void scpi_receive_message(uint8_t client, uint32_t msg);
 
 /**
+ * Stop processing SCPI API requests and free resources.
+ */
+void scpi_exit(void);
+
+/**
  * Initialize the SCPI API handlers and report to the system that the firmware
  * has finished booting and is ready to accept requests.
  */

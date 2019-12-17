@@ -7,7 +7,7 @@
 #include <device.h>
 #include <irq.h>
 #include <pmic.h>
-#include <scpi_protocol.h>
+#include <scpi.h>
 #include <stdbool.h>
 #include <system_power.h>
 #include <watchdog.h>
@@ -49,6 +49,9 @@ system_state_machine(void)
 
 		break;
 	case SYSTEM_SUSPEND:
+		/* Disable runtime services. */
+		scpi_exit();
+
 		/* Enable wakeup sources. */
 
 		/* Perform PMIC-specific suspend actions. */
@@ -71,6 +74,9 @@ system_state_machine(void)
 
 		/* Disable wakeup sources. */
 
+		/* Enable runtime services. */
+		scpi_init();
+
 		/* Resume execution on the first CPU in the CSS. */
 		css_set_css_state(SCPI_CSS_ON);
 		css_set_cluster_state(0, SCPI_CSS_ON);
@@ -80,6 +86,9 @@ system_state_machine(void)
 		system_state = SYSTEM_ACTIVE;
 		break;
 	case SYSTEM_SHUTDOWN:
+		/* Disable runtime services. */
+		scpi_exit();
+
 		/* Enable a subset of wakeup sources. */
 
 		/* Perform PMIC-specific shutdown actions. */

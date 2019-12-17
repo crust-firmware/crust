@@ -131,12 +131,22 @@ scpi_poll_one_client(uint8_t client)
 void
 scpi_poll(void)
 {
-	/* Do nothing if there was no mailbox available. */
+	/* Do nothing if there is no mailbox available. */
 	if (!mailbox)
 		return;
 
 	for (uint8_t client = 0; client < SCPI_CLIENTS; ++client)
 		scpi_poll_one_client(client);
+}
+
+void
+scpi_exit(void)
+{
+	/* Drop the reference so the clock can be turned off in suspend. */
+	if (mailbox) {
+		device_put(mailbox);
+		mailbox = NULL;
+	}
 }
 
 void
