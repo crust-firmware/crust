@@ -4,6 +4,7 @@
  */
 
 #include <device.h>
+#include <error.h>
 #include <i2c.h>
 #include <stdint.h>
 
