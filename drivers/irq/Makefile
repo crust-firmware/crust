@@ -3,4 +3,4 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
-obj-y += sun4i-intc.o
+obj-y += irq.o

@@ -5,12 +5,12 @@
 
 #include <css.h>
 #include <device.h>
+#include <irq.h>
 #include <pmic.h>
 #include <scpi_protocol.h>
 #include <stdbool.h>
 #include <system_power.h>
 #include <watchdog.h>
-#include <irq/sun4i-intc.h>
 #include <watchdog/sunxi-twd.h>
 
 static const struct device *pmic;
@@ -38,16 +38,14 @@ system_state_init(void)
 void
 system_state_machine(void)
 {
-	const struct device *intc, *watchdog;
+	const struct device *watchdog;
 
 	switch (system_state) {
 	case SYSTEM_INACTIVE:
 	case SYSTEM_OFF:
 		/* Poll wakeup sources. */
-		if ((intc = device_get(&r_intc.dev))) {
-			device_poll(intc);
-			device_put(intc);
-		}
+		if (irq_poll())
+			system_wakeup();
 
 		break;
 	case SYSTEM_SUSPEND:
