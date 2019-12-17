@@ -64,8 +64,6 @@ struct clock_driver_ops {
 	                                       uint8_t id, uint32_t *rate);
 	int                        (*get_state)(const struct device *dev,
 	                                        uint8_t id);
-	int                        (*set_rate)(const struct device *dev,
-	                                       uint8_t id, uint32_t rate);
 	int                        (*set_state)(const struct device *dev,
 	                                        uint8_t id, bool enable);
 };
@@ -92,13 +90,10 @@ int clock_disable(const struct device *dev, uint8_t id);
 
 /**
  * Enable a clock. If the clock does not have a gate, this may have no effect
- * on the hardware. The clock's rate will be clamped to its minimum and maximum
- * values, if defined. The clock's parent, if any, will also be enabled.
+ * on the hardware. The clock's parent, if any, will also be enabled.
  *
  * This function may fail with:
  *   EIO    There was a problem communicating with the hardware.
- *   ERANGE No possible set of clock factors will produce a rate that is in
- *          range (between the minimum and maximum rate).
  *
  * @param dev The clock controller containing this clock.
  * @param id  The device-specific identifier for this clock.
@@ -172,23 +167,5 @@ clock_get_rate(const struct device *dev, uint8_t id, uint32_t *rate)
  *             defined error code on failure.
  */
 int clock_get_state(const struct device *dev, uint8_t id);
-
-/**
- * Set the rate of a clock. This function takes into account the current rates
- * of all parent clocks, as well as the minimum and maximum rates for this
- * clock.
- *
- * This function may fail with:
- *   EIO    There was a problem communicating with the hardware.
- *   EPERM  The clock is in use or has a fixed rate that cannot be set.
- *   ERANGE No possible set of clock factors will produce a rate that is in
- *          range (between the minimum and maximum rate).
- *
- * @param dev  The clock controller containing this clock.
- * @param id   The device-specific identifier for this clock.
- * @param rate The requested clock rate.
- * @return     Zero on success; a defined error code on failure.
- */
-int clock_set_rate(const struct device *dev, uint8_t id, uint32_t rate);
 
 #endif /* DRIVERS_CLOCK_H */

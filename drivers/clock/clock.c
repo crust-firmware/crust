@@ -41,17 +41,7 @@ clock_enable(const struct device *dev, uint8_t id)
 	const struct clock_driver_ops *ops = CLOCK_OPS(dev);
 	const struct clock_handle *parent;
 	struct clock_info *info = ops->get_info(dev, id);
-	uint32_t rate;
 	int err;
-
-	/* Clamp the rate to the minimum/maximum rates and select a parent. */
-	if (!(info->flags & CLK_FIXED)) {
-		if ((err = ops->get_rate(dev, id, &rate)))
-			return err;
-		/* This will fail for fixed-rate or already-enabled clocks. */
-		if ((err = clock_set_rate(dev, id, rate)) && err != EPERM)
-			return err;
-	}
 
 	/* Enable the parent clock, if it exists, and increase its refcount. */
 	if ((parent = ops->get_parent(dev, id)) != NULL) {
@@ -108,18 +98,4 @@ clock_get_state(const struct device *dev, uint8_t id)
 
 	/* Call the driver function to read any gate this clock may have. */
 	return ops->get_state(dev, id);
-}
-
-int
-clock_set_rate(const struct device *dev, uint8_t id, uint32_t rate)
-{
-	const struct clock_driver_ops *ops = CLOCK_OPS(dev);
-	struct clock_info *info = ops->get_info(dev, id);
-
-	/* Prevent changing the rate of clocks that are fixed or are in use. */
-	if ((info->flags & CLK_FIXED) || (info->refcount > 0))
-		return EPERM;
-
-	/* Call the driver function to change the clock's rate. */
-	return ops->set_rate(dev, id, rate);
 }
