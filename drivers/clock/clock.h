@@ -42,8 +42,6 @@ struct clock_device_state {
 };
 
 struct clock_driver_ops {
-	struct clock_info *
-	    (*get_info)(const struct clock_handle *clock);
 	const struct clock_handle *
 	    (*get_parent)(const struct clock_handle *clock);
 	int (*get_rate)(const struct clock_handle *clock, uint32_t *rate);

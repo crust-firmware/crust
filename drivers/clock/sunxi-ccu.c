@@ -21,14 +21,6 @@ to_sunxi_ccu(const struct device *dev)
 	return container_of(dev, struct sunxi_ccu, dev);
 }
 
-static struct clock_info *
-sunxi_ccu_get_info(const struct clock_handle *clock)
-{
-	const struct sunxi_ccu *self = to_sunxi_ccu(clock->dev);
-
-	return &self->clocks[clock->id].info;
-}
-
 static const struct clock_handle *
 sunxi_ccu_get_parent(const struct clock_handle *clock)
 {
@@ -136,7 +128,6 @@ const struct clock_driver sunxi_ccu_driver = {
 		.release = dummy_release,
 	},
 	.ops = {
-		.get_info   = sunxi_ccu_get_info,
 		.get_parent = sunxi_ccu_get_parent,
 		.get_rate   = sunxi_ccu_get_rate,
 		.get_state  = sunxi_ccu_get_state,
