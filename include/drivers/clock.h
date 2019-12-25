@@ -7,13 +7,9 @@
 #define DRIVERS_CLOCK_H
 
 #include <device.h>
-#include <intrusive.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <util.h>
-
-#define CLOCK_OPS(dev) \
-	(&container_of((dev)->drv, struct clock_driver, drv)->ops)
 
 #define CLOCK_PARENT(d, i) \
 	& (const struct clock_handle) { \
@@ -56,16 +52,13 @@ struct clock_info {
 };
 
 struct clock_driver_ops {
-	struct clock_info         *(*get_info)(const struct device *dev,
-	                                       uint8_t id);
-	const struct clock_handle *(*get_parent)(const struct device *dev,
-	                                         uint8_t id);
-	int                        (*get_rate)(const struct device *dev,
-	                                       uint8_t id, uint32_t *rate);
-	int                        (*get_state)(const struct device *dev,
-	                                        uint8_t id);
-	int                        (*set_state)(const struct device *dev,
-	                                        uint8_t id, bool enable);
+	struct clock_info *
+	    (*get_info)(const struct clock_handle *clock);
+	const struct clock_handle *
+	    (*get_parent)(const struct clock_handle *clock);
+	int (*get_rate)(const struct clock_handle *clock, uint32_t *rate);
+	int (*get_state)(const struct clock_handle *clock, bool *state);
+	int (*set_state)(const struct clock_handle *clock, bool enable);
 };
 
 struct clock_driver {
@@ -74,56 +67,63 @@ struct clock_driver {
 };
 
 /**
- * Disable a clock. If the clock does not have a gate, this may have no effect
- * on the hardware. If this clock is the last active user of its parent clock,
- * that parent clock will also be disabled.
+ * Disable a clock.
+ *
+ * If the clock does not have a gate, this may have no effect on the hardware.
+ * If this clock is the last active user of its parent clock, that parent clock
+ * will also be disabled.
  *
  * This function may fail with:
  *   EIO    There was a problem communicating with the hardware.
  *   EPERM  The clock is in use or is critical and cannot be disabled.
  *
- * @param dev The clock controller containing this clock.
- * @param id  The device-specific identifier for this clock.
- * @return    Zero on success; a defined error code on failure.
+ * @param clock A reference to a clock.
+ * @return      Zero on success; an error code on failure.
  */
-int clock_disable(const struct device *dev, uint8_t id);
+int clock_disable(const struct clock_handle *clock);
 
 /**
- * Enable a clock. If the clock does not have a gate, this may have no effect
- * on the hardware. The clock's parent, if any, will also be enabled.
+ * Enable a clock.
+ *
+ * If the clock does not have a gate, this may have no effect on the hardware.
+ * The clock's parent, if any, will also be enabled.
  *
  * This function may fail with:
  *   EIO    There was a problem communicating with the hardware.
  *
- * @param dev The clock controller containing this clock.
- * @param id  The device-specific identifier for this clock.
- * @return    Zero on success; a defined error code on failure.
+ * @param clock A reference to a clock.
+ * @return      Zero on success; an error code on failure.
  */
-int clock_enable(const struct device *dev, uint8_t id);
+int clock_enable(const struct clock_handle *clock);
 
 /**
  * Get a reference to a clock and its controller device, and enable the clock.
  *
- * @param clock A handle for the clock.
+ * If the clock does not have a gate, this may have no effect on the hardware.
+ * The clock's parent, if any, will also be enabled.
+ *
+ * This function may fail with:
+ *   EIO    There was a problem communicating with the hardware.
+ *
+ * @param clock A handle specifying the clock.
+ * @return      A reference to the clock that was acquired.
  */
 int clock_get(const struct clock_handle *clock);
 
 /**
  * Get the current rate of a clock, as calculated from the hardware.
  *
+ * This function returns the frequency the clock runs at when ungated,
+ * regardless of if the clock is currently gated.
+ *
  * This function may fail with:
  *   EIO    There was a problem communicating with the hardware.
  *
- * @param dev  The clock controller containing this clock.
- * @param id   The device-specific identifier for this clock.
- * @param rate The location to store the calculated clock rate.
- * @return     Zero on success; a defined error code on failure.
+ * @param clock A reference to a clock.
+ * @param rate  The location to store the calculated clock rate.
+ * @return      Zero on success; an error code on failure.
  */
-static inline int
-clock_get_rate(const struct device *dev, uint8_t id, uint32_t *rate)
-{
-	return CLOCK_OPS(dev)->get_rate(dev, id, rate);
-}
+int clock_get_rate(const struct clock_handle *clock, uint32_t *rate);
 
 /**
  * Get the current state of a clock, as determined from the hardware.
@@ -131,11 +131,10 @@ clock_get_rate(const struct device *dev, uint8_t id, uint32_t *rate)
  * This function may fail with:
  *   EIO    There was a problem communicating with the hardware.
  *
- * @param dev  The clock controller containing this clock.
- * @param id   The device-specific identifier for this clock.
- * @return     On success, boolean true or false for if the clock is enabled; a
- *             defined error code on failure.
+ * @param clock A reference to a clock.
+ * @param state The location to store the calculated clock state.
+ * @return      Zero on success; an error code on failure.
  */
-int clock_get_state(const struct device *dev, uint8_t id);
+int clock_get_state(const struct clock_handle *clock, bool *state);
 
 #endif /* DRIVERS_CLOCK_H */

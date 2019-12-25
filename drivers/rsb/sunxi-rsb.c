@@ -88,13 +88,12 @@ sunxi_rsb_read(const struct rsb_handle *bus, uint8_t addr, uint8_t *data)
 static int
 sunxi_rsb_set_rate(const struct device *dev, uint32_t rate)
 {
-	const struct sunxi_rsb *self     = to_sunxi_rsb(dev);
-	const struct clock_handle *clock = &self->clock;
+	const struct sunxi_rsb *self = to_sunxi_rsb(dev);
 	uint32_t dev_rate;
 	uint8_t  divider;
 	int err;
 
-	if ((err = clock_get_rate(clock->dev, clock->id, &dev_rate)))
+	if ((err = clock_get_rate(&self->clock, &dev_rate)))
 		return err;
 
 	dev_rate /= 2;

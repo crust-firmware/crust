@@ -21,87 +21,83 @@ to_sunxi_ccu(const struct device *dev)
 	return container_of(dev, struct sunxi_ccu, dev);
 }
 
-static struct sunxi_ccu_clock *
-get_clock(const struct sunxi_ccu *self, uint8_t id)
-{
-	return &self->clocks[id];
-}
-
 static struct clock_info *
-sunxi_ccu_get_info(const struct device *dev, uint8_t id)
+sunxi_ccu_get_info(const struct clock_handle *clock)
 {
-	const struct sunxi_ccu *self = to_sunxi_ccu(dev);
+	const struct sunxi_ccu *self = to_sunxi_ccu(clock->dev);
 
-	return &get_clock(self, id)->info;
+	return &self->clocks[clock->id].info;
 }
 
 static const struct clock_handle *
-sunxi_ccu_get_parent(const struct device *dev, uint8_t id)
+sunxi_ccu_get_parent(const struct clock_handle *clock)
 {
-	const struct sunxi_ccu *self  = to_sunxi_ccu(dev);
-	struct sunxi_ccu_clock *clock = get_clock(self, id);
+	const struct sunxi_ccu *self = to_sunxi_ccu(clock->dev);
+	struct sunxi_ccu_clock *clk  = &self->clocks[clock->id];
 	size_t index = 0;
 
-	if (BF_PRESENT(clock->mux)) {
-		uint32_t reg = mmio_read_32(self->regs + clock->reg);
-		index = bitfield_get(reg, clock->mux);
+	if (BF_PRESENT(clk->mux)) {
+		uint32_t reg = mmio_read_32(self->regs + clk->reg);
+		index = bitfield_get(reg, clk->mux);
 	}
 
-	return &clock->parents[index];
+	return &clk->parents[index];
 }
 
 static int
-sunxi_ccu_get_rate(const struct device *dev, uint8_t id, uint32_t *rate)
+sunxi_ccu_get_rate(const struct clock_handle *clock, uint32_t *rate)
 {
-	const struct clock_handle *parent = sunxi_ccu_get_parent(dev, id);
-	const struct sunxi_ccu *self = to_sunxi_ccu(dev);
-	struct sunxi_ccu_clock *clock = get_clock(self, id);
+	const struct clock_handle *parent = sunxi_ccu_get_parent(clock);
+	const struct sunxi_ccu *self = to_sunxi_ccu(clock->dev);
+	struct sunxi_ccu_clock *clk = &self->clocks[clock->id];
 	uint32_t reg, tmp;
 	int err;
 
 	/* If a clock has no parent, it runs at a fixed rate. Return that. */
 	if (parent == NULL) {
-		*rate = clock->info.max_rate;
+		*rate = clk->info.max_rate;
 		return SUCCESS;
 	}
 
 	/* Otherwise, the rate is the parent's rate divided by some factors. */
-	if ((err = clock_get_rate(parent->dev, parent->id, &tmp)))
+	if ((err = clock_get_rate(parent, &tmp)))
 		return err;
-	reg   = mmio_read_32(self->regs + clock->reg);
+	reg   = mmio_read_32(self->regs + clk->reg);
 	tmp  /= bitfield_get(reg, parent->vdiv) + 1;
-	tmp  /= bitfield_get(reg, clock->m) + 1;
-	tmp >>= bitfield_get(reg, clock->p);
+	tmp  /= bitfield_get(reg, clk->m) + 1;
+	tmp >>= bitfield_get(reg, clk->p);
 	*rate = tmp;
 
 	return SUCCESS;
 }
 
 static int
-sunxi_ccu_get_state(const struct device *dev, uint8_t id)
+sunxi_ccu_get_state(const struct clock_handle *clock, bool *state)
 {
-	const struct sunxi_ccu *self  = to_sunxi_ccu(dev);
-	struct sunxi_ccu_clock *clock = get_clock(self, id);
-	uint16_t gate  = clock->gate;
-	uint16_t reset = clock->reset;
+	const struct sunxi_ccu *self = to_sunxi_ccu(clock->dev);
+	struct sunxi_ccu_clock *clk  = &self->clocks[clock->id];
+	uint16_t gate  = clk->gate;
+	uint16_t reset = clk->reset;
 
 	/* Check the bus clock gate. */
 	if (gate != 0 && !bitmap_get(self->regs, gate))
-		return false;
+		*state = false;
 	/* Check the reset line. */
-	if (reset != 0 && !bitmap_get(self->regs, reset))
-		return false;
+	else if (reset != 0 && !bitmap_get(self->regs, reset))
+		*state = false;
+	else
+		*state = true;
 
-	return true;
+	return SUCCESS;
 }
 
 static int
-sunxi_ccu_set_state(const struct device *dev, uint8_t id, bool enable)
+sunxi_ccu_set_state(const struct clock_handle *clock, bool enable)
 {
-	const struct sunxi_ccu *self  = to_sunxi_ccu(dev);
-	struct sunxi_ccu_clock *clock = get_clock(self, id);
-	uint16_t gate  = clock->gate;
-	uint16_t reset = clock->reset;
+	const struct sunxi_ccu *self = to_sunxi_ccu(clock->dev);
+	struct sunxi_ccu_clock *clk  = &self->clocks[clock->id];
+	uint16_t gate  = clk->gate;
+	uint16_t reset = clk->reset;
 
 	if (enable) {
 		/* Enable the clock before taking the device out of reset. */
