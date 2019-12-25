@@ -109,36 +109,6 @@ int clock_enable(const struct device *dev, uint8_t id);
 int clock_get(const struct clock_handle *clock);
 
 /**
- * Get generic information about a clock.
- *
- * This function has no defined errors.
- *
- * @param dev The clock controller containing this clock.
- * @param id  The device-specific identifier for this clock.
- * @return    A pointer to the information structure.
- */
-static inline struct clock_info *
-clock_get_info(const struct device *dev, uint8_t id)
-{
-	return CLOCK_OPS(dev)->get_info(dev, id);
-}
-
-/**
- * Get a handle to the parent of a clock.
- *
- * This function has no defined errors.
- *
- * @param dev The clock controller containing this clock.
- * @param id  The device-specific identifier for this clock.
- * @return    A pointer to the handle; NULL if the clock has no parent.
- */
-static inline const struct clock_handle *
-clock_get_parent(const struct device *dev, uint8_t id)
-{
-	return CLOCK_OPS(dev)->get_parent(dev, id);
-}
-
-/**
  * Get the current rate of a clock, as calculated from the hardware.
  *
  * This function may fail with:

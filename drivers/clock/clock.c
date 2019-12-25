@@ -29,8 +29,10 @@ clock_disable(const struct device *dev, uint8_t id)
 
 	/* Mark the clock and its parent as no longer being in use. */
 	info->refcount--;
-	if ((parent = ops->get_parent(dev, id)) != NULL)
-		clock_get_info(parent->dev, parent->id)->refcount--;
+	if ((parent = ops->get_parent(dev, id)) != NULL) {
+		ops = CLOCK_OPS(parent->dev);
+		ops->get_info(parent->dev, parent->id)->refcount--;
+	}
 
 	return SUCCESS;
 }
