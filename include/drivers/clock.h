@@ -15,12 +15,6 @@ struct clock_handle {
 	const uint8_t        id;  /**< The per-device clock identifier. */
 };
 
-struct clock_info {
-	const char *const name;     /**< Clock name (exported via SCPI). */
-	const uint32_t    min_rate; /**< Minimum allowed rate in Hz. */
-	const uint32_t    max_rate; /**< Maximum allowed rate in Hz. */
-};
-
 /**
  * Disable a clock.
  *

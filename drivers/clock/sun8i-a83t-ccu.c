@@ -27,13 +27,11 @@ sun8i_a83t_ccu_fixed_rate(const struct sunxi_ccu *self UNUSED,
 
 static struct sunxi_ccu_clock sun8i_a83t_ccu_clocks[SUN8I_A83T_CCU_CLOCKS] = {
 	[CLK_PLL_PERIPH0] = {
-		.info.name = "pll_periph0",
-		.get_rate  = sun8i_a83t_ccu_fixed_rate,
+		.get_rate = sun8i_a83t_ccu_fixed_rate,
 	},
 	[CLK_BUS_MSGBOX] = {
-		.info.name = "msgbox",
-		.gate      = BITMAP_INDEX(0x0064 >> 2, 21),
-		.reset     = BITMAP_INDEX(0x02c4 >> 2, 21),
+		.gate  = BITMAP_INDEX(0x0064 >> 2, 21),
+		.reset = BITMAP_INDEX(0x02c4 >> 2, 21),
 	},
 };
 

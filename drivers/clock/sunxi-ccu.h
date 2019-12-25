@@ -14,8 +14,6 @@
 #include "clock.h"
 
 struct sunxi_ccu_clock {
-	/** Generic clock information shared by all drivers. */
-	struct clock_info          info;
 	/** Handles to parent clocks (one for each possible mux value). */
 	const struct clock_handle *parents;
 	/** Hook for calculating the clock rate from the parent rate. */
