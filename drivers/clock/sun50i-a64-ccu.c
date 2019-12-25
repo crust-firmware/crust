@@ -28,7 +28,7 @@ const struct sunxi_ccu ccu = {
 	.dev = {
 		.name  = "ccu",
 		.drv   = &sunxi_ccu_driver.drv,
-		.state = DEVICE_STATE_INIT,
+		.state = CLOCK_DEVICE_STATE_INIT(SUN50I_A64_CCU_CLOCKS),
 	},
 	.clocks = sun50i_a64_ccu_clocks,
 	.regs   = DEV_CCU,

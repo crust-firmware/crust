@@ -30,7 +30,6 @@ struct clock_info {
 	const uint32_t    min_rate; /**< Minimum allowed rate in Hz. */
 	const uint32_t    max_rate; /**< Maximum allowed rate in Hz. */
 	const uint8_t     flags;    /**< Flags from the clock class. */
-	uint8_t           refcount; /**< Number of references to this clock. */
 };
 
 /**

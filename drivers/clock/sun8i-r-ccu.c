@@ -107,7 +107,7 @@ const struct sunxi_ccu r_ccu = {
 	.dev = {
 		.name  = "r_ccu",
 		.drv   = &sunxi_ccu_driver.drv,
-		.state = DEVICE_STATE_INIT,
+		.state = CLOCK_DEVICE_STATE_INIT(SUN8I_R_CCU_CLOCKS),
 	},
 	.clocks = sun8i_r_ccu_clocks,
 	.regs   = DEV_R_PRCM,

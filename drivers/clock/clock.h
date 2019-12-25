@@ -11,6 +11,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define CLOCK_DEVICE_STATE_INIT(n) \
+	(struct device_state *) \
+	&(char[sizeof_struct(struct clock_device_state, cs, n)]) { 0 }
+
 #define CLOCK_PARENT(d, i) \
 	& (const struct clock_handle) { \
 		.dev = &(d).dev, \
@@ -28,6 +32,15 @@
 			.flags    = (f) | CLK_CRITICAL | CLK_FIXED, \
 		}, \
 	}
+
+struct clock_state {
+	uint8_t refcount;
+};
+
+struct clock_device_state {
+	struct device_state ds;
+	struct clock_state  cs[];
+};
 
 struct clock_driver_ops {
 	struct clock_info *

@@ -24,17 +24,30 @@ clock_ops_for(const struct clock_handle *clock)
 	return &drv->ops;
 }
 
+/**
+ * Get the mutable state for this clock.
+ */
+static inline struct clock_state *
+clock_state_for(const struct clock_handle *clock)
+{
+	struct clock_device_state *state =
+		container_of(clock->dev->state, struct clock_device_state, ds);
+
+	return &state->cs[clock->id];
+}
+
 int
 clock_disable(const struct clock_handle *clock)
 {
 	const struct clock_driver_ops *ops = clock_ops_for(clock);
 	const struct clock_handle *parent;
-	struct clock_info *info = ops->get_info(clock);
+	struct clock_info  *info  = ops->get_info(clock);
+	struct clock_state *state = clock_state_for(clock);
 	int err;
 
 	/* Prevent disabling clocks that are critical or in use as parents. */
-	if ((info->flags & CLK_CRITICAL) || (info->refcount > 1)) {
-		info->refcount--;
+	if ((info->flags & CLK_CRITICAL) || (state->refcount > 1)) {
+		state->refcount--;
 		return EPERM;
 	}
 
@@ -43,9 +56,9 @@ clock_disable(const struct clock_handle *clock)
 		return err;
 
 	/* Mark the clock and its parent as no longer being in use. */
-	info->refcount--;
+	state->refcount--;
 	if ((parent = ops->get_parent(clock)) != NULL)
-		clock_ops_for(parent)->get_info(parent)->refcount--;
+		clock_state_for(parent)->refcount--;
 
 	return SUCCESS;
 }
@@ -55,7 +68,6 @@ clock_enable(const struct clock_handle *clock)
 {
 	const struct clock_driver_ops *ops = clock_ops_for(clock);
 	const struct clock_handle *parent;
-	struct clock_info *info = ops->get_info(clock);
 	int err;
 
 	/* Enable the parent clock, if it exists, and increase its refcount. */
@@ -69,7 +81,7 @@ clock_enable(const struct clock_handle *clock)
 		return err;
 
 	/* Mark the clock itself as being in use. */
-	info->refcount++;
+	clock_state_for(clock)->refcount++;
 
 	return SUCCESS;
 }
@@ -101,11 +113,10 @@ clock_get_state(const struct clock_handle *clock, bool *state)
 {
 	const struct clock_driver_ops *ops = clock_ops_for(clock);
 	const struct clock_handle *parent;
-	struct clock_info *info = ops->get_info(clock);
 	int err;
 
 	/* If this clock is in use, it must have been enabled. */
-	if (info->refcount > 0) {
+	if (clock_state_for(clock)->refcount > 0) {
 		*state = true;
 		return SUCCESS;
 	}
