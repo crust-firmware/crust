@@ -13,12 +13,12 @@
 #include "sunxi-ccu.h"
 
 static struct sunxi_ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
+	[CLK_OSC16M] = FIXED_CLOCK("osc16m", 16000000, 0),
 	[CLK_OSC24M] = FIXED_CLOCK("osc24m", 24000000, 0),
 	[CLK_OSC32K] = FIXED_CLOCK("osc32k", 32768, 0),
-	[CLK_OSC16M] = FIXED_CLOCK("osc16m", 16000000, 0),
-	[CLK_AHB0]   = {
+	[CLK_AR100]  = {
 		.info = {
-			.name     = "ahb0",
+			.name     = "ar100",
 			.max_rate = 300000000,
 			.flags    = CLK_CRITICAL,
 		},
@@ -35,6 +35,10 @@ static struct sunxi_ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 		.reg = 0x0000,
 		.mux = BITFIELD(16, 2),
 		.p   = BITFIELD(4, 2),
+	},
+	[CLK_AHB0] = {
+		.info.name = "ahb0",
+		.parents   = CLOCK_PARENT(r_ccu, CLK_AR100),
 	},
 	[CLK_APB0] = {
 		.info.name = "apb0",
