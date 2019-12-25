@@ -10,13 +10,22 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define CLOCK_OPS(clock) \
-	(&container_of((clock)->dev->drv, struct clock_driver, drv)->ops)
+/**
+ * Get the ops for the controller device providing this clock.
+ */
+static inline const struct clock_driver_ops *
+clock_ops_for(const struct clock_handle *clock)
+{
+	const struct clock_driver *drv =
+		container_of(clock->dev->drv, const struct clock_driver, drv);
+
+	return &drv->ops;
+}
 
 int
 clock_disable(const struct clock_handle *clock)
 {
-	const struct clock_driver_ops *ops = CLOCK_OPS(clock);
+	const struct clock_driver_ops *ops = clock_ops_for(clock);
 	const struct clock_handle *parent;
 	struct clock_info *info = ops->get_info(clock);
 	int err;
@@ -34,7 +43,7 @@ clock_disable(const struct clock_handle *clock)
 	/* Mark the clock and its parent as no longer being in use. */
 	info->refcount--;
 	if ((parent = ops->get_parent(clock)) != NULL)
-		CLOCK_OPS(parent)->get_info(parent)->refcount--;
+		clock_ops_for(parent)->get_info(parent)->refcount--;
 
 	return SUCCESS;
 }
@@ -42,7 +51,7 @@ clock_disable(const struct clock_handle *clock)
 int
 clock_enable(const struct clock_handle *clock)
 {
-	const struct clock_driver_ops *ops = CLOCK_OPS(clock);
+	const struct clock_driver_ops *ops = clock_ops_for(clock);
 	const struct clock_handle *parent;
 	struct clock_info *info = ops->get_info(clock);
 	int err;
@@ -82,13 +91,13 @@ clock_get(const struct clock_handle *clock)
 int
 clock_get_rate(const struct clock_handle *clock, uint32_t *rate)
 {
-	return CLOCK_OPS(clock)->get_rate(clock, rate);
+	return clock_ops_for(clock)->get_rate(clock, rate);
 }
 
 int
 clock_get_state(const struct clock_handle *clock, bool *state)
 {
-	const struct clock_driver_ops *ops = CLOCK_OPS(clock);
+	const struct clock_driver_ops *ops = clock_ops_for(clock);
 	const struct clock_handle *parent;
 	struct clock_info *info = ops->get_info(clock);
 	int err;
