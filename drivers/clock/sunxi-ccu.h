@@ -10,6 +10,8 @@
 #include <clock.h>
 #include <stdint.h>
 
+#include "clock.h"
+
 struct sunxi_ccu_clock {
 	/** Generic clock information shared by all drivers. */
 	struct clock_info          info;

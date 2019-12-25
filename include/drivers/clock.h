@@ -11,24 +11,6 @@
 #include <stdint.h>
 #include <util.h>
 
-#define CLOCK_PARENT(d, i) \
-	& (const struct clock_handle) { \
-		.dev = &(d).dev, \
-		.id  = (i), \
-	}
-
-#define CLOCK_PARENTS(n) (const struct clock_handle[n])
-
-#define FIXED_CLOCK(n, r, f) \
-	{ \
-		.info = { \
-			.name     = (n), \
-			.min_rate = (r), \
-			.max_rate = (r), \
-			.flags    = (f) | CLK_CRITICAL | CLK_FIXED, \
-		}, \
-	}
-
 enum {
 	CLK_READABLE  = BIT(0), /**< Clock is readable via SCPI. */
 	CLK_WRITABLE  = BIT(1), /**< Clock is writable via SCPI. */
@@ -49,21 +31,6 @@ struct clock_info {
 	const uint32_t    max_rate; /**< Maximum allowed rate in Hz. */
 	const uint8_t     flags;    /**< Flags from the clock class. */
 	uint8_t           refcount; /**< Number of references to this clock. */
-};
-
-struct clock_driver_ops {
-	struct clock_info *
-	    (*get_info)(const struct clock_handle *clock);
-	const struct clock_handle *
-	    (*get_parent)(const struct clock_handle *clock);
-	int (*get_rate)(const struct clock_handle *clock, uint32_t *rate);
-	int (*get_state)(const struct clock_handle *clock, bool *state);
-	int (*set_state)(const struct clock_handle *clock, bool enable);
-};
-
-struct clock_driver {
-	const struct driver           drv;
-	const struct clock_driver_ops ops;
 };
 
 /**

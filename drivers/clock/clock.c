@@ -10,6 +10,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "clock.h"
+
 /**
  * Get the ops for the controller device providing this clock.
  */
