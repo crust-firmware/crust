@@ -102,7 +102,20 @@ clock_get(const struct clock_handle *clock)
 int
 clock_get_rate(const struct clock_handle *clock, uint32_t *rate)
 {
-	return clock_ops_for(clock)->get_rate(clock, rate);
+	const struct clock_driver_ops *ops = clock_ops_for(clock);
+	const struct clock_handle *parent;
+	int err;
+
+	/* Initialize the rate with the parent's rate or a known safe value. */
+	if ((parent = ops->get_parent(clock))) {
+		if ((err = clock_get_rate(parent, rate)))
+			return err;
+	} else {
+		*rate = 0;
+	}
+
+	/* Call the driver function to adjust this clock's rate. */
+	return ops->get_rate(clock, rate);
 }
 
 int

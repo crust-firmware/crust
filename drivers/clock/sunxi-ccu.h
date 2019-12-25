@@ -9,6 +9,7 @@
 #include <bitfield.h>
 #include <clock.h>
 #include <stdint.h>
+#include <clock/sunxi-ccu.h>
 
 #include "clock.h"
 
@@ -17,6 +18,9 @@ struct sunxi_ccu_clock {
 	struct clock_info          info;
 	/** Handles to parent clocks (one for each possible mux value). */
 	const struct clock_handle *parents;
+	/** Hook for calculating the clock rate from the parent rate. */
+	int                        (*get_rate)(const struct sunxi_ccu *self,
+	                                       uint8_t id, uint32_t *rate);
 	/** Offset into the CCU of the clock gate bit, zero for none. */
 	const uint16_t             gate;
 	/** Offset into the CCU of the module reset bit, zero for none. */

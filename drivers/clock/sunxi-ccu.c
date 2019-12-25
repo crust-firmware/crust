@@ -39,23 +39,18 @@ sunxi_ccu_get_parent(const struct clock_handle *clock)
 static int
 sunxi_ccu_get_rate(const struct clock_handle *clock, uint32_t *rate)
 {
-	const struct clock_handle *parent = sunxi_ccu_get_parent(clock);
 	const struct sunxi_ccu *self = to_sunxi_ccu(clock->dev);
 	struct sunxi_ccu_clock *clk = &self->clocks[clock->id];
 	uint32_t reg, tmp;
 	int err;
 
-	/* If a clock has no parent, it runs at a fixed rate. Return that. */
-	if (parent == NULL) {
-		*rate = clk->info.max_rate;
-		return SUCCESS;
-	}
-
-	/* Otherwise, the rate is the parent's rate divided by some factors. */
-	if ((err = clock_get_rate(parent, &tmp)))
+	/* Perform clock-specific adjustments to the parent rate. */
+	if (clk->get_rate && (err = clk->get_rate(self, clock->id, rate)))
 		return err;
+
+	/* Apply the standard dividers to the clock rate. */
 	reg   = mmio_read_32(self->regs + clk->reg);
-	tmp  /= bitfield_get(reg, parent->vdiv) + 1;
+	tmp   = *rate;
 	tmp  /= bitfield_get(reg, clk->m) + 1;
 	tmp >>= bitfield_get(reg, clk->p);
 	*rate = tmp;

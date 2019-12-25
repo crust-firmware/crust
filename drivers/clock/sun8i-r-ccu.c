@@ -5,18 +5,60 @@
 
 #include <bitmap.h>
 #include <clock.h>
+#include <debug.h>
 #include <device.h>
+#include <error.h>
 #include <stdint.h>
 #include <clock/sunxi-ccu.h>
 #include <platform/devices.h>
 
 #include "sunxi-ccu.h"
 
+static const uint32_t sun8i_r_ccu_fixed_rates[] = {
+	[CLK_OSC16M] = 16000000U,
+	[CLK_OSC24M] = 24000000U,
+	[CLK_OSC32K] = 32768U,
+};
+
+static int
+sun8i_r_ccu_fixed_rate(const struct sunxi_ccu *self UNUSED,
+                       uint8_t id, uint32_t *rate)
+{
+	assert(id < ARRAY_SIZE(sun8i_r_ccu_fixed_rates));
+
+	*rate = sun8i_r_ccu_fixed_rates[id];
+
+	return SUCCESS;
+}
+
+static int
+sun8i_r_ccu_ar100_rate(const struct sunxi_ccu *self,
+                       uint8_t id, uint32_t *rate)
+{
+	const struct sunxi_ccu_clock *clk = &self->clocks[id];
+	uint32_t val = mmio_read_32(self->regs + clk->reg);
+
+	/* Parent 2 (CLK_PLL_PERIPH0) has an additional divider. */
+	if (bitfield_get(val, clk->mux) == 2)
+		*rate /= bitfield_get(val, BITFIELD(8, 5)) + 1;
+
+	return SUCCESS;
+}
+
 static struct sunxi_ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
-	[CLK_OSC16M] = FIXED_CLOCK("osc16m", 16000000),
-	[CLK_OSC24M] = FIXED_CLOCK("osc24m", 24000000),
-	[CLK_OSC32K] = FIXED_CLOCK("osc32k", 32768),
-	[CLK_AR100]  = {
+	[CLK_OSC16M] = {
+		.info.name = "osc16m",
+		.get_rate  = sun8i_r_ccu_fixed_rate,
+	},
+	[CLK_OSC24M] = {
+		.info.name = "osc24m",
+		.get_rate  = sun8i_r_ccu_fixed_rate,
+	},
+	[CLK_OSC32K] = {
+		.info.name = "osc32k",
+		.get_rate  = sun8i_r_ccu_fixed_rate,
+	},
+	[CLK_AR100] = {
 		.info = {
 			.name     = "ar100",
 			.max_rate = 300000000,
@@ -24,16 +66,13 @@ static struct sunxi_ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 		.parents = CLOCK_PARENTS(4) {
 			{ .dev = &r_ccu.dev, .id = CLK_OSC32K },
 			{ .dev = &r_ccu.dev, .id = CLK_OSC24M },
-			{
-				.dev  = &ccu.dev,
-				.id   = CLK_PLL_PERIPH0,
-				.vdiv = BITFIELD(8, 5),
-			},
+			{ .dev = &ccu.dev, .id = CLK_PLL_PERIPH0 },
 			{ .dev = &r_ccu.dev, .id = CLK_OSC16M },
 		},
-		.reg = 0x0000,
-		.mux = BITFIELD(16, 2),
-		.p   = BITFIELD(4, 2),
+		.get_rate = sun8i_r_ccu_ar100_rate,
+		.reg      = 0x0000,
+		.mux      = BITFIELD(16, 2),
+		.p        = BITFIELD(4, 2),
 	},
 	[CLK_AHB0] = {
 		.info.name = "ahb0",

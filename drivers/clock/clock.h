@@ -23,15 +23,6 @@
 
 #define CLOCK_PARENTS(n) (const struct clock_handle[n])
 
-#define FIXED_CLOCK(n, r) \
-	{ \
-		.info = { \
-			.name     = (n), \
-			.min_rate = (r), \
-			.max_rate = (r), \
-		}, \
-	}
-
 struct clock_state {
 	uint8_t refcount;
 };
