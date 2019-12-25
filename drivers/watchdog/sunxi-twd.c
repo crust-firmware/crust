@@ -78,9 +78,16 @@ sunxi_twd_probe(const struct device *dev)
 	return SUCCESS;
 }
 
+static void
+sunxi_twd_release(const struct device *dev)
+{
+	sunxi_twd_disable(dev);
+}
+
 static const struct watchdog_driver sunxi_twd_driver = {
 	.drv = {
-		.probe = sunxi_twd_probe,
+		.probe   = sunxi_twd_probe,
+		.release = sunxi_twd_release,
 	},
 	.ops = {
 		.disable = sunxi_twd_disable,

@@ -81,7 +81,8 @@ axp803_pmic_probe(const struct device *dev)
 
 static const struct pmic_driver axp803_pmic_driver = {
 	.drv = {
-		.probe = axp803_pmic_probe,
+		.probe   = axp803_pmic_probe,
+		.release = dummy_release,
 	},
 	.ops = {
 		.reset    = axp803_pmic_reset,

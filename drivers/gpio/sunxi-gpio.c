@@ -92,7 +92,8 @@ sunxi_gpio_probe(const struct device *dev)
 
 static const struct gpio_driver sunxi_gpio_driver = {
 	.drv = {
-		.probe = sunxi_gpio_probe,
+		.probe   = sunxi_gpio_probe,
+		.release = dummy_release,
 	},
 	.ops = {
 		.get_value = sunxi_gpio_get_value,

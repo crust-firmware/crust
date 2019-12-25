@@ -127,7 +127,8 @@ sunxi_msgbox_probe(const struct device *dev)
 
 static const struct msgbox_driver sunxi_msgbox_driver = {
 	.drv = {
-		.probe = sunxi_msgbox_probe,
+		.probe   = sunxi_msgbox_probe,
+		.release = dummy_release,
 	},
 	.ops = {
 		.ack_rx       = sunxi_msgbox_ack_rx,

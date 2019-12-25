@@ -210,7 +210,8 @@ sun6i_i2c_probe(const struct device *dev)
 
 static const struct i2c_driver sun6i_i2c_driver = {
 	.drv = {
-		.probe = sun6i_i2c_probe,
+		.probe   = sun6i_i2c_probe,
+		.release = dummy_release,
 	},
 	.ops = {
 		.read  = sun6i_i2c_read,

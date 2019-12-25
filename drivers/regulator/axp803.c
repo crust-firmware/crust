@@ -515,7 +515,8 @@ axp_regulator_probe(const struct device *dev)
 
 static const struct regulator_driver axp803_regulator_driver = {
 	.drv = {
-		.probe = axp_regulator_probe,
+		.probe   = axp_regulator_probe,
+		.release = dummy_release,
 	},
 	.ops = {
 		.get_info  = axp803_regulator_get_info,

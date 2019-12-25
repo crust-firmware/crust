@@ -37,7 +37,9 @@ struct device_state {
 
 struct driver {
 	/** A function called to detect and initialize new devices. */
-	int (*probe)(const struct device *dev);
+	int  (*probe)(const struct device *dev);
+	/** A function called to uninitialize devices and free resources. */
+	void (*release)(const struct device *dev);
 };
 
 /**
@@ -76,5 +78,15 @@ bool device_is_running(const struct device *dev);
  * @param dev A reference to a device.
  */
 void device_put(const struct device *dev);
+
+/**
+ * Implementation of the device probe function that does nothing.
+ */
+int dummy_probe(const struct device *dev);
+
+/**
+ * Implementation of the device release function that does nothing.
+ */
+void dummy_release(const struct device *dev);
 
 #endif /* COMMON_DEVICE_H */

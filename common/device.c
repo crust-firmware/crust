@@ -5,6 +5,7 @@
 
 #include <debug.h>
 #include <device.h>
+#include <error.h>
 #include <stddef.h>
 
 const struct device *
@@ -37,5 +38,19 @@ device_is_running(const struct device *dev)
 void
 device_put(const struct device *dev)
 {
-	--dev->state->refcount;
+	if (--dev->state->refcount == 0) {
+		debug("%s: Releasing", dev->name);
+		dev->drv->release(dev);
+	}
+}
+
+int
+dummy_probe(const struct device *dev UNUSED)
+{
+	return SUCCESS;
+}
+
+void
+dummy_release(const struct device *dev UNUSED)
+{
 }

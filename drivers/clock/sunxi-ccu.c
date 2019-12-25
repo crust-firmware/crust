@@ -291,15 +291,10 @@ sunxi_ccu_set_state(const struct device *dev, uint8_t id, bool enable)
 	return SUCCESS;
 }
 
-static int
-sunxi_ccu_probe(const struct device *dev UNUSED)
-{
-	return SUCCESS;
-}
-
 static const struct clock_driver sunxi_ccu_driver = {
 	.drv = {
-		.probe = sunxi_ccu_probe,
+		.probe   = dummy_probe,
+		.release = dummy_release,
 	},
 	.ops = {
 		.get_info   = sunxi_ccu_get_info,
