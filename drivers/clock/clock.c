@@ -41,15 +41,12 @@ clock_disable(const struct clock_handle *clock)
 {
 	const struct clock_driver_ops *ops = clock_ops_for(clock);
 	const struct clock_handle *parent;
-	struct clock_info  *info  = ops->get_info(clock);
 	struct clock_state *state = clock_state_for(clock);
 	int err;
 
-	/* Prevent disabling clocks that are critical or in use as parents. */
-	if ((info->flags & CLK_CRITICAL) || (state->refcount > 1)) {
-		state->refcount--;
+	/* Prevent disabling clocks that have other consumers. */
+	if (--state->refcount)
 		return EPERM;
-	}
 
 	/* Call the driver function to change the clock's state. */
 	if ((err = ops->set_state(clock, false)))

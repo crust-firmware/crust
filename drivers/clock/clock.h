@@ -23,13 +23,12 @@
 
 #define CLOCK_PARENTS(n) (const struct clock_handle[n])
 
-#define FIXED_CLOCK(n, r, f) \
+#define FIXED_CLOCK(n, r) \
 	{ \
 		.info = { \
 			.name     = (n), \
 			.min_rate = (r), \
 			.max_rate = (r), \
-			.flags    = (f) | CLK_CRITICAL | CLK_FIXED, \
 		}, \
 	}
 

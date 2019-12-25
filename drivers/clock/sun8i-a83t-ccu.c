@@ -13,14 +13,11 @@
 #include "sunxi-ccu.h"
 
 static struct sunxi_ccu_clock sun8i_a83t_ccu_clocks[SUN8I_A83T_CCU_CLOCKS] = {
-	[CLK_PLL_PERIPH0] = FIXED_CLOCK("pll_periph0", 600000000, 0),
+	[CLK_PLL_PERIPH0] = FIXED_CLOCK("pll_periph0", 600000000),
 	[CLK_BUS_MSGBOX]  = {
-		.info = {
-			.name  = "msgbox",
-			.flags = CLK_FIXED,
-		},
-		.gate  = BITMAP_INDEX(0x0064 >> 2, 21),
-		.reset = BITMAP_INDEX(0x02c4 >> 2, 21),
+		.info.name = "msgbox",
+		.gate      = BITMAP_INDEX(0x0064 >> 2, 21),
+		.reset     = BITMAP_INDEX(0x02c4 >> 2, 21),
 	},
 };
 

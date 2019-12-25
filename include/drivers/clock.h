@@ -9,15 +9,6 @@
 #include <device.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <util.h>
-
-enum {
-	CLK_READABLE  = BIT(0), /**< Clock is readable via SCPI. */
-	CLK_WRITABLE  = BIT(1), /**< Clock is writable via SCPI. */
-	CLK_CRITICAL  = BIT(4), /**< Clock cannot be disabled. */
-	CLK_FIXED     = BIT(5), /**< Clock rate cannot be changed. */
-	CLK_SCPI_MASK = CLK_READABLE | CLK_WRITABLE,
-};
 
 struct clock_handle {
 	const struct device *dev;  /**< The device containing this clock. */
@@ -29,7 +20,6 @@ struct clock_info {
 	const char *const name;     /**< Clock name (exported via SCPI). */
 	const uint32_t    min_rate; /**< Minimum allowed rate in Hz. */
 	const uint32_t    max_rate; /**< Maximum allowed rate in Hz. */
-	const uint8_t     flags;    /**< Flags from the clock class. */
 };
 
 /**
