@@ -26,4 +26,15 @@
 #define noreturn       _Noreturn
 #define static_assert  _Static_assert
 
+/**
+ * Calculate the size of a struct containing a flexible array member.
+ *
+ * @param type     The name of the structure type.
+ * @param member   The name of the flexible array member.
+ * @param elements The number of elements in the flexible array member.
+ * @return         The total size of the type.
+ */
+#define sizeof_struct(type, member, elements) \
+	(sizeof(type) + sizeof(*((type *)0)->member) * elements)
+
 #endif /* LIB_COMPILER_H */
