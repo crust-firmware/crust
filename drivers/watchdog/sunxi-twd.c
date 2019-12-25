@@ -103,6 +103,6 @@ const struct sunxi_twd r_twd = {
 		.drv   = &sunxi_twd_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
-	.clock = { .dev = &r_ccu.dev, .id = R_CCU_CLOCK_R_TWD },
+	.clock = { .dev = &r_ccu.dev, .id = CLK_BUS_R_TWD },
 	.regs  = DEV_R_TWD,
 };

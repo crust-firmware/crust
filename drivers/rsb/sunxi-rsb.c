@@ -161,7 +161,7 @@ const struct sunxi_rsb r_rsb = {
 		.drv   = &sunxi_rsb_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
-	.clock = { .dev = &r_ccu.dev, .id = R_CCU_CLOCK_R_RSB },
+	.clock = { .dev = &r_ccu.dev, .id = CLK_BUS_R_RSB },
 	.pins  = {
 		{
 			.dev  = &r_pio.dev,

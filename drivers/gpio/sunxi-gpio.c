@@ -108,6 +108,6 @@ const struct sunxi_gpio r_pio = {
 		.drv   = &sunxi_gpio_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
-	.clock = { .dev = &r_ccu.dev, .id = R_CCU_CLOCK_R_PIO },
+	.clock = { .dev = &r_ccu.dev, .id = CLK_BUS_R_PIO },
 	.regs  = DEV_R_PIO,
 };

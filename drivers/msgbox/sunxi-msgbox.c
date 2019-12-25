@@ -144,6 +144,6 @@ const struct sunxi_msgbox msgbox = {
 		.drv   = &sunxi_msgbox_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
-	.clock = { .dev = &ccu.dev, .id = CCU_CLOCK_MSGBOX },
+	.clock = { .dev = &ccu.dev, .id = CLK_BUS_MSGBOX },
 	.regs  = DEV_MSGBOX,
 };

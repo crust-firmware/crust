@@ -8,8 +8,13 @@
 
 #include <clock.h>
 #include <device.h>
-#include <platform/ccu.h>
-#include <platform/r_ccu.h>
+#if CONFIG_PLATFORM_A64
+#include <clock/sun50i-a64-ccu.h>
+#include <clock/sun8i-r-ccu.h>
+#elif CONFIG_PLATFORM_A83T
+#include <clock/sun8i-a83t-ccu.h>
+#include <clock/sun8i-r-ccu.h>
+#endif
 
 struct sunxi_ccu {
 	struct device           dev;

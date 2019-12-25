@@ -227,7 +227,7 @@ const struct sun6i_i2c r_i2c = {
 		.drv   = &sun6i_i2c_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
-	.clock = { .dev = &r_ccu.dev, .id = R_CCU_CLOCK_R_I2C },
+	.clock = { .dev = &r_ccu.dev, .id = CLK_BUS_R_I2C },
 	.pins  = {
 		{
 			.dev  = &r_pio.dev,

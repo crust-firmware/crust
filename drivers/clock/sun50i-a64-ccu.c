@@ -12,9 +12,9 @@
 
 #include "sunxi-ccu.h"
 
-static struct sunxi_ccu_clock ccu_clocks[CCU_CLOCK_COUNT] = {
-	[CCU_CLOCK_PLL_PERIPH0] = FIXED_CLOCK("pll_periph0", 600000000, 0),
-	[CCU_CLOCK_MSGBOX]      = {
+static struct sunxi_ccu_clock sun50i_a64_ccu_clocks[SUN50I_A64_CCU_CLOCKS] = {
+	[CLK_PLL_PERIPH0] = FIXED_CLOCK("pll_periph0", 600000000, 0),
+	[CLK_BUS_MSGBOX]  = {
 		.info = {
 			.name  = "msgbox",
 			.flags = CLK_FIXED,
@@ -30,6 +30,6 @@ const struct sunxi_ccu ccu = {
 		.drv   = &sunxi_ccu_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
-	.clocks = ccu_clocks,
+	.clocks = sun50i_a64_ccu_clocks,
 	.regs   = DEV_CCU,
 };
