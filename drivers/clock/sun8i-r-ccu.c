@@ -45,7 +45,7 @@ sun8i_r_ccu_ar100_rate(const struct sunxi_ccu *self,
 	return SUCCESS;
 }
 
-static struct sunxi_ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
+static const struct sunxi_ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 	[CLK_OSC16M] = {
 		.get_rate = sun8i_r_ccu_fixed_rate,
 	},

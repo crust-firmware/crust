@@ -18,14 +18,14 @@
 static inline const struct sunxi_ccu *
 to_sunxi_ccu(const struct device *dev)
 {
-	return container_of(dev, struct sunxi_ccu, dev);
+	return container_of(dev, const struct sunxi_ccu, dev);
 }
 
 static const struct clock_handle *
 sunxi_ccu_get_parent(const struct clock_handle *clock)
 {
-	const struct sunxi_ccu *self = to_sunxi_ccu(clock->dev);
-	struct sunxi_ccu_clock *clk  = &self->clocks[clock->id];
+	const struct sunxi_ccu *self      = to_sunxi_ccu(clock->dev);
+	const struct sunxi_ccu_clock *clk = &self->clocks[clock->id];
 	size_t index = 0;
 
 	if (BF_PRESENT(clk->mux)) {
@@ -40,7 +40,7 @@ static int
 sunxi_ccu_get_rate(const struct clock_handle *clock, uint32_t *rate)
 {
 	const struct sunxi_ccu *self = to_sunxi_ccu(clock->dev);
-	struct sunxi_ccu_clock *clk = &self->clocks[clock->id];
+	const struct sunxi_ccu_clock *clk = &self->clocks[clock->id];
 	uint32_t reg, tmp;
 	int err;
 
@@ -61,8 +61,8 @@ sunxi_ccu_get_rate(const struct clock_handle *clock, uint32_t *rate)
 static int
 sunxi_ccu_get_state(const struct clock_handle *clock, bool *state)
 {
-	const struct sunxi_ccu *self = to_sunxi_ccu(clock->dev);
-	struct sunxi_ccu_clock *clk  = &self->clocks[clock->id];
+	const struct sunxi_ccu *self      = to_sunxi_ccu(clock->dev);
+	const struct sunxi_ccu_clock *clk = &self->clocks[clock->id];
 	uint16_t gate  = clk->gate;
 	uint16_t reset = clk->reset;
 
@@ -81,8 +81,8 @@ sunxi_ccu_get_state(const struct clock_handle *clock, bool *state)
 static int
 sunxi_ccu_set_state(const struct clock_handle *clock, bool enable)
 {
-	const struct sunxi_ccu *self = to_sunxi_ccu(clock->dev);
-	struct sunxi_ccu_clock *clk  = &self->clocks[clock->id];
+	const struct sunxi_ccu *self      = to_sunxi_ccu(clock->dev);
+	const struct sunxi_ccu_clock *clk = &self->clocks[clock->id];
 	uint16_t gate  = clk->gate;
 	uint16_t reset = clk->reset;
 

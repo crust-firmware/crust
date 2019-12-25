@@ -11,8 +11,8 @@
 #include <stdint.h>
 
 struct clock_handle {
-	const struct device *dev; /**< The device containing this clock. */
-	const uint8_t        id;  /**< The per-device clock identifier. */
+	const struct device *dev; /**< The clock controller device. */
+	uint8_t              id;  /**< The device-specific clock identifier. */
 };
 
 /**

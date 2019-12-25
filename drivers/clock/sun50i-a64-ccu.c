@@ -25,7 +25,8 @@ sun50i_a64_ccu_fixed_rate(const struct sunxi_ccu *self UNUSED,
 	return SUCCESS;
 }
 
-static struct sunxi_ccu_clock sun50i_a64_ccu_clocks[SUN50I_A64_CCU_CLOCKS] = {
+static const
+struct sunxi_ccu_clock sun50i_a64_ccu_clocks[SUN50I_A64_CCU_CLOCKS] = {
 	[CLK_PLL_PERIPH0] = {
 		.get_rate = sun50i_a64_ccu_fixed_rate,
 	},

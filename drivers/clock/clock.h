@@ -41,8 +41,8 @@ struct clock_driver_ops {
 };
 
 struct clock_driver {
-	const struct driver           drv;
-	const struct clock_driver_ops ops;
+	struct driver           drv;
+	struct clock_driver_ops ops;
 };
 
 #endif /* CLOCK_PRIVATE_H */

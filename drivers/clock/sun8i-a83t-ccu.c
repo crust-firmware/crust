@@ -25,7 +25,8 @@ sun8i_a83t_ccu_fixed_rate(const struct sunxi_ccu *self UNUSED,
 	return SUCCESS;
 }
 
-static struct sunxi_ccu_clock sun8i_a83t_ccu_clocks[SUN8I_A83T_CCU_CLOCKS] = {
+static const
+struct sunxi_ccu_clock sun8i_a83t_ccu_clocks[SUN8I_A83T_CCU_CLOCKS] = {
 	[CLK_PLL_PERIPH0] = {
 		.get_rate = sun8i_a83t_ccu_fixed_rate,
 	},

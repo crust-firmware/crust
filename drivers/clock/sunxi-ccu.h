@@ -20,17 +20,17 @@ struct sunxi_ccu_clock {
 	int                        (*get_rate)(const struct sunxi_ccu *self,
 	                                       uint8_t id, uint32_t *rate);
 	/** Offset into the CCU of the clock gate bit, zero for none. */
-	const uint16_t             gate;
+	uint16_t                   gate;
 	/** Offset into the CCU of the module reset bit, zero for none. */
-	const uint16_t             reset;
+	uint16_t                   reset;
 	/** Offset into the CCU of the mux/factor register. */
-	const uint16_t             reg;
+	uint16_t                   reg;
 	/** Offset and width of the parent mux control in the register. */
-	const bitfield_t           mux;
+	bitfield_t                 mux;
 	/** Offset and width of the linear divider in the register. */
-	const bitfield_t           m;
+	bitfield_t                 m;
 	/** Offset and width of the exponential divider in the register. */
-	const bitfield_t           p;
+	bitfield_t                 p;
 };
 
 extern const struct clock_driver sunxi_ccu_driver;
