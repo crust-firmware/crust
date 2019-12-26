@@ -7,6 +7,7 @@
 #include <error.h>
 #include <mmio.h>
 #include <rsb.h>
+#include <util.h>
 #include <clock/sunxi-ccu.h>
 #include <gpio/sunxi-gpio.h>
 #include <rsb/sunxi-rsb.h>
