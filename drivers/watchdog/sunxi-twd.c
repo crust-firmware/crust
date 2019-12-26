@@ -21,7 +21,7 @@
 static inline const struct sunxi_twd *
 to_sunxi_twd(const struct device *dev)
 {
-	return container_of(dev, struct sunxi_twd, dev);
+	return container_of(dev, const struct sunxi_twd, dev);
 }
 
 static void

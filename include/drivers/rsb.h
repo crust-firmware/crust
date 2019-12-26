@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 #define RSB_OPS(dev) \
-	(&container_of((dev)->drv, struct rsb_driver, drv)->ops)
+	(&container_of((dev)->drv, const struct rsb_driver, drv)->ops)
 
 #define RSB_NUM_PINS     2
 
@@ -41,8 +41,8 @@ struct rsb_driver_ops {
 };
 
 struct rsb_driver {
-	const struct driver         drv;
-	const struct rsb_driver_ops ops;
+	struct driver         drv;
+	struct rsb_driver_ops ops;
 };
 
 /**

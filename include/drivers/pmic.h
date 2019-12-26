@@ -10,7 +10,7 @@
 #include <intrusive.h>
 
 #define PMIC_OPS(dev) \
-	(&container_of((dev)->drv, struct pmic_driver, drv)->ops)
+	(&container_of((dev)->drv, const struct pmic_driver, drv)->ops)
 
 struct pmic_driver_ops {
 	int (*reset)(const struct device *dev);
@@ -20,8 +20,8 @@ struct pmic_driver_ops {
 };
 
 struct pmic_driver {
-	const struct driver          drv;
-	const struct pmic_driver_ops ops;
+	struct driver          drv;
+	struct pmic_driver_ops ops;
 };
 
 /**

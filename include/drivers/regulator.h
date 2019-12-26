@@ -13,7 +13,7 @@
 #include <util.h>
 
 #define REGULATOR_OPS(dev) \
-	(&container_of((dev)->drv, struct regulator_driver, drv)->ops)
+	(&container_of((dev)->drv, const struct regulator_driver, drv)->ops)
 
 enum {
 	REGL_READABLE  = BIT(0), /**< Regulator is readable via SCPI. */
@@ -28,17 +28,17 @@ struct regulator_handle {
 };
 
 struct regulator_range {
-	const uint16_t start_raw;   /**< Smallest raw value in the range. */
-	const int16_t  start_value; /**< Cooked value at smallest raw value. */
-	const uint16_t step;        /**< Distance between adjacent values. */
+	uint16_t start_raw;   /**< Smallest raw value in the range. */
+	int16_t  start_value; /**< Cooked value at smallest raw value. */
+	uint16_t step;        /**< Distance between adjacent values. */
 };
 
 struct regulator_info {
-	const char *const            name;      /**< Name exported to SCPI. */
-	const uint16_t               min_value; /**< Minimum allowed value. */
-	const uint16_t               max_value; /**< Maximum allowed value. */
-	const struct regulator_range ranges[2]; /**< Range descriptions. */
-	const uint8_t                flags;     /**< Generic class flags. */
+	const char            *name;      /**< Name exported to SCPI. */
+	uint16_t               min_value; /**< Minimum allowed value. */
+	uint16_t               max_value; /**< Maximum allowed value. */
+	struct regulator_range ranges[2]; /**< Range descriptions. */
+	uint8_t                flags;     /**< Generic class flags. */
 };
 
 struct regulator_driver_ops {
@@ -55,8 +55,8 @@ struct regulator_driver_ops {
 };
 
 struct regulator_driver {
-	const struct driver               drv;
-	const struct regulator_driver_ops ops;
+	struct driver               drv;
+	struct regulator_driver_ops ops;
 };
 
 /**

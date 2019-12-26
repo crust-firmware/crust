@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 #define WATCHDOG_OPS(dev) \
-	(&container_of((dev)->drv, struct watchdog_driver, drv)->ops)
+	(&container_of((dev)->drv, const struct watchdog_driver, drv)->ops)
 
 struct watchdog_driver_ops {
 	int  (*disable)(const struct device *dev);
@@ -20,8 +20,8 @@ struct watchdog_driver_ops {
 };
 
 struct watchdog_driver {
-	const struct driver              drv;
-	const struct watchdog_driver_ops ops;
+	struct driver              drv;
+	struct watchdog_driver_ops ops;
 };
 
 /**

@@ -12,12 +12,12 @@
 #include <stdint.h>
 
 #define GPIO_OPS(dev) \
-	(&container_of((dev)->drv, struct gpio_driver, drv)->ops)
+	(&container_of((dev)->drv, const struct gpio_driver, drv)->ops)
 
 struct gpio_handle {
 	const struct device *dev;
-	const uint8_t        pin;
-	const uint8_t        mode;
+	uint8_t              pin;
+	uint8_t              mode;
 };
 
 struct gpio_driver_ops {
@@ -27,8 +27,8 @@ struct gpio_driver_ops {
 };
 
 struct gpio_driver {
-	const struct driver          drv;
-	const struct gpio_driver_ops ops;
+	struct driver          drv;
+	struct gpio_driver_ops ops;
 };
 
 /**

@@ -43,7 +43,7 @@ enum {
 static inline const struct sun6i_i2c *
 to_sun6i_i2c(const struct device *dev)
 {
-	return container_of(dev, struct sun6i_i2c, dev);
+	return container_of(dev, const struct sun6i_i2c, dev);
 }
 
 static bool

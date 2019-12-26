@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 #define I2C_OPS(dev) \
-	(&container_of((dev)->drv, struct i2c_driver, drv)->ops)
+	(&container_of((dev)->drv, const struct i2c_driver, drv)->ops)
 
 #define I2C_NUM_PINS 2
 
@@ -33,8 +33,8 @@ struct i2c_driver_ops {
 };
 
 struct i2c_driver {
-	const struct driver         drv;
-	const struct i2c_driver_ops ops;
+	struct driver         drv;
+	struct i2c_driver_ops ops;
 };
 
 /**

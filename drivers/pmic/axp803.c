@@ -22,7 +22,7 @@
 static inline const struct axp803_pmic *
 to_axp803_pmic(const struct device *dev)
 {
-	return container_of(dev, struct axp803_pmic, dev);
+	return container_of(dev, const struct axp803_pmic, dev);
 }
 
 static int

@@ -34,7 +34,7 @@ static struct regulator_info sy8106a_regulator_info = {
 static inline const struct sy8106a *
 to_sy8106a(const struct device *dev)
 {
-	return container_of(dev, struct sy8106a, dev);
+	return container_of(dev, const struct sy8106a, dev);
 }
 
 static struct regulator_info *

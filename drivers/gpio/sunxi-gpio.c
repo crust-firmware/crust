@@ -35,7 +35,7 @@
 static inline const struct sunxi_gpio *
 to_sunxi_gpio(const struct device *dev)
 {
-	return container_of(dev, struct sunxi_gpio, dev);
+	return container_of(dev, const struct sunxi_gpio, dev);
 }
 
 static int

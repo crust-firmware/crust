@@ -423,7 +423,7 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 static inline const struct axp803_regulator *
 to_axp803_regulator(const struct device *dev)
 {
-	return container_of(dev, struct axp803_regulator, dev);
+	return container_of(dev, const struct axp803_regulator, dev);
 }
 
 static struct regulator_info *

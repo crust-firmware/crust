@@ -32,7 +32,7 @@ static int sunxi_rsb_set_rate(const struct device *dev, uint32_t rate);
 static inline const struct sunxi_rsb *
 to_sunxi_rsb(const struct device *dev)
 {
-	return container_of(dev, struct sunxi_rsb, dev);
+	return container_of(dev, const struct sunxi_rsb, dev);
 }
 
 static int

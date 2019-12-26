@@ -39,7 +39,7 @@
 static inline const struct sunxi_msgbox *
 to_sunxi_msgbox(const struct device *dev)
 {
-	return container_of(dev, struct sunxi_msgbox, dev);
+	return container_of(dev, const struct sunxi_msgbox, dev);
 }
 
 static bool

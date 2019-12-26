@@ -12,7 +12,7 @@
 #include <stdint.h>
 
 #define MSGBOX_OPS(dev) \
-	(&container_of((dev)->drv, struct msgbox_driver, drv)->ops)
+	(&container_of((dev)->drv, const struct msgbox_driver, drv)->ops)
 
 enum {
 	MSGBOX_CHAN_SCPI_EL3_RX = 0,
@@ -31,8 +31,8 @@ struct msgbox_driver_ops {
 };
 
 struct msgbox_driver {
-	const struct driver            drv;
-	const struct msgbox_driver_ops ops;
+	struct driver            drv;
+	struct msgbox_driver_ops ops;
 };
 
 /**
