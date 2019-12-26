@@ -59,60 +59,47 @@ sunxi_ccu_get_rate(const struct clock_handle *clock, uint32_t *rate)
 }
 
 static int
-sunxi_ccu_get_state(const struct clock_handle *clock, bool *state)
+sunxi_ccu_get_state(const struct clock_handle *clock, int *state)
 {
 	const struct sunxi_ccu *self      = to_sunxi_ccu(clock->dev);
 	const struct sunxi_ccu_clock *clk = &self->clocks[clock->id];
-	uint16_t gate  = clk->gate;
-	uint16_t reset = clk->reset;
 
-	/* Check the bus clock gate. */
-	if (gate != 0 && !bitmap_get(self->regs, gate))
-		*state = false;
-	/* Check the reset line. */
-	else if (reset != 0 && !bitmap_get(self->regs, reset))
-		*state = false;
+	/* Check the reset line, if present. */
+	if (clk->reset && !bitmap_get(self->regs, clk->reset))
+		*state = CLOCK_STATE_DISABLED;
+	/* Check the clock gate, if present. */
+	else if (clk->gate && !bitmap_get(self->regs, clk->gate))
+		*state = CLOCK_STATE_GATED;
+	/* Otherwise, the clock is enabled. */
 	else
-		*state = true;
+		*state = CLOCK_STATE_ENABLED;
 
 	return SUCCESS;
 }
 
 static int
-sunxi_ccu_set_state(const struct clock_handle *clock, bool enable)
+sunxi_ccu_set_state(const struct clock_handle *clock, int state)
 {
 	const struct sunxi_ccu *self      = to_sunxi_ccu(clock->dev);
 	const struct sunxi_ccu_clock *clk = &self->clocks[clock->id];
-	uint16_t gate  = clk->gate;
-	uint16_t reset = clk->reset;
+	bool enable = state > CLOCK_STATE_DISABLED;
+	bool ungate = state > CLOCK_STATE_GATED;
 
-	if (enable) {
-		/* Enable the clock before taking the device out of reset. */
-		if (gate != 0) {
-			bitmap_set(self->regs, gate);
-			if (!bitmap_get(self->regs, gate))
-				return EIO;
-		}
-		/* Deassert the reset once the device has a running clock. */
-		if (reset != 0) {
-			bitmap_set(self->regs, reset);
-			if (!bitmap_get(self->regs, reset))
-				return EIO;
-		}
-	} else {
-		/* Put the device in reset before turning off its clock. */
-		if (reset != 0) {
-			bitmap_clear(self->regs, reset);
-			if (bitmap_get(self->regs, reset))
-				return EIO;
-		}
-		/* Finally gate the bus clock. */
-		if (gate != 0) {
-			bitmap_clear(self->regs, gate);
-			if (bitmap_get(self->regs, gate))
-				return EIO;
-		}
-	}
+	/* Ungate the clock before taking the device out of reset. */
+	if (clk->gate && ungate)
+		bitmap_set(self->regs, clk->gate);
+	/* Assert or deassert the reset line while the clock is running. */
+	if (clk->reset)
+		(enable ? bitmap_set : bitmap_clear)(self->regs, clk->reset);
+	/* Gate the clock after putting the device in reset. */
+	if (clk->gate && !ungate)
+		bitmap_clear(self->regs, clk->gate);
+
+	/* Verify the registers match the expected final values. */
+	if (clk->gate && bitmap_get(self->regs, clk->gate) != ungate)
+		return EIO;
+	if (clk->reset && bitmap_get(self->regs, clk->reset) != enable)
+		return EIO;
 
 	return SUCCESS;
 }

@@ -7,8 +7,13 @@
 #define DRIVERS_CLOCK_H
 
 #include <device.h>
-#include <stdbool.h>
 #include <stdint.h>
+
+enum {
+	CLOCK_STATE_DISABLED,
+	CLOCK_STATE_GATED,
+	CLOCK_STATE_ENABLED,
+};
 
 struct clock_handle {
 	const struct device *dev; /**< The clock controller device. */
@@ -19,12 +24,9 @@ struct clock_handle {
  * Disable a clock.
  *
  * If the clock does not have a gate, this may have no effect on the hardware.
- * If this clock is the last active user of its parent clock, that parent clock
- * will also be disabled.
  *
  * This function may fail with:
  *   EIO    There was a problem communicating with the hardware.
- *   EPERM  The clock is in use or is critical and cannot be disabled.
  *
  * @param clock A reference to a clock.
  * @return      Zero on success; an error code on failure.
@@ -84,6 +86,16 @@ int clock_get_rate(const struct clock_handle *clock, uint32_t *rate);
  * @param state The location to store the calculated clock state.
  * @return      Zero on success; an error code on failure.
  */
-int clock_get_state(const struct clock_handle *clock, bool *state);
+int clock_get_state(const struct clock_handle *clock, int *state);
+
+/**
+ * Release a reference to a clock and its controller device.
+ *
+ * If this is the last reference to a clock, that clock (and its ancestors
+ * recursively, if they have no other consumers) will be disabled.
+ *
+ * @param clock A reference to a clock.
+ */
+void clock_put(const struct clock_handle *clock);
 
 #endif /* DRIVERS_CLOCK_H */

@@ -8,7 +8,6 @@
 
 #include <clock.h>
 #include <device.h>
-#include <stdbool.h>
 #include <stdint.h>
 
 #define CLOCK_DEVICE_STATE_INIT(n) \
@@ -36,8 +35,8 @@ struct clock_driver_ops {
 	const struct clock_handle *
 	    (*get_parent)(const struct clock_handle *clock);
 	int (*get_rate)(const struct clock_handle *clock, uint32_t *rate);
-	int (*get_state)(const struct clock_handle *clock, bool *state);
-	int (*set_state)(const struct clock_handle *clock, bool enable);
+	int (*get_state)(const struct clock_handle *clock, int *state);
+	int (*set_state)(const struct clock_handle *clock, int state);
 };
 
 struct clock_driver {

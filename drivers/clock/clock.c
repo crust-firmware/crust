@@ -4,10 +4,10 @@
  */
 
 #include <clock.h>
+#include <debug.h>
+#include <device.h>
 #include <error.h>
 #include <intrusive.h>
-#include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
 
 #include "clock.h"
@@ -39,25 +39,10 @@ clock_state_for(const struct clock_handle *clock)
 int
 clock_disable(const struct clock_handle *clock)
 {
-	const struct clock_driver_ops *ops = clock_ops_for(clock);
-	const struct clock_handle *parent;
-	struct clock_state *state = clock_state_for(clock);
-	int err;
+	/* Calling this function is only allowed after calling clock_get(). */
+	assert(clock_state_for(clock)->refcount);
 
-	/* Prevent disabling clocks that have other consumers. */
-	if (--state->refcount)
-		return EPERM;
-
-	/* Call the driver function to change the clock's state. */
-	if ((err = ops->set_state(clock, false)))
-		return err;
-
-	/* Mark the clock and its parent as no longer being in use. */
-	state->refcount--;
-	if ((parent = ops->get_parent(clock)) != NULL)
-		clock_state_for(parent)->refcount--;
-
-	return SUCCESS;
+	return clock_ops_for(clock)->set_state(clock, CLOCK_STATE_GATED);
 }
 
 int
@@ -67,34 +52,48 @@ clock_enable(const struct clock_handle *clock)
 	const struct clock_handle *parent;
 	int err;
 
-	/* Enable the parent clock, if it exists, and increase its refcount. */
+	/* Calling this function is only allowed after calling clock_get(). */
+	assert(clock_state_for(clock)->refcount);
+
+	/* If the clock has a parent, ensure the parent is enabled. */
 	if ((parent = ops->get_parent(clock))) {
 		if ((err = clock_enable(parent)))
 			return err;
 	}
 
-	/* Call the driver function to change the clock's state. */
-	if ((err = ops->set_state(clock, true)))
-		return err;
-
-	/* Mark the clock itself as being in use. */
-	clock_state_for(clock)->refcount++;
-
-	return SUCCESS;
+	return ops->set_state(clock, CLOCK_STATE_ENABLED);
 }
 
 int
 clock_get(const struct clock_handle *clock)
 {
+	const struct clock_driver_ops *ops = clock_ops_for(clock);
+	const struct clock_handle *parent;
+	struct clock_state *state = clock_state_for(clock);
 	int err;
 
-	/* Ensure the controller's driver is loaded. */
-	if (!device_get(clock->dev))
-		return ENODEV;
+	/* Perform additional setup if this is the first reference. */
+	if (!state->refcount) {
+		/* Ensure the controller's driver is loaded. */
+		if (!device_get(clock->dev))
+			return ENODEV;
+
+		/* Ensure the clock's parent has an active reference. */
+		if ((parent = ops->get_parent(clock)) &&
+		    (err = clock_get(parent))) {
+			device_put(clock->dev);
+			return err;
+		}
+	}
+
+	/* Bump the refcount only after successfully acquiring dependencies. */
+	++state->refcount;
 
 	/* Enable the clock. */
-	if ((err = clock_enable(clock)))
+	if ((err = clock_enable(clock))) {
+		clock_put(clock);
 		return err;
+	}
 
 	return SUCCESS;
 }
@@ -105,6 +104,9 @@ clock_get_rate(const struct clock_handle *clock, uint32_t *rate)
 	const struct clock_driver_ops *ops = clock_ops_for(clock);
 	const struct clock_handle *parent;
 	int err;
+
+	/* Calling this function is only allowed after calling clock_get(). */
+	assert(clock_state_for(clock)->refcount);
 
 	/* Initialize the rate with the parent's rate or a known safe value. */
 	if ((parent = ops->get_parent(clock))) {
@@ -119,28 +121,54 @@ clock_get_rate(const struct clock_handle *clock, uint32_t *rate)
 }
 
 int
-clock_get_state(const struct clock_handle *clock, bool *state)
+clock_get_state(const struct clock_handle *clock, int *state)
 {
 	const struct clock_driver_ops *ops = clock_ops_for(clock);
 	const struct clock_handle *parent;
 	int err;
 
-	/* If this clock is in use, it must have been enabled. */
-	if (clock_state_for(clock)->refcount > 0) {
-		*state = true;
-		return SUCCESS;
-	}
+	/* Calling this function is only allowed after calling clock_get(). */
+	assert(clock_state_for(clock)->refcount);
 
 	/* If the clock has a parent, check the parent's state. */
 	if ((parent = ops->get_parent(clock))) {
 		if ((err = clock_get_state(parent, state)))
 			return err;
 
-		/* If the parent is not enabled, this clock is not either. */
-		if (*state != true)
+		/* If the parent is not enabled, this clock has that state. */
+		if (*state != CLOCK_STATE_ENABLED)
 			return SUCCESS;
 	}
 
 	/* Call the driver function to read any gate this clock may have. */
 	return ops->get_state(clock, state);
+}
+
+void
+clock_put(const struct clock_handle *clock)
+{
+	const struct clock_driver_ops *ops = clock_ops_for(clock);
+	const struct clock_handle *parent;
+	struct clock_state *state = clock_state_for(clock);
+	int err;
+
+	/* Calling this function is only allowed after calling clock_get(). */
+	assert(state->refcount);
+
+	/* Do nothing if there are other consumers of this clock. */
+	if (--state->refcount)
+		return;
+
+	/* Completely disable the clock once the last consumer is gone. */
+	if ((err = ops->set_state(clock, CLOCK_STATE_DISABLED))) {
+		debug("%s: Clock %u release failed",
+		      clock->dev->name, clock->id);
+	}
+
+	/* Drop the reference to the parent clock. */
+	if ((parent = ops->get_parent(clock)))
+		clock_put(parent);
+
+	/* Drop the reference to the controller device. */
+	device_put(clock->dev);
 }
