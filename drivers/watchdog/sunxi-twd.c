@@ -82,7 +82,10 @@ sunxi_twd_probe(const struct device *dev)
 static void
 sunxi_twd_release(const struct device *dev)
 {
+	const struct sunxi_twd *self = to_sunxi_twd(dev);
+
 	sunxi_twd_disable(dev);
+	clock_put(&self->clock);
 }
 
 static const struct watchdog_driver sunxi_twd_driver = {

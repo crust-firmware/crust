@@ -208,10 +208,18 @@ sun6i_i2c_probe(const struct device *dev)
 	return SUCCESS;
 }
 
+static void
+sun6i_i2c_release(const struct device *dev)
+{
+	const struct sun6i_i2c *self = to_sun6i_i2c(dev);
+
+	clock_put(&self->clock);
+}
+
 static const struct i2c_driver sun6i_i2c_driver = {
 	.drv = {
 		.probe   = sun6i_i2c_probe,
-		.release = dummy_release,
+		.release = sun6i_i2c_release,
 	},
 	.ops = {
 		.read  = sun6i_i2c_read,

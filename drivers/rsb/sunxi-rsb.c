@@ -141,10 +141,18 @@ sunxi_rsb_probe(const struct device *dev)
 	return SUCCESS;
 }
 
+static void
+sunxi_rsb_release(const struct device *dev)
+{
+	const struct sunxi_rsb *self = to_sunxi_rsb(dev);
+
+	clock_put(&self->clock);
+}
+
 static const struct rsb_driver sunxi_rsb_driver = {
 	.drv = {
 		.probe   = sunxi_rsb_probe,
-		.release = dummy_release,
+		.release = sunxi_rsb_release,
 	},
 	.ops = {
 		.probe    = sunxi_rsb_probe_dev,

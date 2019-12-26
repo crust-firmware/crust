@@ -125,10 +125,18 @@ sunxi_msgbox_probe(const struct device *dev)
 	return SUCCESS;
 }
 
+static void
+sunxi_msgbox_release(const struct device *dev)
+{
+	const struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+
+	clock_put(&self->clock);
+}
+
 static const struct msgbox_driver sunxi_msgbox_driver = {
 	.drv = {
 		.probe   = sunxi_msgbox_probe,
-		.release = dummy_release,
+		.release = sunxi_msgbox_release,
 	},
 	.ops = {
 		.ack_rx       = sunxi_msgbox_ack_rx,

@@ -90,10 +90,18 @@ sunxi_gpio_probe(const struct device *dev)
 	return SUCCESS;
 }
 
+static void
+sunxi_gpio_release(const struct device *dev)
+{
+	const struct sunxi_gpio *self = to_sunxi_gpio(dev);
+
+	clock_put(&self->clock);
+}
+
 static const struct gpio_driver sunxi_gpio_driver = {
 	.drv = {
 		.probe   = sunxi_gpio_probe,
-		.release = dummy_release,
+		.release = sunxi_gpio_release,
 	},
 	.ops = {
 		.get_value = sunxi_gpio_get_value,
