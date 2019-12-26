@@ -26,11 +26,17 @@ SECTIONS
     . = ALIGN(4);
   } >SRAM_A2
 
-  .data . : ALIGN(4) {
+  .rodata . : ALIGN(4) {
     *(SORT_BY_ALIGNMENT(SORT_BY_NAME(.rodata*)))
+    . = ALIGN(4);
+  } >SRAM_A2
+
+  .data . : ALIGN(4) {
     *(SORT_BY_ALIGNMENT(SORT_BY_NAME(.data*)))
     . = ALIGN(4);
   } >SRAM_A2
+
+  ASSERT(SIZEOF(.data) == 0, "Global data must be constant or set at runtime")
 
   .bss . : ALIGN(4) {
     __bss_start = .;
