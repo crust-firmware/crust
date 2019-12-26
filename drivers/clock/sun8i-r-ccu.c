@@ -8,6 +8,7 @@
 #include <debug.h>
 #include <device.h>
 #include <error.h>
+#include <mmio.h>
 #include <stdint.h>
 #include <clock/ccu.h>
 #include <platform/devices.h>
@@ -20,40 +21,37 @@ static const uint32_t sun8i_r_ccu_fixed_rates[] = {
 	[CLK_OSC32K] = 32768U,
 };
 
-static int
-sun8i_r_ccu_fixed_rate(const struct ccu *self UNUSED,
-                       uint8_t id, uint32_t *rate)
+static uint32_t
+sun8i_r_ccu_fixed_get_rate(const struct ccu *self UNUSED,
+                           uint32_t rate UNUSED, uint8_t id)
 {
 	assert(id < ARRAY_SIZE(sun8i_r_ccu_fixed_rates));
 
-	*rate = sun8i_r_ccu_fixed_rates[id];
-
-	return SUCCESS;
+	return sun8i_r_ccu_fixed_rates[id];
 }
 
-static int
-sun8i_r_ccu_ar100_rate(const struct ccu *self,
-                       uint8_t id, uint32_t *rate)
+static uint32_t
+sun8i_r_ccu_ar100_get_rate(const struct ccu *self, uint32_t rate, uint8_t id)
 {
 	const struct ccu_clock *clk = &self->clocks[id];
 	uint32_t val = mmio_read_32(self->regs + clk->reg);
 
 	/* Parent 2 (CLK_PLL_PERIPH0) has an additional divider. */
 	if (bitfield_get(val, clk->mux) == 2)
-		*rate /= bitfield_get(val, BITFIELD(8, 5)) + 1;
+		rate /= bitfield_get(val, BITFIELD(8, 5)) + 1;
 
-	return SUCCESS;
+	return rate;
 }
 
 static const struct ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 	[CLK_OSC16M] = {
-		.get_rate = sun8i_r_ccu_fixed_rate,
+		.get_rate = sun8i_r_ccu_fixed_get_rate,
 	},
 	[CLK_OSC24M] = {
-		.get_rate = sun8i_r_ccu_fixed_rate,
+		.get_rate = sun8i_r_ccu_fixed_get_rate,
 	},
 	[CLK_OSC32K] = {
-		.get_rate = sun8i_r_ccu_fixed_rate,
+		.get_rate = sun8i_r_ccu_fixed_get_rate,
 	},
 	[CLK_AR100] = {
 		.parents = CLOCK_PARENTS(4) {
@@ -62,7 +60,7 @@ static const struct ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 			{ .dev = &ccu.dev, .id = CLK_PLL_PERIPH0 },
 			{ .dev = &r_ccu.dev, .id = CLK_OSC16M },
 		},
-		.get_rate = sun8i_r_ccu_ar100_rate,
+		.get_rate = sun8i_r_ccu_ar100_get_rate,
 		.reg      = 0x0000,
 		.mux      = BITFIELD(16, 2),
 		.p        = BITFIELD(4, 2),

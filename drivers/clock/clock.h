@@ -33,10 +33,10 @@ struct clock_device_state {
 
 struct clock_driver_ops {
 	const struct clock_handle *
-	    (*get_parent)(const struct clock_handle *clock);
-	int (*get_rate)(const struct clock_handle *clock, uint32_t *rate);
-	int (*get_state)(const struct clock_handle *clock, int *state);
-	int (*set_state)(const struct clock_handle *clock, int state);
+	         (*get_parent)(const struct clock_handle *clock);
+	uint32_t (*get_rate)(const struct clock_handle *clock, uint32_t rate);
+	int      (*get_state)(const struct clock_handle *clock, int *state);
+	int      (*set_state)(const struct clock_handle *clock, int state);
 };
 
 struct clock_driver {

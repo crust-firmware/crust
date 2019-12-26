@@ -67,14 +67,10 @@ int clock_get(const struct clock_handle *clock);
  * This function returns the frequency the clock runs at when ungated,
  * regardless of if the clock is currently gated.
  *
- * This function may fail with:
- *   EIO    There was a problem communicating with the hardware.
- *
  * @param clock A reference to a clock.
- * @param rate  The location to store the calculated clock rate.
- * @return      Zero on success; an error code on failure.
+ * @return      The clock frequency in Hz on success; zero on failure.
  */
-int clock_get_rate(const struct clock_handle *clock, uint32_t *rate);
+uint32_t clock_get_rate(const struct clock_handle *clock);
 
 /**
  * Get the current state of a clock, as determined from the hardware.

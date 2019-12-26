@@ -36,26 +36,23 @@ ccu_get_parent(const struct clock_handle *clock)
 	return &clk->parents[index];
 }
 
-static int
-ccu_get_rate(const struct clock_handle *clock, uint32_t *rate)
+static uint32_t
+ccu_get_rate(const struct clock_handle *clock, uint32_t rate)
 {
-	const struct ccu *self = to_ccu(clock->dev);
+	const struct ccu *self      = to_ccu(clock->dev);
 	const struct ccu_clock *clk = &self->clocks[clock->id];
-	uint32_t reg, tmp;
-	int err;
+	uint32_t reg;
 
 	/* Perform clock-specific adjustments to the parent rate. */
-	if (clk->get_rate && (err = clk->get_rate(self, clock->id, rate)))
-		return err;
+	if (clk->get_rate)
+		rate = clk->get_rate(self, rate, clock->id);
 
 	/* Apply the standard dividers to the clock rate. */
-	reg   = mmio_read_32(self->regs + clk->reg);
-	tmp   = *rate;
-	tmp  /= bitfield_get(reg, clk->m) + 1;
-	tmp >>= bitfield_get(reg, clk->p);
-	*rate = tmp;
+	reg    = mmio_read_32(self->regs + clk->reg);
+	rate  /= bitfield_get(reg, clk->m) + 1;
+	rate >>= bitfield_get(reg, clk->p);
 
-	return SUCCESS;
+	return rate;
 }
 
 static int

@@ -17,8 +17,8 @@ struct ccu_clock {
 	/** Handles to parent clocks (one for each possible mux value). */
 	const struct clock_handle *parents;
 	/** Hook for calculating the clock rate from the parent rate. */
-	int                        (*get_rate)(const struct ccu *self,
-	                                       uint8_t id, uint32_t *rate);
+	uint32_t                   (*get_rate)(const struct ccu *self,
+	                                       uint32_t rate, uint8_t id);
 	/** Offset into the CCU of the clock gate bit, zero for none. */
 	uint16_t                   gate;
 	/** Offset into the CCU of the module reset bit, zero for none. */

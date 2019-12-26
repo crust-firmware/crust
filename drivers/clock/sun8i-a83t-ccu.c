@@ -14,20 +14,18 @@
 
 #include "ccu.h"
 
-static int
-sun8i_a83t_ccu_fixed_rate(const struct ccu *self UNUSED,
-                          uint8_t id UNUSED, uint32_t *rate)
+static uint32_t
+sun8i_a83t_ccu_fixed_get_rate(const struct ccu *self UNUSED,
+                              uint32_t rate UNUSED, uint8_t id UNUSED)
 {
 	assert(id == CLK_PLL_PERIPH0);
 
-	*rate = 600000000U;
-
-	return SUCCESS;
+	return 600000000U;
 }
 
 static const struct ccu_clock sun8i_a83t_ccu_clocks[SUN8I_A83T_CCU_CLOCKS] = {
 	[CLK_PLL_PERIPH0] = {
-		.get_rate = sun8i_a83t_ccu_fixed_rate,
+		.get_rate = sun8i_a83t_ccu_fixed_get_rate,
 	},
 	[CLK_BUS_MSGBOX] = {
 		.gate  = BITMAP_INDEX(0x0064 >> 2, 21),

@@ -89,12 +89,8 @@ static int
 sunxi_rsb_set_rate(const struct device *dev, uint32_t rate)
 {
 	const struct sunxi_rsb *self = to_sunxi_rsb(dev);
-	uint32_t dev_rate;
+	uint32_t dev_rate = clock_get_rate(&self->clock);
 	uint8_t  divider;
-	int err;
-
-	if ((err = clock_get_rate(&self->clock, &dev_rate)))
-		return err;
 
 	dev_rate /= 2;
 	if (rate == 0 || rate < dev_rate / 256 || rate > dev_rate)
