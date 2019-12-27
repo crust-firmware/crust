@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#ifndef DRIVERS_CLOCK_SUNXI_CCU_H
-#define DRIVERS_CLOCK_SUNXI_CCU_H
+#ifndef DRIVERS_CLOCK_CCU_H
+#define DRIVERS_CLOCK_CCU_H
 
 #include <clock.h>
 #include <device.h>
@@ -16,13 +16,13 @@
 #include <clock/sun8i-r-ccu.h>
 #endif
 
-struct sunxi_ccu {
-	struct device                 dev;
-	const struct sunxi_ccu_clock *clocks;
-	uintptr_t                     regs;
+struct ccu {
+	struct device           dev;
+	const struct ccu_clock *clocks;
+	uintptr_t               regs;
 };
 
-extern const struct sunxi_ccu ccu;
-extern const struct sunxi_ccu r_ccu;
+extern const struct ccu ccu;
+extern const struct ccu r_ccu;
 
-#endif /* DRIVERS_CLOCK_SUNXI_CCU_H */
+#endif /* DRIVERS_CLOCK_CCU_H */

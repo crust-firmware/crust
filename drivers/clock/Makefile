@@ -5,8 +5,8 @@
 
 obj-y += clock.o
 
-obj-y += sunxi-ccu.o
-obj-y += sun8i-r-ccu.o
+obj-y += ccu.o
 
+obj-y += sun8i-r-ccu.o
 obj-$(CONFIG_PLATFORM_A64)  += sun50i-a64-ccu.o
 obj-$(CONFIG_PLATFORM_A83T) += sun8i-a83t-ccu.o

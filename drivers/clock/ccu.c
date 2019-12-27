@@ -11,21 +11,21 @@
 #include <intrusive.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <clock/sunxi-ccu.h>
+#include <clock/ccu.h>
 
-#include "sunxi-ccu.h"
+#include "ccu.h"
 
-static inline const struct sunxi_ccu *
-to_sunxi_ccu(const struct device *dev)
+static inline const struct ccu *
+to_ccu(const struct device *dev)
 {
-	return container_of(dev, const struct sunxi_ccu, dev);
+	return container_of(dev, const struct ccu, dev);
 }
 
 static const struct clock_handle *
-sunxi_ccu_get_parent(const struct clock_handle *clock)
+ccu_get_parent(const struct clock_handle *clock)
 {
-	const struct sunxi_ccu *self      = to_sunxi_ccu(clock->dev);
-	const struct sunxi_ccu_clock *clk = &self->clocks[clock->id];
+	const struct ccu *self      = to_ccu(clock->dev);
+	const struct ccu_clock *clk = &self->clocks[clock->id];
 	size_t index = 0;
 
 	if (BF_PRESENT(clk->mux)) {
@@ -37,10 +37,10 @@ sunxi_ccu_get_parent(const struct clock_handle *clock)
 }
 
 static int
-sunxi_ccu_get_rate(const struct clock_handle *clock, uint32_t *rate)
+ccu_get_rate(const struct clock_handle *clock, uint32_t *rate)
 {
-	const struct sunxi_ccu *self = to_sunxi_ccu(clock->dev);
-	const struct sunxi_ccu_clock *clk = &self->clocks[clock->id];
+	const struct ccu *self = to_ccu(clock->dev);
+	const struct ccu_clock *clk = &self->clocks[clock->id];
 	uint32_t reg, tmp;
 	int err;
 
@@ -59,10 +59,10 @@ sunxi_ccu_get_rate(const struct clock_handle *clock, uint32_t *rate)
 }
 
 static int
-sunxi_ccu_get_state(const struct clock_handle *clock, int *state)
+ccu_get_state(const struct clock_handle *clock, int *state)
 {
-	const struct sunxi_ccu *self      = to_sunxi_ccu(clock->dev);
-	const struct sunxi_ccu_clock *clk = &self->clocks[clock->id];
+	const struct ccu *self      = to_ccu(clock->dev);
+	const struct ccu_clock *clk = &self->clocks[clock->id];
 
 	/* Check the reset line, if present. */
 	if (clk->reset && !bitmap_get(self->regs, clk->reset))
@@ -78,10 +78,10 @@ sunxi_ccu_get_state(const struct clock_handle *clock, int *state)
 }
 
 static int
-sunxi_ccu_set_state(const struct clock_handle *clock, int state)
+ccu_set_state(const struct clock_handle *clock, int state)
 {
-	const struct sunxi_ccu *self      = to_sunxi_ccu(clock->dev);
-	const struct sunxi_ccu_clock *clk = &self->clocks[clock->id];
+	const struct ccu *self      = to_ccu(clock->dev);
+	const struct ccu_clock *clk = &self->clocks[clock->id];
 	bool enable = state > CLOCK_STATE_DISABLED;
 	bool ungate = state > CLOCK_STATE_GATED;
 
@@ -104,15 +104,15 @@ sunxi_ccu_set_state(const struct clock_handle *clock, int state)
 	return SUCCESS;
 }
 
-const struct clock_driver sunxi_ccu_driver = {
+const struct clock_driver ccu_driver = {
 	.drv = {
 		.probe   = dummy_probe,
 		.release = dummy_release,
 	},
 	.ops = {
-		.get_parent = sunxi_ccu_get_parent,
-		.get_rate   = sunxi_ccu_get_rate,
-		.get_state  = sunxi_ccu_get_state,
-		.set_state  = sunxi_ccu_set_state,
+		.get_parent = ccu_get_parent,
+		.get_rate   = ccu_get_rate,
+		.get_state  = ccu_get_state,
+		.set_state  = ccu_set_state,
 	},
 };

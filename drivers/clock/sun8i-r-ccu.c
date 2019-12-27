@@ -9,10 +9,10 @@
 #include <device.h>
 #include <error.h>
 #include <stdint.h>
-#include <clock/sunxi-ccu.h>
+#include <clock/ccu.h>
 #include <platform/devices.h>
 
-#include "sunxi-ccu.h"
+#include "ccu.h"
 
 static const uint32_t sun8i_r_ccu_fixed_rates[] = {
 	[CLK_OSC16M] = 16000000U,
@@ -21,7 +21,7 @@ static const uint32_t sun8i_r_ccu_fixed_rates[] = {
 };
 
 static int
-sun8i_r_ccu_fixed_rate(const struct sunxi_ccu *self UNUSED,
+sun8i_r_ccu_fixed_rate(const struct ccu *self UNUSED,
                        uint8_t id, uint32_t *rate)
 {
 	assert(id < ARRAY_SIZE(sun8i_r_ccu_fixed_rates));
@@ -32,10 +32,10 @@ sun8i_r_ccu_fixed_rate(const struct sunxi_ccu *self UNUSED,
 }
 
 static int
-sun8i_r_ccu_ar100_rate(const struct sunxi_ccu *self,
+sun8i_r_ccu_ar100_rate(const struct ccu *self,
                        uint8_t id, uint32_t *rate)
 {
-	const struct sunxi_ccu_clock *clk = &self->clocks[id];
+	const struct ccu_clock *clk = &self->clocks[id];
 	uint32_t val = mmio_read_32(self->regs + clk->reg);
 
 	/* Parent 2 (CLK_PLL_PERIPH0) has an additional divider. */
@@ -45,7 +45,7 @@ sun8i_r_ccu_ar100_rate(const struct sunxi_ccu *self,
 	return SUCCESS;
 }
 
-static const struct sunxi_ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
+static const struct ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 	[CLK_OSC16M] = {
 		.get_rate = sun8i_r_ccu_fixed_rate,
 	},
@@ -121,10 +121,10 @@ static const struct sunxi_ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 	},
 };
 
-const struct sunxi_ccu r_ccu = {
+const struct ccu r_ccu = {
 	.dev = {
 		.name  = "r_ccu",
-		.drv   = &sunxi_ccu_driver.drv,
+		.drv   = &ccu_driver.drv,
 		.state = CLOCK_DEVICE_STATE_INIT(SUN8I_R_CCU_CLOCKS),
 	},
 	.clocks = sun8i_r_ccu_clocks,

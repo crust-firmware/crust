@@ -7,7 +7,7 @@
 #include <mmio.h>
 #include <util.h>
 #include <watchdog.h>
-#include <clock/sunxi-ccu.h>
+#include <clock/ccu.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/devices.h>
 

@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <util.h>
-#include <clock/sunxi-ccu.h>
+#include <clock/ccu.h>
 #include <msgbox/sunxi-msgbox.h>
 #include <platform/devices.h>
 

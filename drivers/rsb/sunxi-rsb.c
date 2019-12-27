@@ -8,7 +8,7 @@
 #include <mmio.h>
 #include <rsb.h>
 #include <util.h>
-#include <clock/sunxi-ccu.h>
+#include <clock/ccu.h>
 #include <gpio/sunxi-gpio.h>
 #include <rsb/sunxi-rsb.h>
 #include <platform/devices.h>

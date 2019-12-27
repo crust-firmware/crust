@@ -9,13 +9,13 @@
 #include <device.h>
 #include <error.h>
 #include <stdint.h>
-#include <clock/sunxi-ccu.h>
+#include <clock/ccu.h>
 #include <platform/devices.h>
 
-#include "sunxi-ccu.h"
+#include "ccu.h"
 
 static int
-sun50i_a64_ccu_fixed_rate(const struct sunxi_ccu *self UNUSED,
+sun50i_a64_ccu_fixed_rate(const struct ccu *self UNUSED,
                           uint8_t id UNUSED, uint32_t *rate)
 {
 	assert(id == CLK_PLL_PERIPH0);
@@ -25,8 +25,7 @@ sun50i_a64_ccu_fixed_rate(const struct sunxi_ccu *self UNUSED,
 	return SUCCESS;
 }
 
-static const
-struct sunxi_ccu_clock sun50i_a64_ccu_clocks[SUN50I_A64_CCU_CLOCKS] = {
+static const struct ccu_clock sun50i_a64_ccu_clocks[SUN50I_A64_CCU_CLOCKS] = {
 	[CLK_PLL_PERIPH0] = {
 		.get_rate = sun50i_a64_ccu_fixed_rate,
 	},
@@ -36,10 +35,10 @@ struct sunxi_ccu_clock sun50i_a64_ccu_clocks[SUN50I_A64_CCU_CLOCKS] = {
 	},
 };
 
-const struct sunxi_ccu ccu = {
+const struct ccu ccu = {
 	.dev = {
 		.name  = "ccu",
-		.drv   = &sunxi_ccu_driver.drv,
+		.drv   = &ccu_driver.drv,
 		.state = CLOCK_DEVICE_STATE_INIT(SUN50I_A64_CCU_CLOCKS),
 	},
 	.clocks = sun50i_a64_ccu_clocks,

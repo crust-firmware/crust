@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <util.h>
-#include <clock/sunxi-ccu.h>
+#include <clock/ccu.h>
 #include <gpio/sunxi-gpio.h>
 #include <platform/devices.h>
 

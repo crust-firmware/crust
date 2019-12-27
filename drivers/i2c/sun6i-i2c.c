@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <util.h>
-#include <clock/sunxi-ccu.h>
+#include <clock/ccu.h>
 #include <gpio/sunxi-gpio.h>
 #include <i2c/sun6i-i2c.h>
 #include <platform/devices.h>
