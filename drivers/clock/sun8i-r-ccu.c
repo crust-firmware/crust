@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
+#include <bitfield.h>
 #include <bitmap.h>
 #include <clock.h>
 #include <debug.h>
@@ -37,8 +38,8 @@ sun8i_r_ccu_ar100_get_rate(const struct ccu *self, uint32_t rate, uint8_t id)
 	uint32_t val = mmio_read_32(self->regs + clk->reg);
 
 	/* Parent 2 (CLK_PLL_PERIPH0) has an additional divider. */
-	if (bitfield_get(val, clk->mux) == 2)
-		rate /= bitfield_get(val, BITFIELD(8, 5)) + 1;
+	if (bitfield_get(val, BF_OFFSET(clk->mux), BF_WIDTH(clk->mux)) == 2)
+		rate /= bitfield_get(val, 8, 5) + 1;
 
 	return rate;
 }

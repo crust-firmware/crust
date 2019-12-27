@@ -30,7 +30,8 @@ ccu_get_parent(const struct clock_handle *clock)
 
 	if (BF_PRESENT(clk->mux)) {
 		uint32_t reg = mmio_read_32(self->regs + clk->reg);
-		index = bitfield_get(reg, clk->mux);
+		index = bitfield_get(reg, BF_OFFSET(clk->mux),
+		                     BF_WIDTH(clk->mux));
 	}
 
 	return &clk->parents[index];
@@ -49,8 +50,8 @@ ccu_get_rate(const struct clock_handle *clock, uint32_t rate)
 
 	/* Apply the standard dividers to the clock rate. */
 	reg    = mmio_read_32(self->regs + clk->reg);
-	rate  /= bitfield_get(reg, clk->m) + 1;
-	rate >>= bitfield_get(reg, clk->p);
+	rate  /= bitfield_get(reg, BF_OFFSET(clk->m), BF_WIDTH(clk->m)) + 1;
+	rate >>= bitfield_get(reg, BF_OFFSET(clk->p), BF_WIDTH(clk->p));
 
 	return rate;
 }

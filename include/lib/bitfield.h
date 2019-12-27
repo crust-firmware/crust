@@ -6,7 +6,6 @@
 #ifndef LIB_BITFIELD_H
 #define LIB_BITFIELD_H
 
-#include <limits.h>
 #include <stdint.h>
 #include <util.h>
 
@@ -56,31 +55,31 @@
 typedef uint8_t bitfield_t;
 
 /**
- * Get the value of a bitfield.
+ * Get the value in a bitfield.
  *
- * @param word  The word containing this bitfield.
- * @param field The description of the bitfield.
+ * @param word  A word containing a bitfield.
+ * @param start The offset of the starting bit (LSB) of the bitfield.
+ * @param width The width of the bitfield in bits.
  */
-static inline uint8_t
-bitfield_get(uint32_t word, bitfield_t field)
+static inline uint32_t
+bitfield_get(uint32_t word, uint32_t start, uint32_t width)
 {
-	return (word >> BF_OFFSET(field)) & (BIT(BF_WIDTH(field)) - 1);
+	return (word >> start) & (BIT(width) - 1);
 }
 
 /**
- * Set the value of a bitfield, returning the updated word.
+ * Set the value in a bitfield.
  *
- * @param word  The word containing this bitfield.
- * @param field The description of the bitfield.
+ * @param word  A word containing a bitfield.
+ * @param start The offset of the starting bit (LSB) of the bitfield.
+ * @param width The width of the bitfield in bits.
+ * @param value The value to place in the bitfield.
+ * @return      The original word, with the value of the bitfield replaced.
  */
 static inline uint32_t
-bitfield_set(uint32_t word, bitfield_t field, uint8_t value)
+bitfield_set(uint32_t word, uint32_t start, uint32_t width, uint32_t value)
 {
-	if (!BF_PRESENT(field))
-		return word;
-
-	return (word & ~BF_MASK(field)) |
-	       ((value << BF_OFFSET(field)) & BF_MASK(field));
+	return word ^ ((value << start ^ word) & ((BIT(width) - 1) << start));
 }
 
 #endif /* LIB_BITFIELD_H */
