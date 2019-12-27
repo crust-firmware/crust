@@ -4,6 +4,8 @@
  */
 
 #include <bitfield.h>
+#include <clock.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <util.h>
 
@@ -27,6 +29,12 @@ ccu_calc_rate_p(uint32_t val, uint32_t rate,
 	rate >>= bitfield_get(val, p_start, p_width);
 
 	return rate;
+}
+
+const struct clock_handle *
+ccu_get_parent_none(const struct ccu *self UNUSED, uint8_t id UNUSED)
+{
+	return NULL;
 }
 
 uint32_t

@@ -6,7 +6,6 @@
 #ifndef CCU_PRIVATE_H
 #define CCU_PRIVATE_H
 
-#include <bitfield.h>
 #include <clock.h>
 #include <stdint.h>
 #include <clock/ccu.h>
@@ -14,19 +13,16 @@
 #include "clock.h"
 
 struct ccu_clock {
-	/** Handles to parent clocks (one for each possible mux value). */
-	const struct clock_handle *parents;
+	/** Hook for determining the parent clock. */
+	const struct clock_handle *(*get_parent)(const struct ccu *self,
+	                                         uint8_t id);
 	/** Hook for calculating the clock rate from the parent rate. */
 	uint32_t                   (*get_rate)(const struct ccu *self,
 	                                       uint32_t rate, uint8_t id);
-	/** Offset into the CCU of the clock gate bit, zero for none. */
+	/** Bit offset of the clock gate (valid if nonzero). */
 	uint16_t                   gate;
-	/** Offset into the CCU of the module reset bit, zero for none. */
+	/** Bit offset of the module reset (valid if nonzero). */
 	uint16_t                   reset;
-	/** Offset into the CCU of the mux/factor register. */
-	uint16_t                   reg;
-	/** Offset and width of the parent mux control in the register. */
-	bitfield_t                 mux;
 };
 
 uint32_t ccu_calc_rate_mp(uint32_t val, uint32_t rate,
@@ -35,6 +31,8 @@ uint32_t ccu_calc_rate_mp(uint32_t val, uint32_t rate,
 uint32_t ccu_calc_rate_p(uint32_t val, uint32_t rate,
                          uint32_t p_off, uint32_t p_width);
 
+const struct clock_handle *ccu_get_parent_none(const struct ccu *self,
+                                               uint8_t id);
 uint32_t ccu_get_rate_parent(const struct ccu *self, uint32_t rate,
                              uint8_t id);
 

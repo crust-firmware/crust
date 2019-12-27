@@ -14,14 +14,6 @@
 	(struct device_state *) \
 	&(char[sizeof_struct(struct clock_device_state, cs, n)]) { 0 }
 
-#define CLOCK_PARENT(d, i) \
-	& (const struct clock_handle) { \
-		.dev = &(d).dev, \
-		.id  = (i), \
-	}
-
-#define CLOCK_PARENTS(n) (const struct clock_handle[n])
-
 struct clock_state {
 	uint8_t refcount;
 };

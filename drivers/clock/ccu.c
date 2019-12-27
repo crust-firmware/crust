@@ -3,14 +3,12 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <bitfield.h>
 #include <bitmap.h>
 #include <clock.h>
 #include <device.h>
 #include <error.h>
 #include <intrusive.h>
 #include <stdbool.h>
-#include <stddef.h>
 #include <clock/ccu.h>
 
 #include "ccu.h"
@@ -26,15 +24,8 @@ ccu_get_parent(const struct clock_handle *clock)
 {
 	const struct ccu *self      = to_ccu(clock->dev);
 	const struct ccu_clock *clk = &self->clocks[clock->id];
-	size_t index = 0;
 
-	if (BF_PRESENT(clk->mux)) {
-		uint32_t reg = mmio_read_32(self->regs + clk->reg);
-		index = bitfield_get(reg, BF_OFFSET(clk->mux),
-		                     BF_WIDTH(clk->mux));
-	}
-
-	return &clk->parents[index];
+	return clk->get_parent(self, clock->id);
 }
 
 static uint32_t

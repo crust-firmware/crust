@@ -35,6 +35,33 @@ sun8i_r_ccu_fixed_get_rate(const struct ccu *self UNUSED,
 	return sun8i_r_ccu_fixed_rates[id];
 }
 
+static const struct clock_handle sun8i_r_ccu_ar100_parents[] = {
+	{
+		.dev = &r_ccu.dev,
+		.id  = CLK_OSC32K,
+	},
+	{
+		.dev = &r_ccu.dev,
+		.id  = CLK_OSC24M,
+	},
+	{
+		.dev = &ccu.dev,
+		.id  = CLK_PLL_PERIPH0,
+	},
+	{
+		.dev = &r_ccu.dev,
+		.id  = CLK_OSC16M,
+	},
+};
+
+static const struct clock_handle *
+sun8i_r_ccu_ar100_get_parent(const struct ccu *self, uint8_t id UNUSED)
+{
+	uint32_t val = mmio_read_32(self->regs + CLK_AR100_REG);
+
+	return &sun8i_r_ccu_ar100_parents[bitfield_get(val, 16, 2)];
+}
+
 static uint32_t
 sun8i_r_ccu_ar100_get_rate(const struct ccu *self,
                            uint32_t rate, uint8_t id UNUSED)
@@ -46,6 +73,28 @@ sun8i_r_ccu_ar100_get_rate(const struct ccu *self,
 	return ccu_calc_rate_mp(val, rate, 8, 5, 4, 2);
 }
 
+static const struct clock_handle sun8i_r_ccu_ahb0_parent = {
+	.dev = &r_ccu.dev,
+	.id  = CLK_AR100,
+};
+
+static const struct clock_handle *
+sun8i_r_ccu_ahb0_get_parent(const struct ccu *self UNUSED, uint8_t id UNUSED)
+{
+	return &sun8i_r_ccu_ahb0_parent;
+}
+
+static const struct clock_handle sun8i_r_ccu_apb0_parent = {
+	.dev = &r_ccu.dev,
+	.id  = CLK_AHB0,
+};
+
+static const struct clock_handle *
+sun8i_r_ccu_apb0_get_parent(const struct ccu *self UNUSED, uint8_t id UNUSED)
+{
+	return &sun8i_r_ccu_apb0_parent;
+}
+
 static uint32_t
 sun8i_r_ccu_apb0_get_rate(const struct ccu *self,
                           uint32_t rate, uint8_t id UNUSED)
@@ -53,6 +102,37 @@ sun8i_r_ccu_apb0_get_rate(const struct ccu *self,
 	uint32_t val = mmio_read_32(self->regs + CLK_APB0_REG);
 
 	return ccu_calc_rate_p(val, rate, 0, 2);
+}
+
+static const struct clock_handle sun8i_r_ccu_apb0_dev_parent = {
+	.dev = &r_ccu.dev,
+	.id  = CLK_APB0,
+};
+
+static const struct clock_handle *
+sun8i_r_ccu_apb0_dev_get_parent(const struct ccu *self UNUSED,
+                                uint8_t id UNUSED)
+{
+	return &sun8i_r_ccu_apb0_dev_parent;
+}
+
+static const struct clock_handle sun8i_r_ccu_r_cir_parents[] = {
+	{
+		.dev = &r_ccu.dev,
+		.id  = CLK_OSC32K,
+	},
+	{
+		.dev = &r_ccu.dev,
+		.id  = CLK_OSC24M,
+	},
+};
+
+static const struct clock_handle *
+sun8i_r_ccu_r_cir_get_parent(const struct ccu *self, uint8_t id UNUSED)
+{
+	uint32_t val = mmio_read_32(self->regs + CLK_R_CIR_REG);
+
+	return &sun8i_r_ccu_r_cir_parents[bitfield_get(val, 24, 1)];
 }
 
 static uint32_t
@@ -66,82 +146,73 @@ sun8i_r_ccu_r_cir_get_rate(const struct ccu *self,
 
 static const struct ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 	[CLK_OSC16M] = {
-		.get_rate = sun8i_r_ccu_fixed_get_rate,
+		.get_parent = ccu_get_parent_none,
+		.get_rate   = sun8i_r_ccu_fixed_get_rate,
 	},
 	[CLK_OSC24M] = {
-		.get_rate = sun8i_r_ccu_fixed_get_rate,
+		.get_parent = ccu_get_parent_none,
+		.get_rate   = sun8i_r_ccu_fixed_get_rate,
 	},
 	[CLK_OSC32K] = {
-		.get_rate = sun8i_r_ccu_fixed_get_rate,
+		.get_parent = ccu_get_parent_none,
+		.get_rate   = sun8i_r_ccu_fixed_get_rate,
 	},
 	[CLK_AR100] = {
-		.parents = CLOCK_PARENTS(4) {
-			{ .dev = &r_ccu.dev, .id = CLK_OSC32K },
-			{ .dev = &r_ccu.dev, .id = CLK_OSC24M },
-			{ .dev = &ccu.dev, .id = CLK_PLL_PERIPH0 },
-			{ .dev = &r_ccu.dev, .id = CLK_OSC16M },
-		},
-		.get_rate = sun8i_r_ccu_ar100_get_rate,
-		.reg      = CLK_AR100_REG,
-		.mux      = BITFIELD(16, 2),
+		.get_parent = sun8i_r_ccu_ar100_get_parent,
+		.get_rate   = sun8i_r_ccu_ar100_get_rate,
 	},
 	[CLK_AHB0] = {
-		.parents  = CLOCK_PARENT(r_ccu, CLK_AR100),
-		.get_rate = ccu_get_rate_parent,
+		.get_parent = sun8i_r_ccu_ahb0_get_parent,
+		.get_rate   = ccu_get_rate_parent,
 	},
 	[CLK_APB0] = {
-		.parents  = CLOCK_PARENT(r_ccu, CLK_AHB0),
-		.get_rate = sun8i_r_ccu_apb0_get_rate,
+		.get_parent = sun8i_r_ccu_apb0_get_parent,
+		.get_rate   = sun8i_r_ccu_apb0_get_rate,
 	},
 	[CLK_BUS_R_PIO] = {
-		.parents  = CLOCK_PARENT(r_ccu, CLK_APB0),
-		.get_rate = ccu_get_rate_parent,
-		.gate     = BITMAP_INDEX(0x0028 >> 2, 0),
+		.get_parent = sun8i_r_ccu_apb0_dev_get_parent,
+		.get_rate   = ccu_get_rate_parent,
+		.gate       = BITMAP_INDEX(0x0028 >> 2, 0),
 	},
 	[CLK_BUS_R_CIR] = {
-		.parents  = CLOCK_PARENT(r_ccu, CLK_APB0),
-		.get_rate = ccu_get_rate_parent,
-		.gate     = BITMAP_INDEX(0x0028 >> 2, 1),
-		.reset    = BITMAP_INDEX(0x00b0 >> 2, 1),
+		.get_parent = sun8i_r_ccu_apb0_dev_get_parent,
+		.get_rate   = ccu_get_rate_parent,
+		.gate       = BITMAP_INDEX(0x0028 >> 2, 1),
+		.reset      = BITMAP_INDEX(0x00b0 >> 2, 1),
 	},
 	[CLK_BUS_R_TIMER] = {
-		.parents  = CLOCK_PARENT(r_ccu, CLK_APB0),
-		.get_rate = ccu_get_rate_parent,
-		.gate     = BITMAP_INDEX(0x0028 >> 2, 2),
-		.reset    = BITMAP_INDEX(0x00b0 >> 2, 2),
+		.get_parent = sun8i_r_ccu_apb0_dev_get_parent,
+		.get_rate   = ccu_get_rate_parent,
+		.gate       = BITMAP_INDEX(0x0028 >> 2, 2),
+		.reset      = BITMAP_INDEX(0x00b0 >> 2, 2),
 	},
 	[CLK_BUS_R_RSB] = {
-		.parents  = CLOCK_PARENT(r_ccu, CLK_APB0),
-		.get_rate = ccu_get_rate_parent,
-		.gate     = BITMAP_INDEX(0x0028 >> 2, 3),
-		.reset    = BITMAP_INDEX(0x00b0 >> 2, 3),
+		.get_parent = sun8i_r_ccu_apb0_dev_get_parent,
+		.get_rate   = ccu_get_rate_parent,
+		.gate       = BITMAP_INDEX(0x0028 >> 2, 3),
+		.reset      = BITMAP_INDEX(0x00b0 >> 2, 3),
 	},
 	[CLK_BUS_R_UART] = {
-		.parents  = CLOCK_PARENT(r_ccu, CLK_APB0),
-		.get_rate = ccu_get_rate_parent,
-		.gate     = BITMAP_INDEX(0x0028 >> 2, 4),
-		.reset    = BITMAP_INDEX(0x00b0 >> 2, 4),
+		.get_parent = sun8i_r_ccu_apb0_dev_get_parent,
+		.get_rate   = ccu_get_rate_parent,
+		.gate       = BITMAP_INDEX(0x0028 >> 2, 4),
+		.reset      = BITMAP_INDEX(0x00b0 >> 2, 4),
 	},
 	[CLK_BUS_R_I2C] = {
-		.parents  = CLOCK_PARENT(r_ccu, CLK_APB0),
-		.get_rate = ccu_get_rate_parent,
-		.gate     = BITMAP_INDEX(0x0028 >> 2, 6),
-		.reset    = BITMAP_INDEX(0x00b0 >> 2, 6),
+		.get_parent = sun8i_r_ccu_apb0_dev_get_parent,
+		.get_rate   = ccu_get_rate_parent,
+		.gate       = BITMAP_INDEX(0x0028 >> 2, 6),
+		.reset      = BITMAP_INDEX(0x00b0 >> 2, 6),
 	},
 	[CLK_BUS_R_TWD] = {
-		.parents  = CLOCK_PARENT(r_ccu, CLK_APB0),
-		.get_rate = ccu_get_rate_parent,
-		.gate     = BITMAP_INDEX(0x0028 >> 2, 7),
+		.get_parent = sun8i_r_ccu_apb0_dev_get_parent,
+		.get_rate   = ccu_get_rate_parent,
+		.gate       = BITMAP_INDEX(0x0028 >> 2, 7),
 	},
 	[CLK_R_CIR] = {
-		.parents = CLOCK_PARENTS(4) {
-			{ .dev = &r_ccu.dev, .id = CLK_OSC32K },
-			{ .dev = &r_ccu.dev, .id = CLK_OSC24M },
-		},
-		.get_rate = sun8i_r_ccu_r_cir_get_rate,
-		.gate     = BITMAP_INDEX(CLK_R_CIR_REG >> 2, 31),
-		.reg      = CLK_R_CIR_REG,
-		.mux      = BITFIELD(24, 2),
+		.get_parent = sun8i_r_ccu_r_cir_get_parent,
+		.get_rate   = sun8i_r_ccu_r_cir_get_rate,
+		.gate       = BITMAP_INDEX(CLK_R_CIR_REG >> 2, 31),
 	},
 };
 
