@@ -7,7 +7,6 @@
 #include <clock.h>
 #include <debug.h>
 #include <device.h>
-#include <error.h>
 #include <stdint.h>
 #include <clock/ccu.h>
 #include <platform/devices.h>

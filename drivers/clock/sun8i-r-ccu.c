@@ -8,7 +8,6 @@
 #include <clock.h>
 #include <debug.h>
 #include <device.h>
-#include <error.h>
 #include <mmio.h>
 #include <stdint.h>
 #include <clock/ccu.h>
