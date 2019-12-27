@@ -28,8 +28,9 @@ static const struct ccu_clock sun8i_a83t_ccu_clocks[SUN8I_A83T_CCU_CLOCKS] = {
 		.get_rate = sun8i_a83t_ccu_fixed_get_rate,
 	},
 	[CLK_BUS_MSGBOX] = {
-		.gate  = BITMAP_INDEX(0x0064 >> 2, 21),
-		.reset = BITMAP_INDEX(0x02c4 >> 2, 21),
+		.get_rate = ccu_get_rate_parent,
+		.gate     = BITMAP_INDEX(0x0064 >> 2, 21),
+		.reset    = BITMAP_INDEX(0x02c4 >> 2, 21),
 	},
 };
 

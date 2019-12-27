@@ -44,7 +44,7 @@ ccu_get_rate(const struct clock_handle *clock, uint32_t rate)
 	const struct ccu_clock *clk = &self->clocks[clock->id];
 
 	/* Perform clock-specific adjustments to the parent rate. */
-	return clk->get_rate ? clk->get_rate(self, rate, clock->id) : rate;
+	return clk->get_rate(self, rate, clock->id);
 }
 
 static int

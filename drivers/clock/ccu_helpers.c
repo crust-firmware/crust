@@ -28,3 +28,10 @@ ccu_calc_rate_p(uint32_t val, uint32_t rate,
 
 	return rate;
 }
+
+uint32_t
+ccu_get_rate_parent(const struct ccu *self UNUSED, uint32_t rate,
+                    uint8_t id UNUSED)
+{
+	return rate;
+}

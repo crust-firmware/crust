@@ -35,6 +35,9 @@ uint32_t ccu_calc_rate_mp(uint32_t val, uint32_t rate,
 uint32_t ccu_calc_rate_p(uint32_t val, uint32_t rate,
                          uint32_t p_off, uint32_t p_width);
 
+uint32_t ccu_get_rate_parent(const struct ccu *self, uint32_t rate,
+                             uint8_t id);
+
 extern const struct clock_driver ccu_driver;
 
 #endif /* CCU_PRIVATE_H */
