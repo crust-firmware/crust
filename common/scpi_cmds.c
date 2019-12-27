@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
+#include <bitfield.h>
 #include <css.h>
 #include <debug.h>
 #include <device.h>
@@ -104,11 +105,11 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
                              uint16_t *tx_size UNUSED)
 {
 	uint32_t descriptor    = rx_payload[0];
-	uint8_t  core          = (descriptor >> 0x00) & GENMASK(3, 0);
-	uint8_t  cluster       = (descriptor >> 0x04) & GENMASK(3, 0);
-	uint8_t  core_state    = (descriptor >> 0x08) & GENMASK(3, 0);
-	uint8_t  cluster_state = (descriptor >> 0x0c) & GENMASK(3, 0);
-	uint8_t  css_state     = (descriptor >> 0x10) & GENMASK(3, 0);
+	uint8_t  core          = bitfield_get(descriptor, 0x00, 4);
+	uint8_t  cluster       = bitfield_get(descriptor, 0x04, 4);
+	uint8_t  core_state    = bitfield_get(descriptor, 0x08, 4);
+	uint8_t  cluster_state = bitfield_get(descriptor, 0x0c, 4);
+	uint8_t  css_state     = bitfield_get(descriptor, 0x10, 4);
 	int err;
 
 	/* Do not check if the CSS should be turned on, as receiving this
