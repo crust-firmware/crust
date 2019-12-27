@@ -10,51 +10,6 @@
 #include <util.h>
 
 /**
- * Create a bitmask for the bits included in a bitfield.
- *
- * @param field The description of the bitfield.
- */
-#define BF_MASK(f)              ((BIT(BF_WIDTH(f)) - 1) << BF_OFFSET(f))
-
-/**
- * Extract the offset portion of a bitfield description.
- *
- * @param field The description of the bitfield.
- */
-#define BF_OFFSET(field)        ((field) & 0x1f)
-
-/**
- * Return a boolean value for if a bitfield description represents a usable
- * (non-zero-width) bitfield.
- *
- * @param field The description of the bitfield.
- */
-#define BF_PRESENT(field)       (BF_WIDTH(field) > 0)
-
-/**
- * Extract the width portion of a bitfield description.
- *
- * @param field The description of the bitfield.
- */
-#define BF_WIDTH(field)         ((field) >> 5)
-
-/**
- * Create a bitfield description from an offset and width.
- *
- * @param offset The offset in bits of the LSB of the bitfield from the LSB of
- *               the word containing the bitfield.
- * @param width  The width of the bitfield in bits.
- */
-#define BITFIELD(offset, width) (((width) << 5) | ((offset) & 0x1f))
-
-/**
- * Create a bitfield description representing a non-present bitfield.
- */
-#define BITFIELD_NONE           BITFIELD(0, 0)
-
-typedef uint8_t bitfield_t;
-
-/**
  * Get the value in a bitfield.
  *
  * @param word  A word containing a bitfield.
