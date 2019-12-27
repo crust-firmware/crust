@@ -5,3 +5,4 @@
 
 obj-$(CONFIG_PLATFORM_A83T) += sun8i-cnt64.o
 obj-$(CONFIG_PLATFORM_A64)  += sun8i-cnt64.o
+obj-$(CONFIG_PLATFORM_H6)   += sun50i-h6-r-cnt.o

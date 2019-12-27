@@ -1,0 +1,30 @@
+/*
+ * Copyright © 2017-2019 The Crust Firmware Authors.
+ * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+ */
+
+#ifndef DRIVERS_CLOCK_SUN50I_H6_R_CCU_H
+#define DRIVERS_CLOCK_SUN50I_H6_R_CCU_H
+
+enum {
+	CLK_OSC16M,
+	CLK_OSC24M,
+	CLK_OSC32K,
+	CLK_AR100,
+	CLK_R_AHB,
+	CLK_R_APB1,
+	CLK_R_APB2,
+	CLK_BUS_R_PIO,
+	CLK_BUS_R_TIMER,
+	CLK_BUS_R_TWD,
+	CLK_BUS_R_PWM,
+	CLK_BUS_R_UART,
+	CLK_BUS_R_I2C,
+	CLK_BUS_R_CIR,
+	CLK_BUS_R_W1,
+	CLK_R_CIR,
+	CLK_R_W1,
+	SUN50I_H6_R_CCU_CLOCKS
+};
+
+#endif /* DRIVERS_CLOCK_SUN50I_H6_R_CCU_H */

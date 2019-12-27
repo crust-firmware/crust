@@ -7,6 +7,7 @@ config PLATFORM
 	string
 	default "a64"  if PLATFORM_A64
 	default "a83t" if PLATFORM_A83T
+	default "h6"   if PLATFORM_H6
 
 choice
 	prompt "Platform selection"
@@ -17,6 +18,9 @@ config PLATFORM_A64
 config PLATFORM_A83T
 	bool "A83T"
 	imply RSB
+
+config PLATFORM_H6
+	bool "H6"
 
 endchoice
 
