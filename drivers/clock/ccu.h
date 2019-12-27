@@ -27,11 +27,13 @@ struct ccu_clock {
 	uint16_t                   reg;
 	/** Offset and width of the parent mux control in the register. */
 	bitfield_t                 mux;
-	/** Offset and width of the linear divider in the register. */
-	bitfield_t                 m;
-	/** Offset and width of the exponential divider in the register. */
-	bitfield_t                 p;
 };
+
+uint32_t ccu_calc_rate_mp(uint32_t val, uint32_t rate,
+                          uint32_t m_off, uint32_t m_width,
+                          uint32_t p_off, uint32_t p_width);
+uint32_t ccu_calc_rate_p(uint32_t val, uint32_t rate,
+                         uint32_t p_off, uint32_t p_width);
 
 extern const struct clock_driver ccu_driver;
 

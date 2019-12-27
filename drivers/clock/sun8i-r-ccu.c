@@ -16,6 +16,10 @@
 
 #include "ccu.h"
 
+#define CLK_AR100_REG 0x0000
+#define CLK_APB0_REG  0x000c
+#define CLK_R_CIR_REG 0x0054
+
 static const uint32_t sun8i_r_ccu_fixed_rates[] = {
 	[CLK_OSC16M] = 16000000U,
 	[CLK_OSC24M] = 24000000U,
@@ -32,16 +36,32 @@ sun8i_r_ccu_fixed_get_rate(const struct ccu *self UNUSED,
 }
 
 static uint32_t
-sun8i_r_ccu_ar100_get_rate(const struct ccu *self, uint32_t rate, uint8_t id)
+sun8i_r_ccu_ar100_get_rate(const struct ccu *self,
+                           uint32_t rate, uint8_t id UNUSED)
 {
-	const struct ccu_clock *clk = &self->clocks[id];
-	uint32_t val = mmio_read_32(self->regs + clk->reg);
+	uint32_t val = mmio_read_32(self->regs + CLK_AR100_REG);
 
-	/* Parent 2 (CLK_PLL_PERIPH0) has an additional divider. */
-	if (bitfield_get(val, BF_OFFSET(clk->mux), BF_WIDTH(clk->mux)) == 2)
-		rate /= bitfield_get(val, 8, 5) + 1;
+	/* This assumes the post-divider for CLK_PLL_PERIPH0 (parent 2)
+	 * will only be set if parent 2 is selected in the mux. */
+	return ccu_calc_rate_mp(val, rate, 8, 5, 4, 2);
+}
 
-	return rate;
+static uint32_t
+sun8i_r_ccu_apb0_get_rate(const struct ccu *self,
+                          uint32_t rate, uint8_t id UNUSED)
+{
+	uint32_t val = mmio_read_32(self->regs + CLK_APB0_REG);
+
+	return ccu_calc_rate_p(val, rate, 0, 2);
+}
+
+static uint32_t
+sun8i_r_ccu_r_cir_get_rate(const struct ccu *self,
+                           uint32_t rate, uint8_t id UNUSED)
+{
+	uint32_t val = mmio_read_32(self->regs + CLK_R_CIR_REG);
+
+	return ccu_calc_rate_mp(val, rate, 0, 4, 16, 2);
 }
 
 static const struct ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
@@ -62,17 +82,15 @@ static const struct ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 			{ .dev = &r_ccu.dev, .id = CLK_OSC16M },
 		},
 		.get_rate = sun8i_r_ccu_ar100_get_rate,
-		.reg      = 0x0000,
+		.reg      = CLK_AR100_REG,
 		.mux      = BITFIELD(16, 2),
-		.p        = BITFIELD(4, 2),
 	},
 	[CLK_AHB0] = {
 		.parents = CLOCK_PARENT(r_ccu, CLK_AR100),
 	},
 	[CLK_APB0] = {
-		.parents = CLOCK_PARENT(r_ccu, CLK_AHB0),
-		.reg     = 0x000c,
-		.p       = BITFIELD(0, 2),
+		.parents  = CLOCK_PARENT(r_ccu, CLK_AHB0),
+		.get_rate = sun8i_r_ccu_apb0_get_rate,
 	},
 	[CLK_BUS_R_PIO] = {
 		.parents = CLOCK_PARENT(r_ccu, CLK_APB0),
@@ -112,11 +130,10 @@ static const struct ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 			{ .dev = &r_ccu.dev, .id = CLK_OSC32K },
 			{ .dev = &r_ccu.dev, .id = CLK_OSC24M },
 		},
-		.gate = BITMAP_INDEX(0x0054 >> 2, 31),
-		.reg  = 0x0054,
-		.mux  = BITFIELD(24, 2),
-		.m    = BITFIELD(0, 4),
-		.p    = BITFIELD(16, 2),
+		.get_rate = sun8i_r_ccu_r_cir_get_rate,
+		.gate     = BITMAP_INDEX(CLK_R_CIR_REG >> 2, 31),
+		.reg      = CLK_R_CIR_REG,
+		.mux      = BITFIELD(24, 2),
 	},
 };
 
