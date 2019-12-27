@@ -13,20 +13,20 @@
 #include <util.h>
 
 /**
- * Calculate a bit index from a (system word size) word offset and a bit offset
+ * Calculate a bit index from a word offset (in bytes) and a bit offset
  * within that word.
  *
  * @param word The offset of the word from the beginning of the bitmap.
  * @param bit  The offset (arithmetic shift) of the bit within the word.
  */
-#define BITMAP_INDEX(word, bit) (WORD_BIT * (word) + (bit))
+#define BITMAP_INDEX(word, bit) (CHAR_BIT * (word) + (bit))
 
 /**
- * Extract the word offset from a bitmap index.
+ * Extract the word offset (in bytes) from a bitmap index.
  *
  * @param index An index into a bitmap, in bits.
  */
-#define BITMAP_WORD(index)      ((index) / WORD_BIT)
+#define BITMAP_WORD(index)      ((index) / WORD_BIT * (WORD_BIT / CHAR_BIT))
 
 /**
  * Extract the bit offset (arithmetic shift) from a bitmap index.
@@ -44,9 +44,7 @@
 static inline void
 bitmap_clear(uintptr_t base, uint32_t index)
 {
-	uintptr_t word = (uintptr_t)((uint32_t *)base + BITMAP_WORD(index));
-
-	mmio_clr_32(word, BIT(BITMAP_BIT(index)));
+	mmio_clr_32(base + BITMAP_WORD(index), BIT(BITMAP_BIT(index)));
 }
 
 /**
@@ -58,9 +56,7 @@ bitmap_clear(uintptr_t base, uint32_t index)
 static inline bool
 bitmap_get(uintptr_t base, uint32_t index)
 {
-	uintptr_t word = (uintptr_t)((uint32_t *)base + BITMAP_WORD(index));
-
-	return mmio_read_32(word) & BIT(BITMAP_BIT(index));
+	return mmio_get_32(base + BITMAP_WORD(index), BIT(BITMAP_BIT(index)));
 }
 
 /**
@@ -72,9 +68,7 @@ bitmap_get(uintptr_t base, uint32_t index)
 static inline void
 bitmap_set(uintptr_t base, uint32_t index)
 {
-	uintptr_t word = (uintptr_t)((uint32_t *)base + BITMAP_WORD(index));
-
-	mmio_set_32(word, BIT(BITMAP_BIT(index)));
+	mmio_set_32(base + BITMAP_WORD(index), BIT(BITMAP_BIT(index)));
 }
 
 #endif /* LIB_BITMAP_H */
