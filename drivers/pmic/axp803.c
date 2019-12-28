@@ -100,7 +100,7 @@ const struct axp803_pmic axp803_pmic = {
 		.state = DEVICE_STATE_INIT,
 	},
 	.bus = {
-		.dev  = &r_rsb.dev,
-		.addr = AXP803_RSB_RTADDR,
+		.dev = &r_rsb.dev,
+		.id  = AXP803_RSB_RTADDR,
 	},
 };

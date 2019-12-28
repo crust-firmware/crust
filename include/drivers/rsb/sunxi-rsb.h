@@ -13,7 +13,7 @@
 struct sunxi_rsb {
 	struct device       dev;
 	struct clock_handle clock;
-	struct gpio_handle  pins[RSB_NUM_PINS];
+	struct gpio_handle  pins[2];
 	uintptr_t           regs;
 };
 

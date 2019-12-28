@@ -5,6 +5,7 @@
 
 #include <device.h>
 #include <error.h>
+#include <intrusive.h>
 #include <mmio.h>
 #include <rsb.h>
 #include <util.h>
@@ -12,6 +13,8 @@
 #include <gpio/sunxi-gpio.h>
 #include <rsb/sunxi-rsb.h>
 #include <platform/devices.h>
+
+#include "rsb.h"
 
 #define RSB_CTRL_REG   0x00
 #define RSB_CCR_REG    0x04
@@ -65,7 +68,7 @@ sunxi_rsb_probe_dev(const struct rsb_handle *bus, uint16_t hwaddr,
 		return err;
 
 	/* Set the PMIC's runtime address. */
-	return sunxi_rsb_do_command(self, RSB_RTADDR(bus->addr) | hwaddr,
+	return sunxi_rsb_do_command(self, RSB_RTADDR(bus->id) | hwaddr,
 	                            RSB_SRTA);
 }
 
@@ -77,7 +80,7 @@ sunxi_rsb_read(const struct rsb_handle *bus, uint8_t addr, uint8_t *data)
 
 	mmio_write_32(self->regs + RSB_ADDR_REG, addr);
 
-	if ((err = sunxi_rsb_do_command(self, RSB_RTADDR(bus->addr), RSB_RD8)))
+	if ((err = sunxi_rsb_do_command(self, RSB_RTADDR(bus->id), RSB_RD8)))
 		return err;
 
 	*data = mmio_read_32(self->regs + RSB_DATA_REG);
@@ -110,7 +113,7 @@ sunxi_rsb_write(const struct rsb_handle *bus, uint8_t addr, uint8_t data)
 	mmio_write_32(self->regs + RSB_ADDR_REG, addr);
 	mmio_write_32(self->regs + RSB_DATA_REG, data);
 
-	return sunxi_rsb_do_command(self, RSB_RTADDR(bus->addr), RSB_WR8);
+	return sunxi_rsb_do_command(self, RSB_RTADDR(bus->id), RSB_WR8);
 }
 
 static int
