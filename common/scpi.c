@@ -4,7 +4,6 @@
  */
 
 #include <counter.h>
-#include <css.h>
 #include <debug.h>
 #include <error.h>
 #include <msgbox.h>
@@ -130,6 +129,12 @@ scpi_poll_one_client(uint8_t client)
 }
 
 void
+scpi_init(void)
+{
+	mailbox = device_get(&msgbox.dev);
+}
+
+void
 scpi_poll(void)
 {
 	/* Do nothing if there is no mailbox available. */
@@ -148,17 +153,4 @@ scpi_exit(void)
 		device_put(mailbox);
 		mailbox = NULL;
 	}
-}
-
-void
-scpi_init(void)
-{
-	mailbox = device_get(&msgbox.dev);
-
-	/* Only send the ready message once. Assume that if the system is
-	 * already booted, some secondary CPUs will have been turned on. */
-	if (css_get_online_cores(0) != 1)
-		return;
-
-	scpi_create_message(SCPI_CLIENT_EL3, SCPI_CMD_SCP_READY);
 }

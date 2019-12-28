@@ -6,7 +6,6 @@
 #include <counter.h>
 #include <debug.h>
 #include <device.h>
-#include <scpi.h>
 #include <spr.h>
 #include <system_power.h>
 #include <watchdog.h>
@@ -37,14 +36,8 @@ main(uint32_t exception)
 
 	/* Initialize the power management state machine. */
 	system_state_init();
-
-	/* Inform SCPI clients that the firmware has finished booting. */
-	scpi_init();
-
 	next_tick = counter_read() + REFCLK_HZ;
 	for (;;) {
-		/* Perform every-iteration operations. */
-		scpi_poll();
 		system_state_machine();
 
 		if (counter_read() > next_tick) {

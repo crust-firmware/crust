@@ -31,6 +31,23 @@ system_is_running(void)
 void
 system_state_init(void)
 {
+	uint8_t online = css_get_online_cores(0);
+
+	/* If all cores are off, the firmware started while in suspend. */
+	if (online == 0) {
+		system_state = SYSTEM_INACTIVE;
+		return;
+	}
+
+	/* Initialize runtime services. */
+	scpi_init();
+
+	/* If secondary cores are on, Linux is already running. */
+	if (online < 1)
+		return;
+
+	/* Inform SCPI clients that the firmware has finished booting. */
+	scpi_create_message(SCPI_CLIENT_EL3, SCPI_CMD_SCP_READY);
 }
 
 void
@@ -39,6 +56,11 @@ system_state_machine(void)
 	const struct device *pmic, *watchdog;
 
 	switch (system_state) {
+	case SYSTEM_ACTIVE:
+		/* Poll runtime services. */
+		scpi_poll();
+
+		break;
 	case SYSTEM_SUSPEND:
 		/* Disable runtime services. */
 		scpi_exit();
