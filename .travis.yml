@@ -7,10 +7,8 @@ env:
     - CONFIGS="allnoconfig allyesconfig defconfig randconfig randconfig randconfig"
       # A64
     - CONFIGS="orangepi_win_defconfig pine64_plus_defconfig pinebook_defconfig pinephone_defconfig"
-      # A83T
-    - CONFIGS="tbs_a711_defconfig"
-      # H5
-    - CONFIGS="orangepi_pc2_defconfig orangepi_win_defconfig orangepi_zero_plus_defconfig"
+      # A83T / H5 / H6
+    - CONFIGS="tbs_a711_defconfig orangepi_pc2_defconfig orangepi_zero_plus_defconfig pine_h64_defconfig"
 
 install:
   - curl -LSs https://github.com/stffrdhrn/gcc/releases/download/or1k-9.1.1-20190507/or1k-linux-musl-9.1.1-20190507.tar.xz | tar xJf -
