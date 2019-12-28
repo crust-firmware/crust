@@ -64,7 +64,8 @@ scpi_create_message(uint8_t client, uint8_t command)
 	struct scpi_mem *mem     = &SCPI_MEM_AREA(client);
 	struct scpi_state *state = &scpi_state[client];
 
-	assert(!state->tx_full);
+	if (!mailbox || state->tx_full)
+		return;
 
 	/* Write the message header. */
 	mem->tx_msg.command = command;
