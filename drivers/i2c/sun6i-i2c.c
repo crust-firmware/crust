@@ -184,7 +184,7 @@ sun6i_i2c_probe(const struct device *dev)
 	/* Set port L pins 0-1 to I²C. */
 	for (int i = 0; i < I2C_NUM_PINS; ++i) {
 		if ((err = gpio_get(&self->pins[i])))
-			return err;
+			goto err_put_clock;
 	}
 
 	/* Set I2C bus clock divider for 400 KHz operation. */
@@ -202,10 +202,17 @@ sun6i_i2c_probe(const struct device *dev)
 	mmio_set_32(self->regs + I2C_SRST_REG, BIT(0));
 
 	/* Wait for the bus to go idle. */
-	if (!sun6i_i2c_wait_idle(self))
-		return EIO;
+	if (!sun6i_i2c_wait_idle(self)) {
+		err = EIO;
+		goto err_put_clock;
+	}
 
 	return SUCCESS;
+
+err_put_clock:
+	clock_put(&self->clock);
+
+	return err;
 }
 
 static void

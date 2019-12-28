@@ -124,7 +124,7 @@ sunxi_rsb_probe(const struct device *dev)
 
 	for (int i = 0; i < RSB_NUM_PINS; ++i) {
 		if ((err = gpio_get(&self->pins[i])))
-			return err;
+			goto err_put_clock;
 	}
 
 	mmio_write_32(self->regs + RSB_CTRL_REG, BIT(0));
@@ -132,9 +132,14 @@ sunxi_rsb_probe(const struct device *dev)
 
 	/* Set the bus clock to a rate also compatible with I²C. */
 	if ((err = sunxi_rsb_set_rate(dev, 400000)))
-		return err;
+		goto err_put_clock;
 
 	return SUCCESS;
+
+err_put_clock:
+	clock_put(&self->clock);
+
+	return err;
 }
 
 static void
