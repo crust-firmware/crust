@@ -61,18 +61,6 @@ struct driver {
 const struct device *device_get(const struct device *dev);
 
 /**
- * Determine if a device is running.
- *
- * A device is considered running if it has been successfully initialized by
- * its driver and has a nonzero refcount.
- *
- * @param dev A device.
- *
- * @return A Boolean representing the state of the device.
- */
-bool device_is_running(const struct device *dev);
-
-/**
  * Release a reference to a device.
  *
  * @param dev A reference to a device.
