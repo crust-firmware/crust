@@ -5,5 +5,4 @@
 
 obj-y += css.o
 
-obj-$(CONFIG_SOC_A64) += css-a64.o
-obj-$(CONFIG_SOC_H5)  += css-a64.o
+obj-$(CONFIG_PLATFORM_A64) += css-a64.o
