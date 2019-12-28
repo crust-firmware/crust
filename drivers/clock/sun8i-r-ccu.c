@@ -67,7 +67,7 @@ sun8i_r_ccu_ar100_get_rate(const struct ccu *self,
 {
 	uint32_t val = mmio_read_32(self->regs + CLK_AR100_REG);
 
-	/* This assumes the post-divider for CLK_PLL_PERIPH0 (parent 2)
+	/* This assumes the pre-divider for PLL_PERIPH0 (parent 2)
 	 * will only be set if parent 2 is selected in the mux. */
 	return ccu_calc_rate_mp(val, rate, 8, 5, 4, 2);
 }
@@ -100,7 +100,7 @@ sun8i_r_ccu_apb0_get_rate(const struct ccu *self,
 {
 	uint32_t val = mmio_read_32(self->regs + CLK_APB0_REG);
 
-	return ccu_calc_rate_p(val, rate, 0, 2);
+	return ccu_calc_rate_m(val, rate, 0, 2);
 }
 
 static const struct clock_handle sun8i_r_ccu_apb0_dev_parent = {

@@ -25,6 +25,8 @@ struct ccu_clock {
 	uint16_t                   reset;
 };
 
+uint32_t ccu_calc_rate_m(uint32_t val, uint32_t rate,
+                         uint32_t m_off, uint32_t m_width);
 uint32_t ccu_calc_rate_mp(uint32_t val, uint32_t rate,
                           uint32_t m_off, uint32_t m_width,
                           uint32_t p_off, uint32_t p_width);
