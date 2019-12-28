@@ -39,13 +39,6 @@ system_state_machine(void)
 	const struct device *pmic, *watchdog;
 
 	switch (system_state) {
-	case SYSTEM_INACTIVE:
-	case SYSTEM_OFF:
-		/* Poll wakeup sources. */
-		if (irq_poll())
-			system_wakeup();
-
-		break;
 	case SYSTEM_SUSPEND:
 		/* Disable runtime services. */
 		scpi_exit();
@@ -64,6 +57,11 @@ system_state_machine(void)
 
 		/* The system is now inactive. */
 		system_state = SYSTEM_INACTIVE;
+		break;
+	case SYSTEM_INACTIVE:
+		/* Poll wakeup sources. Resume on wakeup. */
+		if (irq_poll())
+			system_state = SYSTEM_RESUME;
 		break;
 	case SYSTEM_RESUME:
 		/* Turn on previously-disabled clocks. */
@@ -107,6 +105,11 @@ system_state_machine(void)
 
 		/* The system is now off. */
 		system_state = SYSTEM_OFF;
+		break;
+	case SYSTEM_OFF:
+		/* Poll wakeup sources. Reset on wakeup. */
+		if (!irq_poll())
+			system_state = SYSTEM_RESET;
 		break;
 	case SYSTEM_RESET:
 		/* Attempt to reset the SoC using the PMIC. */
