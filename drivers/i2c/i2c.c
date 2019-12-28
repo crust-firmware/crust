@@ -24,7 +24,7 @@ i2c_ops_for(const struct i2c_handle *bus)
 }
 
 int
-i2c_probe(const struct i2c_handle *bus)
+i2c_get(const struct i2c_handle *bus)
 {
 	const struct i2c_driver_ops *ops = i2c_ops_for(bus);
 	uint8_t dummy;
@@ -46,7 +46,18 @@ abort:
 	/* Finish the transaction. */
 	ops->stop(bus);
 
-	return err;
+	if (err) {
+		device_put(bus->dev);
+		return ENODEV;
+	}
+
+	return SUCCESS;
+}
+
+void
+i2c_put(const struct i2c_handle *bus)
+{
+	device_put(bus->dev);
 }
 
 int

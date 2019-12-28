@@ -107,16 +107,24 @@ sy8106a_probe(const struct device *dev)
 	const struct sy8106a *self = to_sy8106a(dev);
 	int err;
 
-	if ((err = i2c_probe(&self->bus)))
+	if ((err = i2c_get(&self->bus)))
 		return err;
 
 	return SUCCESS;
 }
 
+static void
+sy8106a_release(const struct device *dev)
+{
+	const struct sy8106a *self = to_sy8106a(dev);
+
+	i2c_put(&self->bus);
+}
+
 static const struct regulator_driver sy8106a_driver = {
 	.drv = {
 		.probe   = sy8106a_probe,
-		.release = dummy_release,
+		.release = sy8106a_release,
 	},
 	.ops = {
 		.get_info  = sy8106a_get_info,
