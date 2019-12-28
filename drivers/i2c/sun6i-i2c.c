@@ -240,12 +240,12 @@ const struct sun6i_i2c r_i2c = {
 		{
 			.dev  = &r_pio.dev,
 			.pin  = SUNXI_GPIO_PIN(0, 0),
-			.mode = IS_ENABLED(CONFIG_SOC_A64) ? 3 : 2,
+			.mode = IS_ENABLED(CONFIG_SOC_H5) ? 2 : 3,
 		},
 		{
 			.dev  = &r_pio.dev,
 			.pin  = SUNXI_GPIO_PIN(0, 1),
-			.mode = IS_ENABLED(CONFIG_SOC_A64) ? 3 : 2,
+			.mode = IS_ENABLED(CONFIG_SOC_H5) ? 2 : 3,
 		},
 	},
 	.regs = DEV_R_I2C,
