@@ -15,7 +15,10 @@ struct rsb_handle {
 };
 
 /**
- * Probe for an RSB device, switch it to RSB mode, and set its runtime address.
+ * Get a reference to an RSB device.
+ *
+ * This function will search for an RSB device, switch it to RSB mode, and set
+ * its runtime address.
  *
  * @param bus    The RSB bus that the device is connected to.
  * @param hwaddr The hardware address of this device.
@@ -23,8 +26,15 @@ struct rsb_handle {
  * @param data   The data value that will switch the PMIC to RSB mode.
  * @return       Zero on success; an error code on failure.
  */
-int rsb_probe(const struct rsb_handle *bus, uint16_t hwaddr, uint8_t addr,
-              uint8_t data);
+int rsb_get(const struct rsb_handle *bus, uint16_t hwaddr,
+            uint8_t addr, uint8_t data);
+
+/**
+ * Release a reference to an RSB device.
+ *
+ * @param bus A reference to an RSB device.
+ */
+void rsb_put(const struct rsb_handle *bus);
 
 /**
  * Read a register contained inside an RSB device.

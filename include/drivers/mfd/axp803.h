@@ -24,7 +24,12 @@
  * @return     Zero if an AXP803 is present and successfully initialized; any
  *             other value if it is not.
  */
-int axp803_probe(const struct rsb_handle *bus);
+int axp803_get(const struct rsb_handle *bus);
+
+/**
+ * Drop a reference to an AXP803 PMIC.
+ */
+void axp803_put(const struct rsb_handle *bus);
 
 /**
  * Set one or more bits in a register in the AXP803 PMIC.

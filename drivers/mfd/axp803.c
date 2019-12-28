@@ -17,27 +17,42 @@
 #define IC_TYPE_MASK    0xcf
 #define IC_TYPE_VALUE   0x41
 
-static bool initialized;
+static uint8_t refcount;
 
 int
-axp803_probe(const struct rsb_handle *bus)
+axp803_get(const struct rsb_handle *bus)
 {
 	uint8_t reg;
 	int err;
 
-	if (initialized)
+	if (refcount)
 		return SUCCESS;
-	if ((err = rsb_probe(bus, AXP803_RSB_HWADDR,
-	                     AXP803_MODE_REG, AXP803_MODE_VAL)))
+	if ((err = rsb_get(bus, AXP803_RSB_HWADDR,
+	                   AXP803_MODE_REG, AXP803_MODE_VAL)))
 		return err;
 	if ((err = rsb_read(bus, IC_TYPE_REG, &reg)))
-		return err;
-	if ((reg & IC_TYPE_MASK) != IC_TYPE_VALUE)
-		return ENODEV;
+		goto err_put_bus;
+	if ((reg & IC_TYPE_MASK) != IC_TYPE_VALUE) {
+		err = ENODEV;
+		goto err_put_bus;
+	}
 
-	initialized = true;
+	++refcount;
 
 	return SUCCESS;
+
+err_put_bus:
+	axp803_put(bus);
+	return err;
+}
+
+void
+axp803_put(const struct rsb_handle *bus)
+{
+	if (--refcount)
+		return;
+
+	rsb_put(bus);
 }
 
 int

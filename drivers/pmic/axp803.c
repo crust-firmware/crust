@@ -56,6 +56,11 @@ static int
 axp803_pmic_suspend(const struct device *dev)
 {
 	const struct axp803_pmic *self = to_axp803_pmic(dev);
+	int err;
+
+	/* Remember previous voltages when waking up from suspend. */
+	if ((err = axp803_reg_setbits(&self->bus, PIN_FUNCTION_REG, BIT(1))))
+		return err;
 
 	/* Enable resume, allow IRQs during suspend. */
 	return axp803_reg_setbits(&self->bus, WAKEUP_CTRL_REG,
@@ -68,22 +73,24 @@ axp803_pmic_probe(const struct device *dev)
 	const struct axp803_pmic *self = to_axp803_pmic(dev);
 	int err;
 
-	if ((err = axp803_probe(&self->bus)))
-		return err;
-
-	/* Enable shutdown on PMIC overheat or >16 seconds button press;
-	 * remember previous voltages when waking up from suspend. */
-	if ((err = axp803_reg_setbits(&self->bus, PIN_FUNCTION_REG,
-	                              GENMASK(3, 1))))
+	if ((err = axp803_get(&self->bus)))
 		return err;
 
 	return SUCCESS;
 }
 
+static void
+axp803_pmic_release(const struct device *dev)
+{
+	const struct axp803_pmic *self = to_axp803_pmic(dev);
+
+	axp803_put(&self->bus);
+}
+
 static const struct pmic_driver axp803_pmic_driver = {
 	.drv = {
 		.probe   = axp803_pmic_probe,
-		.release = dummy_release,
+		.release = axp803_pmic_release,
 	},
 	.ops = {
 		.reset    = axp803_pmic_reset,

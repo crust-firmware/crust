@@ -502,21 +502,29 @@ axp803_regulator_write_raw(const struct device *dev, uint8_t id, uint32_t raw)
 }
 
 static int
-axp_regulator_probe(const struct device *dev)
+axp803_regulator_probe(const struct device *dev)
 {
 	const struct axp803_regulator *self = to_axp803_regulator(dev);
 	int err;
 
-	if ((err = axp803_probe(&self->bus)))
+	if ((err = axp803_get(&self->bus)))
 		return err;
 
 	return SUCCESS;
 }
 
+static void
+axp803_regulator_release(const struct device *dev)
+{
+	const struct axp803_regulator *self = to_axp803_regulator(dev);
+
+	axp803_put(&self->bus);
+}
+
 static const struct regulator_driver axp803_regulator_driver = {
 	.drv = {
-		.probe   = axp_regulator_probe,
-		.release = dummy_release,
+		.probe   = axp803_regulator_probe,
+		.release = axp803_regulator_release,
 	},
 	.ops = {
 		.get_info  = axp803_regulator_get_info,

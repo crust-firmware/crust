@@ -24,14 +24,30 @@ rsb_ops_for(const struct rsb_handle *bus)
 }
 
 int
-rsb_probe(const struct rsb_handle *bus, uint16_t hwaddr, uint8_t addr,
-          uint8_t data)
+rsb_get(const struct rsb_handle *bus, uint16_t hwaddr, uint8_t addr,
+        uint8_t data)
 {
+	int err;
+
 	/* Ensure the controller's driver is loaded. */
 	if (!device_get(bus->dev))
 		return ENODEV;
 
-	return rsb_ops_for(bus)->probe(bus, hwaddr, addr, data);
+	if ((err = rsb_ops_for(bus)->probe(bus, hwaddr, addr, data)))
+		goto err_put_device;
+
+	return SUCCESS;
+
+err_put_device:
+	device_put(bus->dev);
+
+	return err;
+}
+
+void
+rsb_put(const struct rsb_handle *bus)
+{
+	device_put(bus->dev);
 }
 
 int
