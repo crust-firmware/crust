@@ -7,7 +7,6 @@
 #define LIB_BITFIELD_H
 
 #include <stdint.h>
-#include <util.h>
 
 /**
  * Get the value in a bitfield.
@@ -16,11 +15,7 @@
  * @param start The offset of the starting bit (LSB) of the bitfield.
  * @param width The width of the bitfield in bits.
  */
-static inline uint32_t
-bitfield_get(uint32_t word, uint32_t start, uint32_t width)
-{
-	return (word >> start) & (BIT(width) - 1);
-}
+uint32_t bitfield_get(uint32_t word, uint32_t start, uint32_t width);
 
 /**
  * Set the value in a bitfield.
@@ -31,10 +26,7 @@ bitfield_get(uint32_t word, uint32_t start, uint32_t width)
  * @param value The value to place in the bitfield.
  * @return      The original word, with the value of the bitfield replaced.
  */
-static inline uint32_t
-bitfield_set(uint32_t word, uint32_t start, uint32_t width, uint32_t value)
-{
-	return word ^ ((value << start ^ word) & ((BIT(width) - 1) << start));
-}
+uint32_t bitfield_set(uint32_t word, uint32_t start, uint32_t width,
+                      uint32_t value);
 
 #endif /* LIB_BITFIELD_H */
