@@ -180,12 +180,10 @@ sun6i_i2c_probe(const struct device *dev)
 
 	if ((err = clock_get(&self->clock)))
 		return err;
-
-	/* Set port L pins 0-1 to I²C. */
-	for (int i = 0; i < I2C_NUM_PINS; ++i) {
-		if ((err = gpio_get(&self->pins[i])))
-			goto err_put_clock;
-	}
+	if ((err = gpio_get(&self->pins[0])))
+		goto err_put_clock;
+	if ((err = gpio_get(&self->pins[1])))
+		goto err_put_gpio0;
 
 	/* Set I2C bus clock divider for 400 KHz operation. */
 	mmio_write_32(self->regs + I2C_CCR_REG, 0x00000011);
@@ -204,11 +202,15 @@ sun6i_i2c_probe(const struct device *dev)
 	/* Wait for the bus to go idle. */
 	if (!sun6i_i2c_wait_idle(self)) {
 		err = EIO;
-		goto err_put_clock;
+		goto err_put_gpio1;
 	}
 
 	return SUCCESS;
 
+err_put_gpio1:
+	gpio_put(&self->pins[1]);
+err_put_gpio0:
+	gpio_put(&self->pins[0]);
 err_put_clock:
 	clock_put(&self->clock);
 
@@ -220,6 +222,8 @@ sun6i_i2c_release(const struct device *dev)
 {
 	const struct sun6i_i2c *self = to_sun6i_i2c(dev);
 
+	gpio_put(&self->pins[1]);
+	gpio_put(&self->pins[0]);
 	clock_put(&self->clock);
 }
 
@@ -245,14 +249,18 @@ const struct sun6i_i2c r_i2c = {
 	.clock = { .dev = &r_ccu.dev, .id = CLK_BUS_R_I2C },
 	.pins  = {
 		{
-			.dev  = &r_pio.dev,
-			.pin  = SUNXI_GPIO_PIN(0, 0),
-			.mode = IS_ENABLED(CONFIG_SOC_H5) ? 2 : 3,
+			.dev   = &r_pio.dev,
+			.id    = SUNXI_GPIO_PIN(0, 0),
+			.drive = DRIVE_10mA,
+			.mode  = IS_ENABLED(CONFIG_SOC_H5) ? 2 : 3,
+			.pull  = PULL_UP,
 		},
 		{
-			.dev  = &r_pio.dev,
-			.pin  = SUNXI_GPIO_PIN(0, 1),
-			.mode = IS_ENABLED(CONFIG_SOC_H5) ? 2 : 3,
+			.dev   = &r_pio.dev,
+			.id    = SUNXI_GPIO_PIN(0, 1),
+			.drive = DRIVE_10mA,
+			.mode  = IS_ENABLED(CONFIG_SOC_H5) ? 2 : 3,
+			.pull  = PULL_UP,
 		},
 	},
 	.regs = DEV_R_I2C,

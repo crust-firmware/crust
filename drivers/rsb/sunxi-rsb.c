@@ -121,21 +121,24 @@ sunxi_rsb_probe(const struct device *dev)
 
 	if ((err = clock_get(&self->clock)))
 		return err;
-
-	for (int i = 0; i < RSB_NUM_PINS; ++i) {
-		if ((err = gpio_get(&self->pins[i])))
-			goto err_put_clock;
-	}
+	if ((err = gpio_get(&self->pins[0])))
+		goto err_put_clock;
+	if ((err = gpio_get(&self->pins[1])))
+		goto err_put_gpio0;
 
 	mmio_write_32(self->regs + RSB_CTRL_REG, BIT(0));
 	mmio_pollz_32(self->regs + RSB_CTRL_REG, BIT(0));
 
 	/* Set the bus clock to a rate also compatible with I²C. */
 	if ((err = sunxi_rsb_set_rate(dev, 400000)))
-		goto err_put_clock;
+		goto err_put_gpio1;
 
 	return SUCCESS;
 
+err_put_gpio1:
+	gpio_put(&self->pins[1]);
+err_put_gpio0:
+	gpio_put(&self->pins[0]);
 err_put_clock:
 	clock_put(&self->clock);
 
@@ -147,6 +150,8 @@ sunxi_rsb_release(const struct device *dev)
 {
 	const struct sunxi_rsb *self = to_sunxi_rsb(dev);
 
+	gpio_put(&self->pins[1]);
+	gpio_put(&self->pins[0]);
 	clock_put(&self->clock);
 }
 
@@ -172,14 +177,18 @@ const struct sunxi_rsb r_rsb = {
 	.clock = { .dev = &r_ccu.dev, .id = CLK_BUS_R_RSB },
 	.pins  = {
 		{
-			.dev  = &r_pio.dev,
-			.pin  = SUNXI_GPIO_PIN(0, 0),
-			.mode = 2,
+			.dev   = &r_pio.dev,
+			.id    = SUNXI_GPIO_PIN(0, 0),
+			.drive = DRIVE_10mA,
+			.mode  = 2,
+			.pull  = PULL_UP,
 		},
 		{
-			.dev  = &r_pio.dev,
-			.pin  = SUNXI_GPIO_PIN(0, 1),
-			.mode = 2,
+			.dev   = &r_pio.dev,
+			.id    = SUNXI_GPIO_PIN(0, 1),
+			.drive = DRIVE_10mA,
+			.mode  = 2,
+			.pull  = PULL_UP,
 		},
 	},
 	.regs = DEV_R_RSB,

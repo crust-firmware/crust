@@ -7,74 +7,57 @@
 #define DRIVERS_GPIO_H
 
 #include <device.h>
-#include <intrusive.h>
 #include <stdbool.h>
 #include <stdint.h>
 
-#define GPIO_OPS(dev) \
-	(&container_of((dev)->drv, const struct gpio_driver, drv)->ops)
-
 struct gpio_handle {
 	const struct device *dev;
-	uint8_t              pin;
+	uint8_t              id;
+	uint8_t              drive;
 	uint8_t              mode;
-};
-
-struct gpio_driver_ops {
-	int (*get_value)(const struct device *dev, uint8_t pin, bool *value);
-	int (*set_mode)(const struct device *dev, uint8_t pin, uint8_t mode);
-	int (*set_value)(const struct device *dev, uint8_t pin, bool value);
-};
-
-struct gpio_driver {
-	struct driver          drv;
-	struct gpio_driver_ops ops;
+	uint8_t              pull;
 };
 
 /**
- * Get a reference to a pin and its controller device, and set the pin's mode.
+ * Get a reference to a GPIO pin and its controller device, and set up the pin.
  *
- * @param gpio A handle for the GPIO pin.
+ * The pin's mode, drive strength, and pull-up or pull-down will be set based
+ * on the values in the handle.
+ *
+ * @param gpio A handle specifying the GPIO pin.
+ * @return     Zero on success; an error code on failure.
  */
 int gpio_get(const struct gpio_handle *gpio);
 
 /**
- * Get the value of a pin.
+ * Get the value of a GPIO pin.
  *
- * @param dev   The GPIO controller.
- * @param pin   The identifier of the pin to retrieve the value for.
- * @param value The location to store the value read from the specified pin.
+ * If the pin mode is not "input", this may not get the actual hardware state.
+ *
+ * @param gpio  A reference to a GPIO pin.
+ * @param value The location to store the value read from the pin.
+ * @return      Zero on success; an error code on failure.
  */
-static inline int
-gpio_get_value(const struct device *dev, uint8_t pin, bool *value)
-{
-	return GPIO_OPS(dev)->get_value(dev, pin, value);
-}
+int gpio_get_value(const struct gpio_handle *gpio, bool *value);
 
 /**
- * Set the mode of a pin.
+ * Release a reference to a GPIO pin and its controller device.
  *
- * @param dev  The GPIO controller.
- * @param pin  The identifier of the pin to set the mode of.
- * @param mode The mode to set for the specified pin.
+ * If this is the last reference to a GPIO pin, that pin will be disabled.
+ *
+ * @param gpio A reference to a GPIO pin.
  */
-static inline int
-gpio_set_mode(const struct device *dev, uint8_t pin, uint8_t mode)
-{
-	return GPIO_OPS(dev)->set_mode(dev, pin, mode);
-}
+void gpio_put(const struct gpio_handle *gpio);
 
 /**
- * Set the value of a pin.
+ * Set the value of a GPIO pin.
  *
- * @param dev   The GPIO controller.
- * @param pin   The identifier of the pin to set the value of.
- * @param value The value to set for the specified pin.
+ * If the pin mode is not "output", this may have no effect on the hardware.
+ *
+ * @param gpio  A reference to a GPIO pin.
+ * @param value The value to set for the pin.
+ * @return      Zero on success; an error code on failure.
  */
-static inline int
-gpio_set_value(const struct device *dev, uint8_t pin, bool value)
-{
-	return GPIO_OPS(dev)->set_value(dev, pin, value);
-}
+int gpio_set_value(const struct gpio_handle *gpio, bool value);
 
 #endif /* DRIVERS_GPIO_H */

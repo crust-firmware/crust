@@ -9,7 +9,26 @@
 #include <clock.h>
 #include <gpio.h>
 
-#define SUNXI_GPIO_PIN(port, index) (32 * (port) + (index))
+#define SUNXI_GPIO_PIN(port, pin) (32 * (port) + (pin))
+
+enum {
+	DRIVE_10mA = 0,
+	DRIVE_20mA = 1,
+	DRIVE_30mA = 2,
+	DRIVE_40mA = 3,
+};
+
+enum {
+	MODE_INPUT   = 0,
+	MODE_OUTPUT  = 1,
+	MODE_DISABLE = 7,
+};
+
+enum {
+	PULL_NONE = 0,
+	PULL_UP   = 1,
+	PULL_DOWN = 2,
+};
 
 struct sunxi_gpio {
 	struct device       dev;
