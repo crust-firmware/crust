@@ -13,7 +13,7 @@
 struct sun6i_i2c {
 	struct device       dev;
 	struct clock_handle clock;
-	struct gpio_handle  pins[I2C_NUM_PINS];
+	struct gpio_handle  pins[2];
 	uintptr_t           regs;
 };
 

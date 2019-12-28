@@ -6,18 +6,32 @@
 #include <device.h>
 #include <error.h>
 #include <i2c.h>
+#include <intrusive.h>
 #include <stdint.h>
+
+#include "i2c.h"
+
+/**
+ * Get the ops for the I²C controller device.
+ */
+static inline const struct i2c_driver_ops *
+i2c_ops_for(const struct i2c_handle *bus)
+{
+	const struct i2c_driver *drv =
+		container_of(bus->dev->drv, const struct i2c_driver, drv);
+
+	return &drv->ops;
+}
 
 int
 i2c_probe(const struct i2c_handle *bus)
 {
-	const struct device *dev         = device_get(bus->dev);
-	const struct i2c_driver_ops *ops = I2C_OPS(bus->dev);
+	const struct i2c_driver_ops *ops = i2c_ops_for(bus);
 	uint8_t dummy;
 	int err;
 
 	/* Ensure the controller's driver is loaded. */
-	if (!dev)
+	if (!device_get(bus->dev))
 		return ENODEV;
 
 	/* Start a read transaction. */
@@ -38,7 +52,7 @@ abort:
 int
 i2c_read_reg(const struct i2c_handle *bus, uint8_t addr, uint8_t *data)
 {
-	const struct i2c_driver_ops *ops = I2C_OPS(bus->dev);
+	const struct i2c_driver_ops *ops = i2c_ops_for(bus);
 	int err;
 
 	/* Start a write transaction. */
@@ -67,7 +81,7 @@ abort:
 int
 i2c_write_reg(const struct i2c_handle *bus, uint8_t addr, uint8_t data)
 {
-	const struct i2c_driver_ops *ops = I2C_OPS(bus->dev);
+	const struct i2c_driver_ops *ops = i2c_ops_for(bus);
 	int err;
 
 	/* Start a write transaction. */

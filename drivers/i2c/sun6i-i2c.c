@@ -7,6 +7,7 @@
 #include <device.h>
 #include <error.h>
 #include <i2c.h>
+#include <intrusive.h>
 #include <mmio.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -15,6 +16,8 @@
 #include <gpio/sunxi-gpio.h>
 #include <i2c/sun6i-i2c.h>
 #include <platform/devices.h>
+
+#include "i2c.h"
 
 #define I2C_ADDR_REG  0x00
 #define I2C_XADDR_REG 0x04
@@ -133,7 +136,7 @@ sun6i_i2c_start(const struct i2c_handle *bus, uint8_t direction)
 		return EIO;
 
 	/* Write the address and direction, then trigger a state change. */
-	mmio_write_32(self->regs + I2C_DATA_REG, (bus->addr << 1) | direction);
+	mmio_write_32(self->regs + I2C_DATA_REG, (bus->id << 1) | direction);
 	mmio_set_32(self->regs + I2C_CTRL_REG, BIT(3));
 
 	/* Check for address acknowledgement. */

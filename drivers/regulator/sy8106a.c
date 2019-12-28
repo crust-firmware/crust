@@ -134,7 +134,7 @@ const struct sy8106a sy8106a = {
 		.state = DEVICE_STATE_INIT,
 	},
 	.bus = {
-		.dev  = &r_i2c.dev,
-		.addr = SY8106A_I2C_ADDRESS,
+		.dev = &r_i2c.dev,
+		.id  = SY8106A_I2C_ADDRESS,
 	},
 };
