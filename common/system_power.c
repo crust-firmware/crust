@@ -13,7 +13,6 @@
 #include <watchdog.h>
 #include <watchdog/sunxi-twd.h>
 
-static const struct device *pmic;
 static uint8_t system_state;
 
 bool
@@ -32,13 +31,12 @@ system_is_running(void)
 void
 system_state_init(void)
 {
-	pmic = pmic_get();
 }
 
 void
 system_state_machine(void)
 {
-	const struct device *watchdog;
+	const struct device *pmic, *watchdog;
 
 	switch (system_state) {
 	case SYSTEM_INACTIVE:
@@ -55,8 +53,10 @@ system_state_machine(void)
 		/* Enable wakeup sources. */
 
 		/* Perform PMIC-specific suspend actions. */
-		if (pmic)
+		if ((pmic = pmic_get())) {
 			pmic_suspend(pmic);
+			device_put(pmic);
+		}
 
 		/* Turn off all unnecessary power domains. */
 
@@ -71,8 +71,10 @@ system_state_machine(void)
 		/* Turn on previously-disabled power domains. */
 
 		/* Perform PMIC-specific resume actions. */
-		if (pmic)
+		if ((pmic = pmic_get())) {
 			pmic_resume(pmic);
+			device_put(pmic);
+		}
 
 		/* Disable wakeup sources. */
 
@@ -94,8 +96,10 @@ system_state_machine(void)
 		/* Enable a subset of wakeup sources. */
 
 		/* Perform PMIC-specific shutdown actions. */
-		if (pmic)
+		if ((pmic = pmic_get())) {
 			pmic_shutdown(pmic);
+			device_put(pmic);
+		}
 
 		/* Turn off all possible power domains. */
 
@@ -106,8 +110,10 @@ system_state_machine(void)
 		break;
 	case SYSTEM_RESET:
 		/* Attempt to reset the SoC using the PMIC. */
-		if (pmic)
+		if ((pmic = pmic_get())) {
 			pmic_reset(pmic);
+			device_put(pmic);
+		}
 
 		/* Attempt to reset the SoC using the watchdog. */
 		if ((watchdog = device_get(&r_twd.dev))) {
