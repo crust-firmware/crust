@@ -72,6 +72,9 @@ clock_get(const struct clock_handle *clock)
 	struct clock_state *state = clock_state_for(clock);
 	int err;
 
+	debug("%s: Getting clock %u #%u", clock->dev->name, clock->id,
+	      state->refcount + 1);
+
 	/* Perform additional setup if this is the first reference. */
 	if (!state->refcount) {
 		/* Ensure the controller's driver is loaded. */
@@ -94,6 +97,9 @@ clock_get(const struct clock_handle *clock)
 		clock_put(clock);
 		return err;
 	}
+
+	debug("%s: Clock %u running at %u Hz", clock->dev->name, clock->id,
+	      clock_get_rate(clock));
 
 	return SUCCESS;
 }
@@ -147,6 +153,9 @@ clock_put(const struct clock_handle *clock)
 	const struct clock_handle *parent;
 	struct clock_state *state = clock_state_for(clock);
 	int err;
+
+	debug("%s: Putting clock %u #%u", clock->dev->name, clock->id,
+	      state->refcount);
 
 	/* Calling this function is only allowed after calling clock_get(). */
 	assert(state->refcount);
