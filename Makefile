@@ -19,8 +19,6 @@ HOSTCC		 = cc
 LEX		 = lex
 YACC		 = yacc
 
-HAVE_GCC9	:= $(findstring version 9,$(shell $(CC) -v 2>&1;:))
-
 COMMON_CFLAGS	 = -Os -pipe -std=c11 \
 		   -fdata-sections \
 		   -ffunction-sections \
@@ -53,8 +51,7 @@ CFLAGS		 = $(COMMON_CFLAGS) \
 		   -fno-pie \
 		   -fomit-frame-pointer \
 		   -funsigned-char \
-		   -msoft-div -msoft-mul \
-		   $(if $(HAVE_GCC9),-msfimm -mshftimm) \
+		   -msfimm -mshftimm -msoft-div -msoft-mul \
 		   -static
 CPPFLAGS	 = $(COMMON_CPPFLAGS) \
 		   -I$(SRC)/include/drivers \
@@ -64,7 +61,7 @@ CPPFLAGS	 = $(COMMON_CPPFLAGS) \
 		   -nostdinc \
 		   -Werror=missing-include-dirs
 LDFLAGS		 = -nostdlib \
-		   $(if $(HAVE_GCC9),-no-pie) \
+		   -no-pie \
 		   -Wl,-O1 \
 		   -Wl,--build-id=none \
 		   -Wl,--fatal-warnings \
