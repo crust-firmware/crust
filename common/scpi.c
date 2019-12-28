@@ -153,10 +153,7 @@ scpi_exit(void)
 void
 scpi_init(void)
 {
-	/* Bail if there is no mailbox available. */
 	mailbox = device_get(&msgbox.dev);
-	if (!mailbox)
-		return;
 
 	/* Only send the ready message once. Assume that if the system is
 	 * already booted, some secondary CPUs will have been turned on. */
@@ -164,6 +161,4 @@ scpi_init(void)
 		return;
 
 	scpi_create_message(SCPI_CLIENT_EL3, SCPI_CMD_SCP_READY);
-
-	info("SCPI: Initialization complete");
 }
