@@ -159,8 +159,10 @@ scpi_init(void)
 
 	/* Only send the ready message once. Assume that if the system is
 	 * already booted, some secondary CPUs will have been turned on. */
-	if (css_get_online_cores(0) == 1)
-		scpi_create_message(SCPI_CLIENT_EL3, SCPI_CMD_SCP_READY);
+	if (css_get_online_cores(0) != 1)
+		return;
+
+	scpi_create_message(SCPI_CLIENT_EL3, SCPI_CMD_SCP_READY);
 
 	info("SCPI: Initialization complete");
 }
