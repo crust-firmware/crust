@@ -16,17 +16,12 @@ config PLATFORM_A64
 
 config PLATFORM_A83T
 	bool "A83T"
+	imply RSB
 
 endchoice
 
 if PLATFORM_A64
 
 source "a64/Kconfig"
-
-endif
-
-if PLATFORM_A83T
-
-source "a83t/Kconfig"
 
 endif
