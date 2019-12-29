@@ -29,7 +29,6 @@ sunxi_twd_restart(const struct device *dev)
 {
 	const struct sunxi_twd *self = to_sunxi_twd(dev);
 
-	/* Enable and perform restart. */
 	mmio_write_32(self->regs + TWD_RESTART_REG, TWD_RESTART_KEY | BIT(0));
 }
 
@@ -38,7 +37,7 @@ sunxi_twd_disable(const struct device *dev)
 {
 	const struct sunxi_twd *self = to_sunxi_twd(dev);
 
-	/* Disable system reset, stop watchdog counter. */
+	/* Disable system reset; stop the watchdog counter. */
 	mmio_clrset_32(self->regs + TWD_CTRL_REG, BIT(9), BIT(1));
 }
 
@@ -47,14 +46,14 @@ sunxi_twd_enable(const struct device *dev, uint32_t timeout)
 {
 	const struct sunxi_twd *self = to_sunxi_twd(dev);
 
-	/* Program interval until watchdog fires. */
+	/* Program the interval until the watchdog fires. */
 	mmio_write_32(self->regs + TWD_INTV_REG, timeout);
 
-	/* Resume watchdog counter, enable system reset. */
-	mmio_clrset_32(self->regs + TWD_CTRL_REG, BIT(1), BIT(9));
-
-	/* Start the counter rolling. */
+	/* Update the comparator from the current counter value. */
 	sunxi_twd_restart(dev);
+
+	/* Resume the watchdog counter; enable system reset. */
+	mmio_clrset_32(self->regs + TWD_CTRL_REG, BIT(1), BIT(9));
 
 	return SUCCESS;
 }
@@ -68,8 +67,9 @@ sunxi_twd_probe(const struct device *dev)
 	if ((err = clock_get(&self->clock)))
 		return err;
 
-	/* Disable watchdog. */
-	sunxi_twd_disable(dev);
+	/* Clear the watchdog configuration. */
+	mmio_write_32(self->regs + TWD_CTRL_REG, BIT(0));
+	mmio_pollz_32(self->regs + TWD_CTRL_REG, BIT(0));
 
 	/* Set counter clock source to OSC24M. */
 	mmio_set_32(self->regs + TWD_CTRL_REG, BIT(31));
