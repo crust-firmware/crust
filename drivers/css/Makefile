@@ -5,4 +5,4 @@
 
 obj-y += css.o
 
-obj-$(CONFIG_PLATFORM_A64) += css-a64.o
+obj-$(CONFIG_PLATFORM_A64) += sun50i-a64-css.o
