@@ -6,7 +6,7 @@
 #include <debug.h>
 #include <device.h>
 #include <spr.h>
-#include <system_power.h>
+#include <system.h>
 #include <watchdog.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/time.h>

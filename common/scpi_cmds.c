@@ -13,7 +13,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include <system_power.h>
+#include <system.h>
 #include <util.h>
 
 enum {

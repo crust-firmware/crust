@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#ifndef COMMON_SYSTEM_POWER_H
-#define COMMON_SYSTEM_POWER_H
+#ifndef COMMON_SYSTEM_H
+#define COMMON_SYSTEM_H
 
 #include <stdbool.h>
 
@@ -66,4 +66,4 @@ void system_suspend(void);
  */
 void system_wakeup(void);
 
-#endif /* COMMON_SYSTEM_POWER_H */
+#endif /* COMMON_SYSTEM_H */

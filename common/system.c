@@ -9,7 +9,7 @@
 #include <pmic.h>
 #include <scpi.h>
 #include <stdbool.h>
-#include <system_power.h>
+#include <system.h>
 #include <util.h>
 #include <watchdog.h>
 #include <watchdog/sunxi-twd.h>
