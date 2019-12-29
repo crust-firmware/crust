@@ -10,10 +10,11 @@
 #include <mmio.h>
 #include <scpi_protocol.h>
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <util.h>
 #include <platform/devices.h>
+
+#include "css.h"
 
 #define CLUSTER_MAX                 1
 #define CORE_MAX                    4
@@ -42,54 +43,8 @@
 #define R_PRCM_PWROFF_GATING_REG(c) (0x0100 + 0x04 * (c))
 #define R_PRCM_PWR_CLAMP_REG(c, n)  (0x0140 + 0x10 * (c) + 0x04 * (n))
 
-static const uint8_t power_switch_off_sequence[] = {
-	0xff,
-};
-
-static const uint8_t power_switch_on_sequence[] = {
-	0xfe, 0xf8, 0xe0, 0x80, 0x00,
-};
-
 /* Reset Vector Base Address, one saved per cluster. */
 static uint32_t rvba[CLUSTER_MAX];
-
-/**
- * Enable or disable power to a core or cluster power domain. The power switch
- * for core 0 controls power to the entire cluster. Other core switches control
- * only that core.
- *
- * @param cluster The cluster to control power for.
- * @param core    The core to control power for.
- * @param enable  Whether to enable or disable the power switch.
- */
-static void
-set_power_switch(uint8_t cluster, uint8_t core, bool enable)
-{
-	const uint8_t *values;
-	uint32_t length, reg;
-
-	if (enable) {
-		values = power_switch_on_sequence;
-		length = ARRAY_SIZE(power_switch_on_sequence);
-	} else {
-		values = power_switch_off_sequence;
-		length = ARRAY_SIZE(power_switch_off_sequence);
-	}
-
-	/* Avoid killing the power if the switch is already enabled. */
-	reg = mmio_read_32(DEV_R_PRCM + R_PRCM_PWR_CLAMP_REG(cluster, core));
-	if (reg == values[length - 1])
-		return;
-
-	for (size_t i = 0; i < length; ++i) {
-		mmio_write_32(DEV_R_PRCM + R_PRCM_PWR_CLAMP_REG(cluster, core),
-		              values[i]);
-		/* Allwinner's blob uses 10, 20, and 30μs delays, depending on
-		 * the iteration. However, the same code works fine in ATF with
-		 * no delays. The 10μs delay is here just to be extra safe. */
-		udelay(10);
-	}
-}
 
 uint8_t
 css_get_cluster_count(void)
@@ -161,7 +116,8 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 
 	if (state == SCPI_CSS_ON) {
 		/* Apply power to the cluster power domain. */
-		set_power_switch(cluster, 0, true);
+		css_set_power_switch(DEV_R_PRCM +
+		                     R_PRCM_PWR_CLAMP_REG(cluster, 0), true);
 		/* Release the cluster output clamps. */
 		mmio_clr_32(DEV_R_PRCM +
 		            R_PRCM_PWROFF_GATING_REG(cluster), BIT(0));
@@ -223,7 +179,8 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 		mmio_set_32(DEV_R_PRCM +
 		            R_PRCM_PWROFF_GATING_REG(cluster), BIT(0));
 		/* Remove power from the cluster power domain. */
-		set_power_switch(cluster, 0, false);
+		css_set_power_switch(DEV_R_PRCM +
+		                     R_PRCM_PWR_CLAMP_REG(cluster, 0), false);
 	} else {
 		return EINVAL;
 	}
@@ -257,7 +214,10 @@ css_set_core_state(uint8_t cluster, uint8_t core, uint8_t state)
 		/* Core 0 does not have a separate power domain. */
 		if (core > 0) {
 			/* Turn on power to the core power domain. */
-			set_power_switch(cluster, core, true);
+			css_set_power_switch(DEV_R_PRCM +
+			                     R_PRCM_PWR_CLAMP_REG(cluster,
+			                                          core),
+			                     true);
 			/* Release the core output clamps. */
 			mmio_clr_32(DEV_R_PRCM +
 			            R_PRCM_PWROFF_GATING_REG(cluster),
@@ -293,7 +253,10 @@ css_set_core_state(uint8_t cluster, uint8_t core, uint8_t state)
 		/* Core 0 does not have a separate power domain. */
 		if (core > 0) {
 			/* Remove power from the core power domain. */
-			set_power_switch(cluster, core, false);
+			css_set_power_switch(DEV_R_PRCM +
+			                     R_PRCM_PWR_CLAMP_REG(cluster,
+			                                          core),
+			                     false);
 		}
 	} else {
 		/* Unknown power state requested. */
