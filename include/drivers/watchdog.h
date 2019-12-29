@@ -14,7 +14,7 @@
 	(&container_of((dev)->drv, const struct watchdog_driver, drv)->ops)
 
 struct watchdog_driver_ops {
-	int  (*disable)(const struct device *dev);
+	void (*disable)(const struct device *dev);
 	int  (*enable)(const struct device *dev, uint32_t timeout);
 	void (*restart)(const struct device *dev);
 };
@@ -29,10 +29,10 @@ struct watchdog_driver {
  *
  * @param dev The watchdog device.
  */
-static inline int
+static inline void
 watchdog_disable(const struct device *dev)
 {
-	return WATCHDOG_OPS(dev)->disable(dev);
+	WATCHDOG_OPS(dev)->disable(dev);
 }
 
 /**

@@ -33,15 +33,13 @@ sunxi_twd_restart(const struct device *dev)
 	mmio_write_32(self->regs + TWD_RESTART_REG, TWD_RESTART_KEY | BIT(0));
 }
 
-static int
+static void
 sunxi_twd_disable(const struct device *dev)
 {
 	const struct sunxi_twd *self = to_sunxi_twd(dev);
 
 	/* Disable system reset, stop watchdog counter. */
 	mmio_clrset_32(self->regs + TWD_CTRL_REG, BIT(9), BIT(1));
-
-	return SUCCESS;
 }
 
 static int
