@@ -14,9 +14,9 @@
 #include <sys/stat.h>
 
 #include <config.h>
-#include <exception.h>
 #include <mmio.h>
 #include <util.h>
+#include <arch/exception.h>
 #include <platform/devices.h>
 #include <platform/memory.h>
 
