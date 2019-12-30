@@ -220,7 +220,7 @@ static unsigned long tests_passed;
 /**
  * Get the number of set bits in a bitmap.
  */
-static unsigned __const
+static unsigned
 bitmap_weight(unsigned long bits)
 {
 	return __builtin_popcount(bits);
