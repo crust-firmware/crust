@@ -82,15 +82,12 @@ sunxi_gpio_init_pin(const struct gpio_handle *gpio)
 }
 
 static void
-sunxi_gpio_release_pin(const struct gpio_handle *gpio)
+sunxi_gpio_release_pin(const struct gpio_handle *gpio UNUSED)
 {
-	const struct sunxi_gpio *self = to_sunxi_gpio(gpio->dev);
-	uint8_t port = GET_PORT(gpio);
-	uint8_t pin  = GET_PIN(gpio);
-
-	/* Set pin function to high impedance. */
-	mmio_set_bitfield_32(self->regs + MODE_REG(port, pin),
-	                     MODE_BIT(pin), MODE_WIDTH, MODE_DISABLE);
+	/*
+	 * Linux cannot currently save/restore pin configuration during
+	 * suspend/resume, so we cannot yet disable pins after using them.
+	 */
 }
 
 static int
