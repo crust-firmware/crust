@@ -23,6 +23,9 @@ of the (forked) [U-Boot][crust-u-boot] and [ATF][crust-atf] repositories. Those
 patchsets are mostly glue to load and run Crust, but they also include some
 configuration changes that make testing the firmware easier.
 
+Users and contributors are encouraged to join `#crust` on freenode to discuss
+the firmware and related power management topics.
+
 [ar100]: https://linux-sunxi.org/AR100
 [or1k]: http://openrisc.io/
 
