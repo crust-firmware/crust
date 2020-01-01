@@ -14,13 +14,6 @@
 #define MSGBOX_OPS(dev) \
 	(&container_of((dev)->drv, const struct msgbox_driver, drv)->ops)
 
-enum {
-	MSGBOX_CHAN_SCPI_EL3_RX = 0,
-	MSGBOX_CHAN_SCPI_EL3_TX = 1,
-	MSGBOX_CHAN_SCPI_EL2_RX = 2,
-	MSGBOX_CHAN_SCPI_EL2_TX = 3,
-};
-
 struct msgbox_driver_ops {
 	void (*ack_rx)(const struct device *dev, uint8_t chan);
 	bool (*last_tx_done)(const struct device *dev, uint8_t chan);
