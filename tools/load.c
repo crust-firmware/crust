@@ -26,7 +26,11 @@
 #define PAGE_BASE(addr)   ((addr) & ~(PAGESIZE - 1))
 #define PAGE_OFFSET(addr) ((addr) & (PAGESIZE - 1))
 
+#if CONFIG_PLATFORM_A64 || CONFIG_PLATFORM_A83T
 #define SRAM_ARM_OFFSET   0x40000
+#elif CONFIG_PLATFORM_H6
+#define SRAM_ARM_OFFSET   0x100000
+#endif
 
 int
 main(int argc, char *argv[])
