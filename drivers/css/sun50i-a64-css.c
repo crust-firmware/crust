@@ -107,11 +107,9 @@ css_set_css_state(uint8_t state UNUSED)
 int
 css_set_cluster_state(uint8_t cluster, uint8_t state)
 {
-	uint8_t current_state = css_get_cluster_state(cluster);
-
 	assert(cluster < CLUSTER_MAX);
 
-	if (state == current_state)
+	if (state == css_get_cluster_state(cluster))
 		return SUCCESS;
 
 	if (state == SCPI_CSS_ON) {
@@ -191,12 +189,10 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 int
 css_set_core_state(uint8_t cluster, uint8_t core, uint8_t state)
 {
-	uint8_t current_state = css_get_core_state(cluster, core);
-
 	assert(cluster < CLUSTER_MAX);
 	assert(core < CORE_MAX);
 
-	if (state == current_state)
+	if (state == css_get_core_state(cluster, core))
 		return SUCCESS;
 
 	if (state == SCPI_CSS_ON) {
