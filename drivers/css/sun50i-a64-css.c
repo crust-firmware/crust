@@ -49,17 +49,14 @@ css_get_cluster_count(void)
 uint8_t
 css_get_cluster_state(uint8_t cluster)
 {
-	uint32_t reg;
-
 	assert(cluster < CLUSTER_MAX);
 
-	/* Are the cluster output clamps gated? */
-	reg = mmio_read_32(CLUSTER_PWROFF_GATING_REG);
-	if (reg & BIT(0))
-		return SCPI_CSS_OFF;
-	/* Is the cluster in H_RESET? */
-	reg = mmio_read_32(CLUSTER_RESET_CTRL_REG);
-	if (!(reg & BIT(12)))
+	/*
+	 * The cluster is considered off if it is not participating
+	 * in coherency (ACINACTM is set). This bit is chosen as
+	 * setting/clearing it is mandated by ARM.
+	 */
+	if (mmio_get_32(CLUSTER_CTRL_REG1, BIT(0)))
 		return SCPI_CSS_OFF;
 
 	return SCPI_CSS_ON;
@@ -74,18 +71,15 @@ css_get_core_count(uint8_t cluster UNUSED)
 uint8_t
 css_get_core_state(uint8_t cluster, uint8_t core)
 {
-	uint32_t reg;
-
 	assert(cluster < CLUSTER_MAX);
 	assert(core < CORE_MAX);
 
-	/* Is the core in power-on reset? */
-	reg = mmio_read_32(CLUSTER_PWRON_RESET_REG);
-	if (!(reg & BIT(core)))
-		return SCPI_CSS_OFF;
-	/* Is the core in core reset? */
-	reg = mmio_read_32(CLUSTER_RESET_CTRL_REG);
-	if (!(reg & BIT(core)))
+	/*
+	 * A core is considered off if it is in core reset. Regardless of any
+	 * deeper "off" state the core may or may not be in, if it is in
+	 * core reset, it is not running instructions or maintaining state.
+	 */
+	if (!mmio_get_32(CLUSTER_RESET_CTRL_REG, BIT(core)))
 		return SCPI_CSS_OFF;
 
 	return SCPI_CSS_ON;
