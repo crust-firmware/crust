@@ -122,10 +122,7 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 		udelay(1);
 		/* Deassert an undocumented reset bit (active-low). */
 		mmio_set_32(DEV_R_CPUCFG + R_CPUCFG_SYS_RESET_REG, BIT(0));
-		/* Core 0 is enabled by default at power-on. Put it back in
-		 * reset and keep it there until the cluster is ready. */
-		mmio_clr_32(DEV_CPUCFG +
-		            CPUCFG_RESET_CTRL_REG(cluster), BIT(0));
+		udelay(1);
 		/* Assert all cluster resets (active-low). */
 		mmio_write_32(DEV_CPUCFG + CPUCFG_RESET_CTRL_REG(cluster), 0);
 		/* Enable hardware L2 cache flush (active-low). */
