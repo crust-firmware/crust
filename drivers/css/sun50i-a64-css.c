@@ -16,35 +16,29 @@
 
 #include "css.h"
 
-#define CLUSTER_MAX                 1
-#define CORE_MAX                    4
+#define CLUSTER_MAX               1
+#define CORE_MAX                  4
 
-/* c = cluster, n = core. */
-#define CPUCFG_CLUSTER_CTRL0_REG(c) (0x0000 + 0x10 * (c))
-#define CPUCFG_CLUSTER_CTRL1_REG(c) (0x0004 + 0x10 * (c))
-#define CPUCFG_CACHE_CFG0_REG       0x0008
-#define CPUCFG_CACHE_CFG1_REG       0x000c
-#define CPUCFG_DEBUG_REG            0x0020
-#define CPUCFG_GENERAL_CTRL_REG     0x0028
-#define CPUCFG_CPU_STATUS_REG(c)    (0x0030 + 0x04 * (c))
-#define CPUCFG_L2_STATUS_REG        0x003c
-#define CPUCFG_RESET_CTRL_REG(c)    (0x0080 + 0x04 * (c))
-#define CPUCFG_RVBAR_LO_REG(c, n)   (0x00a0 + 0x20 * (c) + 0x08 * (n))
-#define CPUCFG_RVBAR_HI_REG(c, n)   (0x00a4 + 0x20 * (c) + 0x08 * (n))
+#define CLUSTER_CTRL_REG0         (DEV_CPUCFG + 0x0000)
+#define CLUSTER_CTRL_REG1         (DEV_CPUCFG + 0x0004)
+#define CACHE_CFG_REG0            (DEV_CPUCFG + 0x0008)
+#define CACHE_CFG_REG1            (DEV_CPUCFG + 0x000c)
+#define DEBUG_REG0                (DEV_CPUCFG + 0x0020)
+#define GENERAL_CTRL_REG0         (DEV_CPUCFG + 0x0028)
+#define CPU_STATUS_REG            (DEV_CPUCFG + 0x0030)
+#define L2_STATUS_REG             (DEV_CPUCFG + 0x003c)
+#define CLUSTER_RESET_CTRL_REG    (DEV_CPUCFG + 0x0080)
+#define RVBA_LO_REG(n)            (DEV_CPUCFG + 0x00a0 + 0x08 * (n))
+#define RVBA_HI_REG(n)            (DEV_CPUCFG + 0x00a4 + 0x08 * (n))
 
-#define R_CPUCFG_ARISC_RESET_REG    0x0000
-#define R_CPUCFG_PWRON_RESET_REG(c) (0x0030 + 0x04 * (c))
-#define R_CPUCFG_SYS_RESET_REG      0x0140
-#define R_CPUCFG_SS_FLAG_REG        0x01a0
-#define R_CPUCFG_CPU_ENTRY_REG      0x01a4
-#define R_CPUCFG_SS_ENTRY_REG       0x01a8
-#define R_CPUCFG_HP_FLAG_REG        0x01ac
+#define CLUSTER_PWRON_RESET_REG   (DEV_R_CPUCFG + 0x0030)
+#define CPU_SYS_RESET_REG         (DEV_R_CPUCFG + 0x0140)
 
-#define R_PRCM_PWROFF_GATING_REG(c) (0x0100 + 0x04 * (c))
-#define R_PRCM_PWR_CLAMP_REG(c, n)  (0x0140 + 0x10 * (c) + 0x04 * (n))
+#define CLUSTER_PWROFF_GATING_REG (DEV_R_PRCM + 0x0100)
+#define CPU_PWR_CLAMP_REG(n)      (DEV_R_PRCM + 0x0140 + 0x04 * (n))
 
-/* Reset Vector Base Address, one saved per cluster. */
-static uint32_t rvba[CLUSTER_MAX];
+/* Reset Vector Base Address. */
+static uint32_t rvba;
 
 uint8_t
 css_get_cluster_count(void)
@@ -60,11 +54,11 @@ css_get_cluster_state(uint8_t cluster)
 	assert(cluster < CLUSTER_MAX);
 
 	/* Are the cluster output clamps gated? */
-	reg = mmio_read_32(DEV_R_PRCM + R_PRCM_PWROFF_GATING_REG(cluster));
+	reg = mmio_read_32(CLUSTER_PWROFF_GATING_REG);
 	if (reg & BIT(0))
 		return SCPI_CSS_OFF;
 	/* Is the cluster in H_RESET? */
-	reg = mmio_read_32(DEV_CPUCFG + CPUCFG_RESET_CTRL_REG(cluster));
+	reg = mmio_read_32(CLUSTER_RESET_CTRL_REG);
 	if (!(reg & BIT(12)))
 		return SCPI_CSS_OFF;
 
@@ -86,11 +80,11 @@ css_get_core_state(uint8_t cluster, uint8_t core)
 	assert(core < CORE_MAX);
 
 	/* Is the core in power-on reset? */
-	reg = mmio_read_32(DEV_R_CPUCFG + R_CPUCFG_PWRON_RESET_REG(cluster));
+	reg = mmio_read_32(CLUSTER_PWRON_RESET_REG);
 	if (!(reg & BIT(core)))
 		return SCPI_CSS_OFF;
 	/* Is the core in core reset? */
-	reg = mmio_read_32(DEV_CPUCFG + CPUCFG_RESET_CTRL_REG(cluster));
+	reg = mmio_read_32(CLUSTER_RESET_CTRL_REG);
 	if (!(reg & BIT(core)))
 		return SCPI_CSS_OFF;
 
@@ -114,23 +108,19 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 
 	if (state == SCPI_CSS_ON) {
 		/* Apply power to the cluster power domain. */
-		css_set_power_switch(DEV_R_PRCM +
-		                     R_PRCM_PWR_CLAMP_REG(cluster, 0), true);
+		css_set_power_switch(CPU_PWR_CLAMP_REG(0), true);
 		/* Release the cluster output clamps. */
-		mmio_clr_32(DEV_R_PRCM +
-		            R_PRCM_PWROFF_GATING_REG(cluster), BIT(0));
+		mmio_clr_32(CLUSTER_PWROFF_GATING_REG, BIT(0));
 		udelay(1);
 		/* Deassert an undocumented reset bit (active-low). */
-		mmio_set_32(DEV_R_CPUCFG + R_CPUCFG_SYS_RESET_REG, BIT(0));
+		mmio_set_32(CPU_SYS_RESET_REG, BIT(0));
 		udelay(1);
 		/* Assert all cluster resets (active-low). */
-		mmio_write_32(DEV_CPUCFG + CPUCFG_RESET_CTRL_REG(cluster), 0);
+		mmio_write_32(CLUSTER_RESET_CTRL_REG, 0);
 		/* Enable hardware L2 cache flush (active-low). */
-		mmio_clr_32(DEV_CPUCFG +
-		            CPUCFG_CLUSTER_CTRL0_REG(cluster), BIT(4));
+		mmio_clr_32(CLUSTER_CTRL_REG0, BIT(4));
 		/* Put the cluster back into coherency (deassert ACINACTM). */
-		mmio_clr_32(DEV_CPUCFG +
-		            CPUCFG_CLUSTER_CTRL1_REG(cluster), BIT(0));
+		mmio_clr_32(CLUSTER_CTRL_REG1, BIT(0));
 		/*
 		 * Deassert all cluster resets (active-low). From MSB to LSB:
 		 *     Bit 28: AXI2MBUS interface reset
@@ -139,43 +129,35 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 		 *     Bit 12: Cluster H_RESET
 		 *     Bit  8: L2 cache reset
 		 */
-		mmio_write_32(DEV_CPUCFG + CPUCFG_RESET_CTRL_REG(cluster),
+		mmio_write_32(CLUSTER_RESET_CTRL_REG,
 		              BIT(28) | BIT(24) | BIT(20) | BIT(12) | BIT(8));
 		/* Restore the reset vector base addresses for all cores. */
-		for (uint8_t core = 0; core < CORE_MAX; ++core) {
-			uintptr_t rvbar = CPUCFG_RVBAR_LO_REG(cluster, core);
-			mmio_write_32(DEV_CPUCFG + rvbar, rvba[cluster]);
-		}
+		for (uint8_t core = 0; core < CORE_MAX; ++core)
+			mmio_write_32(RVBA_LO_REG(core), rvba);
 	} else if (state == SCPI_CSS_OFF) {
 		/* Wait for all CPUs to be idle. */
-		mmio_poll_32(DEV_CPUCFG +
-		             CPUCFG_CPU_STATUS_REG(cluster), GENMASK(19, 16));
+		mmio_poll_32(CPU_STATUS_REG, GENMASK(19, 16));
 		/* Save the power-on reset vector base address from core 0. */
-		rvba[cluster] = mmio_read_32(DEV_CPUCFG +
-		                             CPUCFG_RVBAR_LO_REG(cluster, 0));
+		rvba = mmio_read_32(RVBA_LO_REG(0));
 		/* Assert L2FLUSHREQ to clean the cluster L2 cache. */
-		mmio_set_32(DEV_CPUCFG + CPUCFG_GENERAL_CTRL_REG, BIT(8));
+		mmio_set_32(GENERAL_CTRL_REG0, BIT(8));
 		/* Wait for L2FLUSHDONE to go high. */
-		mmio_poll_32(DEV_CPUCFG + CPUCFG_L2_STATUS_REG, BIT(10));
+		mmio_poll_32(L2_STATUS_REG, BIT(10));
 		/* Deassert L2FLUSHREQ. */
-		mmio_clr_32(DEV_CPUCFG + CPUCFG_GENERAL_CTRL_REG, BIT(8));
+		mmio_clr_32(GENERAL_CTRL_REG0, BIT(8));
 		/* Remove the cluster from coherency (assert ACINACTM). */
-		mmio_set_32(DEV_CPUCFG +
-		            CPUCFG_CLUSTER_CTRL1_REG(cluster), BIT(0));
+		mmio_set_32(CLUSTER_CTRL_REG1, BIT(0));
 		/* Wait for the cluster (L2 cache) to be idle. */
-		mmio_poll_32(DEV_CPUCFG +
-		             CPUCFG_CPU_STATUS_REG(cluster), BIT(0));
+		mmio_poll_32(CPU_STATUS_REG, BIT(0));
 		/* Assert all cluster resets (active-low). */
-		mmio_write_32(DEV_CPUCFG + CPUCFG_RESET_CTRL_REG(cluster), 0);
+		mmio_write_32(CLUSTER_RESET_CTRL_REG, 0);
 		/* Assert an undocumented reset bit (active-low). */
-		mmio_write_32(DEV_R_CPUCFG + R_CPUCFG_SYS_RESET_REG, 0);
+		mmio_write_32(CPU_SYS_RESET_REG, 0);
 		udelay(1);
 		/* Activate the cluster output clamps. */
-		mmio_set_32(DEV_R_PRCM +
-		            R_PRCM_PWROFF_GATING_REG(cluster), BIT(0));
+		mmio_set_32(CLUSTER_PWROFF_GATING_REG, BIT(0));
 		/* Remove power from the cluster power domain. */
-		css_set_power_switch(DEV_R_PRCM +
-		                     R_PRCM_PWR_CLAMP_REG(cluster, 0), false);
+		css_set_power_switch(CPU_PWR_CLAMP_REG(0), false);
 	} else {
 		return EINVAL;
 	}
@@ -194,62 +176,44 @@ css_set_core_state(uint8_t cluster, uint8_t core, uint8_t state)
 
 	if (state == SCPI_CSS_ON) {
 		/* Deassert DBGPWRDUP (prevent debug access to the core). */
-		mmio_clr_32(DEV_CPUCFG + CPUCFG_DEBUG_REG, BIT(core));
+		mmio_clr_32(DEBUG_REG0, BIT(core));
 		/* Assert core reset (active-low). */
-		mmio_clr_32(DEV_CPUCFG +
-		            CPUCFG_RESET_CTRL_REG(cluster), BIT(core));
+		mmio_clr_32(CLUSTER_RESET_CTRL_REG, BIT(core));
 		/* Assert core power-on reset (active-low). */
-		mmio_clr_32(DEV_R_CPUCFG +
-		            R_CPUCFG_PWRON_RESET_REG(cluster), BIT(core));
+		mmio_clr_32(CLUSTER_PWRON_RESET_REG, BIT(core));
 		/* Program the core to start in AArch64 mode. */
-		mmio_set_32(DEV_CPUCFG + CPUCFG_CLUSTER_CTRL0_REG(cluster),
-		            BIT(24 + core));
+		mmio_set_32(CLUSTER_CTRL_REG0, BIT(24 + core));
 		/* Core 0 does not have a separate power domain. */
 		if (core > 0) {
 			/* Turn on power to the core power domain. */
-			css_set_power_switch(DEV_R_PRCM +
-			                     R_PRCM_PWR_CLAMP_REG(cluster,
-			                                          core),
-			                     true);
+			css_set_power_switch(CPU_PWR_CLAMP_REG(core), true);
 			/* Release the core output clamps. */
-			mmio_clr_32(DEV_R_PRCM +
-			            R_PRCM_PWROFF_GATING_REG(cluster),
-			            BIT(core));
+			mmio_clr_32(CLUSTER_PWROFF_GATING_REG, BIT(core));
 		}
 		/* Deassert core power-on reset (active-low). */
-		mmio_set_32(DEV_R_CPUCFG +
-		            R_CPUCFG_PWRON_RESET_REG(cluster), BIT(core));
+		mmio_set_32(CLUSTER_PWRON_RESET_REG, BIT(core));
 		/* Deassert core reset (active-low). */
-		mmio_set_32(DEV_CPUCFG +
-		            CPUCFG_RESET_CTRL_REG(cluster), BIT(core));
+		mmio_set_32(CLUSTER_RESET_CTRL_REG, BIT(core));
 		/* Assert DBGPWRDUP (allow debug access to the core). */
-		mmio_set_32(DEV_CPUCFG + CPUCFG_DEBUG_REG, BIT(core));
+		mmio_set_32(DEBUG_REG0, BIT(core));
 	} else if (state == SCPI_CSS_OFF) {
 		/* Wait for the core to be in WFI and ready to shut down. */
-		mmio_poll_32(DEV_CPUCFG +
-		             CPUCFG_CPU_STATUS_REG(cluster), BIT(16 + core));
+		mmio_poll_32(CPU_STATUS_REG, BIT(16 + core));
 		/* Deassert DBGPWRDUP (prevent debug access to the core). */
-		mmio_clr_32(DEV_CPUCFG + CPUCFG_DEBUG_REG, BIT(core));
+		mmio_clr_32(DEBUG_REG0, BIT(core));
 		/* Core 0 does not have a separate power domain. */
 		if (core > 0) {
 			/* Activate the core output clamps. */
-			mmio_set_32(DEV_R_PRCM +
-			            R_PRCM_PWROFF_GATING_REG(cluster),
-			            BIT(core));
+			mmio_set_32(CLUSTER_PWROFF_GATING_REG, BIT(core));
 		}
 		/* Assert core reset (active-low). */
-		mmio_clr_32(DEV_CPUCFG +
-		            CPUCFG_RESET_CTRL_REG(cluster), BIT(core));
+		mmio_clr_32(CLUSTER_RESET_CTRL_REG, BIT(core));
 		/* Assert core power-on reset (active-low). */
-		mmio_clr_32(DEV_R_CPUCFG +
-		            R_CPUCFG_PWRON_RESET_REG(cluster), BIT(core));
+		mmio_clr_32(CLUSTER_PWRON_RESET_REG, BIT(core));
 		/* Core 0 does not have a separate power domain. */
 		if (core > 0) {
 			/* Remove power from the core power domain. */
-			css_set_power_switch(DEV_R_PRCM +
-			                     R_PRCM_PWR_CLAMP_REG(cluster,
-			                                          core),
-			                     false);
+			css_set_power_switch(CPU_PWR_CLAMP_REG(core), false);
 		}
 	} else {
 		/* Unknown power state requested. */
