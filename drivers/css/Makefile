@@ -7,3 +7,4 @@ obj-y += css.o
 obj-y += css_helpers.o
 
 obj-$(CONFIG_PLATFORM_A64) += sun50i-a64-css.o
+obj-$(CONFIG_PLATFORM_H6)  += sun50i-h6-css.o
