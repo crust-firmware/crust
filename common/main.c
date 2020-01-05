@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <counter.h>
 #include <debug.h>
 #include <device.h>
 #include <spr.h>
@@ -20,7 +19,6 @@ noreturn void
 main(uint32_t exception)
 {
 	const struct device *watchdog;
-	uint64_t next_tick;
 
 	if (exception) {
 		error("Unhandled exception %u at %p!",
@@ -36,16 +34,9 @@ main(uint32_t exception)
 
 	/* Initialize the power management state machine. */
 	system_state_init();
-	next_tick = counter_read() + REFCLK_HZ;
 	for (;;) {
 		system_state_machine();
-
-		if (counter_read() > next_tick) {
-			next_tick += REFCLK_HZ;
-
-			/* Perform 1Hz operations. */
-			if (watchdog)
-				watchdog_restart(watchdog);
-		}
+		if (watchdog)
+			watchdog_restart(watchdog);
 	}
 }
