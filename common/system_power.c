@@ -33,9 +33,9 @@ system_state_init(void)
 {
 	uint8_t online = css_get_online_cores(0);
 
-	/* If all cores are off, the firmware started while in suspend. */
+	/* If all cores are off, assume the system is off. */
 	if (online == 0) {
-		system_state = SYSTEM_INACTIVE;
+		system_state = SYSTEM_OFF;
 		return;
 	}
 
