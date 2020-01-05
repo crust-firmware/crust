@@ -9,7 +9,6 @@
 #include <intrusive.h>
 #include <pmic.h>
 #include <rsb.h>
-#include <system_power.h>
 #include <util.h>
 #include <mfd/axp803.h>
 #include <pmic/axp803.h>
