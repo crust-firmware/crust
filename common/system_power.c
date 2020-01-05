@@ -10,6 +10,7 @@
 #include <scpi.h>
 #include <stdbool.h>
 #include <system_power.h>
+#include <util.h>
 #include <watchdog.h>
 #include <watchdog/sunxi-twd.h>
 
@@ -43,7 +44,7 @@ system_state_init(void)
 	scpi_init();
 
 	/* If secondary cores are on, Linux is already running. */
-	if (online < 1)
+	if (online != BIT(0))
 		return;
 
 	/* Inform SCPI clients that the firmware has finished booting. */
