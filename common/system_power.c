@@ -143,7 +143,7 @@ system_state_machine(void)
 
 		/* Attempt to reset the SoC using the watchdog. */
 		if ((watchdog = device_get(&r_twd.dev))) {
-			watchdog_enable(watchdog, 0);
+			watchdog_enable(watchdog, 1);
 			device_put(watchdog);
 		}
 
