@@ -9,13 +9,13 @@
 #include <stdbool.h>
 
 enum {
-	SYSTEM_ACTIVE,
-	SYSTEM_SUSPEND,
-	SYSTEM_INACTIVE,
-	SYSTEM_RESUME,
-	SYSTEM_SHUTDOWN,
-	SYSTEM_OFF,
-	SYSTEM_RESET,
+	SYSTEM_ACTIVE,   /**< ARM CPUs are running firmware or an OS. */
+	SYSTEM_SUSPEND,  /**< Transition from active to inactive. */
+	SYSTEM_INACTIVE, /**< ARM CPUs are not running; RAM is preserved. */
+	SYSTEM_RESUME,   /**< Transition from inactive to active. */
+	SYSTEM_SHUTDOWN, /**< Transition from active to off. */
+	SYSTEM_OFF,      /**< ARM CPUs are not running; RAM is invalid. */
+	SYSTEM_RESET,    /**< System reset is in progress (final state). */
 };
 
 /**
@@ -40,21 +40,29 @@ void system_state_machine(void);
 
 /**
  * Reset the SoC, including all CPUs and internal peripherals.
+ *
+ * Should not be called durring a system state transition.
  */
 void system_reset(void);
 
 /**
- * Shut down the SoC, and turn off all possible external voltage domains.
+ * Shut down the SoC, and turn off all possible power domains.
+ *
+ * Should not be called durring a system state transition.
  */
 void system_shutdown(void);
 
 /**
- * Suspend the SoC, and turn off all possible external voltage domains.
+ * Suspend the SoC, and turn off all non-wakeup power domains.
+ *
+ * Should not be called durring a system state transition.
  */
 void system_suspend(void);
 
 /**
- * Wake up the SoC, and turn on necessary external voltage domains.
+ * Wake up the SoC, and turn on previously-disabled power domains.
+ *
+ * Should not be called durring a system state transition.
  */
 void system_wakeup(void);
 
