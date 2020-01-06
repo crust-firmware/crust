@@ -4,39 +4,19 @@
  */
 
 #include <debug.h>
-#include <device.h>
 #include <spr.h>
 #include <system.h>
-#include <watchdog.h>
-#include <watchdog/sunxi-twd.h>
-#include <platform/time.h>
-
-#define WATCHDOG_TIMEOUT 5 /* seconds */
 
 noreturn void main(uint32_t exception);
 
 noreturn void
 main(uint32_t exception)
 {
-	const struct device *watchdog;
-
 	if (exception) {
 		error("Unhandled exception %u at %p!",
 		      exception, (void *)mfspr(SPR_SYS_EPCR_INDEX(0)));
 	}
 
-	/* Initialize and enable the watchdog first. This provides a failsafe
-	 * for the possibility that something below hangs. */
-	if ((watchdog = device_get(&r_twd.dev))) {
-		watchdog_enable(watchdog, WATCHDOG_TIMEOUT * REFCLK_HZ);
-		info("Watchdog enabled");
-	}
-
-	/* Initialize the power management state machine. */
-	system_state_init();
-	for (;;) {
-		system_state_machine();
-		if (watchdog)
-			watchdog_restart(watchdog);
-	}
+	/* Cede control to the system state machine (never returns). */
+	system_state_machine();
 }

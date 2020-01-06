@@ -29,14 +29,11 @@ bool system_can_wake(void) ATTRIBUTE(pure);
 bool system_is_running(void) ATTRIBUTE(pure);
 
 /**
- * Perform system state machine initialization.
+ * Perform system state management.
+ *
+ * This is the main loop of the firmware, and never returns.
  */
-void system_state_init(void);
-
-/**
- * Perform system state transitions.
- */
-void system_state_machine(void);
+noreturn void system_state_machine(void);
 
 /**
  * Reset the SoC, including all CPUs and internal peripherals.
