@@ -52,11 +52,9 @@ css_get_cluster_state(uint8_t cluster)
 	assert(cluster < CLUSTER_MAX);
 
 	/*
-	 * The cluster is considered off if it is not participating
-	 * in coherency (ACINACTM is set). This bit is chosen as
-	 * setting/clearing it is mandated by ARM.
+	 * The cluster is considered off if its L2 cache is in reset.
 	 */
-	if (mmio_get_32(CLUSTER_CTRL_REG1, BIT(0)))
+	if (!mmio_get_32(CLUSTER_RESET_CTRL_REG, BIT(8)))
 		return SCPI_CSS_OFF;
 
 	return SCPI_CSS_ON;
