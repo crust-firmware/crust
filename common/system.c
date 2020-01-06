@@ -79,6 +79,8 @@ system_state_machine(void)
 
 			break;
 		case SYSTEM_SUSPEND:
+			debug("Suspending...");
+
 			/* Disable runtime services. */
 			scpi_exit();
 
@@ -94,6 +96,8 @@ system_state_machine(void)
 
 			/* Turn off all unnecessary clocks. */
 
+			debug("Suspend complete!");
+
 			/* The system is now inactive. */
 			system_state = SYSTEM_INACTIVE;
 			break;
@@ -103,6 +107,8 @@ system_state_machine(void)
 				system_state = SYSTEM_RESUME;
 			break;
 		case SYSTEM_RESUME:
+			debug("Resuming...");
+
 			/* Turn on previously-disabled clocks. */
 
 			/* Turn on previously-disabled power domains. */
@@ -122,6 +128,8 @@ system_state_machine(void)
 			css_set_css_state(SCPI_CSS_ON);
 			css_set_cluster_state(0, SCPI_CSS_ON);
 			css_set_core_state(0, 0, SCPI_CSS_ON);
+
+			debug("Resume complete!");
 
 			/* The system is now active. */
 			system_state = SYSTEM_ACTIVE;
