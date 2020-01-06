@@ -20,6 +20,11 @@ enum {
 };
 
 /**
+ * Get the current system state.
+ */
+uint8_t get_system_state(void);
+
+/**
  * Check if the system is in a state where it can be woken up.
  */
 bool system_can_wake(void) ATTRIBUTE(pure);

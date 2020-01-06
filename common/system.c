@@ -20,6 +20,12 @@
 
 static uint8_t system_state;
 
+uint8_t
+get_system_state(void)
+{
+	return system_state;
+}
+
 bool
 system_can_wake(void)
 {
