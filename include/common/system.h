@@ -9,6 +9,7 @@
 #include <stdbool.h>
 
 enum {
+	SYSTEM_INVALID,  /**< Uninitialized state machine (initial state). */
 	SYSTEM_ACTIVE,   /**< ARM CPUs are running firmware or an OS. */
 	SYSTEM_SUSPEND,  /**< Transition from active to inactive. */
 	SYSTEM_INACTIVE, /**< ARM CPUs are not running; RAM is preserved. */

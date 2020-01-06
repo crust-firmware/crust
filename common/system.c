@@ -43,7 +43,7 @@ system_state_machine(void)
 	 * If no CPU is online, assume the system is off. It could be
 	 * suspended, but resetting the board is safer than attempting to
 	 * resume in an unpredictable environment. Otherwise, prepare the
-	 * default SYSTEM_ACTIVE state.
+	 * SYSTEM_ACTIVE state.
 	 */
 	cpus = css_get_online_cores(0);
 	if (!cpus) {
@@ -52,6 +52,8 @@ system_state_machine(void)
 		/* Clear out inactive references. */
 		watchdog = NULL;
 	} else {
+		system_state = SYSTEM_ACTIVE;
+
 		/* Initialize runtime devices. */
 		if ((watchdog = device_get(&r_twd.dev)))
 			watchdog_enable(watchdog, WATCHDOG_TIMEOUT);
@@ -172,7 +174,7 @@ system_state_machine(void)
 			if (!irq_poll())
 				system_state = SYSTEM_RESET;
 			break;
-		case SYSTEM_RESET:
+		default: /* SYSTEM_RESET and all others */
 			/* Attempt to reset the SoC using the PMIC. */
 			if ((pmic = pmic_get())) {
 				pmic_reset(pmic);
