@@ -48,4 +48,17 @@ noreturn void panic(const char *fmt, ...) ATTRIBUTE(format(printf, 1, 2));
 #define debug(...) ((void)0)
 #endif
 
+#if CONFIG_DEBUG_PRINT_LATENCY
+
+void print_latency(void);
+
+#else
+
+static inline void
+print_latency(void)
+{
+}
+
+#endif
+
 #endif /* COMMON_DEBUG_H */

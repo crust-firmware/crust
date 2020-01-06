@@ -46,4 +46,13 @@ config DEBUG_LOG
 		This enables the debug() logging macro to print verbose
 		informational messages that may aid in debugging.
 
+
+config DEBUG_PRINT_LATENCY
+	bool "Print average latency after each state transition"
+	help
+		After each system state transition, calculate the
+		average latency of the main loop, in AR100 clock cycles.
+		The latency will be printed after the firmware has
+		performed 1 million iterations in that state.
+
 endmenu

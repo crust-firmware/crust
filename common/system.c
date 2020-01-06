@@ -195,6 +195,8 @@ system_state_machine(void)
 			 * attempts each time this function is called. */
 			break;
 		}
+
+		print_latency();
 	}
 }
 
