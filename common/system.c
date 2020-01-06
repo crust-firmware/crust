@@ -16,7 +16,7 @@
 #include <watchdog/sunxi-twd.h>
 #include <platform/time.h>
 
-#define WATCHDOG_TIMEOUT 5 /* seconds */
+#define WATCHDOG_TIMEOUT (5 * REFCLK_HZ) /* 5 seconds */
 
 static uint8_t system_state;
 
@@ -39,13 +39,6 @@ system_state_machine(void)
 	const struct device *pmic, *watchdog;
 	uint8_t cpus;
 
-	/* Initialize and enable the watchdog first. This provides a failsafe
-	 * for the possibility that something below hangs. */
-	if ((watchdog = device_get(&r_twd.dev))) {
-		watchdog_enable(watchdog, WATCHDOG_TIMEOUT * REFCLK_HZ);
-		info("Watchdog enabled");
-	}
-
 	/*
 	 * If no CPU is online, assume the system is off. It could be
 	 * suspended, but resetting the board is safer than attempting to
@@ -55,7 +48,14 @@ system_state_machine(void)
 	cpus = css_get_online_cores(0);
 	if (!cpus) {
 		system_state = SYSTEM_OFF;
+
+		/* Clear out inactive references. */
+		watchdog = NULL;
 	} else {
+		/* Initialize runtime devices. */
+		if ((watchdog = device_get(&r_twd.dev)))
+			watchdog_enable(watchdog, WATCHDOG_TIMEOUT);
+
 		/* Initialize runtime services. */
 		scpi_init();
 
@@ -74,6 +74,10 @@ system_state_machine(void)
 	for (;;) {
 		switch (system_state) {
 		case SYSTEM_ACTIVE:
+			/* Poll runtime devices. */
+			if (watchdog)
+				watchdog_restart(watchdog);
+
 			/* Poll runtime services. */
 			scpi_poll();
 
@@ -95,6 +99,10 @@ system_state_machine(void)
 			/* Turn off all unnecessary power domains. */
 
 			/* Turn off all unnecessary clocks. */
+			if (watchdog) {
+				device_put(watchdog);
+				watchdog = NULL;
+			}
 
 			debug("Suspend complete!");
 
@@ -110,6 +118,8 @@ system_state_machine(void)
 			debug("Resuming...");
 
 			/* Turn on previously-disabled clocks. */
+			if ((watchdog = device_get(&r_twd.dev)))
+				watchdog_enable(watchdog, WATCHDOG_TIMEOUT);
 
 			/* Turn on previously-disabled power domains. */
 
@@ -149,6 +159,10 @@ system_state_machine(void)
 			/* Turn off all possible power domains. */
 
 			/* Turn off all possible clocks. */
+			if (watchdog) {
+				device_put(watchdog);
+				watchdog = NULL;
+			}
 
 			/* The system is now off. */
 			system_state = SYSTEM_OFF;
@@ -166,16 +180,13 @@ system_state_machine(void)
 			}
 
 			/* Attempt to reset the SoC using the watchdog. */
-			if (watchdog)
+			if (watchdog || (watchdog = device_get(&r_twd.dev)))
 				watchdog_enable(watchdog, 1);
 
 			/* Leave the system state as is; continue making reset
 			 * attempts each time this function is called. */
 			break;
 		}
-
-		if (watchdog)
-			watchdog_restart(watchdog);
 	}
 }
 
