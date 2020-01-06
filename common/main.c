@@ -14,7 +14,7 @@ main(uint32_t exception)
 {
 	if (exception) {
 		error("Unhandled exception %u at %p!",
-		      exception, (void *)mfspr(SPR_SYS_EPCR_INDEX(0)));
+		      exception, (void *)mfspr(SPR_SYS_EPCR_ADDR(0)));
 	}
 
 	/* Cede control to the system state machine (never returns). */
