@@ -6,10 +6,21 @@
 #ifndef DRIVERS_IRQ_H
 #define DRIVERS_IRQ_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 /**
- * Get a bitmask of the pending IRQs.
+ * Determine if a specific IRQ is enabled.
+ */
+bool irq_is_enabled(uint32_t irq);
+
+/**
+ * Determine if a specific IRQ is pending (it may or may not be enabled).
+ */
+bool irq_is_pending(uint32_t irq);
+
+/**
+ * Get a bitmask of the IRQs that are both enabled and pending.
  */
 uint32_t irq_poll(void);
 
