@@ -50,12 +50,12 @@ noreturn void panic(const char *fmt, ...) ATTRIBUTE(format(printf, 1, 2));
 
 #if CONFIG_DEBUG_PRINT_LATENCY
 
-void print_latency(void);
+void debug_print_latency(void);
 
 #else
 
 static inline void
-print_latency(void)
+debug_print_latency(void)
 {
 }
 

@@ -14,7 +14,7 @@ static uint32_t iterations;
 static uint8_t last_state;
 
 void
-print_latency(void)
+debug_print_latency(void)
 {
 	uint8_t current_state = get_system_state();
 

@@ -46,7 +46,6 @@ config DEBUG_LOG
 		This enables the debug() logging macro to print verbose
 		informational messages that may aid in debugging.
 
-
 config DEBUG_PRINT_LATENCY
 	bool "Print average latency after each state transition"
 	help

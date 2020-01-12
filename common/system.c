@@ -196,7 +196,7 @@ system_state_machine(void)
 			break;
 		}
 
-		print_latency();
+		debug_print_latency();
 	}
 }
 
