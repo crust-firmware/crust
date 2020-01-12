@@ -46,7 +46,7 @@ css_get_cluster_count(void)
 }
 
 uint8_t
-css_get_cluster_state(uint8_t cluster)
+css_get_cluster_state(uint8_t cluster UNUSED)
 {
 	assert(cluster < CLUSTER_MAX);
 
@@ -66,7 +66,7 @@ css_get_core_count(uint8_t cluster UNUSED)
 }
 
 uint8_t
-css_get_core_state(uint8_t cluster, uint8_t core)
+css_get_core_state(uint8_t cluster UNUSED, uint8_t core)
 {
 	assert(cluster < CLUSTER_MAX);
 	assert(core < CORE_MAX);
