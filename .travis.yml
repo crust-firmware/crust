@@ -60,9 +60,12 @@ matrix:
 script:
   - |-
     set -e
+    cat > all.config << 'EOF'
+    # CONFIG_DEBUG_PRINT_SPRS is not set
+    EOF
     for config in ${CONFIGS}; do
       echo ========== begin $config ==========
-      make -j$(nproc) V=1 "$config"
+      make -j$(nproc) KCONFIG_ALLCONFIG=1 V=1 "$config"
       make -j$(nproc) TGT="\$(OBJ)/$config" V=1 scp
       or1k-linux-musl-size build/$config/scp.elf
       grep __bss_end build/$config/scp.map
