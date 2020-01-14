@@ -13,6 +13,8 @@
 #include <i2c/sun6i-i2c.h>
 #include <regulator/sy8106a.h>
 
+#include "regulator.h"
+
 #define VOUT_SEL_REG   0x01
 #define VOUT_COM_REG   0x02
 #define SYS_STATUS_REG 0x06

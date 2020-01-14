@@ -12,6 +12,8 @@
 #include <regulator/axp803.h>
 #include <rsb/sunxi-rsb.h>
 
+#include "regulator.h"
+
 #define OUTPUT_POWER_CONTROL1 0x10
 #define OUTPUT_POWER_CONTROL2 0x12
 #define OUTPUT_POWER_CONTROL3 0x13
