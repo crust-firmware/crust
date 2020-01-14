@@ -9,10 +9,24 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "regulator.h"
+
+/**
+ * Get the ops for the regulator controller device.
+ */
+static inline const struct regulator_driver_ops *
+regulator_ops_for(const struct device *dev)
+{
+	const struct regulator_driver *drv =
+		container_of(dev->drv, const struct regulator_driver, drv);
+
+	return &drv->ops;
+}
+
 int
 regulator_disable(const struct device *dev, uint8_t id)
 {
-	const struct regulator_driver_ops *ops = REGULATOR_OPS(dev);
+	const struct regulator_driver_ops *ops = regulator_ops_for(dev);
 	struct regulator_info *info = ops->get_info(dev, id);
 
 	if (info->flags & REGL_CRITICAL)
@@ -22,9 +36,27 @@ regulator_disable(const struct device *dev, uint8_t id)
 }
 
 int
+regulator_enable(const struct device *dev, uint8_t id)
+{
+	return regulator_ops_for(dev)->set_state(dev, id, true);
+}
+
+struct regulator_info *
+regulator_get_info(const struct device *dev, uint8_t id)
+{
+	return regulator_ops_for(dev)->get_info(dev, id);
+}
+
+int
+regulator_get_state(const struct device *dev, uint8_t id)
+{
+	return regulator_ops_for(dev)->get_state(dev, id);
+}
+
+int
 regulator_get_value(const struct device *dev, uint8_t id, uint16_t *value)
 {
-	const struct regulator_driver_ops *ops = REGULATOR_OPS(dev);
+	const struct regulator_driver_ops *ops = regulator_ops_for(dev);
 	struct regulator_info *info = ops->get_info(dev, id);
 	const struct regulator_range *range;
 	uint32_t raw;
@@ -48,7 +80,7 @@ regulator_get_value(const struct device *dev, uint8_t id, uint16_t *value)
 int
 regulator_set_value(const struct device *dev, uint8_t id, uint16_t value)
 {
-	const struct regulator_driver_ops *ops = REGULATOR_OPS(dev);
+	const struct regulator_driver_ops *ops = regulator_ops_for(dev);
 	struct regulator_info *info = ops->get_info(dev, id);
 	const struct regulator_range *range;
 	uint32_t raw;

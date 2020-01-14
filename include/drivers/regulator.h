@@ -12,9 +12,6 @@
 #include <stdint.h>
 #include <util.h>
 
-#define REGULATOR_OPS(dev) \
-	(&container_of((dev)->drv, const struct regulator_driver, drv)->ops)
-
 enum {
 	REGL_READABLE  = BIT(0), /**< Regulator is readable via SCPI. */
 	REGL_WRITABLE  = BIT(1), /**< Regulator is writable via SCPI. */
@@ -39,24 +36,6 @@ struct regulator_info {
 	uint16_t               max_value; /**< Maximum allowed value. */
 	struct regulator_range ranges[2]; /**< Range descriptions. */
 	uint8_t                flags;     /**< Generic class flags. */
-};
-
-struct regulator_driver_ops {
-	struct regulator_info *(*get_info)(const struct device *dev,
-	                                   uint8_t id);
-	int                    (*get_state)(const struct device *dev,
-	                                    uint8_t id);
-	int                    (*read_raw)(const struct device *dev,
-	                                   uint8_t id, uint32_t *raw);
-	int                    (*set_state)(const struct device *dev,
-	                                    uint8_t id, bool enable);
-	int                    (*write_raw)(const struct device *dev,
-	                                    uint8_t id, uint32_t raw);
-};
-
-struct regulator_driver {
-	struct driver               drv;
-	struct regulator_driver_ops ops;
 };
 
 /**
@@ -84,11 +63,7 @@ int regulator_disable(const struct device *dev, uint8_t id);
  * @param id    The device-specific identifier for this regulator.
  * @return      Zero on success; a defined error code on failure.
  */
-static inline int
-regulator_enable(const struct device *dev, uint8_t id)
-{
-	return REGULATOR_OPS(dev)->set_state(dev, id, true);
-}
+int regulator_enable(const struct device *dev, uint8_t id);
 
 /**
  * Get generic information about a regulator.
@@ -99,11 +74,8 @@ regulator_enable(const struct device *dev, uint8_t id)
  * @param id    The device-specific identifier for this regulator.
  * @return      A pointer to the information structure.
  */
-static inline struct regulator_info *
-regulator_get_info(const struct device *dev, uint8_t id)
-{
-	return REGULATOR_OPS(dev)->get_info(dev, id);
-}
+struct regulator_info *regulator_get_info(const struct device *dev,
+                                          uint8_t id);
 
 /**
  * Get the current state of a regulator, as determined from the hardware.
@@ -116,11 +88,7 @@ regulator_get_info(const struct device *dev, uint8_t id)
  * @return      On success, boolean true or false for if the regulator is
  *              enabled; a defined error code on failure.
  */
-static inline int
-regulator_get_state(const struct device *dev, uint8_t id)
-{
-	return REGULATOR_OPS(dev)->get_state(dev, id);
-}
+int regulator_get_state(const struct device *dev, uint8_t id);
 
 /**
  * Get the current value of a regulator. If the regulator is disabled, this
