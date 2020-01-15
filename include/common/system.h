@@ -44,28 +44,28 @@ noreturn void system_state_machine(void);
 /**
  * Reset the SoC, including all CPUs and internal peripherals.
  *
- * Should not be called durring a system state transition.
+ * Should not be called during a system state transition.
  */
 void system_reset(void);
 
 /**
  * Shut down the SoC, and turn off all possible power domains.
  *
- * Should not be called durring a system state transition.
+ * Should not be called during a system state transition.
  */
 void system_shutdown(void);
 
 /**
  * Suspend the SoC, and turn off all non-wakeup power domains.
  *
- * Should not be called durring a system state transition.
+ * Should not be called during a system state transition.
  */
 void system_suspend(void);
 
 /**
  * Wake up the SoC, and turn on previously-disabled power domains.
  *
- * Should not be called durring a system state transition.
+ * Should not be called during a system state transition.
  */
 void system_wakeup(void);
 
