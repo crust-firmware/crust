@@ -13,7 +13,9 @@
 #include <system.h>
 #include <util.h>
 #include <watchdog.h>
+#include <gpio/sunxi-gpio.h>
 #include <watchdog/sunxi-twd.h>
+#include <platform/irq.h>
 #include <platform/time.h>
 
 #define WATCHDOG_TIMEOUT (5 * REFCLK_HZ) /* 5 seconds */
@@ -42,7 +44,7 @@ system_is_running(void)
 noreturn void
 system_state_machine(void)
 {
-	const struct device *pmic, *watchdog;
+	const struct device *gpio, *pmic, *watchdog;
 	uint8_t cpus;
 
 	/*
@@ -57,12 +59,14 @@ system_state_machine(void)
 
 		/* Clear out inactive references. */
 		watchdog = NULL;
+		gpio     = NULL;
 	} else {
 		system_state = SYSTEM_ACTIVE;
 
 		/* Initialize runtime devices. */
 		if ((watchdog = device_get(&r_twd.dev)))
 			watchdog_enable(watchdog, WATCHDOG_TIMEOUT);
+		gpio = device_get(&r_pio.dev);
 
 		/* Initialize runtime services. */
 		scpi_init();
@@ -107,6 +111,10 @@ system_state_machine(void)
 			/* Turn off all unnecessary power domains. */
 
 			/* Turn off all unnecessary clocks. */
+			if (gpio && !irq_is_enabled(IRQ_R_PIO_PL)) {
+				device_put(gpio);
+				gpio = NULL;
+			}
 			if (watchdog) {
 				device_put(watchdog);
 				watchdog = NULL;
@@ -128,6 +136,8 @@ system_state_machine(void)
 			/* Turn on previously-disabled clocks. */
 			if ((watchdog = device_get(&r_twd.dev)))
 				watchdog_enable(watchdog, WATCHDOG_TIMEOUT);
+			if (!gpio)
+				gpio = device_get(&r_pio.dev);
 
 			/* Turn on previously-disabled power domains. */
 
@@ -167,6 +177,10 @@ system_state_machine(void)
 			/* Turn off all possible power domains. */
 
 			/* Turn off all possible clocks. */
+			if (gpio && !irq_is_enabled(IRQ_R_PIO_PL)) {
+				device_put(gpio);
+				gpio = NULL;
+			}
 			if (watchdog) {
 				device_put(watchdog);
 				watchdog = NULL;
