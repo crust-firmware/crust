@@ -4,12 +4,15 @@
  */
 
 #include <error.h>
+#include <intrusive.h>
 #include <mmio.h>
 #include <util.h>
 #include <watchdog.h>
 #include <clock/ccu.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/devices.h>
+
+#include "watchdog.h"
 
 #define TWD_STATUS_REG  0x00
 #define TWD_CTRL_REG    0x10

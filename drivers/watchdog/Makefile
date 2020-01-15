@@ -4,3 +4,4 @@
 #
 
 obj-y += sunxi-twd.o
+obj-y += watchdog.o
