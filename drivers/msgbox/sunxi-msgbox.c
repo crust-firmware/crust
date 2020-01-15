@@ -6,6 +6,7 @@
 #include <debug.h>
 #include <device.h>
 #include <error.h>
+#include <intrusive.h>
 #include <mmio.h>
 #include <msgbox.h>
 #include <stdbool.h>
@@ -14,6 +15,8 @@
 #include <clock/ccu.h>
 #include <msgbox/sunxi-msgbox.h>
 #include <platform/devices.h>
+
+#include "msgbox.h"
 
 #define CTRL_REG0           0x0000
 #define CTRL_REG1           0x0004

@@ -7,7 +7,9 @@
 #define DRIVERS_MSGBOX_SUNXI_MSGBOX_H
 
 #include <clock.h>
+#include <device.h>
 #include <msgbox.h>
+#include <stdint.h>
 
 /* The message box hardware provides 8 unidirectional channels. */
 #define SUNXI_MSGBOX_CHANS 8
