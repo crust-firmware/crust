@@ -52,6 +52,14 @@ config DEBUG_LOG
 		This enables the debug() logging macro to print verbose
 		informational messages that may aid in debugging.
 
+config DEBUG_PRINT_BATTERY
+	bool "Print battery consumption periodically during suspend"
+	depends on MFD_AXP803
+	help
+		While the system is suspended and the battery is
+		discharging, print the battery voltage, discharge
+		current, and calculated power usage every 30 seconds.
+
 config DEBUG_PRINT_LATENCY
 	bool "Print average latency after each state transition"
 	help

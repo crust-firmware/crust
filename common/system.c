@@ -234,6 +234,7 @@ system_state_machine(void)
 			break;
 		}
 
+		debug_print_battery();
 		debug_print_latency();
 	}
 }
