@@ -30,8 +30,6 @@
 
 #define I2C_BCAST_ADDR 0
 
-static int sunxi_rsb_set_rate(const struct device *dev, uint32_t rate);
-
 static inline const struct sunxi_rsb *
 to_sunxi_rsb(const struct device *dev)
 {
@@ -56,16 +54,11 @@ sunxi_rsb_probe_dev(const struct rsb_handle *bus, uint16_t hwaddr,
                     uint8_t addr, uint8_t data)
 {
 	const struct sunxi_rsb *self = to_sunxi_rsb(bus->dev);
-	int err;
 
 	/* Switch the PMIC to RSB mode. */
 	mmio_write_32(self->regs + RSB_PMCR_REG,
 	              BIT(31) | data << 16 | addr << 8 | I2C_BCAST_ADDR);
 	mmio_pollz_32(self->regs + RSB_PMCR_REG, BIT(31));
-
-	/* Raise the clock to 3MHz. */
-	if ((err = sunxi_rsb_set_rate(bus->dev, 3000000)))
-		return err;
 
 	/* Set the PMIC's runtime address. */
 	return sunxi_rsb_do_command(self, RSB_RTADDR(bus->id) | hwaddr,
@@ -100,9 +93,8 @@ sunxi_rsb_write(const struct rsb_handle *bus, uint8_t addr, uint8_t data)
 }
 
 static int
-sunxi_rsb_set_rate(const struct device *dev, uint32_t rate)
+sunxi_rsb_set_rate(const struct sunxi_rsb *self, uint32_t rate)
 {
-	const struct sunxi_rsb *self = to_sunxi_rsb(dev);
 	uint32_t dev_rate = clock_get_rate(&self->clock);
 	uint8_t  divider;
 
@@ -132,8 +124,8 @@ sunxi_rsb_probe(const struct device *dev)
 	mmio_write_32(self->regs + RSB_CTRL_REG, BIT(0));
 	mmio_pollz_32(self->regs + RSB_CTRL_REG, BIT(0));
 
-	/* Set the bus clock to a rate also compatible with I²C. */
-	if ((err = sunxi_rsb_set_rate(dev, 400000)))
+	/* Set the bus clock rate to its default value (3 MHz). */
+	if ((err = sunxi_rsb_set_rate(self, 3000000)))
 		goto err_put_gpio1;
 
 	return SUCCESS;
