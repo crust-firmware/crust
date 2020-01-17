@@ -1,5 +1,5 @@
 #
-# Copyright © 2017-2019 The Crust Firmware Authors.
+# Copyright © 2017-2020 The Crust Firmware Authors.
 # SPDX-License-Identifier: GPL-2.0-only
 #
 # Based in part on scripts/kconfig/Makefile from Linux v4.19.
