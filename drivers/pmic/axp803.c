@@ -14,6 +14,8 @@
 #include <pmic/axp803.h>
 #include <rsb/sunxi-rsb.h>
 
+#include "pmic.h"
+
 #define WAKEUP_CTRL_REG   0x31
 #define POWER_DISABLE_REG 0x32
 #define PIN_FUNCTION_REG  0x8f

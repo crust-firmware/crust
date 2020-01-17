@@ -10,6 +10,7 @@
 #include <pmic.h>
 #include <scpi.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <system.h>
 #include <util.h>
 #include <watchdog.h>

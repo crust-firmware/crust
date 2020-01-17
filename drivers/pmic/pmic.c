@@ -4,7 +4,23 @@
  */
 
 #include <device.h>
+#include <intrusive.h>
+#include <pmic.h>
 #include <pmic/axp803.h>
+
+#include "pmic.h"
+
+/**
+ * Get the ops for the pmic controller device.
+ */
+static inline const struct pmic_driver_ops *
+pmic_ops_for(const struct device *dev)
+{
+	const struct pmic_driver *drv =
+		container_of(dev->drv, const struct pmic_driver, drv);
+
+	return &drv->ops;
+}
 
 const struct device *
 pmic_get(void)
@@ -15,4 +31,28 @@ pmic_get(void)
 		pmic = device_get(&axp803_pmic.dev);
 
 	return pmic;
+}
+
+int
+pmic_reset(const struct device *dev)
+{
+	return pmic_ops_for(dev)->reset(dev);
+}
+
+int
+pmic_resume(const struct device *dev)
+{
+	return pmic_ops_for(dev)->resume(dev);
+}
+
+int
+pmic_shutdown(const struct device *dev)
+{
+	return pmic_ops_for(dev)->shutdown(dev);
+}
+
+int
+pmic_suspend(const struct device *dev)
+{
+	return pmic_ops_for(dev)->suspend(dev);
 }
