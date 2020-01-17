@@ -7,8 +7,7 @@
 #define DRIVERS_MFD_AXP803_H
 
 #include <device.h>
-#include <rsb.h>
-#include <stdint.h>
+#include <regmap.h>
 
 #define AXP803_RSB_RTADDR 0x2d
 
@@ -19,30 +18,15 @@
  *  EIO    There was a problem communicating with the hardware.
  *  ENODEV No AXP803 PMIC was found.
  *
- * @param bus  The device to check.
+ * @param map  The device to check.
  * @return     Zero if an AXP803 is present and successfully initialized; any
  *             other value if it is not.
  */
-int axp803_get(const struct rsb_handle *bus);
+int axp803_get(const struct regmap *map);
 
 /**
  * Drop a reference to an AXP803 PMIC.
  */
-void axp803_put(const struct rsb_handle *bus);
-
-/**
- * Set one or more bits in a register in the AXP803 PMIC.
- *
- * This function may fail with:
- *  EIO    There was a problem communicating with the hardware.
- *
- * @param bus  A device associated with an AXP803 PMIC.
- * @param addr The register within the PMIC to write.
- * @param bits A mask of bits to set in the register. Bits that are ones here
- *             will be set in the register; zeroes here will be left unchanged.
- * @return     Zero on success; a defined error code on failure.
- */
-int axp803_reg_setbits(const struct rsb_handle *bus, uint8_t addr,
-                       uint8_t bits);
+void axp803_put(const struct regmap *map);
 
 #endif /* DRIVERS_MFD_AXP803_H */

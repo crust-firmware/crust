@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#ifndef DRIVERS_RSB_SUNXI_RSB_H
-#define DRIVERS_RSB_SUNXI_RSB_H
+#ifndef DRIVERS_REGMAP_SUNXI_RSB_H
+#define DRIVERS_REGMAP_SUNXI_RSB_H
 
 #include <clock.h>
 #include <gpio.h>
-#include <rsb.h>
+#include <regmap.h>
 
 struct sunxi_rsb {
 	struct device       dev;
@@ -19,4 +19,4 @@ struct sunxi_rsb {
 
 extern const struct sunxi_rsb r_rsb;
 
-#endif /* DRIVERS_RSB_SUNXI_RSB_H */
+#endif /* DRIVERS_REGMAP_SUNXI_RSB_H */

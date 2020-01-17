@@ -7,11 +7,11 @@
 #define DRIVERS_PMIC_AXP803_H
 
 #include <pmic.h>
-#include <rsb.h>
+#include <regmap.h>
 
 struct axp803_pmic {
-	struct device     dev;
-	struct rsb_handle bus;
+	struct device dev;
+	struct regmap map;
 };
 
 extern const struct axp803_pmic axp803_pmic;

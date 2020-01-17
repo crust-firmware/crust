@@ -5,7 +5,7 @@
 
 #include <device.h>
 #include <error.h>
-#include <rsb.h>
+#include <regmap.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <mfd/axp803.h>
@@ -17,19 +17,19 @@
 static uint8_t refcount;
 
 int
-axp803_get(const struct rsb_handle *bus)
+axp803_get(const struct regmap *map)
 {
 	uint8_t reg;
 	int err;
 
 	if (!refcount) {
-		if ((err = rsb_get(bus)))
+		if ((err = regmap_get(map)))
 			return err;
-		if ((err = rsb_read(bus, IC_TYPE_REG, &reg)))
-			goto err_put_bus;
+		if ((err = regmap_read(map, IC_TYPE_REG, &reg)))
+			goto err_put_regmap;
 		if ((reg & IC_TYPE_MASK) != IC_TYPE_VALUE) {
 			err = ENODEV;
-			goto err_put_bus;
+			goto err_put_regmap;
 		}
 	}
 
@@ -37,28 +37,17 @@ axp803_get(const struct rsb_handle *bus)
 
 	return SUCCESS;
 
-err_put_bus:
-	rsb_put(bus);
+err_put_regmap:
+	regmap_put(map);
+
 	return err;
 }
 
 void
-axp803_put(const struct rsb_handle *bus)
+axp803_put(const struct regmap *map)
 {
 	if (--refcount)
 		return;
 
-	rsb_put(bus);
-}
-
-int
-axp803_reg_setbits(const struct rsb_handle *bus, uint8_t addr, uint8_t bits)
-{
-	uint8_t tmp;
-	int err;
-
-	if ((err = rsb_read(bus, addr, &tmp)))
-		return err;
-
-	return rsb_write(bus, addr, tmp | bits);
+	regmap_put(map);
 }

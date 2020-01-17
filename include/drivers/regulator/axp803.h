@@ -6,8 +6,8 @@
 #ifndef DRIVERS_REGULATOR_AXP803_H
 #define DRIVERS_REGULATOR_AXP803_H
 
+#include <regmap.h>
 #include <regulator.h>
-#include <rsb.h>
 
 enum {
 	AXP803_REGL_DCDC1,
@@ -35,8 +35,8 @@ enum {
 };
 
 struct axp803_regulator {
-	struct device     dev;
-	struct rsb_handle bus;
+	struct device dev;
+	struct regmap map;
 };
 
 extern const struct axp803_regulator axp803_regulator;

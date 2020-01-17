@@ -8,31 +8,43 @@
 #include <error.h>
 #include <intrusive.h>
 #include <mmio.h>
-#include <rsb.h>
+#include <regmap.h>
 #include <util.h>
 #include <clock/ccu.h>
 #include <gpio/sunxi-gpio.h>
-#include <rsb/sunxi-rsb.h>
+#include <regmap/sunxi-rsb.h>
 #include <platform/devices.h>
 
-#include "rsb.h"
+#include "regmap.h"
 
-#define RSB_CTRL_REG   0x00
-#define RSB_CCR_REG    0x04
-#define RSB_INT_EN_REG 0x08
-#define RSB_STAT_REG   0x0c
-#define RSB_ADDR_REG   0x10
-#define RSB_DLEN_REG   0x18
-#define RSB_DATA_REG   0x1c
-#define RSB_LCR_REG    0x24
-#define RSB_PMCR_REG   0x28
-#define RSB_CMD_REG    0x2c
-#define RSB_SADDR_REG  0x30
+#define RSB_CTRL_REG     0x00
+#define RSB_CCR_REG      0x04
+#define RSB_INT_EN_REG   0x08
+#define RSB_STAT_REG     0x0c
+#define RSB_ADDR_REG     0x10
+#define RSB_DLEN_REG     0x18
+#define RSB_DATA_REG     0x1c
+#define RSB_LCR_REG      0x24
+#define RSB_PMCR_REG     0x28
+#define RSB_CMD_REG      0x2c
+#define RSB_SADDR_REG    0x30
 
-#define I2C_BCAST_ADDR 0
+#define RSB_RTADDR(addr) ((addr) << 16)
 
-#define PMIC_MODE_REG  0x3e
-#define PMIC_MODE_VAL  0x7c
+#define I2C_BCAST_ADDR   0
+
+#define PMIC_MODE_REG    0x3e
+#define PMIC_MODE_VAL    0x7c
+
+enum {
+	RSB_SRTA = 0xe8,
+	RSB_RD8  = 0x8b,
+	RSB_RD16 = 0x9c,
+	RSB_RD32 = 0xa6,
+	RSB_WR8  = 0x4e,
+	RSB_WR16 = 0x59,
+	RSB_WR32 = 0x63,
+};
 
 static inline const struct sunxi_rsb *
 to_sunxi_rsb(const struct device *dev)
@@ -63,24 +75,24 @@ sunxi_rsb_do_command(const struct sunxi_rsb *self, uint32_t addr, uint32_t cmd)
 }
 
 static int
-sunxi_rsb_probe_dev(const struct rsb_handle *bus)
+sunxi_rsb_prepare(const struct regmap *map)
 {
-	const struct sunxi_rsb *self = to_sunxi_rsb(bus->dev);
-	uint32_t addr = RSB_RTADDR(bus->id) | sunxi_rsb_get_hwaddr(bus->id);
+	const struct sunxi_rsb *self = to_sunxi_rsb(map->dev);
+	uint32_t addr = RSB_RTADDR(map->id) | sunxi_rsb_get_hwaddr(map->id);
 
 	/* Set the device's runtime address. */
 	return sunxi_rsb_do_command(self, addr, RSB_SRTA);
 }
 
 static int
-sunxi_rsb_read(const struct rsb_handle *bus, uint8_t addr, uint8_t *data)
+sunxi_rsb_read(const struct regmap *map, uint8_t addr, uint8_t *data)
 {
-	const struct sunxi_rsb *self = to_sunxi_rsb(bus->dev);
+	const struct sunxi_rsb *self = to_sunxi_rsb(map->dev);
 	int err;
 
 	mmio_write_32(self->regs + RSB_ADDR_REG, addr);
 
-	if ((err = sunxi_rsb_do_command(self, RSB_RTADDR(bus->id), RSB_RD8)))
+	if ((err = sunxi_rsb_do_command(self, RSB_RTADDR(map->id), RSB_RD8)))
 		return err;
 
 	*data = mmio_read_32(self->regs + RSB_DATA_REG);
@@ -89,14 +101,14 @@ sunxi_rsb_read(const struct rsb_handle *bus, uint8_t addr, uint8_t *data)
 }
 
 static int
-sunxi_rsb_write(const struct rsb_handle *bus, uint8_t addr, uint8_t data)
+sunxi_rsb_write(const struct regmap *map, uint8_t addr, uint8_t data)
 {
-	const struct sunxi_rsb *self = to_sunxi_rsb(bus->dev);
+	const struct sunxi_rsb *self = to_sunxi_rsb(map->dev);
 
 	mmio_write_32(self->regs + RSB_ADDR_REG, addr);
 	mmio_write_32(self->regs + RSB_DATA_REG, data);
 
-	return sunxi_rsb_do_command(self, RSB_RTADDR(bus->id), RSB_WR8);
+	return sunxi_rsb_do_command(self, RSB_RTADDR(map->id), RSB_WR8);
 }
 
 static int
@@ -162,15 +174,15 @@ sunxi_rsb_release(const struct device *dev)
 	clock_put(&self->clock);
 }
 
-static const struct rsb_driver sunxi_rsb_driver = {
+static const struct regmap_driver sunxi_rsb_driver = {
 	.drv = {
 		.probe   = sunxi_rsb_probe,
 		.release = sunxi_rsb_release,
 	},
 	.ops = {
-		.probe = sunxi_rsb_probe_dev,
-		.read  = sunxi_rsb_read,
-		.write = sunxi_rsb_write,
+		.prepare = sunxi_rsb_prepare,
+		.read    = sunxi_rsb_read,
+		.write   = sunxi_rsb_write,
 	},
 };
 

@@ -8,11 +8,11 @@
 #include <error.h>
 #include <intrusive.h>
 #include <pmic.h>
-#include <rsb.h>
+#include <regmap.h>
 #include <util.h>
 #include <mfd/axp803.h>
 #include <pmic/axp803.h>
-#include <rsb/sunxi-rsb.h>
+#include <regmap/sunxi-rsb.h>
 
 #include "pmic.h"
 
@@ -32,7 +32,7 @@ axp803_pmic_reset(const struct device *dev)
 	const struct axp803_pmic *self = to_axp803_pmic(dev);
 
 	/* Trigger soft power restart. */
-	return axp803_reg_setbits(&self->bus, WAKEUP_CTRL_REG, BIT(6));
+	return regmap_set_bits(&self->map, WAKEUP_CTRL_REG, BIT(6));
 }
 
 static int
@@ -41,7 +41,7 @@ axp803_pmic_resume(const struct device *dev)
 	const struct axp803_pmic *self = to_axp803_pmic(dev);
 
 	/* Trigger soft power resume. */
-	return axp803_reg_setbits(&self->bus, WAKEUP_CTRL_REG, BIT(5));
+	return regmap_set_bits(&self->map, WAKEUP_CTRL_REG, BIT(5));
 }
 
 static int
@@ -50,7 +50,7 @@ axp803_pmic_shutdown(const struct device *dev)
 	const struct axp803_pmic *self = to_axp803_pmic(dev);
 
 	/* Trigger soft power off. */
-	return axp803_reg_setbits(&self->bus, POWER_DISABLE_REG, BIT(7));
+	return regmap_set_bits(&self->map, POWER_DISABLE_REG, BIT(7));
 }
 
 static int
@@ -60,12 +60,11 @@ axp803_pmic_suspend(const struct device *dev)
 	int err;
 
 	/* Remember previous voltages when waking up from suspend. */
-	if ((err = axp803_reg_setbits(&self->bus, PIN_FUNCTION_REG, BIT(1))))
+	if ((err = regmap_set_bits(&self->map, PIN_FUNCTION_REG, BIT(1))))
 		return err;
 
 	/* Enable resume, allow IRQs during suspend. */
-	return axp803_reg_setbits(&self->bus, WAKEUP_CTRL_REG,
-	                          BIT(4) | BIT(3));
+	return regmap_set_bits(&self->map, WAKEUP_CTRL_REG, BIT(4) | BIT(3));
 }
 
 static int
@@ -74,7 +73,7 @@ axp803_pmic_probe(const struct device *dev)
 	const struct axp803_pmic *self = to_axp803_pmic(dev);
 	int err;
 
-	if ((err = axp803_get(&self->bus)))
+	if ((err = axp803_get(&self->map)))
 		return err;
 
 	return SUCCESS;
@@ -85,7 +84,7 @@ axp803_pmic_release(const struct device *dev)
 {
 	const struct axp803_pmic *self = to_axp803_pmic(dev);
 
-	axp803_put(&self->bus);
+	axp803_put(&self->map);
 }
 
 static const struct pmic_driver axp803_pmic_driver = {
@@ -107,7 +106,7 @@ const struct axp803_pmic axp803_pmic = {
 		.drv   = &axp803_pmic_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
-	.bus = {
+	.map = {
 		.dev = &r_rsb.dev,
 		.id  = AXP803_RSB_RTADDR,
 	},

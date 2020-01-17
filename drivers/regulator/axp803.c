@@ -9,8 +9,8 @@
 #include <mmio.h>
 #include <regulator.h>
 #include <mfd/axp803.h>
+#include <regmap/sunxi-rsb.h>
 #include <regulator/axp803.h>
-#include <rsb/sunxi-rsb.h>
 
 #include "regulator.h"
 
@@ -398,31 +398,31 @@ static int
 axp803_regulator_get_state(const struct device *dev, uint8_t id)
 {
 	const struct axp803_regulator *self = to_axp803_regulator(dev);
-	uint8_t regaddr = axp803_regulators[id].enable_register;
-	uint8_t regmask = axp803_regulators[id].enable_mask;
-	uint8_t reg;
+	uint8_t reg  = axp803_regulators[id].enable_register;
+	uint8_t mask = axp803_regulators[id].enable_mask;
+	uint8_t val;
 	int err;
 
-	if ((err = rsb_read(&self->bus, regaddr, &reg)))
+	if ((err = regmap_read(&self->map, reg, &val)))
 		return err;
 
 	/* GPIO LDOs have their status bit inverted. */
-	return !!(reg & regmask) ^ (id >= AXP803_REGL_GPIO0);
+	return !!(val & mask) ^ (id >= AXP803_REGL_GPIO0);
 }
 
 static int
 axp803_regulator_read_raw(const struct device *dev, uint8_t id, uint32_t *raw)
 {
 	const struct axp803_regulator *self = to_axp803_regulator(dev);
-	uint8_t regaddr = axp803_regulators[id].value_register;
-	uint8_t regmask = axp803_regulators[id].status_mask;
-	uint8_t reg;
+	uint8_t reg  = axp803_regulators[id].value_register;
+	uint8_t mask = axp803_regulators[id].status_mask;
+	uint8_t val;
 	int err;
 
-	if ((err = rsb_read(&self->bus, regaddr, &reg)))
+	if ((err = regmap_read(&self->map, reg, &val)))
 		return err;
 	/* Mask out a possible status bit. */
-	*raw = reg & ~regmask;
+	*raw = val & ~mask;
 
 	return SUCCESS;
 }
@@ -431,25 +431,25 @@ static int
 axp803_regulator_set_state(const struct device *dev, uint8_t id, bool enabled)
 {
 	const struct axp803_regulator *self = to_axp803_regulator(dev);
-	uint8_t regaddr = axp803_regulators[id].enable_register;
-	uint8_t regmask = axp803_regulators[id].enable_mask;
-	uint8_t reg;
+	uint8_t reg  = axp803_regulators[id].enable_register;
+	uint8_t mask = axp803_regulators[id].enable_mask;
+	uint8_t val;
 	int err;
 
-	if ((err = rsb_read(&self->bus, regaddr, &reg)))
+	if ((err = regmap_read(&self->map, reg, &val)))
 		return err;
 	/* GPIO LDOs have their status bit inverted. */
 	enabled ^= (id >= AXP803_REGL_GPIO0);
-	reg      = enabled ? reg | regmask : reg & ~regmask;
+	val      = enabled ? val | mask : val & ~mask;
 
-	return rsb_write(&self->bus, regaddr, reg);
+	return regmap_write(&self->map, reg, val);
 }
 
 static int
 axp803_regulator_write_raw(const struct device *dev, uint8_t id, uint32_t raw)
 {
 	const struct axp803_regulator *self = to_axp803_regulator(dev);
-	uint8_t regaddr = axp803_regulators[id].value_register;
+	uint8_t reg = axp803_regulators[id].value_register;
 
 	assert(raw <= UINT8_MAX);
 
@@ -458,7 +458,7 @@ axp803_regulator_write_raw(const struct device *dev, uint8_t id, uint32_t raw)
 	if (id == AXP803_REGL_DC1SW)
 		return SUCCESS;
 
-	return rsb_write(&self->bus, regaddr, raw);
+	return regmap_write(&self->map, reg, raw);
 }
 
 static int
@@ -467,7 +467,7 @@ axp803_regulator_probe(const struct device *dev)
 	const struct axp803_regulator *self = to_axp803_regulator(dev);
 	int err;
 
-	if ((err = axp803_get(&self->bus)))
+	if ((err = axp803_get(&self->map)))
 		return err;
 
 	return SUCCESS;
@@ -478,7 +478,7 @@ axp803_regulator_release(const struct device *dev)
 {
 	const struct axp803_regulator *self = to_axp803_regulator(dev);
 
-	axp803_put(&self->bus);
+	axp803_put(&self->map);
 }
 
 static const struct regulator_driver axp803_regulator_driver = {
@@ -501,7 +501,7 @@ const struct axp803_regulator axp803_regulator = {
 		.drv   = &axp803_regulator_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
-	.bus = {
+	.map = {
 		.dev = &r_rsb.dev,
 		.id  = AXP803_RSB_RTADDR,
 	},
