@@ -10,7 +10,6 @@
 #include <rsb.h>
 #include <stdint.h>
 
-#define AXP803_RSB_HWADDR 0x03a3
 #define AXP803_RSB_RTADDR 0x2d
 
 /**

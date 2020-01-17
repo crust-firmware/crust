@@ -24,8 +24,7 @@ rsb_ops_for(const struct rsb_handle *bus)
 }
 
 int
-rsb_get(const struct rsb_handle *bus, uint16_t hwaddr, uint8_t addr,
-        uint8_t data)
+rsb_get(const struct rsb_handle *bus)
 {
 	int err;
 
@@ -33,7 +32,7 @@ rsb_get(const struct rsb_handle *bus, uint16_t hwaddr, uint8_t addr,
 	if (!device_get(bus->dev))
 		return ENODEV;
 
-	if ((err = rsb_ops_for(bus)->probe(bus, hwaddr, addr, data)))
+	if ((err = rsb_ops_for(bus)->probe(bus)))
 		goto err_put_device;
 
 	return SUCCESS;

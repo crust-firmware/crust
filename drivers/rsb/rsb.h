@@ -23,8 +23,7 @@ enum {
 };
 
 struct rsb_driver_ops {
-	int (*probe)(const struct rsb_handle *bus, uint16_t hwaddr,
-	             uint8_t addr, uint8_t data);
+	int (*probe)(const struct rsb_handle *bus);
 	int (*read)(const struct rsb_handle *bus, uint8_t addr, uint8_t *data);
 	int (*write)(const struct rsb_handle *bus, uint8_t addr, uint8_t data);
 };

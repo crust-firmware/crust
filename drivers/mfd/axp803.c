@@ -10,12 +10,9 @@
 #include <stdint.h>
 #include <mfd/axp803.h>
 
-#define AXP803_MODE_REG 0x3e
-#define AXP803_MODE_VAL 0x7c
-
-#define IC_TYPE_REG     0x03
-#define IC_TYPE_MASK    0xcf
-#define IC_TYPE_VALUE   0x41
+#define IC_TYPE_REG   0x03
+#define IC_TYPE_MASK  0xcf
+#define IC_TYPE_VALUE 0x41
 
 static uint8_t refcount;
 
@@ -26,8 +23,7 @@ axp803_get(const struct rsb_handle *bus)
 	int err;
 
 	if (!refcount) {
-		if ((err = rsb_get(bus, AXP803_RSB_HWADDR,
-		                   AXP803_MODE_REG, AXP803_MODE_VAL)))
+		if ((err = rsb_get(bus)))
 			return err;
 		if ((err = rsb_read(bus, IC_TYPE_REG, &reg)))
 			goto err_put_bus;

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
+#include <debug.h>
 #include <device.h>
 #include <error.h>
 #include <intrusive.h>
@@ -30,10 +31,22 @@
 
 #define I2C_BCAST_ADDR 0
 
+#define PMIC_MODE_REG  0x3e
+#define PMIC_MODE_VAL  0x7c
+
 static inline const struct sunxi_rsb *
 to_sunxi_rsb(const struct device *dev)
 {
 	return container_of(dev, const struct sunxi_rsb, dev);
+}
+
+static uint16_t
+sunxi_rsb_get_hwaddr(uint8_t rtaddr)
+{
+	/* Currently only a primary PMIC is supported. */
+	assert(rtaddr == 0x2d);
+
+	return 0x3a3;
 }
 
 static int
@@ -50,19 +63,13 @@ sunxi_rsb_do_command(const struct sunxi_rsb *self, uint32_t addr, uint32_t cmd)
 }
 
 static int
-sunxi_rsb_probe_dev(const struct rsb_handle *bus, uint16_t hwaddr,
-                    uint8_t addr, uint8_t data)
+sunxi_rsb_probe_dev(const struct rsb_handle *bus)
 {
 	const struct sunxi_rsb *self = to_sunxi_rsb(bus->dev);
+	uint32_t addr = RSB_RTADDR(bus->id) | sunxi_rsb_get_hwaddr(bus->id);
 
-	/* Switch the PMIC to RSB mode. */
-	mmio_write_32(self->regs + RSB_PMCR_REG,
-	              BIT(31) | data << 16 | addr << 8 | I2C_BCAST_ADDR);
-	mmio_pollz_32(self->regs + RSB_PMCR_REG, BIT(31));
-
-	/* Set the PMIC's runtime address. */
-	return sunxi_rsb_do_command(self, RSB_RTADDR(bus->id) | hwaddr,
-	                            RSB_SRTA);
+	/* Set the device's runtime address. */
+	return sunxi_rsb_do_command(self, addr, RSB_SRTA);
 }
 
 static int
@@ -127,6 +134,11 @@ sunxi_rsb_probe(const struct device *dev)
 	/* Set the bus clock rate to its default value (3 MHz). */
 	if ((err = sunxi_rsb_set_rate(self, 3000000)))
 		goto err_put_gpio1;
+
+	/* Switch all devices to RSB mode. */
+	mmio_write_32(self->regs + RSB_PMCR_REG, I2C_BCAST_ADDR |
+	              PMIC_MODE_REG << 8 | PMIC_MODE_VAL << 16 | BIT(31));
+	mmio_pollz_32(self->regs + RSB_PMCR_REG, BIT(31));
 
 	return SUCCESS;
 
