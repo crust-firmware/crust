@@ -25,16 +25,16 @@ axp803_get(const struct rsb_handle *bus)
 	uint8_t reg;
 	int err;
 
-	if (refcount)
-		return SUCCESS;
-	if ((err = rsb_get(bus, AXP803_RSB_HWADDR,
-	                   AXP803_MODE_REG, AXP803_MODE_VAL)))
-		return err;
-	if ((err = rsb_read(bus, IC_TYPE_REG, &reg)))
-		goto err_put_bus;
-	if ((reg & IC_TYPE_MASK) != IC_TYPE_VALUE) {
-		err = ENODEV;
-		goto err_put_bus;
+	if (!refcount) {
+		if ((err = rsb_get(bus, AXP803_RSB_HWADDR,
+		                   AXP803_MODE_REG, AXP803_MODE_VAL)))
+			return err;
+		if ((err = rsb_read(bus, IC_TYPE_REG, &reg)))
+			goto err_put_bus;
+		if ((reg & IC_TYPE_MASK) != IC_TYPE_VALUE) {
+			err = ENODEV;
+			goto err_put_bus;
+		}
 	}
 
 	++refcount;
