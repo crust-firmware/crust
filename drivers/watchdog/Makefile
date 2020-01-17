@@ -3,5 +3,6 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
-obj-y += sunxi-twd.o
 obj-y += watchdog.o
+
+obj-y += sunxi-twd.o

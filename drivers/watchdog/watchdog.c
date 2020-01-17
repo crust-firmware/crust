@@ -6,6 +6,7 @@
 #include <device.h>
 #include <intrusive.h>
 #include <stdint.h>
+#include <watchdog.h>
 
 #include "watchdog.h"
 
