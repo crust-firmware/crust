@@ -26,7 +26,6 @@ struct rsb_driver_ops {
 	int (*probe)(const struct rsb_handle *bus, uint16_t hwaddr,
 	             uint8_t addr, uint8_t data);
 	int (*read)(const struct rsb_handle *bus, uint8_t addr, uint8_t *data);
-	int (*set_rate)(const struct device *dev, uint32_t rate);
 	int (*write)(const struct rsb_handle *bus, uint8_t addr, uint8_t data);
 };
 

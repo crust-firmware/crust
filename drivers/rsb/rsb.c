@@ -57,12 +57,6 @@ rsb_read(const struct rsb_handle *bus, uint8_t addr, uint8_t *data)
 }
 
 int
-rsb_set_rate(const struct rsb_handle *bus, uint32_t rate)
-{
-	return rsb_ops_for(bus)->set_rate(bus->dev, rate);
-}
-
-int
 rsb_write(const struct rsb_handle *bus, uint8_t addr, uint8_t data)
 {
 	return rsb_ops_for(bus)->write(bus, addr, data);

@@ -89,6 +89,17 @@ sunxi_rsb_read(const struct rsb_handle *bus, uint8_t addr, uint8_t *data)
 }
 
 static int
+sunxi_rsb_write(const struct rsb_handle *bus, uint8_t addr, uint8_t data)
+{
+	const struct sunxi_rsb *self = to_sunxi_rsb(bus->dev);
+
+	mmio_write_32(self->regs + RSB_ADDR_REG, addr);
+	mmio_write_32(self->regs + RSB_DATA_REG, data);
+
+	return sunxi_rsb_do_command(self, RSB_RTADDR(bus->id), RSB_WR8);
+}
+
+static int
 sunxi_rsb_set_rate(const struct device *dev, uint32_t rate)
 {
 	const struct sunxi_rsb *self = to_sunxi_rsb(dev);
@@ -103,17 +114,6 @@ sunxi_rsb_set_rate(const struct device *dev, uint32_t rate)
 	mmio_write_32(self->regs + RSB_CCR_REG, 1U << 8 | divider);
 
 	return SUCCESS;
-}
-
-static int
-sunxi_rsb_write(const struct rsb_handle *bus, uint8_t addr, uint8_t data)
-{
-	const struct sunxi_rsb *self = to_sunxi_rsb(bus->dev);
-
-	mmio_write_32(self->regs + RSB_ADDR_REG, addr);
-	mmio_write_32(self->regs + RSB_DATA_REG, data);
-
-	return sunxi_rsb_do_command(self, RSB_RTADDR(bus->id), RSB_WR8);
 }
 
 static int
@@ -164,10 +164,9 @@ static const struct rsb_driver sunxi_rsb_driver = {
 		.release = sunxi_rsb_release,
 	},
 	.ops = {
-		.probe    = sunxi_rsb_probe_dev,
-		.read     = sunxi_rsb_read,
-		.set_rate = sunxi_rsb_set_rate,
-		.write    = sunxi_rsb_write,
+		.probe = sunxi_rsb_probe_dev,
+		.read  = sunxi_rsb_read,
+		.write = sunxi_rsb_write,
 	},
 };
 

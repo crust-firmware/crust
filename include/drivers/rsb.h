@@ -47,15 +47,6 @@ void rsb_put(const struct rsb_handle *bus);
 int rsb_read(const struct rsb_handle *bus, uint8_t addr, uint8_t *data);
 
 /**
- * Set the clock frequency of an RSB bus.
- *
- * @param bus   The RSB bus to modify.
- * @param rate  The clock rate in Hz.
- * @return      Zero on success; an error code on failure.
- */
-int rsb_set_rate(const struct rsb_handle *bus, uint32_t rate);
-
-/**
  * Write to a register contained inside an RSB device.
  *
  * @param bus   The RSB bus that the device is connected to.
