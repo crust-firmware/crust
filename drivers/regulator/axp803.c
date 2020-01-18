@@ -3,10 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <debug.h>
 #include <error.h>
-#include <limits.h>
-#include <mmio.h>
 #include <regulator.h>
 #include <mfd/axp803.h>
 #include <regulator/axp803.h>
@@ -17,12 +14,15 @@
 #define OUTPUT_POWER_CONTROL2 0x12
 #define OUTPUT_POWER_CONTROL3 0x13
 
+#define GPIO_LDO_ON           0x3
+#define GPIO_LDO_OFF          0x4
+
 struct axp803_regulator_info {
 	struct regulator_info info;
-	uint8_t               value_register;
 	uint8_t               enable_register;
 	uint8_t               enable_mask;
-	uint8_t               status_mask;
+	uint8_t               value_register;
+	uint8_t               value_mask;
 };
 
 static const struct axp803_regulator_info axp803_regulators[] = {
@@ -37,10 +37,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x20,
 		.enable_register = OUTPUT_POWER_CONTROL1,
 		.enable_mask     = BIT(0),
-		.status_mask     = BIT(7),
+		.value_register  = 0x20,
+		.value_mask      = GENMASK(4, 0),
 	},
 	[AXP803_REGL_DCDC2] = {
 		.info = {
@@ -58,10 +58,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x21,
 		.enable_register = OUTPUT_POWER_CONTROL1,
 		.enable_mask     = BIT(1),
-		.status_mask     = BIT(7),
+		.value_register  = 0x21,
+		.value_mask      = GENMASK(6, 0),
 	},
 	[AXP803_REGL_DCDC3] = {
 		.info = {
@@ -79,10 +79,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x22,
 		.enable_register = OUTPUT_POWER_CONTROL1,
 		.enable_mask     = BIT(2),
-		.status_mask     = BIT(7),
+		.value_register  = 0x22,
+		.value_mask      = GENMASK(6, 0),
 	},
 	[AXP803_REGL_DCDC4] = {
 		.info = {
@@ -100,10 +100,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x23,
 		.enable_register = OUTPUT_POWER_CONTROL1,
 		.enable_mask     = BIT(3),
-		.status_mask     = BIT(7),
+		.value_register  = 0x23,
+		.value_mask      = GENMASK(6, 0),
 	},
 	[AXP803_REGL_DCDC5] = {
 		.info = {
@@ -121,10 +121,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x24,
 		.enable_register = OUTPUT_POWER_CONTROL1,
 		.enable_mask     = BIT(4),
-		.status_mask     = BIT(7),
+		.value_register  = 0x24,
+		.value_mask      = GENMASK(6, 0),
 	},
 	[AXP803_REGL_DCDC6] = {
 		.info = {
@@ -142,10 +142,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x25,
 		.enable_register = OUTPUT_POWER_CONTROL1,
 		.enable_mask     = BIT(5),
-		.status_mask     = BIT(7),
+		.value_register  = 0x25,
+		.value_mask      = GENMASK(6, 0),
 	},
 	[AXP803_REGL_DC1SW] = {
 		.info = {
@@ -158,9 +158,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x20,
 		.enable_register = OUTPUT_POWER_CONTROL2,
 		.enable_mask     = BIT(7),
+		.value_register  = 0x20,
+		.value_mask      = GENMASK(4, 0),
 	},
 	[AXP803_REGL_ALDO1] = {
 		.info = {
@@ -173,9 +174,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x28,
 		.enable_register = OUTPUT_POWER_CONTROL3,
 		.enable_mask     = BIT(5),
+		.value_register  = 0x28,
+		.value_mask      = GENMASK(4, 0),
 	},
 	[AXP803_REGL_ALDO2] = {
 		.info = {
@@ -188,9 +190,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x29,
 		.enable_register = OUTPUT_POWER_CONTROL3,
 		.enable_mask     = BIT(6),
+		.value_register  = 0x29,
+		.value_mask      = GENMASK(4, 0),
 	},
 	[AXP803_REGL_ALDO3] = {
 		.info = {
@@ -203,9 +206,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x2a,
 		.enable_register = OUTPUT_POWER_CONTROL3,
 		.enable_mask     = BIT(7),
+		.value_register  = 0x2a,
+		.value_mask      = GENMASK(4, 0),
 	},
 	[AXP803_REGL_DLDO1] = {
 		.info = {
@@ -218,9 +222,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x15,
 		.enable_register = OUTPUT_POWER_CONTROL2,
 		.enable_mask     = BIT(3),
+		.value_register  = 0x15,
+		.value_mask      = GENMASK(4, 0),
 	},
 	[AXP803_REGL_DLDO2] = {
 		.info = {
@@ -238,9 +243,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x16,
 		.enable_register = OUTPUT_POWER_CONTROL2,
 		.enable_mask     = BIT(4),
+		.value_register  = 0x16,
+		.value_mask      = GENMASK(4, 0),
 	},
 	[AXP803_REGL_DLDO3] = {
 		.info = {
@@ -253,9 +259,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x17,
 		.enable_register = OUTPUT_POWER_CONTROL2,
 		.enable_mask     = BIT(5),
+		.value_register  = 0x17,
+		.value_mask      = GENMASK(4, 0),
 	},
 	[AXP803_REGL_DLDO4] = {
 		.info = {
@@ -268,9 +275,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x18,
 		.enable_register = OUTPUT_POWER_CONTROL2,
 		.enable_mask     = BIT(6),
+		.value_register  = 0x18,
+		.value_mask      = GENMASK(4, 0),
 	},
 	[AXP803_REGL_ELDO1] = {
 		.info = {
@@ -283,9 +291,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x19,
 		.enable_register = OUTPUT_POWER_CONTROL2,
 		.enable_mask     = BIT(0),
+		.value_register  = 0x19,
+		.value_mask      = GENMASK(4, 0),
 	},
 	[AXP803_REGL_ELDO2] = {
 		.info = {
@@ -298,9 +307,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x1a,
 		.enable_register = OUTPUT_POWER_CONTROL2,
 		.enable_mask     = BIT(1),
+		.value_register  = 0x1a,
+		.value_mask      = GENMASK(4, 0),
 	},
 	[AXP803_REGL_ELDO3] = {
 		.info = {
@@ -313,9 +323,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x1b,
 		.enable_register = OUTPUT_POWER_CONTROL2,
 		.enable_mask     = BIT(2),
+		.value_register  = 0x1b,
+		.value_mask      = GENMASK(4, 0),
 	},
 	[AXP803_REGL_FLDO1] = {
 		.info = {
@@ -328,9 +339,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x1c,
 		.enable_register = OUTPUT_POWER_CONTROL3,
 		.enable_mask     = BIT(2),
+		.value_register  = 0x1c,
+		.value_mask      = GENMASK(3, 0),
 	},
 	[AXP803_REGL_FLDO2] = {
 		.info = {
@@ -343,9 +355,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x1d,
 		.enable_register = OUTPUT_POWER_CONTROL3,
 		.enable_mask     = BIT(3),
+		.value_register  = 0x1d,
+		.value_mask      = GENMASK(3, 0),
 	},
 	[AXP803_REGL_GPIO0] = {
 		.info = {
@@ -358,9 +371,10 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x91,
 		.enable_register = 0x90,
-		.enable_mask     = BIT(2),
+		.enable_mask     = GENMASK(2, 0),
+		.value_register  = 0x91,
+		.value_mask      = GENMASK(4, 0),
 	},
 	[AXP803_REGL_GPIO1] = {
 		.info = {
@@ -373,17 +387,16 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 				},
 			},
 		},
-		.value_register  = 0x93,
 		.enable_register = 0x92,
-		.enable_mask     = BIT(2),
+		.enable_mask     = GENMASK(2, 0),
+		.value_register  = 0x93,
+		.value_mask      = GENMASK(4, 0),
 	},
 };
 
 static const struct regulator_info *
 axp803_regulator_get_info(const struct device *dev UNUSED, uint8_t id)
 {
-	assert(id < AXP803_REGL_COUNT);
-
 	return &axp803_regulators[id].info;
 }
 
@@ -399,8 +412,11 @@ axp803_regulator_get_state(const struct device *dev UNUSED, uint8_t id)
 	if ((err = regmap_read(map, reg, &val)))
 		return err;
 
-	/* GPIO LDOs have their status bit inverted. */
-	return !!(val & mask) ^ (id >= AXP803_REGL_GPIO0);
+	/* GPIO LDOs have a pin function, not an enable bit. */
+	if (id >= AXP803_REGL_GPIO0)
+		return (val & mask) == GPIO_LDO_ON;
+
+	return !!(val & mask);
 }
 
 static int
@@ -409,14 +425,14 @@ axp803_regulator_read_raw(const struct device *dev UNUSED, uint8_t id,
 {
 	const struct regmap *map = &axp803.map;
 	uint8_t reg  = axp803_regulators[id].value_register;
-	uint8_t mask = axp803_regulators[id].status_mask;
+	uint8_t mask = axp803_regulators[id].value_mask;
 	uint8_t val;
 	int err;
 
 	if ((err = regmap_read(map, reg, &val)))
 		return err;
-	/* Mask out a possible status bit. */
-	*raw = val & ~mask;
+
+	*raw = val & mask;
 
 	return SUCCESS;
 }
@@ -429,15 +445,14 @@ axp803_regulator_set_state(const struct device *dev UNUSED, uint8_t id,
 	uint8_t reg  = axp803_regulators[id].enable_register;
 	uint8_t mask = axp803_regulators[id].enable_mask;
 	uint8_t val;
-	int err;
 
-	if ((err = regmap_read(map, reg, &val)))
-		return err;
-	/* GPIO LDOs have their status bit inverted. */
-	enabled ^= (id >= AXP803_REGL_GPIO0);
-	val      = enabled ? val | mask : val & ~mask;
+	/* GPIO LDOs have a pin function, not an enable bit. */
+	if (id >= AXP803_REGL_GPIO0)
+		val = enabled ? GPIO_LDO_ON : GPIO_LDO_OFF;
+	else
+		val = enabled ? mask : 0;
 
-	return regmap_write(map, reg, val);
+	return regmap_update_bits(map, reg, mask, val);
 }
 
 static int
@@ -445,16 +460,15 @@ axp803_regulator_write_raw(const struct device *dev UNUSED, uint8_t id,
                            uint32_t raw)
 {
 	const struct regmap *map = &axp803.map;
-	uint8_t reg = axp803_regulators[id].value_register;
-
-	assert(raw <= UINT8_MAX);
+	uint8_t reg  = axp803_regulators[id].value_register;
+	uint8_t mask = axp803_regulators[id].value_mask;
 
 	/* AXP803_REGL_DC1SW is a secondary output of AXP803_REGL_DCDC1,
 	 * without its own voltage control. Only pretend to set its voltage. */
 	if (id == AXP803_REGL_DC1SW)
 		return SUCCESS;
 
-	return regmap_write(map, reg, raw);
+	return regmap_update_bits(map, reg, mask, raw);
 }
 
 static const struct regulator_driver axp803_regulator_driver = {
