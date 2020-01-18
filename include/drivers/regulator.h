@@ -12,13 +12,6 @@
 #include <stdint.h>
 #include <util.h>
 
-enum {
-	REGL_READABLE  = BIT(0), /**< Regulator is readable via SCPI. */
-	REGL_WRITABLE  = BIT(1), /**< Regulator is writable via SCPI. */
-	REGL_CRITICAL  = BIT(4), /**< Regulator cannot be disabled. */
-	REGL_SCPI_MASK = REGL_READABLE | REGL_WRITABLE,
-};
-
 struct regulator_handle {
 	const struct device *dev; /**< The device containing this regulator. */
 	uint8_t              id;  /**< The per-device regulator identifier. */
@@ -31,11 +24,9 @@ struct regulator_range {
 };
 
 struct regulator_info {
-	const char            *name;      /**< Name exported to SCPI. */
 	uint16_t               min_value; /**< Minimum allowed value. */
 	uint16_t               max_value; /**< Maximum allowed value. */
 	struct regulator_range ranges[2]; /**< Range descriptions. */
-	uint8_t                flags;     /**< Generic class flags. */
 };
 
 /**

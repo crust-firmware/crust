@@ -29,7 +29,6 @@ struct axp803_regulator_info {
 static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	[AXP803_REGL_DCDC1] = {
 		.info = {
-			.name      = "dcdc1",
 			.min_value = 1600,
 			.max_value = 3400,
 			.ranges    = {
@@ -38,7 +37,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 100,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE | REGL_CRITICAL,
 		},
 		.value_register  = 0x20,
 		.enable_register = OUTPUT_POWER_CONTROL1,
@@ -47,7 +45,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_DCDC2] = {
 		.info = {
-			.name      = "dcdc2",
 			.min_value = 500,
 			.max_value = 1300,
 			.ranges    = {
@@ -61,7 +58,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 20,
 				},
 			},
-			.flags = REGL_READABLE,
 		},
 		.value_register  = 0x21,
 		.enable_register = OUTPUT_POWER_CONTROL1,
@@ -70,7 +66,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_DCDC3] = {
 		.info = {
-			.name      = "dcdc3",
 			.min_value = 500,
 			.max_value = 1300,
 			.ranges    = {
@@ -84,7 +79,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 20,
 				},
 			},
-			.flags = REGL_READABLE,
 		},
 		.value_register  = 0x22,
 		.enable_register = OUTPUT_POWER_CONTROL1,
@@ -93,7 +87,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_DCDC4] = {
 		.info = {
-			.name      = "dcdc4",
 			.min_value = 500,
 			.max_value = 1300,
 			.ranges    = {
@@ -107,7 +100,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 20,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE,
 		},
 		.value_register  = 0x23,
 		.enable_register = OUTPUT_POWER_CONTROL1,
@@ -116,7 +108,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_DCDC5] = {
 		.info = {
-			.name      = "dcdc5",
 			.min_value = 800,
 			.max_value = 1840,
 			.ranges    = {
@@ -130,7 +121,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 20,
 				},
 			},
-			.flags = REGL_READABLE,
 		},
 		.value_register  = 0x24,
 		.enable_register = OUTPUT_POWER_CONTROL1,
@@ -139,7 +129,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_DCDC6] = {
 		.info = {
-			.name      = "dcdc6",
 			.min_value = 600,
 			.max_value = 1520,
 			.ranges    = {
@@ -153,7 +142,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 20,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE | REGL_CRITICAL,
 		},
 		.value_register  = 0x25,
 		.enable_register = OUTPUT_POWER_CONTROL1,
@@ -162,7 +150,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_DC1SW] = {
 		.info = {
-			.name      = "dc1sw",
 			.min_value = 1600,
 			.max_value = 3400,
 			.ranges    = {
@@ -171,7 +158,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 100,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE,
 		},
 		.value_register  = 0x20,
 		.enable_register = OUTPUT_POWER_CONTROL2,
@@ -179,7 +165,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_ALDO1] = {
 		.info = {
-			.name      = "aldo1",
 			.min_value = 700,
 			.max_value = 3300,
 			.ranges    = {
@@ -188,7 +173,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 100,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE,
 		},
 		.value_register  = 0x28,
 		.enable_register = OUTPUT_POWER_CONTROL3,
@@ -196,7 +180,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_ALDO2] = {
 		.info = {
-			.name      = "aldo2",
 			.min_value = 700,
 			.max_value = 3300,
 			.ranges    = {
@@ -205,7 +188,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 100,
 				},
 			},
-			.flags = REGL_READABLE | REGL_CRITICAL,
 		},
 		.value_register  = 0x29,
 		.enable_register = OUTPUT_POWER_CONTROL3,
@@ -213,7 +195,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_ALDO3] = {
 		.info = {
-			.name      = "aldo3",
 			.min_value = 700,
 			.max_value = 3300,
 			.ranges    = {
@@ -222,7 +203,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 100,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE | REGL_CRITICAL,
 		},
 		.value_register  = 0x2a,
 		.enable_register = OUTPUT_POWER_CONTROL3,
@@ -230,7 +210,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_DLDO1] = {
 		.info = {
-			.name      = "dldo1",
 			.min_value = 700,
 			.max_value = 3300,
 			.ranges    = {
@@ -239,7 +218,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 100,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE,
 		},
 		.value_register  = 0x15,
 		.enable_register = OUTPUT_POWER_CONTROL2,
@@ -247,7 +225,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_DLDO2] = {
 		.info = {
-			.name      = "dldo2",
 			.min_value = 700,
 			.max_value = 4200,
 			.ranges    = {
@@ -261,7 +238,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 200,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE,
 		},
 		.value_register  = 0x16,
 		.enable_register = OUTPUT_POWER_CONTROL2,
@@ -269,7 +245,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_DLDO3] = {
 		.info = {
-			.name      = "dldo3",
 			.min_value = 700,
 			.max_value = 3300,
 			.ranges    = {
@@ -278,7 +253,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 100,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE,
 		},
 		.value_register  = 0x17,
 		.enable_register = OUTPUT_POWER_CONTROL2,
@@ -286,7 +260,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_DLDO4] = {
 		.info = {
-			.name      = "dldo4",
 			.min_value = 700,
 			.max_value = 3300,
 			.ranges    = {
@@ -295,7 +268,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 100,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE,
 		},
 		.value_register  = 0x18,
 		.enable_register = OUTPUT_POWER_CONTROL2,
@@ -303,7 +275,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_ELDO1] = {
 		.info = {
-			.name      = "eldo1",
 			.min_value = 700,
 			.max_value = 1900,
 			.ranges    = {
@@ -312,7 +283,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 50,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE,
 		},
 		.value_register  = 0x19,
 		.enable_register = OUTPUT_POWER_CONTROL2,
@@ -320,7 +290,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_ELDO2] = {
 		.info = {
-			.name      = "eldo2",
 			.min_value = 700,
 			.max_value = 1900,
 			.ranges    = {
@@ -329,7 +298,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 50,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE,
 		},
 		.value_register  = 0x1a,
 		.enable_register = OUTPUT_POWER_CONTROL2,
@@ -337,7 +305,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_ELDO3] = {
 		.info = {
-			.name      = "eldo3",
 			.min_value = 700,
 			.max_value = 1900,
 			.ranges    = {
@@ -346,7 +313,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 50,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE,
 		},
 		.value_register  = 0x1b,
 		.enable_register = OUTPUT_POWER_CONTROL2,
@@ -354,7 +320,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_FLDO1] = {
 		.info = {
-			.name      = "fldo1",
 			.min_value = 700,
 			.max_value = 1450,
 			.ranges    = {
@@ -363,7 +328,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 50,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE,
 		},
 		.value_register  = 0x1c,
 		.enable_register = OUTPUT_POWER_CONTROL3,
@@ -371,7 +335,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_FLDO2] = {
 		.info = {
-			.name      = "fldo2",
 			.min_value = 700,
 			.max_value = 1450,
 			.ranges    = {
@@ -380,7 +343,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 50,
 				},
 			},
-			.flags = REGL_READABLE | REGL_CRITICAL,
 		},
 		.value_register  = 0x1d,
 		.enable_register = OUTPUT_POWER_CONTROL3,
@@ -388,7 +350,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_GPIO0] = {
 		.info = {
-			.name      = "gpio0",
 			.min_value = 700,
 			.max_value = 3300,
 			.ranges    = {
@@ -397,7 +358,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 100,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE,
 		},
 		.value_register  = 0x91,
 		.enable_register = 0x90,
@@ -405,7 +365,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 	},
 	[AXP803_REGL_GPIO1] = {
 		.info = {
-			.name      = "gpio1",
 			.min_value = 700,
 			.max_value = 3300,
 			.ranges    = {
@@ -414,7 +373,6 @@ static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
 					.step        = 100,
 				},
 			},
-			.flags = REGL_READABLE | REGL_WRITABLE,
 		},
 		.value_register  = 0x93,
 		.enable_register = 0x92,

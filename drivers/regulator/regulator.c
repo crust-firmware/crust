@@ -27,10 +27,6 @@ int
 regulator_disable(const struct device *dev, uint8_t id)
 {
 	const struct regulator_driver_ops *ops = regulator_ops_for(dev);
-	struct regulator_info *info = ops->get_info(dev, id);
-
-	if (info->flags & REGL_CRITICAL)
-		return EPERM;
 
 	return ops->set_state(dev, id, false);
 }

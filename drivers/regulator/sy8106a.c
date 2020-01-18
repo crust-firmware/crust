@@ -20,7 +20,6 @@
 #define SYS_STATUS_REG 0x06
 
 static struct regulator_info sy8106a_regulator_info = {
-	.name      = "vout",
 	.min_value = 680,
 	.max_value = 1950,
 	.ranges    = {
@@ -30,7 +29,6 @@ static struct regulator_info sy8106a_regulator_info = {
 			.step        = 10,
 		},
 	},
-	.flags = REGL_READABLE,
 };
 
 static inline const struct sy8106a *
