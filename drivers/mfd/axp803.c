@@ -38,7 +38,7 @@ axp803_get(const struct rsb_handle *bus)
 	return SUCCESS;
 
 err_put_bus:
-	axp803_put(bus);
+	rsb_put(bus);
 	return err;
 }
 
