@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <delay.h>
 #include <error.h>
 #include <intrusive.h>
 #include <regmap.h>
@@ -46,10 +45,6 @@ sy8106a_set_state(const struct device *dev, uint8_t id UNUSED, bool enabled)
 	if ((err = regmap_update_bits(&self->map, VOUT_COM_REG,
 	                              BIT(0), !enabled)))
 		return err;
-
-	/* Wait for the regulator to start up (5 ms). */
-	if (enabled)
-		udelay(5000);
 
 	return SUCCESS;
 }

@@ -5,9 +5,13 @@
 
 #include <css.h>
 #include <debug.h>
+#include <delay.h>
 #include <device.h>
+#include <error.h>
 #include <irq.h>
 #include <pmic.h>
+#include <regulator.h>
+#include <regulator_list.h>
 #include <scpi.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -110,6 +114,7 @@ system_state_machine(void)
 			}
 
 			/* Turn off all unnecessary power domains. */
+			regulator_bulk_disable(&inactive_list);
 
 			/* Turn off all unnecessary clocks. */
 			if (gpio && !irq_is_enabled(IRQ_R_PIO_PL)) {
@@ -142,11 +147,18 @@ system_state_machine(void)
 
 			/* Turn on previously-disabled power domains. */
 
-			/* Perform PMIC-specific resume actions. */
+			/* Perform PMIC-specific resume actions.
+			 * The PMIC is expected to restore regulator state. */
+			bool restored = false;
 			if ((pmic = pmic_get())) {
-				pmic_resume(pmic);
+				restored = pmic_resume(pmic) == SUCCESS;
 				device_put(pmic);
 			}
+			if (!restored)
+				regulator_bulk_enable(&inactive_list);
+
+			/* Give regulator outputs time to rise. */
+			udelay(5000);
 
 			/* Disable wakeup sources. */
 
@@ -176,6 +188,7 @@ system_state_machine(void)
 			}
 
 			/* Turn off all possible power domains. */
+			regulator_bulk_disable(&off_list);
 
 			/* Turn off all possible clocks. */
 			if (gpio && !irq_is_enabled(IRQ_R_PIO_PL)) {
@@ -197,11 +210,17 @@ system_state_machine(void)
 			break;
 		case SYSTEM_RESET:
 		default:
-			/* Attempt to reset the SoC using the PMIC. */
+			/* Attempt to reset the board using the PMIC. */
 			if ((pmic = pmic_get())) {
 				pmic_reset(pmic);
 				device_put(pmic);
 			}
+
+			/* Turn on regulators required to boot. */
+			regulator_bulk_enable(&off_list);
+
+			/* Give regulator outputs time to rise. */
+			udelay(5000);
 
 			/* Attempt to reset the SoC using the watchdog. */
 			if (watchdog || (watchdog = device_get(&r_twd.dev)))
