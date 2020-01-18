@@ -62,6 +62,21 @@ int regmap_read(const struct regmap *map, uint8_t reg, uint8_t *val);
 int regmap_set_bits(const struct regmap *map, uint8_t reg, uint8_t set);
 
 /**
+ * Update a bitfield in a regmap register.
+ *
+ * This function may fail with:
+ *   EIO     There was a problem communicating with the hardware.
+ *
+ * @param map  A reference to the regmap.
+ * @param reg  The register to modify.
+ * @param mask A mask of bits representing a bitfield.
+ * @param val  The new value of the bitfield.
+ * @return     Zero on success; an error code on failure.
+ */
+int regmap_update_bits(const struct regmap *map, uint8_t reg, uint8_t mask,
+                       uint8_t val);
+
+/**
  * Write a value to a regmap.
  *
  * This function may fail with:

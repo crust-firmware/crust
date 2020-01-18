@@ -69,6 +69,20 @@ regmap_set_bits(const struct regmap *map, uint8_t reg, uint8_t set)
 }
 
 int
+regmap_update_bits(const struct regmap *map, uint8_t reg, uint8_t mask,
+                   uint8_t val)
+{
+	const struct regmap_driver_ops *ops = regmap_ops_for(map);
+	uint8_t tmp;
+	int err;
+
+	if ((err = ops->read(map, reg, &tmp)))
+		return err;
+
+	return ops->write(map, reg, tmp ^ ((val ^ tmp) & mask));
+}
+
+int
 regmap_write(const struct regmap *map, uint8_t reg, uint8_t val)
 {
 	return regmap_ops_for(map)->write(map, reg, val);
