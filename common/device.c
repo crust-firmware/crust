@@ -13,6 +13,9 @@ device_get(const struct device *dev)
 {
 	int err;
 
+	if (!dev)
+		return NULL;
+
 	if (!dev->state->refcount) {
 		debug("%s: Probing", dev->name);
 		if ((err = dev->drv->probe(dev))) {
