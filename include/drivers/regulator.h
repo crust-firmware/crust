@@ -7,26 +7,11 @@
 #define DRIVERS_REGULATOR_H
 
 #include <device.h>
-#include <intrusive.h>
-#include <stdbool.h>
 #include <stdint.h>
-#include <util.h>
 
 struct regulator_handle {
 	const struct device *dev; /**< The device containing this regulator. */
 	uint8_t              id;  /**< The per-device regulator identifier. */
-};
-
-struct regulator_range {
-	uint16_t start_raw;   /**< Smallest raw value in the range. */
-	int16_t  start_value; /**< Cooked value at smallest raw value. */
-	uint16_t step;        /**< Distance between adjacent values. */
-};
-
-struct regulator_info {
-	uint16_t               min_value; /**< Minimum allowed value. */
-	uint16_t               max_value; /**< Maximum allowed value. */
-	struct regulator_range ranges[2]; /**< Range descriptions. */
 };
 
 /**
@@ -57,18 +42,6 @@ int regulator_disable(const struct device *dev, uint8_t id);
 int regulator_enable(const struct device *dev, uint8_t id);
 
 /**
- * Get generic information about a regulator.
- *
- * This function has no defined errors.
- *
- * @param dev   The device containing this regulator.
- * @param id    The device-specific identifier for this regulator.
- * @return      A pointer to the information structure.
- */
-const struct regulator_info *regulator_get_info(const struct device *dev,
-                                                uint8_t id);
-
-/**
  * Get the current state of a regulator, as determined from the hardware.
  *
  * This function may fail with:
@@ -80,36 +53,5 @@ const struct regulator_info *regulator_get_info(const struct device *dev,
  *              enabled; a defined error code on failure.
  */
 int regulator_get_state(const struct device *dev, uint8_t id);
-
-/**
- * Get the current value of a regulator. If the regulator is disabled, this
- * function returns the value the regulator would have if it was enabled. If
- * the value is unknown, this function returns zero for the value
- *
- * This function may fail with:
- *   EIO    There was a problem communicating with the hardware.
- *
- * @param dev   The device containing this regulator.
- * @param id    The device-specific identifier for this regulator.
- * @param value The location to store the value read from the regulator.
- * @return      Zero on success; a defined error code on failure.
- */
-int regulator_get_value(const struct device *dev, uint8_t id, uint16_t *value);
-
-/**
- * Set the value of a regulator. If the regulator is currently disabled, this
- * will update the value the regulator would have if it was enabled.
- *
- * This function may fail with:
- *   EIO    There was a problem communicating with the hardware.
- *   ERANGE The requested value is below the minimum or above the maximum
- *          allowed value for this regulator.
- *
- * @param dev   The device containing this regulator.
- * @param id    The device-specific identifier for this regulator.
- * @param value The new value for this regulator.
- * @return      Zero on success; a defined error code on failure.
- */
-int regulator_set_value(const struct device *dev, uint8_t id, uint16_t value);
 
 #endif /* DRIVERS_REGULATOR_H */

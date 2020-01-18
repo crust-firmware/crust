@@ -3,13 +3,12 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <debug.h>
 #include <delay.h>
 #include <error.h>
-#include <limits.h>
-#include <mmio.h>
+#include <intrusive.h>
 #include <regmap.h>
 #include <regulator.h>
+#include <util.h>
 #include <regmap/sun6i-i2c.h>
 #include <regulator/sy8106a.h>
 
@@ -19,30 +18,10 @@
 #define VOUT_COM_REG   0x02
 #define SYS_STATUS_REG 0x06
 
-static const struct regulator_info sy8106a_regulator_info = {
-	.min_value = 680,
-	.max_value = 1950,
-	.ranges    = {
-		{
-			.start_raw   = 0x00,
-			.start_value = 680,
-			.step        = 10,
-		},
-	},
-};
-
 static inline const struct sy8106a *
 to_sy8106a(const struct device *dev)
 {
 	return container_of(dev, const struct sy8106a, dev);
-}
-
-static const struct regulator_info *
-sy8106a_get_info(const struct device *dev UNUSED, uint8_t id UNUSED)
-{
-	assert(id < SY8106A_REGL_COUNT);
-
-	return &sy8106a_regulator_info;
 }
 
 static int
@@ -56,21 +35,6 @@ sy8106a_get_state(const struct device *dev, uint8_t id UNUSED)
 		return err;
 
 	return !(val & BIT(0));
-}
-
-static int
-sy8106a_read_raw(const struct device *dev, uint8_t id UNUSED, uint32_t *raw)
-{
-	const struct sy8106a *self = to_sy8106a(dev);
-	uint8_t val;
-	int err;
-
-	if ((err = regmap_read(&self->map, VOUT_SEL_REG, &val)))
-		return err;
-
-	*raw = val & GENMASK(6, 0);
-
-	return SUCCESS;
 }
 
 static int
@@ -88,16 +52,6 @@ sy8106a_set_state(const struct device *dev, uint8_t id UNUSED, bool enabled)
 		udelay(5000);
 
 	return SUCCESS;
-}
-
-static int
-sy8106a_write_raw(const struct device *dev, uint8_t id UNUSED, uint32_t raw)
-{
-	const struct sy8106a *self = to_sy8106a(dev);
-
-	assert(raw <= UINT8_MAX);
-
-	return regmap_write(&self->map, VOUT_SEL_REG, raw | BIT(7));
 }
 
 static int
@@ -126,11 +80,8 @@ static const struct regulator_driver sy8106a_driver = {
 		.release = sy8106a_release,
 	},
 	.ops = {
-		.get_info  = sy8106a_get_info,
 		.get_state = sy8106a_get_state,
-		.read_raw  = sy8106a_read_raw,
 		.set_state = sy8106a_set_state,
-		.write_raw = sy8106a_write_raw,
 	},
 };
 
