@@ -49,25 +49,26 @@ static int
 sy8106a_get_state(const struct device *dev, uint8_t id UNUSED)
 {
 	const struct sy8106a *self = to_sy8106a(dev);
-	uint8_t reg;
+	uint8_t val;
 	int err;
 
-	if ((err = regmap_read(&self->map, VOUT_COM_REG, &reg)))
+	if ((err = regmap_read(&self->map, VOUT_COM_REG, &val)))
 		return err;
 
-	return (reg & BIT(0)) == 0;
+	return !(val & BIT(0));
 }
 
 static int
 sy8106a_read_raw(const struct device *dev, uint8_t id UNUSED, uint32_t *raw)
 {
 	const struct sy8106a *self = to_sy8106a(dev);
-	uint8_t reg;
+	uint8_t val;
 	int err;
 
-	if ((err = regmap_read(&self->map, VOUT_SEL_REG, &reg)))
+	if ((err = regmap_read(&self->map, VOUT_SEL_REG, &val)))
 		return err;
-	*raw = reg & ~BIT(7);
+
+	*raw = val & GENMASK(6, 0);
 
 	return SUCCESS;
 }
@@ -76,14 +77,12 @@ static int
 sy8106a_set_state(const struct device *dev, uint8_t id UNUSED, bool enabled)
 {
 	const struct sy8106a *self = to_sy8106a(dev);
-	uint8_t reg;
 	int err;
 
-	if ((err = regmap_read(&self->map, VOUT_COM_REG, &reg)))
+	if ((err = regmap_update_bits(&self->map, VOUT_COM_REG,
+	                              BIT(0), !enabled)))
 		return err;
-	reg = enabled ? reg & ~BIT(0) : reg | BIT(0);
-	if ((err = regmap_write(&self->map, VOUT_COM_REG, reg)))
-		return err;
+
 	/* Wait for the regulator to start up (5 ms). */
 	if (enabled)
 		udelay(5000);
