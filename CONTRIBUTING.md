@@ -84,8 +84,8 @@ include the following four commits:
 3. The third set of commits (one for each platform) should add the devices that
    use this driver to `platform/<platform>/devices.c`. If this driver supplies
    an additional platform-specific header, that should go before these commits.
-4. Finally, the device may be utilized be used from common code (e.g. in
-   `common/main.c` or `common/scpi_cmds.c`).
+4. Finally, the device may be used from common code (e.g. in `common/main.c` or
+   `common/scpi_cmds.c`).
 
 Changes to submitted pull requests that address feedback from project
 maintainers should be squashed into existing commits rather than being included
