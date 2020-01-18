@@ -6,7 +6,7 @@
 #ifndef DRIVERS_REGULATOR_AXP803_H
 #define DRIVERS_REGULATOR_AXP803_H
 
-#include <regmap.h>
+#include <device.h>
 #include <regulator.h>
 
 enum {
@@ -34,11 +34,6 @@ enum {
 	AXP803_REGL_COUNT,
 };
 
-struct axp803_regulator {
-	struct device dev;
-	struct regmap map;
-};
-
-extern const struct axp803_regulator axp803_regulator;
+extern const struct device axp803_regulator;
 
 #endif /* DRIVERS_REGULATOR_AXP803_H */

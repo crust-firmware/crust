@@ -9,7 +9,6 @@
 #include <mmio.h>
 #include <regulator.h>
 #include <mfd/axp803.h>
-#include <regmap/sunxi-rsb.h>
 #include <regulator/axp803.h>
 
 #include "regulator.h"
@@ -380,12 +379,6 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 	},
 };
 
-static inline const struct axp803_regulator *
-to_axp803_regulator(const struct device *dev)
-{
-	return container_of(dev, const struct axp803_regulator, dev);
-}
-
 static const struct regulator_info *
 axp803_regulator_get_info(const struct device *dev UNUSED, uint8_t id)
 {
@@ -395,15 +388,15 @@ axp803_regulator_get_info(const struct device *dev UNUSED, uint8_t id)
 }
 
 static int
-axp803_regulator_get_state(const struct device *dev, uint8_t id)
+axp803_regulator_get_state(const struct device *dev UNUSED, uint8_t id)
 {
-	const struct axp803_regulator *self = to_axp803_regulator(dev);
+	const struct regmap *map = &axp803.map;
 	uint8_t reg  = axp803_regulators[id].enable_register;
 	uint8_t mask = axp803_regulators[id].enable_mask;
 	uint8_t val;
 	int err;
 
-	if ((err = regmap_read(&self->map, reg, &val)))
+	if ((err = regmap_read(map, reg, &val)))
 		return err;
 
 	/* GPIO LDOs have their status bit inverted. */
@@ -411,15 +404,16 @@ axp803_regulator_get_state(const struct device *dev, uint8_t id)
 }
 
 static int
-axp803_regulator_read_raw(const struct device *dev, uint8_t id, uint32_t *raw)
+axp803_regulator_read_raw(const struct device *dev UNUSED, uint8_t id,
+                          uint32_t *raw)
 {
-	const struct axp803_regulator *self = to_axp803_regulator(dev);
+	const struct regmap *map = &axp803.map;
 	uint8_t reg  = axp803_regulators[id].value_register;
 	uint8_t mask = axp803_regulators[id].status_mask;
 	uint8_t val;
 	int err;
 
-	if ((err = regmap_read(&self->map, reg, &val)))
+	if ((err = regmap_read(map, reg, &val)))
 		return err;
 	/* Mask out a possible status bit. */
 	*raw = val & ~mask;
@@ -428,27 +422,29 @@ axp803_regulator_read_raw(const struct device *dev, uint8_t id, uint32_t *raw)
 }
 
 static int
-axp803_regulator_set_state(const struct device *dev, uint8_t id, bool enabled)
+axp803_regulator_set_state(const struct device *dev UNUSED, uint8_t id,
+                           bool enabled)
 {
-	const struct axp803_regulator *self = to_axp803_regulator(dev);
+	const struct regmap *map = &axp803.map;
 	uint8_t reg  = axp803_regulators[id].enable_register;
 	uint8_t mask = axp803_regulators[id].enable_mask;
 	uint8_t val;
 	int err;
 
-	if ((err = regmap_read(&self->map, reg, &val)))
+	if ((err = regmap_read(map, reg, &val)))
 		return err;
 	/* GPIO LDOs have their status bit inverted. */
 	enabled ^= (id >= AXP803_REGL_GPIO0);
 	val      = enabled ? val | mask : val & ~mask;
 
-	return regmap_write(&self->map, reg, val);
+	return regmap_write(map, reg, val);
 }
 
 static int
-axp803_regulator_write_raw(const struct device *dev, uint8_t id, uint32_t raw)
+axp803_regulator_write_raw(const struct device *dev UNUSED, uint8_t id,
+                           uint32_t raw)
 {
-	const struct axp803_regulator *self = to_axp803_regulator(dev);
+	const struct regmap *map = &axp803.map;
 	uint8_t reg = axp803_regulators[id].value_register;
 
 	assert(raw <= UINT8_MAX);
@@ -458,33 +454,13 @@ axp803_regulator_write_raw(const struct device *dev, uint8_t id, uint32_t raw)
 	if (id == AXP803_REGL_DC1SW)
 		return SUCCESS;
 
-	return regmap_write(&self->map, reg, raw);
-}
-
-static int
-axp803_regulator_probe(const struct device *dev)
-{
-	const struct axp803_regulator *self = to_axp803_regulator(dev);
-	int err;
-
-	if ((err = axp803_get(&self->map)))
-		return err;
-
-	return SUCCESS;
-}
-
-static void
-axp803_regulator_release(const struct device *dev)
-{
-	const struct axp803_regulator *self = to_axp803_regulator(dev);
-
-	axp803_put(&self->map);
+	return regmap_write(map, reg, raw);
 }
 
 static const struct regulator_driver axp803_regulator_driver = {
 	.drv = {
-		.probe   = axp803_regulator_probe,
-		.release = axp803_regulator_release,
+		.probe   = axp803_subdevice_probe,
+		.release = axp803_subdevice_release,
 	},
 	.ops = {
 		.get_info  = axp803_regulator_get_info,
@@ -495,14 +471,8 @@ static const struct regulator_driver axp803_regulator_driver = {
 	},
 };
 
-const struct axp803_regulator axp803_regulator = {
-	.dev = {
-		.name  = "axp803-regulator",
-		.drv   = &axp803_regulator_driver.drv,
-		.state = DEVICE_STATE_INIT,
-	},
-	.map = {
-		.dev = &r_rsb.dev,
-		.id  = AXP803_RSB_RTADDR,
-	},
+const struct device axp803_regulator = {
+	.name  = "axp803-regulator",
+	.drv   = &axp803_regulator_driver.drv,
+	.state = DEVICE_STATE_INIT,
 };
