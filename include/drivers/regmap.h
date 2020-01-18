@@ -49,17 +49,17 @@ void regmap_put(const struct regmap *map);
 int regmap_read(const struct regmap *map, uint8_t reg, uint8_t *val);
 
 /**
- * Set bits in a regmap register.
+ * Write a value to a regmap.
  *
  * This function may fail with:
  *   EIO     There was a problem communicating with the hardware.
  *
  * @param map  A reference to the regmap.
- * @param reg  The register to modify.
- * @param set  The mask of bits to set in the register.
+ * @param reg  The register to write.
+ * @param val  The value to write to the register.
  * @return     Zero on success; an error code on failure.
  */
-int regmap_set_bits(const struct regmap *map, uint8_t reg, uint8_t set);
+int regmap_write(const struct regmap *map, uint8_t reg, uint8_t val);
 
 /**
  * Update a bitfield in a regmap register.
@@ -77,16 +77,37 @@ int regmap_update_bits(const struct regmap *map, uint8_t reg, uint8_t mask,
                        uint8_t val);
 
 /**
- * Write a value to a regmap.
+ * Clear bits in a regmap register.
  *
  * This function may fail with:
  *   EIO     There was a problem communicating with the hardware.
  *
  * @param map  A reference to the regmap.
- * @param reg  The register to write.
- * @param val  The value to write to the register.
+ * @param reg  The register to modify.
+ * @param clr  The mask of bits to clear in the register.
  * @return     Zero on success; an error code on failure.
  */
-int regmap_write(const struct regmap *map, uint8_t reg, uint8_t val);
+static inline int
+regmap_clr_bits(const struct regmap *map, uint8_t reg, uint8_t clr)
+{
+	return regmap_update_bits(map, reg, clr, 0);
+}
+
+/**
+ * Set bits in a regmap register.
+ *
+ * This function may fail with:
+ *   EIO     There was a problem communicating with the hardware.
+ *
+ * @param map  A reference to the regmap.
+ * @param reg  The register to modify.
+ * @param set  The mask of bits to set in the register.
+ * @return     Zero on success; an error code on failure.
+ */
+static inline int
+regmap_set_bits(const struct regmap *map, uint8_t reg, uint8_t set)
+{
+	return regmap_update_bits(map, reg, set, set);
+}
 
 #endif /* DRIVERS_REGMAP_H */
