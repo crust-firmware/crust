@@ -41,7 +41,7 @@ to_sunxi_rsb(const struct device *dev)
 }
 
 static uint16_t
-sunxi_rsb_get_hwaddr(uint8_t rtaddr)
+sunxi_rsb_get_hwaddr(uint8_t rtaddr UNUSED)
 {
 	/* Currently only a primary PMIC is supported. */
 	assert(rtaddr == 0x2d);
