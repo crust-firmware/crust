@@ -19,7 +19,7 @@
 #define VOUT_COM_REG   0x02
 #define SYS_STATUS_REG 0x06
 
-static struct regulator_info sy8106a_regulator_info = {
+static const struct regulator_info sy8106a_regulator_info = {
 	.min_value = 680,
 	.max_value = 1950,
 	.ranges    = {
@@ -37,7 +37,7 @@ to_sy8106a(const struct device *dev)
 	return container_of(dev, const struct sy8106a, dev);
 }
 
-static struct regulator_info *
+static const struct regulator_info *
 sy8106a_get_info(const struct device *dev UNUSED, uint8_t id UNUSED)
 {
 	assert(id < SY8106A_REGL_COUNT);

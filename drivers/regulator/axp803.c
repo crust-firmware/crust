@@ -26,7 +26,7 @@ struct axp803_regulator_info {
 	uint8_t               status_mask;
 };
 
-static struct axp803_regulator_info axp803_regulators[AXP803_REGL_COUNT] = {
+static const struct axp803_regulator_info axp803_regulators[] = {
 	[AXP803_REGL_DCDC1] = {
 		.info = {
 			.min_value = 1600,
@@ -386,7 +386,7 @@ to_axp803_regulator(const struct device *dev)
 	return container_of(dev, const struct axp803_regulator, dev);
 }
 
-static struct regulator_info *
+static const struct regulator_info *
 axp803_regulator_get_info(const struct device *dev UNUSED, uint8_t id)
 {
 	assert(id < AXP803_REGL_COUNT);

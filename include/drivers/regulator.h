@@ -65,8 +65,8 @@ int regulator_enable(const struct device *dev, uint8_t id);
  * @param id    The device-specific identifier for this regulator.
  * @return      A pointer to the information structure.
  */
-struct regulator_info *regulator_get_info(const struct device *dev,
-                                          uint8_t id);
+const struct regulator_info *regulator_get_info(const struct device *dev,
+                                                uint8_t id);
 
 /**
  * Get the current state of a regulator, as determined from the hardware.
