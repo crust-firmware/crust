@@ -6,7 +6,7 @@
 #ifndef DRIVERS_REGULATOR_SY8106A_H
 #define DRIVERS_REGULATOR_SY8106A_H
 
-#include <i2c.h>
+#include <regmap.h>
 #include <regulator.h>
 
 #define SY8106A_I2C_ADDRESS 0x65
@@ -17,8 +17,8 @@ enum {
 };
 
 struct sy8106a {
-	struct device     dev;
-	struct i2c_handle bus;
+	struct device dev;
+	struct regmap map;
 };
 
 extern const struct sy8106a sy8106a;

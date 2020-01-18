@@ -3,5 +3,10 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
+config I2C
+	bool
+	default y
+	depends on !RSB
+
 config RSB
 	bool

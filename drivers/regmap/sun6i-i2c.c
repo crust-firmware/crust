@@ -6,18 +6,18 @@
 #include <delay.h>
 #include <device.h>
 #include <error.h>
-#include <i2c.h>
 #include <intrusive.h>
 #include <mmio.h>
+#include <regmap.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <util.h>
 #include <clock/ccu.h>
 #include <gpio/sunxi-gpio.h>
-#include <i2c/sun6i-i2c.h>
+#include <regmap/sun6i-i2c.h>
 #include <platform/devices.h>
 
-#include "i2c.h"
+#include "regmap-i2c.h"
 
 #define I2C_ADDR_REG  0x00
 #define I2C_XADDR_REG 0x04
@@ -98,9 +98,9 @@ sun6i_i2c_wait_state(const struct sun6i_i2c *self, uint8_t state)
 }
 
 static int
-sun6i_i2c_read(const struct i2c_handle *bus, uint8_t *data)
+sun6i_i2c_read(const struct regmap *map, uint8_t *data)
 {
-	const struct sun6i_i2c *self = to_sun6i_i2c(bus->dev);
+	const struct sun6i_i2c *self = to_sun6i_i2c(map->dev);
 
 	/* Disable sending an ACK and trigger a state change. */
 	mmio_clrset_32(self->regs + I2C_CTRL_REG, BIT(2), BIT(3));
@@ -116,9 +116,9 @@ sun6i_i2c_read(const struct i2c_handle *bus, uint8_t *data)
 }
 
 static int
-sun6i_i2c_start(const struct i2c_handle *bus, uint8_t direction)
+sun6i_i2c_start(const struct regmap *map, uint8_t direction)
 {
-	const struct sun6i_i2c *self = to_sun6i_i2c(bus->dev);
+	const struct sun6i_i2c *self = to_sun6i_i2c(map->dev);
 	uint8_t init_state = mmio_read_32(self->regs + I2C_STAT_REG);
 	uint8_t state;
 
@@ -136,7 +136,7 @@ sun6i_i2c_start(const struct i2c_handle *bus, uint8_t direction)
 		return EIO;
 
 	/* Write the address and direction, then trigger a state change. */
-	mmio_write_32(self->regs + I2C_DATA_REG, (bus->id << 1) | direction);
+	mmio_write_32(self->regs + I2C_DATA_REG, (map->id << 1) | direction);
 	mmio_set_32(self->regs + I2C_CTRL_REG, BIT(3));
 
 	/* Check for address acknowledgement. */
@@ -148,9 +148,9 @@ sun6i_i2c_start(const struct i2c_handle *bus, uint8_t direction)
 }
 
 static void
-sun6i_i2c_stop(const struct i2c_handle *bus)
+sun6i_i2c_stop(const struct regmap *map)
 {
-	const struct sun6i_i2c *self = to_sun6i_i2c(bus->dev);
+	const struct sun6i_i2c *self = to_sun6i_i2c(map->dev);
 
 	/* Send a stop condition. */
 	mmio_set_32(self->regs + I2C_CTRL_REG, BIT(4) | BIT(3));
@@ -160,9 +160,9 @@ sun6i_i2c_stop(const struct i2c_handle *bus)
 }
 
 static int
-sun6i_i2c_write(const struct i2c_handle *bus, uint8_t data)
+sun6i_i2c_write(const struct regmap *map, uint8_t data)
 {
-	const struct sun6i_i2c *self = to_sun6i_i2c(bus->dev);
+	const struct sun6i_i2c *self = to_sun6i_i2c(map->dev);
 
 	/* Write data, then trigger a state change. */
 	mmio_write_32(self->regs + I2C_DATA_REG, data);
@@ -230,10 +230,17 @@ sun6i_i2c_release(const struct device *dev)
 	clock_put(&self->clock);
 }
 
-static const struct i2c_driver sun6i_i2c_driver = {
+static const struct regmap_i2c_driver sun6i_i2c_driver = {
 	.drv = {
-		.probe   = sun6i_i2c_probe,
-		.release = sun6i_i2c_release,
+		.drv = {
+			.probe   = sun6i_i2c_probe,
+			.release = sun6i_i2c_release,
+		},
+		.ops = {
+			.prepare = regmap_i2c_prepare,
+			.read    = regmap_i2c_read,
+			.write   = regmap_i2c_write,
+		},
 	},
 	.ops = {
 		.read  = sun6i_i2c_read,
@@ -246,7 +253,7 @@ static const struct i2c_driver sun6i_i2c_driver = {
 const struct sun6i_i2c r_i2c = {
 	.dev = {
 		.name  = "r_i2c",
-		.drv   = &sun6i_i2c_driver.drv,
+		.drv   = &sun6i_i2c_driver.drv.drv,
 		.state = DEVICE_STATE_INIT,
 	},
 	.clock = { .dev = &r_ccu.dev, .id = CLK_BUS_R_I2C },

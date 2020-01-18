@@ -7,7 +7,6 @@ obj-y += clock/
 obj-y += counter/
 obj-y += css/
 obj-y += gpio/
-obj-$(CONFIG_I2C) += i2c/
 obj-y += irq/
 obj-y += mfd/
 obj-y += msgbox/

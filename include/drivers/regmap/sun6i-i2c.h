@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#ifndef DRIVERS_I2C_SUN6I_I2C_H
-#define DRIVERS_I2C_SUN6I_I2C_H
+#ifndef DRIVERS_REGMAP_SUN6I_I2C_H
+#define DRIVERS_REGMAP_SUN6I_I2C_H
 
 #include <clock.h>
 #include <gpio.h>
-#include <i2c.h>
+#include <regmap.h>
 
 struct sun6i_i2c {
 	struct device       dev;
@@ -19,4 +19,4 @@ struct sun6i_i2c {
 
 extern const struct sun6i_i2c r_i2c;
 
-#endif /* DRIVERS_I2C_SUN6I_I2C_H */
+#endif /* DRIVERS_REGMAP_SUN6I_I2C_H */
