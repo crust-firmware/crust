@@ -4,6 +4,7 @@
  */
 
 #include <device.h>
+#include <error.h>
 #include <intrusive.h>
 #include <regulator.h>
 #include <stdbool.h>
@@ -23,18 +24,36 @@ regulator_ops_for(const struct device *dev)
 	return &drv->ops;
 }
 
-int
-regulator_disable(const struct device *dev, uint8_t id)
+static int
+regulator_bulk_set(const struct regulator_list *list, bool enable)
 {
-	const struct regulator_driver_ops *ops = regulator_ops_for(dev);
+	const struct regulator_driver_ops *ops = regulator_ops_for(list->dev);
+	int err, ret = SUCCESS;
 
-	return ops->set_state(dev, id, false);
+	if (!device_get(list->dev))
+		return ENODEV;
+
+	for (uint8_t i = 0; i < list->nr_ids; ++i) {
+		err = ops->set_state(list->dev, list->ids[i], enable);
+		if (err && !ret)
+			ret = err;
+	}
+
+	device_put(list->dev);
+
+	return ret;
 }
 
 int
-regulator_enable(const struct device *dev, uint8_t id)
+regulator_bulk_disable(const struct regulator_list *list)
 {
-	return regulator_ops_for(dev)->set_state(dev, id, true);
+	return regulator_bulk_set(list, false);
+}
+
+int
+regulator_bulk_enable(const struct regulator_list *list)
+{
+	return regulator_bulk_set(list, true);
 }
 
 int
