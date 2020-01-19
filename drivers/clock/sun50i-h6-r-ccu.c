@@ -67,11 +67,26 @@ static uint32_t
 sun50i_h6_r_ccu_mp_get_rate(const struct ccu *self,
                             uint32_t rate, uint8_t id)
 {
-	uint32_t reg = id == CLK_R_W1 ? CLK_R_W1_REG
-	                              : CLK_R_CIR ? CLK_R_CIR_REG
-	                                          : CLK_R_APB2 ? CLK_R_APB2_REG
-	                                                       : CLK_AR100_REG;
-	uint32_t val = mmio_read_32(self->regs + reg);
+	uint32_t reg, val;
+
+	switch (id) {
+	case CLK_AR100:
+		reg = CLK_AR100_REG;
+		break;
+	case CLK_R_W1:
+		reg = CLK_R_W1_REG;
+		break;
+	case CLK_R_CIR:
+		reg = CLK_R_CIR_REG;
+		break;
+	case CLK_R_APB2:
+		reg = CLK_R_APB2_REG;
+		break;
+	default:
+		unreachable();
+	}
+
+	val = mmio_read_32(self->regs + reg);
 
 	/* For AR100 and R_APB2, this assumes the pre-divider for PLL_PERIPH0
 	 * (parent 3) will only be set if parent 3 is selected in the mux. */
