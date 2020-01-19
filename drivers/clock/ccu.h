@@ -44,6 +44,12 @@ uint32_t ccu_helper_get_rate_p(const struct ccu *self,
                                const struct ccu_clock *clk, uint32_t rate,
                                uint32_t p_off, uint32_t p_width);
 
-extern const struct clock_driver ccu_driver;
+const struct clock_handle *ccu_get_parent(const struct clock_handle *clock);
+
+uint32_t ccu_get_rate(const struct clock_handle *clock, uint32_t rate);
+
+int ccu_get_state(const struct clock_handle *clock, int *state);
+
+int ccu_set_state(const struct clock_handle *clock, int state);
 
 #endif /* CCU_PRIVATE_H */
