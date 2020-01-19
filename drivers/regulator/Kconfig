@@ -7,7 +7,7 @@ menu "Voltage and current regulators"
 
 config REGULATOR_AXP803
 	bool "X-Powers AXP803 voltage regulators"
-	depends on RSB
+	depends on MFD_AXP803
 
 config REGULATOR_SY8106A
 	bool "Silergy SY8106A voltage regulator"
