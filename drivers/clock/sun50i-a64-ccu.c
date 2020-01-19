@@ -5,7 +5,6 @@
 
 #include <bitmap.h>
 #include <clock.h>
-#include <debug.h>
 #include <device.h>
 #include <stdint.h>
 #include <clock/ccu.h>
@@ -15,10 +14,9 @@
 
 static uint32_t
 sun50i_a64_ccu_fixed_get_rate(const struct ccu *self UNUSED,
-                              uint32_t rate UNUSED, uint8_t id UNUSED)
+                              const struct ccu_clock *clk UNUSED,
+                              uint32_t rate UNUSED)
 {
-	assert(id == CLK_PLL_PERIPH0);
-
 	return 600000000U;
 }
 

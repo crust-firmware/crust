@@ -25,7 +25,7 @@ ccu_get_parent(const struct clock_handle *clock)
 	const struct ccu *self      = to_ccu(clock->dev);
 	const struct ccu_clock *clk = &self->clocks[clock->id];
 
-	return clk->get_parent(self, clock->id);
+	return clk->get_parent(self, clk);
 }
 
 static uint32_t
@@ -35,7 +35,7 @@ ccu_get_rate(const struct clock_handle *clock, uint32_t rate)
 	const struct ccu_clock *clk = &self->clocks[clock->id];
 
 	/* Perform clock-specific adjustments to the parent rate. */
-	return clk->get_rate(self, rate, clock->id);
+	return clk->get_rate(self, clk, rate);
 }
 
 static int

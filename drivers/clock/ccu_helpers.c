@@ -41,14 +41,15 @@ ccu_calc_rate_p(uint32_t val, uint32_t rate,
 }
 
 const struct clock_handle *
-ccu_get_parent_none(const struct ccu *self UNUSED, uint8_t id UNUSED)
+ccu_get_parent_none(const struct ccu *self UNUSED,
+                    const struct ccu_clock *clk UNUSED)
 {
 	return NULL;
 }
 
 uint32_t
-ccu_get_rate_parent(const struct ccu *self UNUSED, uint32_t rate,
-                    uint8_t id UNUSED)
+ccu_get_rate_parent(const struct ccu *self UNUSED,
+                    const struct ccu_clock *clk UNUSED, uint32_t rate)
 {
 	return rate;
 }
