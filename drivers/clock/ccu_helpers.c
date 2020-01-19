@@ -4,13 +4,25 @@
  */
 
 #include <bitfield.h>
-#include <clock.h>
 #include <mmio.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <util.h>
 
 #include "ccu.h"
+
+const struct clock_handle *
+ccu_helper_get_parent(const struct ccu *self UNUSED,
+                      const struct ccu_clock *clk UNUSED)
+{
+	return NULL;
+}
+
+uint32_t
+ccu_helper_get_rate(const struct ccu *self UNUSED,
+                    const struct ccu_clock *clk UNUSED, uint32_t rate)
+{
+	return rate;
+}
 
 uint32_t
 ccu_helper_get_rate_m(const struct ccu *self,
@@ -47,19 +59,5 @@ ccu_helper_get_rate_p(const struct ccu *self,
 
 	rate >>= bitfield_get(val, p_start, p_width);
 
-	return rate;
-}
-
-const struct clock_handle *
-ccu_get_parent_none(const struct ccu *self UNUSED,
-                    const struct ccu_clock *clk UNUSED)
-{
-	return NULL;
-}
-
-uint32_t
-ccu_get_rate_parent(const struct ccu *self UNUSED,
-                    const struct ccu_clock *clk UNUSED, uint32_t rate)
-{
 	return rate;
 }

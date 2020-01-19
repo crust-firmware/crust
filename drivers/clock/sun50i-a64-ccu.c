@@ -22,12 +22,12 @@ sun50i_a64_ccu_fixed_get_rate(const struct ccu *self UNUSED,
 
 static const struct ccu_clock sun50i_a64_ccu_clocks[SUN50I_A64_CCU_CLOCKS] = {
 	[CLK_PLL_PERIPH0] = {
-		.get_parent = ccu_get_parent_none,
+		.get_parent = ccu_helper_get_parent,
 		.get_rate   = sun50i_a64_ccu_fixed_get_rate,
 	},
 	[CLK_BUS_MSGBOX] = {
-		.get_parent = ccu_get_parent_none,
-		.get_rate   = ccu_get_rate_parent,
+		.get_parent = ccu_helper_get_parent,
+		.get_rate   = ccu_helper_get_rate,
 		.gate       = BITMAP_INDEX(0x0064, 21),
 		.reset      = BITMAP_INDEX(0x02c4, 21),
 	},
