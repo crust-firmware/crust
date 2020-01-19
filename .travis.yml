@@ -61,7 +61,7 @@ script:
   - |-
     set -e
     cat > all.config << 'EOF'
-    # CONFIG_DEBUG_PRINT_SPRS is not set
+    CONFIG_COMPILE_TEST=y
     EOF
     for config in ${CONFIGS}; do
       echo ========== begin $config ==========

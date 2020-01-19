@@ -26,6 +26,17 @@ config ASSERT_VERBOSE
 		that this option significantly increases the size of the
 		final firmware binary. If in doubt, say N.
 
+config COMPILE_TEST
+	bool "Allow compiling a firmware that does not run"
+	help
+		Some combinations of options may not make sense or may
+		not produce a functional firmware, for example if the
+		firmware becomes too large, or if it contains multiple
+		drivers for the same piece of hardware.
+
+		This is mostly useful for development and automated
+		testing. Users should say N.
+
 config DEBUG_INFO
 	bool "Compile the firmware with debug info"
 	default y
