@@ -15,10 +15,6 @@
 
 #include "ccu.h"
 
-#define CLK_AR100_REG 0x0000
-#define CLK_APB0_REG  0x000c
-#define CLK_R_CIR_REG 0x0054
-
 static const uint32_t sun8i_r_ccu_fixed_rates[] = {
 	[CLK_OSC16M] = 16000000U,
 	[CLK_OSC24M] = 24000000U,
@@ -56,7 +52,8 @@ static const struct clock_handle sun8i_r_ccu_ar100_parents[] = {
 static const struct clock_handle *
 sun8i_r_ccu_ar100_get_parent(const struct ccu *self, uint8_t id UNUSED)
 {
-	uint32_t val = mmio_read_32(self->regs + CLK_AR100_REG);
+	const struct ccu_clock *clk = &self->clocks[id];
+	uint32_t val = mmio_read_32(self->regs + clk->reg);
 
 	return &sun8i_r_ccu_ar100_parents[bitfield_get(val, 16, 2)];
 }
@@ -65,7 +62,8 @@ static uint32_t
 sun8i_r_ccu_ar100_get_rate(const struct ccu *self,
                            uint32_t rate, uint8_t id UNUSED)
 {
-	uint32_t val = mmio_read_32(self->regs + CLK_AR100_REG);
+	const struct ccu_clock *clk = &self->clocks[id];
+	uint32_t val = mmio_read_32(self->regs + clk->reg);
 
 	/* This assumes the pre-divider for PLL_PERIPH0 (parent 2)
 	 * will only be set if parent 2 is selected in the mux. */
@@ -98,7 +96,8 @@ static uint32_t
 sun8i_r_ccu_apb0_get_rate(const struct ccu *self,
                           uint32_t rate, uint8_t id UNUSED)
 {
-	uint32_t val = mmio_read_32(self->regs + CLK_APB0_REG);
+	const struct ccu_clock *clk = &self->clocks[id];
+	uint32_t val = mmio_read_32(self->regs + clk->reg);
 
 	return ccu_calc_rate_m(val, rate, 0, 2);
 }
@@ -129,7 +128,8 @@ static const struct clock_handle sun8i_r_ccu_r_cir_parents[] = {
 static const struct clock_handle *
 sun8i_r_ccu_r_cir_get_parent(const struct ccu *self, uint8_t id UNUSED)
 {
-	uint32_t val = mmio_read_32(self->regs + CLK_R_CIR_REG);
+	const struct ccu_clock *clk = &self->clocks[id];
+	uint32_t val = mmio_read_32(self->regs + clk->reg);
 
 	return &sun8i_r_ccu_r_cir_parents[bitfield_get(val, 24, 1)];
 }
@@ -138,7 +138,8 @@ static uint32_t
 sun8i_r_ccu_r_cir_get_rate(const struct ccu *self,
                            uint32_t rate, uint8_t id UNUSED)
 {
-	uint32_t val = mmio_read_32(self->regs + CLK_R_CIR_REG);
+	const struct ccu_clock *clk = &self->clocks[id];
+	uint32_t val = mmio_read_32(self->regs + clk->reg);
 
 	return ccu_calc_rate_mp(val, rate, 0, 4, 16, 2);
 }
@@ -159,6 +160,7 @@ static const struct ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 	[CLK_AR100] = {
 		.get_parent = sun8i_r_ccu_ar100_get_parent,
 		.get_rate   = sun8i_r_ccu_ar100_get_rate,
+		.reg        = 0x0000,
 	},
 	[CLK_AHB0] = {
 		.get_parent = sun8i_r_ccu_ahb0_get_parent,
@@ -167,6 +169,7 @@ static const struct ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 	[CLK_APB0] = {
 		.get_parent = sun8i_r_ccu_apb0_get_parent,
 		.get_rate   = sun8i_r_ccu_apb0_get_rate,
+		.reg        = 0x000c,
 	},
 	[CLK_BUS_R_PIO] = {
 		.get_parent = sun8i_r_ccu_apb0_dev_get_parent,
@@ -211,7 +214,8 @@ static const struct ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 	[CLK_R_CIR] = {
 		.get_parent = sun8i_r_ccu_r_cir_get_parent,
 		.get_rate   = sun8i_r_ccu_r_cir_get_rate,
-		.gate       = BITMAP_INDEX(CLK_R_CIR_REG, 31),
+		.reg        = 0x0054,
+		.gate       = BITMAP_INDEX(0x0054, 31),
 	},
 };
 

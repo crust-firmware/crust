@@ -19,6 +19,8 @@ struct ccu_clock {
 	/** Hook for calculating the clock rate from the parent rate. */
 	uint32_t                   (*get_rate)(const struct ccu *self,
 	                                       uint32_t rate, uint8_t id);
+	/** Byte offset of the clock configuration register. */
+	uint16_t                   reg;
 	/** Bit offset of the clock gate (valid if nonzero). */
 	uint16_t                   gate;
 	/** Bit offset of the module reset (valid if nonzero). */
