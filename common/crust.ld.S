@@ -5,6 +5,11 @@
 
 #include <platform/memory.h>
 
+#ifdef CONFIG_COMPILE_TEST
+#undef  SRAM_A2_LIMIT
+#define SRAM_A2_LIMIT 0xffffffff
+#endif
+
 OUTPUT_ARCH(or1k)
 OUTPUT_FORMAT(elf32-or1k)
 
