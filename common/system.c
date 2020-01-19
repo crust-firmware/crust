@@ -195,7 +195,8 @@ system_state_machine(void)
 			if (!irq_poll())
 				system_state = SYSTEM_RESET;
 			break;
-		default: /* SYSTEM_RESET and all others */
+		case SYSTEM_RESET:
+		default:
 			/* Attempt to reset the SoC using the PMIC. */
 			if ((pmic = pmic_get())) {
 				pmic_reset(pmic);
