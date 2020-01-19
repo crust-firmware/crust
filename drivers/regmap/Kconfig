@@ -6,7 +6,7 @@
 config I2C
 	bool
 	default y
-	depends on !RSB
+	depends on !RSB || COMPILE_TEST
 
 config RSB
 	bool
