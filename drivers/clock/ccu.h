@@ -28,13 +28,16 @@ struct ccu_clock {
 	uint16_t reset;
 };
 
-uint32_t ccu_calc_rate_m(uint32_t val, uint32_t rate,
-                         uint32_t m_off, uint32_t m_width);
-uint32_t ccu_calc_rate_mp(uint32_t val, uint32_t rate,
-                          uint32_t m_off, uint32_t m_width,
-                          uint32_t p_off, uint32_t p_width);
-uint32_t ccu_calc_rate_p(uint32_t val, uint32_t rate,
-                         uint32_t p_off, uint32_t p_width);
+uint32_t ccu_helper_get_rate_m(const struct ccu *self,
+                               const struct ccu_clock *clk, uint32_t rate,
+                               uint32_t m_off, uint32_t m_width);
+uint32_t ccu_helper_get_rate_mp(const struct ccu *self,
+                                const struct ccu_clock *clk, uint32_t rate,
+                                uint32_t m_off, uint32_t m_width,
+                                uint32_t p_off, uint32_t p_width);
+uint32_t ccu_helper_get_rate_p(const struct ccu *self,
+                               const struct ccu_clock *clk, uint32_t rate,
+                               uint32_t p_off, uint32_t p_width);
 
 const struct clock_handle *ccu_get_parent_none(const struct ccu *self,
                                                const struct ccu_clock *clk);

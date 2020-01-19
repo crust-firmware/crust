@@ -5,6 +5,7 @@
 
 #include <bitfield.h>
 #include <clock.h>
+#include <mmio.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <util.h>
@@ -12,19 +13,25 @@
 #include "ccu.h"
 
 uint32_t
-ccu_calc_rate_m(uint32_t val, uint32_t rate,
-                uint32_t m_start, uint32_t m_width)
+ccu_helper_get_rate_m(const struct ccu *self,
+                      const struct ccu_clock *clk, uint32_t rate,
+                      uint32_t m_start, uint32_t m_width)
 {
+	uint32_t val = mmio_read_32(self->regs + clk->reg);
+
 	rate /= bitfield_get(val, m_start, m_width) + 1;
 
 	return rate;
 }
 
 uint32_t
-ccu_calc_rate_mp(uint32_t val, uint32_t rate,
-                 uint32_t m_start, uint32_t m_width,
-                 uint32_t p_start, uint32_t p_width)
+ccu_helper_get_rate_mp(const struct ccu *self,
+                       const struct ccu_clock *clk, uint32_t rate,
+                       uint32_t m_start, uint32_t m_width,
+                       uint32_t p_start, uint32_t p_width)
 {
+	uint32_t val = mmio_read_32(self->regs + clk->reg);
+
 	rate  /= bitfield_get(val, m_start, m_width) + 1;
 	rate >>= bitfield_get(val, p_start, p_width);
 
@@ -32,9 +39,12 @@ ccu_calc_rate_mp(uint32_t val, uint32_t rate,
 }
 
 uint32_t
-ccu_calc_rate_p(uint32_t val, uint32_t rate,
-                uint32_t p_start, uint32_t p_width)
+ccu_helper_get_rate_p(const struct ccu *self,
+                      const struct ccu_clock *clk, uint32_t rate,
+                      uint32_t p_start, uint32_t p_width)
 {
+	uint32_t val = mmio_read_32(self->regs + clk->reg);
+
 	rate >>= bitfield_get(val, p_start, p_width);
 
 	return rate;

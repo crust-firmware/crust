@@ -66,11 +66,9 @@ static uint32_t
 sun50i_h6_r_ccu_mp_get_rate(const struct ccu *self,
                             const struct ccu_clock *clk, uint32_t rate)
 {
-	uint32_t val = mmio_read_32(self->regs + clk->reg);
-
 	/* For AR100 and R_APB2, this assumes the pre-divider for PLL_PERIPH0
 	 * (parent 3) will only be set if parent 3 is selected in the mux. */
-	return ccu_calc_rate_mp(val, rate, 0, 5, 8, 2);
+	return ccu_helper_get_rate_mp(self, clk, rate, 0, 5, 8, 2);
 }
 
 static const struct clock_handle sun50i_h6_r_ccu_r_ahb_parent = {
@@ -101,9 +99,7 @@ static uint32_t
 sun50i_h6_r_ccu_r_apb1_get_rate(const struct ccu *self,
                                 const struct ccu_clock *clk, uint32_t rate)
 {
-	uint32_t val = mmio_read_32(self->regs + clk->reg);
-
-	return ccu_calc_rate_m(val, rate, 0, 2);
+	return ccu_helper_get_rate_m(self, clk, rate, 0, 2);
 }
 
 static const struct clock_handle sun50i_h6_r_ccu_r_apb1_dev_parent = {
