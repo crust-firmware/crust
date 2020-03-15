@@ -5,7 +5,6 @@
 
 #include <css.h>
 #include <debug.h>
-#include <error.h>
 #include <scpi_protocol.h>
 #include <stdint.h>
 #include <util.h>
@@ -114,7 +113,10 @@ int WEAK
 css_set_css_state(uint8_t state)
 {
 	/* Reject any attempts to change CSS, cluster, or core power states. */
-	return state == css_get_css_state() ? SUCCESS : ENOTSUP;
+	if (state != css_get_css_state())
+		return SCPI_E_SUPPORT;
+
+	return SCPI_OK;
 }
 
 /**
@@ -126,7 +128,10 @@ int WEAK
 css_set_cluster_state(uint8_t cluster, uint8_t state)
 {
 	/* Reject any attempts to change CSS, cluster, or core power states. */
-	return state == css_get_cluster_state(cluster) ? SUCCESS : ENOTSUP;
+	if (state != css_get_cluster_state(cluster))
+		return SCPI_E_SUPPORT;
+
+	return SCPI_OK;
 }
 
 /**
@@ -138,5 +143,8 @@ int WEAK
 css_set_core_state(uint8_t cluster, uint8_t core, uint8_t state)
 {
 	/* Reject any attempts to change CSS, cluster, or core power states. */
-	return state == css_get_core_state(cluster, core) ? SUCCESS : ENOTSUP;
+	if (state != css_get_core_state(cluster, core))
+		return SCPI_E_SUPPORT;
+
+	return SCPI_OK;
 }

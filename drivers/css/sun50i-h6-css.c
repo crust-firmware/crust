@@ -6,7 +6,6 @@
 #include <css.h>
 #include <debug.h>
 #include <delay.h>
-#include <error.h>
 #include <mmio.h>
 #include <scpi_protocol.h>
 #include <stdbool.h>
@@ -86,7 +85,7 @@ int
 css_set_css_state(uint8_t state UNUSED)
 {
 	/* Nothing to do. */
-	return SUCCESS;
+	return SCPI_OK;
 }
 
 int
@@ -95,7 +94,7 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 	assert(cluster < CLUSTER_MAX);
 
 	if (state == css_get_cluster_state(cluster))
-		return SUCCESS;
+		return SCPI_OK;
 
 	if (state == SCPI_CSS_ON) {
 		/* Put the cluster back into coherency (deassert ACINACTM). */
@@ -119,10 +118,10 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 		/* Wait for the cluster (L2 cache) to be idle. */
 		mmio_poll_32(CPU_STATUS_REG, BIT(0));
 	} else {
-		return EINVAL;
+		return SCPI_E_PARAM;
 	}
 
-	return SUCCESS;
+	return SCPI_OK;
 }
 
 int
@@ -132,7 +131,7 @@ css_set_core_state(uint8_t cluster, uint8_t core, uint8_t state)
 	assert(core < CORE_MAX);
 
 	if (state == css_get_core_state(cluster, core))
-		return SUCCESS;
+		return SCPI_OK;
 
 	if (state == SCPI_CSS_ON) {
 		/* Deassert DBGPWRDUP (prevent debug access to the core). */
@@ -168,8 +167,8 @@ css_set_core_state(uint8_t cluster, uint8_t core, uint8_t state)
 		css_set_power_switch(CPU_PWR_CLAMP_REG(core), false);
 	} else {
 		/* Unknown power state requested. */
-		return EINVAL;
+		return SCPI_E_PARAM;
 	}
 
-	return SUCCESS;
+	return SCPI_OK;
 }

@@ -7,7 +7,6 @@
 #include <css.h>
 #include <debug.h>
 #include <device.h>
-#include <error.h>
 #include <scpi.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -38,27 +37,6 @@ struct scpi_cmd {
 	/** Any combination of flags from above, if applicable. */
 	uint8_t         flags;
 };
-
-static const uint8_t scpi_error_map[] = {
-	SCPI_OK,        /* SUCCESS */
-	SCPI_E_BUSY,    /* EBUSY */
-	SCPI_E_PARAM,   /* EEXIST */
-	SCPI_E_PARAM,   /* EINVAL */
-	SCPI_E_DEVICE,  /* EIO */
-	SCPI_E_PARAM,   /* ENODEV */
-	SCPI_E_PARAM,   /* ENOENT */
-	SCPI_E_SUPPORT, /* ENOTSUP */
-	SCPI_E_ACCESS,  /* EPERM */
-	SCPI_E_RANGE,   /* ERANGE */
-};
-
-static uint32_t scpi_map_error(int err) ATTRIBUTE(const);
-
-static uint32_t
-scpi_map_error(int err)
-{
-	return scpi_error_map[-err];
-}
 
 /*
  * Handler/payload data for SCPI_CMD_GET_SCP_CAP: Get SCP capability.
@@ -129,7 +107,7 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
 	if (css_state == SCPI_CSS_OFF)
 		system_suspend();
 
-	return SUCCESS;
+	return SCPI_OK;
 }
 
 /*
@@ -158,7 +136,7 @@ scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload UNUSED,
 	}
 	*tx_size = clusters * sizeof(descriptor);
 
-	return SUCCESS;
+	return SCPI_OK;
 }
 
 /*
@@ -178,9 +156,9 @@ scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
 	else if (state == SCPI_SYSTEM_RESET)
 		system_reset();
 	else
-		return EINVAL;
+		return SCPI_E_PARAM;
 
-	return SUCCESS;
+	return SCPI_OK;
 }
 
 /*
@@ -247,9 +225,8 @@ scpi_handle_cmd(uint8_t client, struct scpi_mem *mem)
 		memcpy(&tx_msg->payload, cmd->tx_payload, cmd->tx_size);
 	} else if (cmd->handler) {
 		/* Run the handler for this command to make a response. */
-		int err = cmd->handler(rx_msg->payload, tx_msg->payload,
-		                       &tx_msg->size);
-		tx_msg->status = scpi_map_error(err);
+		tx_msg->status = cmd->handler(rx_msg->payload, tx_msg->payload,
+		                              &tx_msg->size);
 	} else {
 		warn("SCPI: Unknown command %u", rx_msg->command);
 	}
