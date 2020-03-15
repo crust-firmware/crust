@@ -204,12 +204,11 @@ system_state_machine(void)
 			system_state = SYSTEM_OFF;
 			break;
 		case SYSTEM_OFF:
-			/* Poll wakeup sources. Reset on wakeup. */
+			/* Poll wakeup sources. Reboot on wakeup. */
 			if (!irq_poll())
 				break;
 			fallthrough;
-		case SYSTEM_RESET:
-		default:
+		case SYSTEM_REBOOT:
 			/* Attempt to reset the board using the PMIC. */
 			if ((pmic = pmic_get())) {
 				pmic_reset(pmic);
@@ -222,6 +221,10 @@ system_state_machine(void)
 			/* Give regulator outputs time to rise. */
 			udelay(5000);
 
+			/* Continue through to resetting the SoC. */
+			fallthrough;
+		case SYSTEM_RESET:
+		default:
 			/* Attempt to reset the SoC using the watchdog. */
 			if (watchdog || (watchdog = device_get(&r_twd.dev)))
 				watchdog_enable(watchdog, 1);
@@ -233,6 +236,12 @@ system_state_machine(void)
 
 		debug_print_latency();
 	}
+}
+
+void
+system_reboot(void)
+{
+	system_state = SYSTEM_REBOOT;
 }
 
 void

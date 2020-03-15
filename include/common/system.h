@@ -16,7 +16,8 @@ enum {
 	SYSTEM_RESUME,   /**< Transition from inactive to active. */
 	SYSTEM_SHUTDOWN, /**< Transition from active to off. */
 	SYSTEM_OFF,      /**< ARM CPUs are not running; RAM is invalid. */
-	SYSTEM_RESET,    /**< System reset is in progress (final state). */
+	SYSTEM_REBOOT,   /**< Board-level reset is in progress. */
+	SYSTEM_RESET,    /**< SoC-level reset is in progress (final state). */
 };
 
 /**
@@ -40,6 +41,13 @@ bool system_is_running(void) ATTRIBUTE(pure);
  * This is the main loop of the firmware, and never returns.
  */
 noreturn void system_state_machine(void);
+
+/**
+ * Reboot the board, including the SoC and external peripherals.
+ *
+ * Should not be called during a system state transition.
+ */
+void system_reboot(void);
 
 /**
  * Reset the SoC, including all CPUs and internal peripherals.

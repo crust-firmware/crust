@@ -173,7 +173,9 @@ scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
 
 	if (state == SCPI_SYSTEM_SHUTDOWN)
 		system_shutdown();
-	else if (state == SCPI_SYSTEM_REBOOT || state == SCPI_SYSTEM_RESET)
+	else if (state == SCPI_SYSTEM_REBOOT)
+		system_reboot();
+	else if (state == SCPI_SYSTEM_RESET)
 		system_reset();
 	else
 		return EINVAL;
