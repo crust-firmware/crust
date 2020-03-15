@@ -27,6 +27,7 @@ COMMON_CFLAGS	 = -Os -pipe -std=c11 \
 		   -fvar-tracking-assignments \
 		   -g$(if $(CONFIG_DEBUG_INFO),gdb,0) \
 		   -Wall -Wextra -Wformat=2 -Wpedantic -Wshadow \
+		   -Werror=implicit-fallthrough=5 \
 		   -Werror=implicit-function-declaration \
 		   -Werror=implicit-int \
 		   -Werror=pointer-arith \
