@@ -133,9 +133,9 @@ system_state_machine(void)
 			break;
 		case SYSTEM_INACTIVE:
 			/* Poll wakeup sources. Resume on wakeup. */
-			if (irq_poll())
-				system_state = SYSTEM_RESUME;
-			break;
+			if (!irq_poll())
+				break;
+			fallthrough;
 		case SYSTEM_RESUME:
 			debug("Resuming...");
 
@@ -206,8 +206,8 @@ system_state_machine(void)
 		case SYSTEM_OFF:
 			/* Poll wakeup sources. Reset on wakeup. */
 			if (!irq_poll())
-				system_state = SYSTEM_RESET;
-			break;
+				break;
+			fallthrough;
 		case SYSTEM_RESET:
 		default:
 			/* Attempt to reset the board using the PMIC. */
@@ -226,8 +226,8 @@ system_state_machine(void)
 			if (watchdog || (watchdog = device_get(&r_twd.dev)))
 				watchdog_enable(watchdog, 1);
 
-			/* Leave the system state as is; continue making reset
-			 * attempts each time this function is called. */
+			/* Continue making reset attempts each iteration. */
+			system_state = SYSTEM_RESET;
 			break;
 		}
 
