@@ -27,11 +27,11 @@ ccu_helper_get_rate(const struct ccu *self UNUSED,
 uint32_t
 ccu_helper_get_rate_m(const struct ccu *self,
                       const struct ccu_clock *clk, uint32_t rate,
-                      uint32_t m_start, uint32_t m_width)
+                      uint32_t m_shift, uint32_t m_width)
 {
 	uint32_t val = mmio_read_32(self->regs + clk->reg);
 
-	rate /= bitfield_get(val, m_start, m_width) + 1;
+	rate /= bitfield_get(val, m_shift, m_width) + 1;
 
 	return rate;
 }
@@ -39,13 +39,13 @@ ccu_helper_get_rate_m(const struct ccu *self,
 uint32_t
 ccu_helper_get_rate_mp(const struct ccu *self,
                        const struct ccu_clock *clk, uint32_t rate,
-                       uint32_t m_start, uint32_t m_width,
-                       uint32_t p_start, uint32_t p_width)
+                       uint32_t m_shift, uint32_t m_width,
+                       uint32_t p_shift, uint32_t p_width)
 {
 	uint32_t val = mmio_read_32(self->regs + clk->reg);
 
-	rate  /= bitfield_get(val, m_start, m_width) + 1;
-	rate >>= bitfield_get(val, p_start, p_width);
+	rate  /= bitfield_get(val, m_shift, m_width) + 1;
+	rate >>= bitfield_get(val, p_shift, p_width);
 
 	return rate;
 }
@@ -53,11 +53,11 @@ ccu_helper_get_rate_mp(const struct ccu *self,
 uint32_t
 ccu_helper_get_rate_p(const struct ccu *self,
                       const struct ccu_clock *clk, uint32_t rate,
-                      uint32_t p_start, uint32_t p_width)
+                      uint32_t p_shift, uint32_t p_width)
 {
 	uint32_t val = mmio_read_32(self->regs + clk->reg);
 
-	rate >>= bitfield_get(val, p_start, p_width);
+	rate >>= bitfield_get(val, p_shift, p_width);
 
 	return rate;
 }
