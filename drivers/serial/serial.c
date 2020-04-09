@@ -9,13 +9,24 @@
 #include <platform/devices.h>
 
 enum {
+	UART_RBR = 0x0000,
 	UART_THR = 0x0000,
 	UART_LSR = 0x0014,
 };
 
 enum {
+	UART_LSR_DR   = BIT(0),
 	UART_LSR_THRE = BIT(5),
 };
+
+char
+serial_getc(void)
+{
+	if (!mmio_get_32(DEV_UART0 + UART_LSR, UART_LSR_DR))
+		return 0;
+
+	return mmio_read_32(DEV_UART0 + UART_RBR);
+}
 
 void
 serial_putc(char c)

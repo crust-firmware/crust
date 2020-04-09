@@ -6,6 +6,12 @@
 #ifndef DRIVERS_SERIAL_H
 #define DRIVERS_SERIAL_H
 
+/**
+ * Read a character from the UART.
+ *
+ * @return The character read, or 0 if no character is available.
+ */
+char serial_getc(void);
 void serial_putc(char c);
 void serial_puts(const char *s);
 
