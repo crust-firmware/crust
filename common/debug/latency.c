@@ -11,7 +11,7 @@
 #define ITERATIONS 1000000
 
 static uint32_t iterations;
-static uint8_t last_state;
+static uint8_t  last_state;
 
 void
 debug_print_latency(void)
