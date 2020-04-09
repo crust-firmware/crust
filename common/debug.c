@@ -25,7 +25,6 @@ static char *prefixes[LOG_LEVELS] = {
 
 static void print_number(uint32_t num, int base, int width, bool zero);
 static void print_signed(int32_t num, int base, int width, bool zero);
-static void print_string(const char *s);
 
 void
 hexdump(uintptr_t addr, uint32_t bytes)
@@ -68,7 +67,7 @@ log(const char *fmt, ...)
 
 	level = *fmt - 1;
 	if (level < LOG_LEVELS) {
-		print_string(prefixes[level]);
+		serial_puts(prefixes[level]);
 		++fmt;
 	}
 	va_start(args, fmt);
@@ -96,7 +95,7 @@ conversion:
 			break;
 		case 'p':
 			/* "%p" behaves like "0x%08x". */
-			print_string("0x");
+			serial_puts("0x");
 			print_number(arg, 16, 2 * sizeof(arg), true);
 			break;
 		case 'x':
@@ -104,7 +103,7 @@ conversion:
 			break;
 		case 's':
 			assert(arg);
-			print_string((const char *)arg);
+			serial_puts((const char *)arg);
 			break;
 		case 'u':
 			print_number(arg, 10, width, zero);
@@ -148,13 +147,4 @@ print_signed(int32_t num, int base, int width, bool zero)
 	} else {
 		print_number(num, base, width, zero);
 	}
-}
-
-static void
-print_string(const char *s)
-{
-	char c;
-
-	while ((c = *s++))
-		serial_putc(c);
 }

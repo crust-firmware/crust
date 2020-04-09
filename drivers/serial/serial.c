@@ -25,3 +25,12 @@ serial_putc(char c)
 	mmio_poll_32(DEV_UART0 + UART_LSR, UART_LSR_THRE);
 	mmio_write_32(DEV_UART0 + UART_THR, c);
 }
+
+void
+serial_puts(const char *s)
+{
+	char c;
+
+	while ((c = *s++))
+		serial_putc(c);
+}

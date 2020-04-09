@@ -7,5 +7,6 @@
 #define DRIVERS_SERIAL_H
 
 void serial_putc(char c);
+void serial_puts(const char *s);
 
 #endif /* DRIVERS_SERIAL_H */
