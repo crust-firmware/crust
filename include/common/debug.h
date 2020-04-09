@@ -48,6 +48,19 @@ noreturn void panic(const char *fmt, ...) ATTRIBUTE(format(printf, 1, 2));
 #define debug(...) ((void)0)
 #endif
 
+#if CONFIG_DEBUG_MONITOR
+
+void debug_monitor(void);
+
+#else
+
+static inline void
+debug_monitor(void)
+{
+}
+
+#endif
+
 #if CONFIG_DEBUG_PRINT_BATTERY
 
 void debug_print_battery(void);

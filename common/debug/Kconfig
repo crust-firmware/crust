@@ -52,6 +52,25 @@ config DEBUG_LOG
 		This enables the debug() logging macro to print verbose
 		informational messages that may aid in debugging.
 
+config DEBUG_MONITOR
+	bool "Provide an interactive debug monitor during suspend"
+	help
+		While the system is suspended, accept simple commands on
+		the serial port. Parsing is extremely basic, and line
+		editing is not supported. Available commands are:
+			m <address> [value] -- read/write memory
+			sb -- trigger board-level reboot
+			sr -- trigger SoC-level reset
+			sw -- trigger wakeup
+
+		With a PMIC present, additional commands are supported:
+			p <address> [value] -- read/write PMIC registers
+
+config DEBUG_MONITOR_PMIC
+	bool
+	default y
+	depends on MFD_AXP803
+
 config DEBUG_PRINT_BATTERY
 	bool "Print battery consumption periodically during suspend"
 	depends on MFD_AXP803
