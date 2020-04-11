@@ -57,9 +57,14 @@ parse_hex(const char **str, uint32_t *num)
 static void
 run_command(const char *cmd)
 {
-	uint32_t addr;
+	uint32_t addr, len;
 
 	switch (*cmd++) {
+	case 'd':
+		/* Hex dump: "d xxxxxxxx xxxxxxxx", arguments in bare hex. */
+		if (parse_hex(&cmd, &addr) && parse_hex(&cmd, &len))
+			hexdump(addr, len);
+		return;
 	case 'm':
 		/* MMIO: "m xxxxxxxx" or "m xxxxxxxx xxxxxxxx", bare hex. */
 		if (parse_hex(&cmd, &addr)) {
