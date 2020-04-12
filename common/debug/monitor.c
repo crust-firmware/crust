@@ -29,6 +29,10 @@ parse_hex(const char **str, uint32_t *num)
 	while (*s == ' ')
 		++s;
 
+	/* At least one space must precede the number. */
+	if (s == *str)
+		return false;
+
 	/* Consume as many hex digits as found. */
 	for (;;) {
 		uint32_t c = *s | 0x20;
