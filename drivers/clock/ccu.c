@@ -74,6 +74,9 @@ ccu_set_state(const struct clock_handle *clock, int state)
 	/* Gate the clock after putting the device in reset. */
 	if (clk->gate && !ungate)
 		bitmap_clear(self->regs, clk->gate);
+	/* Apply the changes by setting the update bit, if applicable. */
+	if (clk->update)
+		mmio_set_32(self->regs + clk->reg, BIT(clk->update));
 	/* Wait for the lock bit to be set, if applicable. */
 	if (clk->lock && ungate)
 		mmio_poll_32(self->regs + clk->reg, BIT(clk->lock));
