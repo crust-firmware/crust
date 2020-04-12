@@ -53,9 +53,9 @@ config DEBUG_LOG
 		informational messages that may aid in debugging.
 
 config DEBUG_MONITOR
-	bool "Provide an interactive debug monitor during suspend"
+	bool "Provide an interactive debug monitor while off/suspended"
 	help
-		While the system is suspended, accept simple commands on
+		While the system is inactive, accept simple commands on
 		the serial port. Parsing is extremely basic, and line
 		editing is not supported. Available commands are:
 			m <address> [value] -- read/write memory
@@ -72,10 +72,10 @@ config DEBUG_MONITOR_PMIC
 	depends on MFD_AXP803
 
 config DEBUG_PRINT_BATTERY
-	bool "Print battery consumption periodically during suspend"
+	bool "Print battery consumption periodically while off/suspended"
 	depends on MFD_AXP803
 	help
-		While the system is suspended and the battery is
+		While the system is inactive and the battery is
 		discharging, print the battery voltage, discharge
 		current, and calculated power usage every 30 seconds.
 

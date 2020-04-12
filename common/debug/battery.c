@@ -25,7 +25,7 @@ debug_print_battery(void)
 	int32_t  current, voltage;
 	uint8_t  hi, lo, val;
 
-	if (get_system_state() != SYSTEM_INACTIVE)
+	if (system_is_running())
 		return;
 
 	if (now - last_tick > DELAY) {

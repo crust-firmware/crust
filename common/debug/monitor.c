@@ -106,7 +106,7 @@ debug_monitor(void)
 {
 	unsigned char c;
 
-	if (get_system_state() != SYSTEM_INACTIVE)
+	if (system_is_running())
 		return;
 	if (!(c = serial_getc()))
 		return;
