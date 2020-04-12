@@ -215,16 +215,16 @@ system_state_machine(void)
 				device_put(pmic);
 			}
 
+			/* Continue through to resetting the SoC. */
+			fallthrough;
+		case SYSTEM_RESET:
+		default:
 			/* Turn on regulators required to boot. */
 			regulator_bulk_enable(&off_list);
 
 			/* Give regulator outputs time to rise. */
 			udelay(5000);
 
-			/* Continue through to resetting the SoC. */
-			fallthrough;
-		case SYSTEM_RESET:
-		default:
 			/* Attempt to reset the SoC using the watchdog. */
 			if (watchdog || (watchdog = device_get(&r_twd.dev)))
 				watchdog_enable(watchdog, 1);
