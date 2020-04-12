@@ -54,6 +54,13 @@ uint8_t css_get_core_state(uint8_t cluster, uint8_t core);
 uint8_t css_get_online_cores(uint8_t cluster);
 
 /**
+ * Initialize the CSS driver, assuming the CSS is already running. Since the
+ * firmware starts after the CSS, the driver may need to synchronize its state
+ * with the actual state of the hardware.
+ */
+void css_init(void);
+
+/**
  * Set the state of the compute subsystem (CSS). This state must not be
  * numbered higher than the lowest cluster state in the CSS.
  *

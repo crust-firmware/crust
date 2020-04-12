@@ -105,6 +105,15 @@ css_get_online_cores(uint8_t cluster)
 }
 
 /**
+ * Generic implementation used when no platform support is available.
+ * Since the generic code has no state, no initialization is needed.
+ */
+void WEAK
+css_init(void)
+{
+}
+
+/**
  * Generic implementation used when no platform support is available. Because
  * the generic code does not know how to control the hardware, prohibit changes
  * to the CSS state by default without a platform-specific implementation.

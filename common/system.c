@@ -74,6 +74,7 @@ system_state_machine(void)
 		gpio = device_get(&r_pio.dev);
 
 		/* Initialize runtime services. */
+		css_init();
 		scpi_init();
 
 		/*
