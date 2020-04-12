@@ -22,6 +22,8 @@ struct ccu_clock {
 	                                       uint32_t rate);
 	/** Byte offset of the clock configuration register. */
 	uint16_t reg;
+	/** Offset of the lock bit inside the register (valid if nonzero). */
+	uint8_t  lock;
 	/** Bit offset of the clock gate (valid if nonzero). */
 	uint16_t gate;
 	/** Bit offset of the module reset (valid if nonzero). */
