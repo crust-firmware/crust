@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
+#include <clock.h>
 #include <css.h>
 #include <debug.h>
 #include <delay.h>
@@ -11,6 +12,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <util.h>
+#include <clock/ccu.h>
 #include <platform/devices.h>
 
 #include "css.h"
@@ -35,6 +37,18 @@
 
 #define CLUSTER_PWROFF_GATING_REG (DEV_R_PRCM + 0x0100)
 #define CPU_PWR_CLAMP_REG(n)      (DEV_R_PRCM + 0x0140 + 0x04 * (n))
+
+/* Clocks needed by this driver. */
+enum {
+	CPUX,
+};
+
+static const struct clock_handle css_clocks[] = {
+	[CPUX] = {
+		.dev = &ccu.dev,
+		.id  = CLK_CPUX,
+	},
+};
 
 /* Reset Vector Base Address. */
 static uint32_t rvba;
@@ -82,6 +96,13 @@ css_get_core_state(uint8_t cluster UNUSED, uint8_t core)
 	return SCPI_CSS_ON;
 }
 
+void
+css_init(void)
+{
+	/* Get references to clocks that are already running. */
+	clock_get(&css_clocks[CPUX]);
+}
+
 int
 css_set_css_state(uint8_t state UNUSED)
 {
@@ -98,6 +119,8 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 		return SCPI_OK;
 
 	if (state == SCPI_CSS_ON) {
+		/* Enable the CPUX clock. */
+		clock_get(&css_clocks[CPUX]);
 		/* Apply power to the cluster power domain. */
 		css_set_power_switch(CPU_PWR_CLAMP_REG(0), true);
 		/* Release the cluster output clamps. */
@@ -149,6 +172,8 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 		mmio_set_32(CLUSTER_PWROFF_GATING_REG, BIT(0));
 		/* Remove power from the cluster power domain. */
 		css_set_power_switch(CPU_PWR_CLAMP_REG(0), false);
+		/* Disable the CPUX clock. */
+		clock_put(&css_clocks[CPUX]);
 	} else {
 		return SCPI_E_PARAM;
 	}
