@@ -75,11 +75,5 @@ ccu_set_state(const struct clock_handle *clock, int state)
 	if (clk->gate && !ungate)
 		bitmap_clear(self->regs, clk->gate);
 
-	/* Verify the registers match the expected final values. */
-	if (clk->gate && bitmap_get(self->regs, clk->gate) != ungate)
-		return EIO;
-	if (clk->reset && bitmap_get(self->regs, clk->reset) != enable)
-		return EIO;
-
 	return SUCCESS;
 }
