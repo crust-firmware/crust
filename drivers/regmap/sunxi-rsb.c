@@ -111,20 +111,17 @@ sunxi_rsb_write(const struct regmap *map, uint8_t addr, uint8_t data)
 	return sunxi_rsb_do_command(self, RSB_RTADDR(map->id), RSB_WR8);
 }
 
-static int
+static void
 sunxi_rsb_set_rate(const struct sunxi_rsb *self, uint32_t rate)
 {
-	uint32_t dev_rate = clock_get_rate(&self->clock);
-	uint8_t  divider;
+	uint32_t divider = (clock_get_rate(&self->clock) + rate) / (2 * rate);
 
-	dev_rate /= 2;
-	if (rate == 0 || rate < dev_rate / 256 || rate > dev_rate)
-		return ERANGE;
+	if (divider > 0)
+		divider = divider - 1;
+	if (divider > 0xff)
+		divider = 0xff;
 
-	divider = dev_rate / rate - 1;
 	mmio_write_32(self->regs + RSB_CCR_REG, 1U << 8 | divider);
-
-	return SUCCESS;
 }
 
 static int
@@ -140,12 +137,12 @@ sunxi_rsb_probe(const struct device *dev)
 	if ((err = gpio_get(&self->pins[1])))
 		goto err_put_gpio0;
 
+	/* Soft-reset the controller. */
 	mmio_write_32(self->regs + RSB_CTRL_REG, BIT(0));
 	mmio_pollz_32(self->regs + RSB_CTRL_REG, BIT(0));
 
 	/* Set the bus clock rate to its default value (3 MHz). */
-	if ((err = sunxi_rsb_set_rate(self, 3000000)))
-		goto err_put_gpio1;
+	sunxi_rsb_set_rate(self, 3000000);
 
 	/* Switch all devices to RSB mode. */
 	mmio_write_32(self->regs + RSB_PMCR_REG, I2C_BCAST_ADDR |
@@ -154,8 +151,6 @@ sunxi_rsb_probe(const struct device *dev)
 
 	return SUCCESS;
 
-err_put_gpio1:
-	gpio_put(&self->pins[1]);
 err_put_gpio0:
 	gpio_put(&self->pins[0]);
 err_put_clock:
