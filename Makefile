@@ -6,6 +6,8 @@
 SRC		 = .
 OBJ		 = build
 TGT		 = $(OBJ)/scp
+DOC		 = $(OBJ)/docs/html
+MD		 = $(SRC)/*.md $(SRC)/docs/*.md
 
 CROSS_COMPILE	?= or1k-linux-musl-
 AR		 = $(CROSS_COMPILE)gcc-ar
@@ -101,18 +103,20 @@ $(call descend,3rdparty common drivers lib tools)
 M := @$(if $(filter-out 0,$(V)),:,exec printf '  %-7s %s\n')
 Q :=  $(if $(filter-out 0,$(V)),,@)exec
 
-all: scp $(test-all)
+all: scp $(test-all) doc
 
 check: $(test-all:%=%.test)
 
 clean:
-	$(Q) rm -fr $(TGT)
+	$(Q) rm -fr $(TGT) $(DOC)
 
 clobber:
 	$(Q) rm -fr $(OBJ)
 
 distclean:
 	$(Q) rm -fr $(OBJ) ..config* .config*
+
+doc: $(DOC)
 
 scp: $(TGT)/scp.bin
 
@@ -124,6 +128,9 @@ tools: $(tools-all)
 	$(Q) mkdir -p $*
 
 %.d:;
+
+$(DOC): $(SRC) $(MD) $(SRC)/Doxyfile
+	(cat "$(SRC)/Doxyfile"; echo OUTPUT_DIRECTORY="$(OBJ)/docs") | (cd "$(SRC)"; doxygen -)
 
 $(OBJ)/%.test: $(SRC)/scripts/test.sh $(OBJ)/%
 	$(M) TEST $@
@@ -191,6 +198,6 @@ $(TGT)/%.o: $(SRC)/%.S
 $(SRC)/Makefile:;
 $(SRC)/%.h:;
 
-.PHONY: all check clean clobber distclean scp tools
+.PHONY: all check clean clobber distclean doc scp tools
 .SECONDARY:
 .SUFFIXES:
