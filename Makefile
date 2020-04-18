@@ -82,6 +82,8 @@ HOSTLDLIBS	 =
 GOALS		:= $(if $(MAKECMDGOALS),$(MAKECMDGOALS),$(.DEFAULT_GOAL))
 MAKEFLAGS	+= -Rr
 
+DOCS		 = $(wildcard $(SRC)/*.md $(SRC)/docs/*.md)
+
 export KCONFIG_AUTOCONFIG := $(OBJ)/include/config/auto.conf
 export KCONFIG_AUTOHEADER := $(OBJ)/include/config.h
 export KCONFIG_TRISTATE   := $(OBJ)/include/config/tristate.conf
@@ -114,6 +116,8 @@ clobber:
 distclean:
 	$(Q) rm -fr $(OBJ) ..config* .config*
 
+html: $(OBJ)/docs
+
 scp: $(TGT)/scp.bin
 
 tools: $(tools-all)
@@ -124,6 +128,14 @@ tools: $(tools-all)
 	$(Q) mkdir -p $*
 
 %.d:;
+
+$(OBJ)/docs: $(OBJ)/Doxyfile $(DOCS) $(obj-all)
+	$(M) DOXYGEN $@
+	$(Q) doxygen $<
+	$(Q) touch $@
+
+$(OBJ)/Doxyfile: $(SRC)/Doxyfile
+	$(Q) sed 's|@DOCS@|$(DOCS)|g;s|@OBJ@|$(OBJ)|g;s|@SRC@|$(SRC)|g' $< > $@
 
 $(OBJ)/%.test: $(SRC)/scripts/test.sh $(OBJ)/%
 	$(M) TEST $@
@@ -191,6 +203,6 @@ $(TGT)/%.o: $(SRC)/%.S
 $(SRC)/Makefile:;
 $(SRC)/%.h:;
 
-.PHONY: all check clean clobber distclean scp tools
+.PHONY: all check clean clobber distclean doc scp tools
 .SECONDARY:
 .SUFFIXES:
