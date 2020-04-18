@@ -45,14 +45,19 @@ matrix:
       script:
         - make check-format
         - codespell -i 0 -q 4 $(git ls-files)
-    - env:
+    - addons:
+        apt:
+          packages:
+            - doxygen
+            - graphviz
+      env:
         - BUILD_TYPE=out-of-tree
       script:
         - set -e
         - cd /tmp
         - cp $TRAVIS_BUILD_DIR/Makefile .
         - make SRC=$TRAVIS_BUILD_DIR OBJ=$HOME/build defconfig
-        - make SRC=$TRAVIS_BUILD_DIR OBJ=$HOME/build -j$(nproc) V=1 all check
+        - make SRC=$TRAVIS_BUILD_DIR OBJ=$HOME/build -j$(nproc) V=1 all check html
         - or1k-linux-musl-size $HOME/build/scp/scp.elf
         - grep __bss_end $HOME/build/scp/scp.map
         - sha256sum -b $HOME/build/scp/scp.bin
