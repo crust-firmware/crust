@@ -121,7 +121,7 @@ enum {
 	TEST_COUNT,
 };
 
-/** A structure containing the timing data neede to analyze an SCPI call. */
+/** A structure containing the timing data needed to analyze an SCPI call. */
 struct scpi_call_times {
 	struct timespec start;       /**< Before doing any processing. */
 	struct timespec send;        /**< Before the call to msgbox_send. */

@@ -11,7 +11,7 @@
 /**
  * Spin (do nothing) for at least the given number of microseconds.
  *
- * @param The number of microseconds to delay for.
+ * @param useconds The number of microseconds to delay for.
  */
 void udelay(uint32_t useconds);
 

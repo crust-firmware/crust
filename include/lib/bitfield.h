@@ -45,7 +45,6 @@ uint32_t mmio_get_bitfield_32(uintptr_t addr, uint32_t start, uint32_t width);
  * @param start The offset of the starting bit (LSB) of the bitfield.
  * @param width The width of the bitfield in bits.
  * @param value The value to place in the bitfield.
- * @return      The original word, with the value of the bitfield replaced.
  */
 void mmio_set_bitfield_32(uintptr_t addr, uint32_t start, uint32_t width,
                           uint32_t value);
