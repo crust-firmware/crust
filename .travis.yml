@@ -1,6 +1,12 @@
 ---
 dist: bionic
 
+addons:
+  apt:
+    packages:
+      - doxygen
+      - graphviz
+
 env:
   matrix:
       # Generic
