@@ -13,7 +13,7 @@
 /**
  * Spin (do nothing) for at least the given number of reference clock cycles.
  *
- * @param The number of cycles to delay for.
+ * @param cycles The number of cycles to delay for.
  */
 static void
 delay_cycles(uint32_t cycles)
