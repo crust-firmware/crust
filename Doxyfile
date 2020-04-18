@@ -1,0 +1,48 @@
+PROJECT_NAME           = "crust"
+BRIEF_MEMBER_DESC      = YES
+REPEAT_BRIEF           = YES
+ALWAYS_DETAILED_SEC    = NO
+FULL_PATH_NAMES        = NO
+JAVADOC_AUTOBRIEF      = YES
+USE_MDFILE_AS_MAINPAGE = "README.md"
+TAB_SIZE               = 4
+OPTIMIZE_OUTPUT_FOR_C  = YES
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+EXTRACT_PRIVATE        = YES
+SHOW_INCLUDE_FILES     = YES
+INLINE_INFO            = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+INPUT                  = include/ \
+                         lib/ \
+                         tools/ \
+                         common/ \
+                         docs/ \
+                         README.md \
+                         CONTRIBUTING.md \
+                         LICENSE.md
+FILE_PATTERNS          = *.h \
+                         *.c \
+                         *.md
+RECURSIVE              = YES
+EXCLUDE                = include/drivers/
+SOURCE_BROWSER         = NO
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+VERBATIM_HEADERS       = YES
+ALPHABETICAL_INDEX     = YES
+COLS_IN_ALPHA_INDEX    = 5
+GENERATE_LATEX         = NO
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+HTML_FILE_EXTENSION    = .html
+INCLUDE_GRAPH          = YES
+INCLUDED_BY_GRAPH      = YES
+CALL_GRAPH             = YES
+DOT_IMAGE_FORMAT       = svg
+HAVE_DOT               = YES
+GENERATE_LEGEND        = YES
+DOT_CLEANUP            = YES
+SEARCHENGINE           = YES
