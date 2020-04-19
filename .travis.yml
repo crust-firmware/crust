@@ -49,13 +49,16 @@ matrix:
         apt:
           packages:
             - doxygen
+            - gcc-aarch64-linux-gnu
             - graphviz
+            - libc6-dev-arm64-cross
       env:
         - BUILD_TYPE=out-of-tree
       script:
         - set -e
         - cd /tmp
         - cp $TRAVIS_BUILD_DIR/Makefile .
+        - export HOST_COMPILE=aarch64-linux-gnu-
         - make SRC=$TRAVIS_BUILD_DIR OBJ=$HOME/build defconfig
         - make SRC=$TRAVIS_BUILD_DIR OBJ=$HOME/build -j$(nproc) V=1 all check html
         - or1k-linux-musl-size $HOME/build/scp/scp.elf
