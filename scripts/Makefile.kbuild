@@ -33,7 +33,7 @@ dir_HOSTLDFLAGS	 = $(ldflags-y)
 
 flags		 = AFLAGS CFLAGS CPPFLAGS LDFLAGS LDLIBS
 flags_object	:= $(filter-out LD%,$(flags))
-flags_program	:= $(filter LD%,$(flags))
+flags_program	:= $(filter CFLAGS LD%,$(flags))
 flags_script	:= $(filter CPP%,$(flags))
 
 vars		 = hostprogs lib obj test tools
