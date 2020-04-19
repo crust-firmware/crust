@@ -7,14 +7,18 @@ SRC		 = .
 OBJ		 = build
 TGT		 = $(OBJ)/scp
 
+BUILDAR		 = ar
+BUILDCC		 = cc
+
+HOST_COMPILE	?= aarch64-linux-musl-
+HOSTAR		 = $(HOST_COMPILE)gcc-ar
+HOSTCC		 = $(HOST_COMPILE)gcc
+
 CROSS_COMPILE	?= or1k-linux-musl-
 AR		 = $(CROSS_COMPILE)gcc-ar
 CC		 = $(CROSS_COMPILE)gcc
 CPP		 = $(CROSS_COMPILE)cpp
 OBJCOPY		 = $(CROSS_COMPILE)objcopy
-
-HOSTAR		 = ar
-HOSTCC		 = cc
 
 LEX		 = lex
 YACC		 = yacc
@@ -43,6 +47,18 @@ HEADERS		 = $(OBJ)/include/config.h \
 		   $(SRC)/lib/compiler.h \
 		   $(SRC)/lib/kconfig.h
 
+BUILDCFLAGS	 = $(COMMON_CFLAGS)
+BUILDCPPFLAGS	 = $(COMMON_CPPFLAGS) \
+		   -D_XOPEN_SOURCE=700
+BUILDLDFLAGS	 =
+BUILDLDLIBS	 =
+
+HOSTCFLAGS	 = $(COMMON_CFLAGS)
+HOSTCPPFLAGS	 = $(COMMON_CPPFLAGS) \
+		   -D_XOPEN_SOURCE=700
+HOSTLDFLAGS	 =
+HOSTLDLIBS	 =
+
 AFLAGS		 = -Wa,--fatal-warnings
 CFLAGS		 = $(COMMON_CFLAGS) \
 		   -ffixed-r2 \
@@ -69,12 +85,6 @@ LDFLAGS		 = -nostdlib \
 		   -Wl,--gc-sections \
 		   -Wl,--no-dynamic-linker \
 		   -Wl,--no-undefined
-
-HOSTCFLAGS	 = $(COMMON_CFLAGS)
-HOSTCPPFLAGS	 = $(COMMON_CPPFLAGS) \
-		   -D_XOPEN_SOURCE=700
-HOSTLDFLAGS	 =
-HOSTLDLIBS	 =
 
 ###############################################################################
 

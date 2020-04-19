@@ -15,16 +15,16 @@ ccflags-y	+= -D_GNU_SOURCE \
 		   -Wno-vla
 cppflags-y	+= -I$(src)
 
-HOSTCFLAGS_nconf := $(shell \
+BUILDCFLAGS_nconf := $(shell \
 	pkg-config --cflags menuw panelw ncursesw 2>/dev/null \
 	|| pkg-config --cflags menu panel ncurses 2>/dev/null \
 	|| echo "-D_GNU_SOURCE -I/usr/include/ncurses")
-HOSTLDLIBS_nconf := $(shell \
+BUILDLDLIBS_nconf := $(shell \
 	pkg-config --libs menuw panelw ncursesw 2>/dev/null \
 	|| pkg-config --libs menu panel ncurses 2>/dev/null \
 	|| echo "-lmenu -lpanel -lncurses")
 
-hostprogs-y	+= conf nconf
+buildprogs-y	+= conf nconf
 common-objs	:= confdata.o expr.o lexer.lex.o parser.tab.o \
 		   preprocess.o symbol.o
 conf-objs	:= $(common-objs) conf.o

@@ -13,6 +13,7 @@ tgt		 = $(TGT)/$(subdir)
 #
 # Variables for use in the main Makefile
 #
+buildprogs-all	:=
 hostprogs-all	:=
 lib-all		:=
 obj-all		:=
@@ -26,6 +27,10 @@ dir_AFLAGS	 = $(asflags-y)
 dir_CFLAGS	 = $(ccflags-y)
 dir_CPPFLAGS	 = $(cppflags-y)
 dir_LDFLAGS	 = $(ldflags-y)
+dir_BUILDAFLAGS	 = $(asflags-y)
+dir_BUILDCFLAGS	 = $(ccflags-y)
+dir_BUILDCPPFLAGS= $(cppflags-y)
+dir_BUILDLDFLAGS = $(ldflags-y)
 dir_HOSTAFLAGS	 = $(asflags-y)
 dir_HOSTCFLAGS	 = $(ccflags-y)
 dir_HOSTCPPFLAGS = $(cppflags-y)
@@ -36,7 +41,7 @@ flags_object	:= $(filter-out LD%,$(flags))
 flags_program	:= $(filter CFLAGS LD%,$(flags))
 flags_script	:= $(filter CPP%,$(flags))
 
-vars		 = hostprogs lib obj test tools
+vars		 = buildprogs hostprogs lib obj test tools
 
 #
 # Defined functions and procedures (those starting with '_' are internal)
@@ -48,6 +53,7 @@ vars		 = hostprogs lib obj test tools
 # $1: File name (no path)
 # $2: List of flags, e.g. $(flags_object) or $(flags_program)
 #
+build_file_flags  = $(foreach f,$(2:%=BUILD%),$(call _file_flag,$(obj),$1,$f))
 host_file_flags   = $(foreach f,$(2:%=HOST%),$(call _file_flag,$(obj),$1,$f))
 target_file_flags = $(foreach f,$2,$(call _file_flag,$(tgt),$1,$f))
 
@@ -61,6 +67,44 @@ target_file_flags = $(foreach f,$2,$(call _file_flag,$(tgt),$1,$f))
 #
 _file_flag = $(if $(strip $(dir_$3)$($3_$2)), \
                   $(eval $1/$2: $3 += $(dir_$3) $($3_$2)))
+
+#
+# Overrides compiler/linker paths and flags to the correct variable for the
+# type of object (build vs host).
+#
+# $1: File name (no path)
+# $2: List of flags, e.g. $(flags_object) or $(flags_program)
+#
+build_overrides  = $(foreach f,AR CC $2,$(eval $(obj)/$1: HOST$f = $$(BUILD$f)))
+
+#
+# Adds the necessary dependencies and flags for a list of build object files.
+#
+# $1: List of object file names (no path)
+#
+build_objects = $(foreach object,$1,$(eval $(value _build_object)))
+define _build_object
+  $(call build_file_flags,$(object),$(flags_object))
+  $(call build_overrides,$(object),$(flags_object))
+  $(obj)/$(object): | $(obj)/.
+  -include $(obj)/$(object:.o=.d)
+endef
+
+#
+# Adds the necessary dependencies and flags for a list of build programs.
+#
+# $1: List of program names (no path)
+#
+build_programs = $(foreach program,$1,$(eval $(value _build_program)))
+define _build_program
+  $(call build_file_flags,$(program),$(flags_program))
+  $(call build_overrides,$(program),$(flags_program))
+  ifeq ($($(program)-objs),)
+    $(program)-objs := $(program).o
+  endif
+  $(obj)/$(program): $($(program)-objs:%=$(obj)/%) | $(obj)/.
+  $(call build_objects,$($(program)-objs))
+endef
 
 #
 # Adds the necessary dependencies and flags for a list of host object files.
@@ -147,6 +191,7 @@ define _descend
 
   # Filter out directory dependencies
   dirs-y	:= $(filter %/,$(foreach var,$(vars),$($(var)-y)))
+  buildprogs-y	:= $(filter-out %/,$(buildprogs-y))
   hostprogs-y	:= $(filter-out %/,$(hostprogs-y))
   lib-y		:= $(filter-out %/,$(lib-y))
   obj-y		:= $(filter-out %/,$(obj-y))
@@ -160,6 +205,7 @@ define _descend
   ldflags-y	+= $(parent-ldflags) $(subdir-ldflags-y)
 
   # Handle file rules
+  $(call build_programs, $(buildprogs-y))
   $(call host_programs,  $(hostprogs-y))
   $(call library_objects,$(lib-y))
   $(call target_objects, $(obj-y))
@@ -167,6 +213,7 @@ define _descend
   $(call host_programs,  $(tools-y))
 
   # Accumulate file names (library objects are handled above)
+  buildprogs-all+= $(buildprogs-y:%=$(obj)/%)
   hostprogs-all	+= $(hostprogs-y:%=$(obj)/%)
   obj-all	+= $(obj-y:%=$(tgt)/%)
   test-all	+= $(test-y:%=$(obj)/%)
