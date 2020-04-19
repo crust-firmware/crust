@@ -102,6 +102,42 @@ be used:
 - Run integration tests by building the firmware with `make TEST=1` and running
   it on the hardware (if possible).
 
+## Architecture
+
+This firmware is designed to be flexible yet extremely lightweight. It borrows
+heavily from ideas in both Linux and ATF for its layout and driver model. The
+code is divided into directories based on major function:
+
+- `configs`: These files contain configuration for each board supported by this
+  firmware. They determine which subdirectory of `platform` is used and which
+  devices are enabled.
+- `common`: Files in this directory contain the main logic of the firmware, as
+  well as glue code for connecting drivers, handling exceptions, etc.
+- `drivers`: This directory contains a subdirectory for each class of drivers.
+  - `drivers/<class>`: These directories contain all of the drivers of a class,
+    as well as generic dispatch code (in `drivers/<class>/<class>.c`).
+- `include`: This directory contains headers for code in `common` and `lib`, as
+  well as standalone definitions.
+  - `include/common/arch`: These headers expose functionality of the CPU
+    architecture that are not dependent on a specific hardware implementation.
+  - `include/drivers`: These headers specify the interface for each class of
+    drivers. Also included are headers for individual drivers; these provide
+    declarations necessary to interact with devices from outside the drivers.
+- `lib`: This directory contains standalone code that does not depend on other
+  outside code (with few exceptions). This code should be easily reusable in
+  other projects.
+- `platform`: This directory contains a subdirectory for each supported
+  platform, which refers to a family of SoCs with a similar programming
+  interface.
+  - `platform/<platform>/include`: This directory contains headers with
+    platform-specific macro definitions, such as memory addresses of devices
+    and register layouts that change between platforms.
+- `scripts`: These files are used to assist in building and linking the
+  firmware, but contain no code themselves.
+- `tools`: Each file here is a self-contained program intended to be run on the
+  host machine (in Linux userspace on the ARM cores) to gather information,
+  manipulate hardware, load firmware, or for other reasons.
+
 ## Formatting
 
 Crust firmware uses Uncrustify to format all source code files. Running `make
