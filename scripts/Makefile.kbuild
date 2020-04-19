@@ -44,12 +44,11 @@ vars		 = hostprogs lib obj test tools
 
 #
 # Adds compiler/linker flags to the target-specific variables for this file.
-# Pass $(flags_object) or $(flags_program) for the flags list, as appropriate.
 #
 # $1: File name (no path)
-# $2: List of flags
+# $2: List of flags, e.g. $(flags_object) or $(flags_program)
 #
-host_file_flags   = $(foreach f,$(2:%=HOST%),$(call _file_flag, $(obj),$1,$f))
+host_file_flags   = $(foreach f,$(2:%=HOST%),$(call _file_flag,$(obj),$1,$f))
 target_file_flags = $(foreach f,$2,$(call _file_flag,$(tgt),$1,$f))
 
 #
