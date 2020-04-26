@@ -19,6 +19,9 @@
 #define INTC_MASK_REG      0x0050
 #define INTC_RESP_REG      0x0060
 
+#define EINT_CTL_REG(n)    (0x20 * (n) + 0x0210)
+#define EINT_STATUS_REG(n) (0x20 * (n) + 0x0214)
+
 bool
 irq_is_enabled(uint32_t irq)
 {
@@ -34,6 +37,20 @@ irq_is_pending(uint32_t irq)
 uint32_t
 irq_poll(void)
 {
+#if IS_ENABLED(CONFIG_IRQ_POLL_EINT)
+	uint32_t first = CONFIG_IRQ_POLL_EINT_FIRST_BANK;
+	uint32_t last  = CONFIG_IRQ_POLL_EINT_LAST_BANK;
+
+	for (uint32_t bank = first; bank <= last; ++bank) {
+		uint32_t pending;
+
+		pending = mmio_read_32(DEV_PIO + EINT_CTL_REG(bank)) &
+		          mmio_read_32(DEV_PIO + EINT_STATUS_REG(bank));
+		if (pending)
+			return pending;
+	}
+#endif
+
 	return mmio_read_32(DEV_R_INTC + INTC_EN_REG) &
 	       mmio_read_32(DEV_R_INTC + INTC_IRQ_PEND_REG);
 }

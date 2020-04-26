@@ -1,0 +1,47 @@
+#
+# Copyright © 2020 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+menu "Interrupt and wakeup options"
+
+config IRQ_POLL_EINT
+	bool "Poll the GPIO controller for EINT IRQs"
+	help
+		Check the main GPIO controller (the one containing ports
+		A through H) for external interrupts (EINTs) when
+		polling for wakeup IRQs.
+
+		This allows EINT-capable pins on those ports to be used
+		as wakeup sources. The pins must be configured as EINT
+		pins by Linux before entering suspend.
+
+		Say Y if your board has a device connected to port A-H
+		that must be able to wake up or turn on the system.
+		Otherwise, say N.
+
+if IRQ_POLL_EINT
+
+config IRQ_POLL_EINT_FIRST_BANK
+	int "First EINT bank to poll"
+	range 0 7
+	default 0
+	help
+		Begin the EINT polling loop at the nth EINT-capable GPIO
+		bank, counting from 0. This number is not related to the
+		GPIO bank letter.
+
+config IRQ_POLL_EINT_LAST_BANK
+	int "Last EINT bank to poll"
+	range 0 7
+	default 2 if PLATFORM_A64
+	default 2 if PLATFORM_A83T
+	default 7 if PLATFORM_H6
+	help
+		End the EINT polling loop at the nth EINT-capable GPIO
+		bank, counting from 0. This number is not related to the
+		GPIO bank letter.
+
+endif
+
+endmenu
