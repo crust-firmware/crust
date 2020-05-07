@@ -36,7 +36,7 @@ debug_print_battery(void)
 		if (regmap_read(map, 0x01, &val) || !(val & BIT(5)))
 			goto err_put_mfd;
 		/* Battery discharging? */
-		if (regmap_read(map, 0x00, &val) || (val & BIT(1)))
+		if (regmap_read(map, 0x00, &val) || (val & BIT(2)))
 			goto err_put_mfd;
 
 		if (regmap_read(map, 0x78, &hi))
