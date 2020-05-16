@@ -14,7 +14,6 @@ HOST_COMPILE	?= aarch64-linux-musl-
 HOSTAR		 = $(HOST_COMPILE)gcc-ar
 HOSTCC		 = $(HOST_COMPILE)gcc
 
-CROSS_COMPILE	?= or1k-linux-musl-
 AR		 = $(CROSS_COMPILE)gcc-ar
 CC		 = $(CROSS_COMPILE)gcc
 OBJCOPY		 = $(CROSS_COMPILE)objcopy
@@ -68,9 +67,7 @@ CFLAGS		 = $(COMMON_CFLAGS) \
 		   -fno-asynchronous-unwind-tables \
 		   -fno-pie \
 		   -fomit-frame-pointer \
-		   -funsigned-char \
-		   -msfimm -mshftimm -msoft-div -msoft-mul \
-		   -static
+		   -funsigned-char
 CPPFLAGS	 = $(COMMON_CPPFLAGS) \
 		   -I$(SRC)/include/drivers \
 		   -I$(SRC)/include/stdlib \
@@ -79,6 +76,7 @@ CPPFLAGS	 = $(COMMON_CPPFLAGS) \
 		   -Werror=missing-include-dirs
 LDFLAGS		 = -nostdlib \
 		   -no-pie \
+		   -static \
 		   -Wl,-O1 \
 		   -Wl,--build-id=none \
 		   -Wl,--fatal-warnings \
