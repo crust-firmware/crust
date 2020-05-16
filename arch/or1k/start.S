@@ -4,7 +4,7 @@
  */
 
 #include <macros.S>
-#include <arch/spr.h>
+#include <asm/spr.h>
 
 func start
 	l.mfspr	r2, r0, SPR_SYS_PPC_ADDR

@@ -5,6 +5,7 @@
 
 mainmenu "Crust Firmware Configuration"
 
+source "arch/Kconfig"
 source "platform/Kconfig"
 source "drivers/Kconfig"
 source "common/debug/Kconfig"

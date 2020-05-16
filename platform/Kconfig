@@ -14,13 +14,16 @@ choice
 
 config PLATFORM_A64
 	bool "A64/H5"
+	depends on ARCH_OR1K
 
 config PLATFORM_A83T
 	bool "A83T"
+	depends on ARCH_OR1K
 	imply RSB
 
 config PLATFORM_H6
 	bool "H6"
+	depends on ARCH_OR1K
 
 endchoice
 

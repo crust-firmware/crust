@@ -1,0 +1,12 @@
+#
+# Copyright © 2020 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+config ARCH
+	string
+	default "or1k" if ARCH_OR1K
+
+config ARCH_OR1K
+	bool
+	default y

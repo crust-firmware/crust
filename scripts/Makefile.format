@@ -5,7 +5,7 @@
 
 find_files	 = $(sort $(wildcard $(foreach X,$2,$(1:%=$(SRC)/%/$X))))
 
-format_dirs	:= common drivers/* include/* lib platform/* tools
+format_dirs	:= arch/* common drivers/* include/* lib platform/* tools
 format_globs	:= *.c */*.c *.h */*.h */*/*.h
 format_files	:= $(call find_files,$(format_dirs),$(format_globs))
 

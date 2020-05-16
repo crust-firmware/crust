@@ -40,6 +40,7 @@ COMMON_CFLAGS	 = -Os -pipe -std=c11 \
 		   -Wno-missing-field-initializers
 COMMON_CPPFLAGS	 = -I$(OBJ)/include \
 		   -I$(SRC)/platform/$(CONFIG_PLATFORM)/include \
+		   -I$(SRC)/arch/$(CONFIG_ARCH)/include \
 		   -I$(SRC)/include/common \
 		   -I$(SRC)/include/lib
 
@@ -105,7 +106,7 @@ endif
 include $(SRC)/scripts/Makefile.format
 include $(SRC)/scripts/Makefile.kbuild
 
-$(call descend,3rdparty common drivers lib tools)
+$(call descend,3rdparty arch common drivers lib tools)
 
 ###############################################################################
 

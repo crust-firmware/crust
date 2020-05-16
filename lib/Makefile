@@ -5,6 +5,3 @@
 
 lib-y += bitfield.o
 lib-y += string.o
-
-obj-y += math.o
-obj-y += runtime.o

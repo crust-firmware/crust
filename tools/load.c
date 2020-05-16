@@ -16,7 +16,7 @@
 #include <config.h>
 #include <mmio.h>
 #include <util.h>
-#include <arch/exception.h>
+#include <asm/exception.h>
 #include <platform/devices.h>
 #include <platform/memory.h>
 

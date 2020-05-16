@@ -4,7 +4,7 @@
  */
 
 #include <macros.S>
-#include <arch/spr.h>
+#include <asm/spr.h>
 
 func panic
 	l.jal	log			# Log the panic message (clobbers r9)

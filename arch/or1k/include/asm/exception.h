@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#ifndef COMMON_ARCH_EXCEPTION_H
-#define COMMON_ARCH_EXCEPTION_H
+#ifndef ASM_EXCEPTION_H
+#define ASM_EXCEPTION_H
 
 #define RESET_EXCEPTION             0x01
 #define BUS_ERROR                   0x02
@@ -23,4 +23,4 @@
 
 #define EXCEPTION_VECTOR_ADDRESS(n) (0x100 * (n))
 
-#endif /* COMMON_ARCH_EXCEPTION_H */
+#endif /* ASM_EXCEPTION_H */
