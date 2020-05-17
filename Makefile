@@ -17,7 +17,6 @@ HOSTCC		 = $(HOST_COMPILE)gcc
 CROSS_COMPILE	?= or1k-linux-musl-
 AR		 = $(CROSS_COMPILE)gcc-ar
 CC		 = $(CROSS_COMPILE)gcc
-CPP		 = $(CROSS_COMPILE)cpp
 OBJCOPY		 = $(CROSS_COMPILE)objcopy
 
 LEX		 = lex
@@ -190,13 +189,9 @@ $(TGT)/%.bin: $(TGT)/%.elf
 	$(M) OBJCOPY $@
 	$(Q) $(OBJCOPY) -O binary -S --reverse-bytes 4 $< $@
 
-$(TGT)/%.elf $(TGT)/%.map: $(TGT)/common/crust.ld $(obj-all) $(TGT)/lib.a
+$(TGT)/%.elf $(TGT)/%.map: $(obj-all) $(TGT)/lib.a
 	$(M) LD $@
 	$(Q) $(CC) $(CFLAGS) $(LDFLAGS) -Wl,-Map,$(TGT)/$*.map -o $@ -T $^
-
-$(TGT)/%.ld: $(SRC)/%.ld.S
-	$(M) CPP $@
-	$(Q) $(CPP) $(CPPFLAGS) -MMD -MF $@.d -MT $@ -P -o $@ $<
 
 $(TGT)/lib.a:
 	$(M) AR $@
@@ -209,6 +204,10 @@ $(TGT)/%.o: $(SRC)/%.c
 $(TGT)/%.o: $(SRC)/%.S
 	$(M) AS $@
 	$(Q) $(CC) $(CPPFLAGS) $(AFLAGS) -MMD -c -o $@ $<
+
+$(TGT)/%.ld.o: $(SRC)/%.ld.S
+	$(M) CPP $@
+	$(Q) $(CC) $(CPPFLAGS) -E -MMD -P -o $@ $<
 
 $(SRC)/Makefile:;
 $(SRC)/%.h:;

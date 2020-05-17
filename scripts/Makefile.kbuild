@@ -39,7 +39,6 @@ dir_HOSTLDFLAGS	 = $(ldflags-y)
 flags		 = AFLAGS CFLAGS CPPFLAGS LDFLAGS LDLIBS
 flags_object	:= $(filter-out LD%,$(flags))
 flags_program	:= $(filter CFLAGS LD%,$(flags))
-flags_script	:= $(filter CPP%,$(flags))
 
 vars		 = buildprogs hostprogs lib obj test tools
 
@@ -148,18 +147,6 @@ define _library_object
   # Add the target version of this library object
   $(TGT)/lib.a: $(tgt)/$(object)
   $(call target_objects,$(object))
-endef
-
-#
-# Adds the necessary dependencies and flags for a list of linker scripts.
-#
-# $1: List of linker script file names (no path)
-#
-linker_scripts = $(foreach script,$1,$(eval $(value _linker_script)))
-define _linker_script
-  $(call target_file_flags,$(script),$(flags_script))
-  $(tgt)/$(script): | $(tgt)/.
-  -include $(tgt)/$(script).d
 endef
 
 #

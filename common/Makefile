@@ -3,7 +3,8 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
-$(call linker_scripts,crust.ld)
+# The first object is used as the linker script.
+obj-y += crust.ld.o
 
 obj-y += debug/
 
