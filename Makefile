@@ -40,6 +40,7 @@ COMMON_CFLAGS	 = -Os -pipe -std=c11 \
 		   -Werror=vla \
 		   -Wno-missing-field-initializers
 COMMON_CPPFLAGS	 = -I$(OBJ)/include \
+		   -I$(SRC)/platform/$(CONFIG_PLATFORM)/include \
 		   -I$(SRC)/include/common \
 		   -I$(SRC)/include/lib
 
@@ -73,7 +74,6 @@ CFLAGS		 = $(COMMON_CFLAGS) \
 CPPFLAGS	 = $(COMMON_CPPFLAGS) \
 		   -I$(SRC)/include/drivers \
 		   -I$(SRC)/include/stdlib \
-		   -I$(SRC)/platform/$(CONFIG_PLATFORM)/include \
 		   $(foreach header,$(HEADERS),-include $(notdir $(header))) \
 		   -nostdinc \
 		   -Werror=missing-include-dirs
