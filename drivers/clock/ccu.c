@@ -7,17 +7,10 @@
 #include <clock.h>
 #include <device.h>
 #include <error.h>
-#include <intrusive.h>
 #include <stdbool.h>
 #include <clock/ccu.h>
 
 #include "ccu.h"
-
-static inline const struct ccu *
-to_ccu(const struct device *dev)
-{
-	return container_of(dev, const struct ccu, dev);
-}
 
 const struct clock_handle *
 ccu_get_parent(const struct clock_handle *clock)
