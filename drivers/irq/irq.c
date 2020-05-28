@@ -51,6 +51,5 @@ irq_poll(void)
 	}
 #endif
 
-	return mmio_read_32(DEV_R_INTC + INTC_EN_REG) &
-	       mmio_read_32(DEV_R_INTC + INTC_IRQ_PEND_REG);
+	return mmio_read_32(DEV_R_INTC + INTC_IRQ_PEND_REG);
 }
