@@ -20,7 +20,7 @@
 
 #define MODE_WIDTH           4
 #define MODE_PPW             (WORD_BIT / MODE_WIDTH)
-#define MODE_REG(port, pin)  (0x0000 + 0x24 * (port) + 0x4 * (pin) / MODE_PPW)
+#define MODE_REG(port, pin)  (0x0000 + 0x24 * (port) + 4 * ((pin) / MODE_PPW))
 #define MODE_BIT(pin)        (MODE_WIDTH * ((pin) % MODE_PPW))
 
 #define DATA_WIDTH           1
@@ -30,12 +30,12 @@
 
 #define DRIVE_WIDTH          2
 #define DRIVE_PPW            (WORD_BIT / DRIVE_WIDTH)
-#define DRIVE_REG(port, pin) (0x0014 + 0x24 * (port) + 0x4 * (pin) / DRIVE_PPW)
+#define DRIVE_REG(port, pin) (0x0014 + 0x24 * (port) + 4 * ((pin) / DRIVE_PPW))
 #define DRIVE_BIT(pin)       (DRIVE_WIDTH * ((pin) % DRIVE_PPW))
 
 #define PULL_WIDTH           2
 #define PULL_PPW             (WORD_BIT / PULL_WIDTH)
-#define PULL_REG(port, pin)  (0x001c + 0x24 * (port) + 0x4 * (pin) / PULL_PPW)
+#define PULL_REG(port, pin)  (0x001c + 0x24 * (port) + 4 * ((pin) / PULL_PPW))
 #define PULL_BIT(pin)        (PULL_WIDTH * ((pin) % PULL_PPW))
 
 #define PINS_PER_PORT        32
