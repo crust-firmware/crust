@@ -27,6 +27,7 @@
 #define __kc_concat(a, b)          a ## b
 #define __kc_do(junk, action, ...) action(__VA_ARGS__)
 #define __kc_expand(...)           __kc_do(__VA_ARGS__)
+#define __kc_tokenize(...)         __VA_ARGS__
 
 /**
  * Expands to the remainder of the argument list if the option is enabled;
@@ -48,5 +49,13 @@
  */
 #define IS_ENABLED(option) \
 	__kc_expand(__kc_concat(__kcm_true_, option), __kca_false, junk)
+
+/**
+ * Shorthand for IS_ENABLED(CONFIG_option).
+ *
+ * Expands to the token 1 if the option is enabled; otherwise expands to 0.
+ */
+#define CONFIG(option) \
+	IS_ENABLED(__kc_tokenize(CONFIG_ ## option))
 
 #endif /* LIB_KCONFIG_H */
