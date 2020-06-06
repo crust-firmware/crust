@@ -18,6 +18,9 @@
 #define SRAM_A2_LIMIT  0x00014000
 #define SRAM_A2_SIZE   (SRAM_A2_LIMIT - SRAM_A2_BASE)
 
+/* Difference between SRAM_A2_BASE in the AR100 and ARM address spaces. */
+#define SRAM_A2_OFFSET 0x00040000
+
 #define STACK_SIZE     0x00000400
 
 #endif /* PLATFORM_MEMORY_H */

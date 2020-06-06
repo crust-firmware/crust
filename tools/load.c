@@ -26,12 +26,6 @@
 #define PAGE_BASE(addr)   ((addr) & ~(PAGESIZE - 1))
 #define PAGE_OFFSET(addr) ((addr) & (PAGESIZE - 1))
 
-#if CONFIG_PLATFORM_A64 || CONFIG_PLATFORM_A83T
-#define SRAM_ARM_OFFSET   0x40000
-#elif CONFIG_PLATFORM_H6
-#define SRAM_ARM_OFFSET   0x100000
-#endif
-
 int
 main(int argc, char *argv[])
 {
@@ -60,7 +54,7 @@ main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 	sram = mmap(NULL, SRAM_A2_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED,
-	            fd, SRAM_ARM_OFFSET + PAGE_BASE(SRAM_A2_BASE));
+	            fd, PAGE_BASE(SRAM_A2_OFFSET + SRAM_A2_BASE));
 	if (sram == MAP_FAILED) {
 		perror("Failed to mmap SRAM A2");
 		return EXIT_FAILURE;

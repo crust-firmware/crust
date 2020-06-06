@@ -65,12 +65,6 @@
 /** Arbitrary value to ensure the firmware correctly handles status codes. */
 #define SCPI_STATUS_TEST  0xcafef00d
 
-/**
- * Difference between the SRAM addresses given in the platform header (as seen
- * by the ARISC core) and the addresses as seen by the ARM cores.
- */
-#define SRAM_ARM_OFFSET   0x40000
-
 /** Convert a symbol to a string. */
 #define STRINGIFY(token)  #token
 
@@ -1066,7 +1060,7 @@ main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 	sram_map = mmap(NULL, PAGESIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
-	                SRAM_ARM_OFFSET + PAGE_BASE(SCPI_MEM_BASE));
+	                PAGE_BASE(SRAM_A2_OFFSET + SCPI_MEM_BASE));
 	if (sram_map == MAP_FAILED) {
 		perror("Failed to mmap SRAM A2");
 		return EXIT_FAILURE;
@@ -1075,7 +1069,8 @@ main(int argc, char *argv[])
 
 	/* Correct the addresses for mmap requiring page alignment. */
 	mbox = (uintptr_t)mbox_map + PAGE_OFFSET(DEV_MSGBOX);
-	sram = (uintptr_t)sram_map + PAGE_OFFSET(SCPI_MEM_BASE);
+	sram = (uintptr_t)sram_map + PAGE_OFFSET(SRAM_A2_OFFSET +
+	                                         SCPI_MEM_BASE);
 
 	/* Set up the fatal error handler. */
 	if (sigsetjmp(main_buf, 0)) {
