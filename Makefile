@@ -35,6 +35,7 @@ COMMON_CFLAGS	 = -Os -pipe -std=c11 \
 		   -Werror=pointer-arith \
 		   -Werror=pointer-sign \
 		   -Werror=strict-prototypes \
+		   -Werror=undef \
 		   -Werror=vla \
 		   -Wno-missing-field-initializers
 COMMON_CPPFLAGS	 = -I$(OBJ)/include \
