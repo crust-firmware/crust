@@ -75,7 +75,7 @@ static const struct clock_handle sun50i_a64_ccu_dram_parents[] = {
 		.dev = &ccu.dev,
 		.id  = CLK_PLL_DDR0,
 	},
-#if CONFIG_SOC_A64
+#if CONFIG(SOC_A64)
 	{
 		.dev = &ccu.dev,
 		.id  = CLK_PLL_DDR1,
@@ -117,7 +117,7 @@ static const struct ccu_clock sun50i_a64_ccu_clocks[SUN50I_A64_CCU_CLOCKS] = {
 		.get_parent = ccu_helper_get_parent,
 		.get_rate   = sun50i_a64_ccu_fixed_get_rate,
 	},
-#if CONFIG_SOC_A64
+#if CONFIG(SOC_A64)
 	[CLK_PLL_DDR1] = {
 		.get_parent = ccu_helper_get_parent,
 		.get_rate   = ccu_helper_get_rate,

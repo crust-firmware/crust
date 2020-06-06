@@ -13,7 +13,7 @@
 #define IRQ_R_WDOG   0x04
 #define IRQ_R_CIR_RX 0x05
 #define IRQ_R_UART   0x06
-#if CONFIG_SOC_A64
+#if CONFIG(SOC_A64)
 #define IRQ_R_RSB    0x07
 #endif
 #define IRQ_R_ALARM0 0x08

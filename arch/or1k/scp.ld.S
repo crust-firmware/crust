@@ -5,7 +5,7 @@
 
 #include <platform/memory.h>
 
-#ifdef CONFIG_COMPILE_TEST
+#if CONFIG(COMPILE_TEST)
 #undef  SRAM_A2_LIMIT
 #define SRAM_A2_LIMIT 0xffffffff
 #endif

@@ -76,7 +76,7 @@ run_command(const char *cmd)
 			log("%08x: %08x\n", addr, mmio_read_32(addr));
 		}
 		return;
-#if CONFIG_DEBUG_MONITOR_PMIC
+#if CONFIG(DEBUG_MONITOR_PMIC)
 	case 'p':
 		/* PMIC: "p xx" or "p xx xx", bare hex. */
 		if (parse_hex(&cmd, &addr) && !axp803_subdevice_probe(NULL)) {

@@ -14,8 +14,8 @@
 #define LOG_STRING_INFO    "\x04"
 #define LOG_STRING_DEBUG   "\x05"
 
-#if CONFIG_ASSERT
-#if CONFIG_ASSERT_VERBOSE
+#if CONFIG(ASSERT)
+#if CONFIG(ASSERT_VERBOSE)
 #define assert(e) ((void)((e) || (panic("Assertion failed: %s (%s:%d)", #e, \
 	                                __FILE__, __LINE__), 0)))
 #else
@@ -42,13 +42,13 @@ noreturn void panic(const char *fmt, ...) ATTRIBUTE(format(printf, 1, 2));
 #define error(...) log(LOG_STRING_ERROR __VA_ARGS__)
 #define warn(...)  log(LOG_STRING_WARNING __VA_ARGS__)
 #define info(...)  log(LOG_STRING_INFO __VA_ARGS__)
-#if CONFIG_DEBUG_LOG
+#if CONFIG(DEBUG_LOG)
 #define debug(...) log(LOG_STRING_DEBUG __VA_ARGS__)
 #else
 #define debug(...) ((void)0)
 #endif
 
-#if CONFIG_DEBUG_MONITOR
+#if CONFIG(DEBUG_MONITOR)
 
 void debug_monitor(void);
 
@@ -61,7 +61,7 @@ debug_monitor(void)
 
 #endif
 
-#if CONFIG_DEBUG_PRINT_BATTERY
+#if CONFIG(DEBUG_PRINT_BATTERY)
 
 void debug_print_battery(void);
 
@@ -74,7 +74,7 @@ debug_print_battery(void)
 
 #endif
 
-#if CONFIG_DEBUG_PRINT_LATENCY
+#if CONFIG(DEBUG_PRINT_LATENCY)
 
 void debug_print_latency(void);
 
@@ -87,7 +87,7 @@ debug_print_latency(void)
 
 #endif
 
-#if CONFIG_DEBUG_PRINT_SPRS
+#if CONFIG(DEBUG_PRINT_SPRS)
 
 void debug_print_sprs(void);
 

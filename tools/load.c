@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 
 #include <config.h>
+#include <kconfig.h>
 #include <mmio.h>
 #include <util.h>
 #include <asm/exception.h>

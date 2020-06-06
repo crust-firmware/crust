@@ -20,6 +20,7 @@
 
 #include <compiler.h>
 #include <config.h>
+#include <kconfig.h>
 #include <mmio.h>
 #include <scpi_protocol.h>
 #include <util.h>

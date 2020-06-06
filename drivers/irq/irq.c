@@ -37,7 +37,7 @@ irq_is_pending(uint32_t irq)
 uint32_t
 irq_poll(void)
 {
-#if IS_ENABLED(CONFIG_IRQ_POLL_EINT)
+#if CONFIG(IRQ_POLL_EINT)
 	uint32_t first = CONFIG_IRQ_POLL_EINT_FIRST_BANK;
 	uint32_t last  = CONFIG_IRQ_POLL_EINT_LAST_BANK;
 

@@ -78,7 +78,7 @@
 #define DEV_R_I2C       0x01f02400
 #define DEV_R_UART      0x01f02800
 #define DEV_R_PIO       0x01f02c00
-#if CONFIG_SOC_A64
+#if CONFIG(SOC_A64)
 #define DEV_R_RSB       0x01f03400
 #endif
 #define DEV_R_PWM       0x01f03800
