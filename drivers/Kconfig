@@ -6,9 +6,9 @@
 menu "Device drivers"
 
 source "irq/Kconfig"
+source "regmap/Kconfig"
 source "mfd/Kconfig"
 source "pmic/Kconfig"
-source "regmap/Kconfig"
 source "regulator/Kconfig"
 
 endmenu

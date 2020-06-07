@@ -3,10 +3,64 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
-config I2C
+config HAVE_I2C
 	bool
 	default y
-	depends on !RSB || COMPILE_TEST
+	help
+		This option is selected on platforms that have I2C
+		controller hardware.
+
+choice
+	bool "I2C controller pin selection"
+	depends on HAVE_I2C
+	default I2C_PINS_NONE if HAVE_RSB
+	default I2C_PINS_PL0_PL1
+	help
+		Choose which pair of pins is used for the I2C bus.
+
+config I2C_PINS_NONE
+	bool "None"
+	help
+		Select this option if your board does not have a PMIC or
+		regulator connected via I2C.
+
+		This is usually the right choice if your SoC supports RSB.
+
+config I2C_PINS_PL0_PL1
+	bool "PL0/PL1"
+	help
+		Select this option if your board has a PMIC or regulator
+		connected via I2C using the normal set of pins.
+
+		Note that if you SoC contains an RSB controller,
+		choosing this option will prevent you from using it.
+
+config I2C_PINS_PL8_PL9
+	bool "PL8/PL9"
+	depends on HAVE_RSB
+	help
+		Select this option if your board has a PMIC or regulator
+		connected via I2C using the alternate set of pins.
+
+endchoice
+
+config I2C
+	bool
+	default HAVE_I2C && (!I2C_PINS_NONE || COMPILE_TEST)
+	help
+		This option is selected if the chosen pin configuration
+		allows the I2C controller to be used.
+
+config HAVE_RSB
+	bool
+	default SOC_A64 || PLATFORM_A83T
+	help
+		This option is selected on platforms that have RSB
+		controller hardware.
 
 config RSB
 	bool
+	default HAVE_RSB && (!I2C_PINS_PL0_PL1 || COMPILE_TEST)
+	help
+		This option is selected if the chosen pin configuration
+		allows the RSB controller to be used.

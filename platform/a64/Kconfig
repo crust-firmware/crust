@@ -8,7 +8,6 @@ choice
 
 config SOC_A64
 	bool "A64"
-	imply RSB
 
 config SOC_H5
 	bool "H5"
