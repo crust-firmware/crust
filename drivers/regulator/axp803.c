@@ -15,6 +15,7 @@
 #define OUTPUT_POWER_CONTROL2 0x12
 #define OUTPUT_POWER_CONTROL3 0x13
 
+#define GPIO_LDO_MASK         0x7
 #define GPIO_LDO_ON           0x3
 #define GPIO_LDO_OFF          0x4
 
@@ -166,8 +167,11 @@ axp803_regulator_get_state(const struct device *dev UNUSED, uint8_t id)
 	if ((err = regmap_read(map, reg, &val)))
 		return err;
 
-	/* GPIO LDOs have a pin function, not an enable bit. */
-	if (id >= AXP803_REGL_GPIO0)
+	/*
+	 * GPIO LDOs have a pin function, not an enable bit. Their
+	 * distinguishing feature is a mask containing more than one bit.
+	 */
+	if (mask == GPIO_LDO_MASK)
 		return (val & mask) == GPIO_LDO_ON;
 
 	return !!(val & mask);
@@ -182,8 +186,11 @@ axp803_regulator_set_state(const struct device *dev UNUSED, uint8_t id,
 	uint8_t mask = axp803_regulators[id].enable_mask;
 	uint8_t val;
 
-	/* GPIO LDOs have a pin function, not an enable bit. */
-	if (id >= AXP803_REGL_GPIO0)
+	/*
+	 * GPIO LDOs have a pin function, not an enable bit. Their
+	 * distinguishing feature is a mask containing more than one bit.
+	 */
+	if (mask == GPIO_LDO_MASK)
 		val = enabled ? GPIO_LDO_ON : GPIO_LDO_OFF;
 	else
 		val = enabled ? mask : 0;
