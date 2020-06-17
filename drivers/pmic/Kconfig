@@ -9,4 +9,8 @@ config PMIC_AXP803
 	bool
 	default MFD_AXP803
 
+config PMIC_AXP805
+	bool
+	default MFD_AXP805
+
 endmenu

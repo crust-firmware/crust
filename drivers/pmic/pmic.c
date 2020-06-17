@@ -7,6 +7,7 @@
 #include <intrusive.h>
 #include <pmic.h>
 #include <pmic/axp803.h>
+#include <pmic/axp805.h>
 
 #include "pmic.h"
 
@@ -29,6 +30,8 @@ pmic_get(void)
 
 	if (CONFIG(PMIC_AXP803))
 		pmic = device_get_or_null(&axp803_pmic.dev);
+	if (!pmic && CONFIG(PMIC_AXP805))
+		pmic = device_get_or_null(&axp805_pmic.dev);
 
 	return pmic;
 }
