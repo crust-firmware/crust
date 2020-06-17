@@ -4,10 +4,21 @@
 #
 
 config MFD_AXP20X
-	bool
-	default y
+	bool "Multi-function driver for X-Powers PMICs"
 	depends on RSB
+	help
+		This driver enables both the power sequencing and
+		voltage regulator functionality of an AXP2xx or AXP8xx
+		series power management IC.
+
+choice
+	bool "X-Powers PMIC variant"
+	depends on MFD_AXP20X
+	default MFD_AXP803 if PLATFORM_A64
 
 config MFD_AXP803
-	bool
-	default MFD_AXP20X
+	bool "AXP803"
+	help
+		This PMIC is usually paired with the A64 SoC.
+
+endchoice

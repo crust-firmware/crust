@@ -6,7 +6,7 @@
 menu "Power management controllers"
 
 config PMIC_AXP803
-	bool "X-Powers AXP803 PMIC"
-	depends on MFD_AXP803
+	bool
+	default MFD_AXP803
 
 endmenu
