@@ -13,10 +13,16 @@
 
 #define IC_TYPE_REG   0x03
 #define IC_TYPE_MASK  0xcf
-#define IC_TYPE_VALUE 0x41
 
+#if CONFIG(MFD_AXP803)
+#define IC_TYPE_VALUE 0x41
 #define I2C_ADDRESS   0x34
 #define RSB_RTADDR    0x2d
+#elif CONFIG(MFD_AXP805)
+#define IC_TYPE_VALUE 0x40
+#define I2C_ADDRESS   0x36
+#define RSB_RTADDR    0x2d
+#endif
 
 static int
 axp20x_probe(const struct device *dev)

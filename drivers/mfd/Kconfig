@@ -15,10 +15,16 @@ choice
 	bool "X-Powers PMIC variant"
 	depends on MFD_AXP20X
 	default MFD_AXP803 if PLATFORM_A64
+	default MFD_AXP805 if PLATFORM_H6
 
 config MFD_AXP803
 	bool "AXP803"
 	help
 		This PMIC is usually paired with the A64 SoC.
+
+config MFD_AXP805
+	bool "AXP805"
+	help
+		This PMIC is usually paired with the H6 SoC.
 
 endchoice
