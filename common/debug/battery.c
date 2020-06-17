@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <system.h>
 #include <util.h>
-#include <mfd/axp803.h>
+#include <mfd/axp20x.h>
 #include <platform/time.h>
 
 #define DELAY (30 * REFCLK_HZ)
@@ -20,7 +20,7 @@ static uint64_t last_tick;
 void
 debug_print_battery(void)
 {
-	const struct regmap *map = &axp803.map;
+	const struct regmap *map = &axp20x.map;
 	uint64_t now = counter_read();
 	int32_t  current, voltage;
 	uint8_t  hi, lo, val;

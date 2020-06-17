@@ -5,7 +5,7 @@
 
 #include <regmap.h>
 #include <util.h>
-#include <mfd/axp803.h>
+#include <mfd/axp20x.h>
 #include <regulator/axp803.h>
 
 #include "regulator.h"
@@ -236,6 +236,6 @@ const struct axp803_regulator axp803_regulator = {
 		.drv   = &axp803_regulator_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
-	.map  = &axp803.map,
+	.map  = &axp20x.map,
 	.info = axp803_regulators,
 };

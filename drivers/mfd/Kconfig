@@ -3,7 +3,11 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
-config MFD_AXP803
+config MFD_AXP20X
 	bool
 	default y
 	depends on RSB
+
+config MFD_AXP803
+	bool
+	default MFD_AXP20X

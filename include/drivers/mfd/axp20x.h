@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#ifndef DRIVERS_MFD_AXP803_H
-#define DRIVERS_MFD_AXP803_H
+#ifndef DRIVERS_MFD_AXP20X_H
+#define DRIVERS_MFD_AXP20X_H
 
 #include <regmap.h>
 
-extern const struct regmap_device axp803;
+extern const struct regmap_device axp20x;
 
-#endif /* DRIVERS_MFD_AXP803_H */
+#endif /* DRIVERS_MFD_AXP20X_H */

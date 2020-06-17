@@ -7,17 +7,17 @@
 #include <error.h>
 #include <regmap.h>
 #include <stdint.h>
-#include <mfd/axp803.h>
+#include <mfd/axp20x.h>
 #include <regmap/sunxi-rsb.h>
 
 #define IC_TYPE_REG       0x03
 #define IC_TYPE_MASK      0xcf
 #define IC_TYPE_VALUE     0x41
 
-#define AXP803_RSB_RTADDR 0x2d
+#define AXP20X_RSB_RTADDR 0x2d
 
 static int
-axp803_probe(const struct device *dev)
+axp20x_probe(const struct device *dev)
 {
 	const struct regmap_device *self = to_regmap_device(dev);
 	uint8_t reg;
@@ -40,19 +40,19 @@ err_release:
 	return err;
 }
 
-static const struct driver axp803_driver = {
-	.probe   = axp803_probe,
+static const struct driver axp20x_driver = {
+	.probe   = axp20x_probe,
 	.release = regmap_device_release,
 };
 
-const struct regmap_device axp803 = {
+const struct regmap_device axp20x = {
 	.dev = {
-		.name  = "axp803",
-		.drv   = &axp803_driver,
+		.name  = "axp20x",
+		.drv   = &axp20x_driver,
 		.state = DEVICE_STATE_INIT,
 	},
 	.map = {
 		.dev = &r_rsb.dev,
-		.id  = AXP803_RSB_RTADDR,
+		.id  = AXP20X_RSB_RTADDR,
 	},
 };

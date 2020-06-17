@@ -5,7 +5,7 @@
 
 #include <regmap.h>
 #include <util.h>
-#include <mfd/axp803.h>
+#include <mfd/axp20x.h>
 #include <pmic/axp803.h>
 
 #include "pmic.h"
@@ -96,5 +96,5 @@ const struct axp803_pmic axp803_pmic = {
 		.drv   = &axp803_pmic_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
-	.map = &axp803.map,
+	.map = &axp20x.map,
 };

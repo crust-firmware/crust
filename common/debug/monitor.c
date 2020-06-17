@@ -11,7 +11,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <system.h>
-#include <mfd/axp803.h>
+#include <mfd/axp20x.h>
 
 #define MAX_LENGTH 19 /* "m xxxxxxxx xxxxxxxx" */
 
@@ -80,7 +80,7 @@ run_command(const char *cmd)
 	case 'p':
 		/* PMIC: "p xx" or "p xx xx", bare hex. */
 		if (parse_hex(&cmd, &addr)) {
-			const struct regmap *map = &axp803.map;
+			const struct regmap *map = &axp20x.map;
 			uint32_t val32;
 			uint8_t  val8;
 

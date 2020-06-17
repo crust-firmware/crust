@@ -69,7 +69,7 @@ config DEBUG_MONITOR
 config DEBUG_MONITOR_PMIC
 	bool
 	depends on DEBUG_MONITOR
-	default MFD_AXP803
+	default MFD_AXP20X
 
 config DEBUG_PRINT_BATTERY
 	bool "Print battery consumption periodically while off/suspended"
