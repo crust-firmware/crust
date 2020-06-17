@@ -74,3 +74,37 @@ regmap_update_bits(const struct regmap *map, uint8_t reg, uint8_t mask,
 
 	return ops->write(map, reg, tmp ^ ((val ^ tmp) & mask));
 }
+
+int
+regmap_device_probe(const struct device *dev)
+{
+	const struct regmap_device *self = to_regmap_device(dev);
+
+	return regmap_get(&self->map);
+}
+
+void
+regmap_device_release(const struct device *dev)
+{
+	const struct regmap_device *self = to_regmap_device(dev);
+
+	regmap_put(&self->map);
+}
+
+static inline const struct device *
+regmap_to_device(const struct regmap *map)
+{
+	return &container_of(map, const struct regmap_device, map)->dev;
+}
+
+int
+regmap_user_probe(const struct regmap *map)
+{
+	return device_get(regmap_to_device(map));
+}
+
+void
+regmap_user_release(const struct regmap *map)
+{
+	device_put(regmap_to_device(map));
+}

@@ -7,12 +7,27 @@
 #define DRIVERS_REGMAP_H
 
 #include <device.h>
+#include <intrusive.h>
 #include <stdint.h>
 
 struct regmap {
 	const struct device *dev;
 	uint8_t              id;
 };
+
+struct regmap_device {
+	struct device dev;
+	struct regmap map;
+};
+
+/**
+ * Downcast a pointer to a regmap device.
+ */
+static inline const struct regmap_device *
+to_regmap_device(const struct device *dev)
+{
+	return container_of(dev, const struct regmap_device, dev);
+}
 
 /**
  * Get a reference to a regmap and its provider bus/device.
@@ -109,5 +124,37 @@ regmap_set_bits(const struct regmap *map, uint8_t reg, uint8_t set)
 {
 	return regmap_update_bits(map, reg, set, set);
 }
+
+/**
+ * Probe a device that owns a regmap.
+ *
+ * This function can be used to implement a device's .probe hook.
+ */
+int regmap_device_probe(const struct device *dev);
+
+/**
+ * Release a device that owns a regmap.
+ *
+ * This function can be used to implement a device's .release hook.
+ */
+void regmap_device_release(const struct device *dev);
+
+/**
+ * Probe a device that uses a regmap owned by another device.
+ *
+ * This function assumes that the regmap's owner is a regmap_device.
+ *
+ * This function can be used to implement a device's .probe hook.
+ */
+int regmap_user_probe(const struct regmap *map);
+
+/**
+ * Release a device that uses a regmap owned by another device.
+ *
+ * This function assumes that the regmap's owner is a regmap_device.
+ *
+ * This function can be used to implement a device's .release hook.
+ */
+void regmap_user_release(const struct regmap *map);
 
 #endif /* DRIVERS_REGMAP_H */
