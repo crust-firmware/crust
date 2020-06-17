@@ -5,9 +5,7 @@
 
 #include <device.h>
 #include <error.h>
-#include <intrusive.h>
 #include <regmap.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <mfd/axp803.h>
 #include <regmap/sunxi-rsb.h>
@@ -18,50 +16,36 @@
 
 #define AXP803_RSB_RTADDR 0x2d
 
-static inline const struct axp803 *
-to_axp803(const struct device *dev)
-{
-	return container_of(dev, const struct axp803, dev);
-}
-
 static int
 axp803_probe(const struct device *dev)
 {
-	const struct axp803 *self = to_axp803(dev);
+	const struct regmap_device *self = to_regmap_device(dev);
 	uint8_t reg;
 	int err;
 
-	if ((err = regmap_get(&self->map)))
+	if ((err = regmap_device_probe(dev)))
 		return err;
 	if ((err = regmap_read(&self->map, IC_TYPE_REG, &reg)))
-		goto err_put_regmap;
+		goto err_release;
 	if ((reg & IC_TYPE_MASK) != IC_TYPE_VALUE) {
 		err = ENODEV;
-		goto err_put_regmap;
+		goto err_release;
 	}
 
 	return SUCCESS;
 
-err_put_regmap:
-	regmap_put(&self->map);
+err_release:
+	regmap_device_release(dev);
 
 	return err;
 }
 
-static void
-axp803_release(const struct device *dev)
-{
-	const struct axp803 *self = to_axp803(dev);
-
-	regmap_put(&self->map);
-}
-
 static const struct driver axp803_driver = {
 	.probe   = axp803_probe,
-	.release = axp803_release,
+	.release = regmap_device_release,
 };
 
-const struct axp803 axp803 = {
+const struct regmap_device axp803 = {
 	.dev = {
 		.name  = "axp803",
 		.drv   = &axp803_driver,

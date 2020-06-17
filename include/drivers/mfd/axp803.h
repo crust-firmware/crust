@@ -9,12 +9,7 @@
 #include <device.h>
 #include <regmap.h>
 
-struct axp803 {
-	struct device dev;
-	struct regmap map;
-};
-
-extern const struct axp803 axp803;
+extern const struct regmap_device axp803;
 
 int axp803_subdevice_probe(const struct device *dev);
 

@@ -29,7 +29,7 @@ debug_print_battery(void)
 		return;
 
 	if (now - last_tick > DELAY) {
-		if (axp803_subdevice_probe(NULL))
+		if (regmap_user_probe(map))
 			return;
 
 		/* Battery present? */
@@ -55,7 +55,7 @@ debug_print_battery(void)
 		     (current * voltage + 500) / 1000, current, voltage);
 
 err_put_mfd:
-		axp803_subdevice_release(NULL);
+		regmap_user_release(map);
 		last_tick = now;
 	}
 }

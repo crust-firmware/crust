@@ -79,10 +79,13 @@ run_command(const char *cmd)
 #if CONFIG(DEBUG_MONITOR_PMIC)
 	case 'p':
 		/* PMIC: "p xx" or "p xx xx", bare hex. */
-		if (parse_hex(&cmd, &addr) && !axp803_subdevice_probe(NULL)) {
+		if (parse_hex(&cmd, &addr)) {
 			const struct regmap *map = &axp803.map;
 			uint32_t val32;
 			uint8_t  val8;
+
+			if (regmap_user_probe(map))
+				return;
 
 			if (parse_hex(&cmd, &val32))
 				regmap_write(map, addr, val32);
@@ -90,7 +93,7 @@ run_command(const char *cmd)
 			regmap_read(map, addr, &val8);
 			log("%02x: %02x\n", addr, val8);
 
-			axp803_subdevice_release(NULL);
+			regmap_user_release(map);
 		}
 		return;
 #endif
