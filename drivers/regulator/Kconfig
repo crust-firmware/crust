@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
-menu "Voltage and current regulators"
+menu "Regulators (voltage/current)"
 
 config REGULATOR_AXP803
 	bool "X-Powers AXP803 voltage regulators"
