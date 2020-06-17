@@ -51,14 +51,20 @@ struct driver {
  * The device will remain running as long as the reference is held (that is,
  * until calling device_put()).
  *
- * If an error occurs during device initialization, this function will return
- * NULL, and there is no need to call device_put().
+ * If this function returns an error, do not call device_put().
  *
  * @param dev A device.
  *
- * @return A reference to the device that was acquired.
+ * @return Zero on success; an error code on failure.
  */
-const struct device *device_get(const struct device *dev);
+int device_get(const struct device *dev);
+
+/**
+ * Get a reference to a device.
+ *
+ * @return A reference to the device that was acquired, or a NULL pointer.
+ */
+const struct device *device_get_or_null(const struct device *dev);
 
 /**
  * Release a reference to a device.

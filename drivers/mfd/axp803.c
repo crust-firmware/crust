@@ -76,7 +76,7 @@ const struct axp803 axp803 = {
 int
 axp803_subdevice_probe(const struct device *dev UNUSED)
 {
-	return device_get(&axp803.dev) ? SUCCESS : ENODEV;
+	return device_get(&axp803.dev);
 }
 
 void

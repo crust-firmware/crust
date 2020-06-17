@@ -29,8 +29,8 @@ gpio_get(const struct gpio_handle *gpio)
 	int err;
 
 	/* Ensure the controller's driver is loaded. */
-	if (!device_get(gpio->dev))
-		return ENODEV;
+	if ((err = device_get(gpio->dev)))
+		return err;
 
 	/* Set the GPIO pin mode, drive strength, and pull-up or pull-down. */
 	if ((err = gpio_ops_for(gpio)->init_pin(gpio)))

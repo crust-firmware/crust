@@ -29,8 +29,8 @@ regmap_get(const struct regmap *map)
 	int err;
 
 	/* Ensure the controller's driver is loaded. */
-	if (!device_get(map->dev))
-		return ENODEV;
+	if ((err = device_get(map->dev)))
+		return err;
 
 	if ((err = regmap_ops_for(map)->prepare(map)))
 		goto err_put_device;

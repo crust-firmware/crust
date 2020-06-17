@@ -78,8 +78,8 @@ clock_get(const struct clock_handle *clock)
 	/* Perform additional setup if this is the first reference. */
 	if (!state->refcount) {
 		/* Ensure the controller's driver is loaded. */
-		if (!device_get(clock->dev))
-			return ENODEV;
+		if ((err = device_get(clock->dev)))
+			return err;
 
 		/* Ensure the clock's parent has an active reference. */
 		if ((parent = ops->get_parent(clock)) &&

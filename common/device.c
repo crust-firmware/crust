@@ -8,26 +8,32 @@
 #include <error.h>
 #include <stddef.h>
 
-const struct device *
+int
 device_get(const struct device *dev)
 {
 	int err;
 
 	if (!dev)
-		return NULL;
+		return ENODEV;
 
 	if (!dev->state->refcount) {
 		debug("%s: Probing", dev->name);
 		if ((err = dev->drv->probe(dev))) {
 			error("%s: Probe failed: %d", dev->name, err);
-			return NULL;
+			return err;
 		}
 	}
 
 	/* Increment the refcount only after successful initialization. */
 	++dev->state->refcount;
 
-	return dev;
+	return SUCCESS;
+}
+
+const struct device *
+device_get_or_null(const struct device *dev)
+{
+	return device_get(dev) == SUCCESS ? dev : NULL;
 }
 
 void

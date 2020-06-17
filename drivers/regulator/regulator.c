@@ -30,8 +30,8 @@ regulator_bulk_set(const struct regulator_list *list, bool enable)
 	const struct regulator_driver_ops *ops = regulator_ops_for(list->dev);
 	int err, ret = SUCCESS;
 
-	if (!device_get(list->dev))
-		return ENODEV;
+	if ((err = device_get(list->dev)))
+		return err;
 
 	for (uint8_t i = 0; i < list->nr_ids; ++i) {
 		err = ops->set_state(list->dev, list->ids[i], enable);

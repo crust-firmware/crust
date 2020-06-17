@@ -131,7 +131,7 @@ scpi_poll_one_client(uint8_t client)
 void
 scpi_init(void)
 {
-	mailbox = device_get(&msgbox.dev);
+	mailbox = device_get_or_null(&msgbox.dev);
 }
 
 void

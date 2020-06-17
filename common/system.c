@@ -69,9 +69,9 @@ system_state_machine(void)
 		system_state = SYSTEM_ACTIVE;
 
 		/* Initialize runtime devices. */
-		if ((watchdog = device_get(&r_twd.dev)))
+		if ((watchdog = device_get_or_null(&r_twd.dev)))
 			watchdog_enable(watchdog, WATCHDOG_TIMEOUT);
-		gpio = device_get(&r_pio.dev);
+		gpio = device_get_or_null(&r_pio.dev);
 
 		/* Initialize runtime services. */
 		css_init();
@@ -141,10 +141,10 @@ system_state_machine(void)
 			debug("Resuming...");
 
 			/* Turn on previously-disabled clocks. */
-			if ((watchdog = device_get(&r_twd.dev)))
+			if ((watchdog = device_get_or_null(&r_twd.dev)))
 				watchdog_enable(watchdog, WATCHDOG_TIMEOUT);
 			if (!gpio)
-				gpio = device_get(&r_pio.dev);
+				gpio = device_get_or_null(&r_pio.dev);
 
 			/* Turn on previously-disabled power domains. */
 
@@ -227,7 +227,9 @@ system_state_machine(void)
 			udelay(5000);
 
 			/* Attempt to reset the SoC using the watchdog. */
-			if (watchdog || (watchdog = device_get(&r_twd.dev)))
+			if (!watchdog)
+				watchdog = device_get_or_null(&r_twd.dev);
+			if (watchdog)
 				watchdog_enable(watchdog, 1);
 
 			/* Continue making reset attempts each iteration. */
