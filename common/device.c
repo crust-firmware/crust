@@ -39,7 +39,7 @@ device_get_or_null(const struct device *dev)
 void
 device_put(const struct device *dev)
 {
-	if (--dev->state->refcount)
+	if (!dev || --dev->state->refcount)
 		return;
 
 	debug("%s: Releasing", dev->name);

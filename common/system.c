@@ -118,14 +118,12 @@ system_state_machine(void)
 			regulator_bulk_disable(&inactive_list);
 
 			/* Turn off all unnecessary clocks. */
-			if (gpio && !irq_is_enabled(IRQ_R_PIO_PL)) {
+			if (!irq_is_enabled(IRQ_R_PIO_PL)) {
 				device_put(gpio);
 				gpio = NULL;
 			}
-			if (watchdog) {
-				device_put(watchdog);
-				watchdog = NULL;
-			}
+			device_put(watchdog);
+			watchdog = NULL;
 
 			debug("Suspend complete!");
 
@@ -192,14 +190,12 @@ system_state_machine(void)
 			regulator_bulk_disable(&off_list);
 
 			/* Turn off all possible clocks. */
-			if (gpio && !irq_is_enabled(IRQ_R_PIO_PL)) {
+			if (!irq_is_enabled(IRQ_R_PIO_PL)) {
 				device_put(gpio);
 				gpio = NULL;
 			}
-			if (watchdog) {
-				device_put(watchdog);
-				watchdog = NULL;
-			}
+			device_put(watchdog);
+			watchdog = NULL;
 
 			/* The system is now off. */
 			system_state = SYSTEM_OFF;

@@ -149,8 +149,6 @@ void
 scpi_exit(void)
 {
 	/* Drop the reference so the clock can be turned off in suspend. */
-	if (mailbox) {
-		device_put(mailbox);
-		mailbox = NULL;
-	}
+	device_put(mailbox);
+	mailbox = NULL;
 }
