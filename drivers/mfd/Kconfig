@@ -5,7 +5,7 @@
 
 config MFD_AXP20X
 	bool "Multi-function driver for X-Powers PMICs"
-	depends on RSB
+	depends on I2C || RSB
 	help
 		This driver enables both the power sequencing and
 		voltage regulator functionality of an AXP2xx or AXP8xx

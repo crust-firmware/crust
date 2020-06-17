@@ -8,13 +8,15 @@
 #include <regmap.h>
 #include <stdint.h>
 #include <mfd/axp20x.h>
+#include <regmap/sun6i-i2c.h>
 #include <regmap/sunxi-rsb.h>
 
-#define IC_TYPE_REG       0x03
-#define IC_TYPE_MASK      0xcf
-#define IC_TYPE_VALUE     0x41
+#define IC_TYPE_REG   0x03
+#define IC_TYPE_MASK  0xcf
+#define IC_TYPE_VALUE 0x41
 
-#define AXP20X_RSB_RTADDR 0x2d
+#define I2C_ADDRESS   0x34
+#define RSB_RTADDR    0x2d
 
 static int
 axp20x_probe(const struct device *dev)
@@ -52,7 +54,7 @@ const struct regmap_device axp20x = {
 		.state = DEVICE_STATE_INIT,
 	},
 	.map = {
-		.dev = &r_rsb.dev,
-		.id  = AXP20X_RSB_RTADDR,
+		.dev = CONFIG(RSB) ? &r_rsb.dev : &r_i2c.dev,
+		.id  = CONFIG(RSB) ? RSB_RTADDR : I2C_ADDRESS,
 	},
 };
