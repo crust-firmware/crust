@@ -56,15 +56,3 @@ const struct regmap_device axp803 = {
 		.id  = AXP803_RSB_RTADDR,
 	},
 };
-
-int
-axp803_subdevice_probe(const struct device *dev UNUSED)
-{
-	return device_get(&axp803.dev);
-}
-
-void
-axp803_subdevice_release(const struct device *dev UNUSED)
-{
-	device_put(&axp803.dev);
-}
