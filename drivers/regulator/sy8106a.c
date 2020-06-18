@@ -4,7 +4,6 @@
  */
 
 #include <error.h>
-#include <intrusive.h>
 #include <regmap.h>
 #include <regulator.h>
 #include <util.h>
@@ -17,16 +16,10 @@
 #define VOUT_COM_REG   0x02
 #define SYS_STATUS_REG 0x06
 
-static inline const struct sy8106a *
-to_sy8106a(const struct device *dev)
-{
-	return container_of(dev, const struct sy8106a, dev);
-}
-
 static int
 sy8106a_get_state(const struct device *dev, uint8_t id UNUSED)
 {
-	const struct sy8106a *self = to_sy8106a(dev);
+	const struct regmap_device *self = to_regmap_device(dev);
 	uint8_t val;
 	int err;
 
@@ -39,7 +32,7 @@ sy8106a_get_state(const struct device *dev, uint8_t id UNUSED)
 static int
 sy8106a_set_state(const struct device *dev, uint8_t id UNUSED, bool enabled)
 {
-	const struct sy8106a *self = to_sy8106a(dev);
+	const struct regmap_device *self = to_regmap_device(dev);
 	int err;
 
 	if ((err = regmap_update_bits(&self->map, VOUT_COM_REG,
@@ -49,30 +42,10 @@ sy8106a_set_state(const struct device *dev, uint8_t id UNUSED, bool enabled)
 	return SUCCESS;
 }
 
-static int
-sy8106a_probe(const struct device *dev)
-{
-	const struct sy8106a *self = to_sy8106a(dev);
-	int err;
-
-	if ((err = regmap_get(&self->map)))
-		return err;
-
-	return SUCCESS;
-}
-
-static void
-sy8106a_release(const struct device *dev)
-{
-	const struct sy8106a *self = to_sy8106a(dev);
-
-	regmap_put(&self->map);
-}
-
 static const struct regulator_driver sy8106a_driver = {
 	.drv = {
-		.probe   = sy8106a_probe,
-		.release = sy8106a_release,
+		.probe   = regmap_device_probe,
+		.release = regmap_device_release,
 	},
 	.ops = {
 		.get_state = sy8106a_get_state,
@@ -80,7 +53,7 @@ static const struct regulator_driver sy8106a_driver = {
 	},
 };
 
-const struct sy8106a sy8106a = {
+const struct regmap_device sy8106a = {
 	.dev = {
 		.name  = "sy8106a",
 		.drv   = &sy8106a_driver.drv,

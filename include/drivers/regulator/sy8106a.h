@@ -16,11 +16,6 @@ enum {
 	SY8106A_REGL_COUNT,
 };
 
-struct sy8106a {
-	struct device dev;
-	struct regmap map;
-};
-
-extern const struct sy8106a sy8106a;
+extern const struct regmap_device sy8106a;
 
 #endif /* DRIVERS_REGULATOR_SY8106A_H */
