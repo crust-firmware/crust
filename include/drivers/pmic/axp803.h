@@ -8,7 +8,13 @@
 
 #include <device.h>
 #include <pmic.h>
+#include <regmap.h>
 
-extern const struct device axp803_pmic;
+struct axp803_pmic {
+	struct device        dev;
+	const struct regmap *map;
+};
+
+extern const struct axp803_pmic axp803_pmic;
 
 #endif /* DRIVERS_PMIC_AXP803_H */

@@ -28,7 +28,7 @@ pmic_get(void)
 	const struct device *pmic = NULL;
 
 	if (CONFIG(PMIC_AXP803))
-		pmic = device_get_or_null(&axp803_pmic);
+		pmic = device_get_or_null(&axp803_pmic.dev);
 
 	return pmic;
 }
