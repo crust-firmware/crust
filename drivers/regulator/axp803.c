@@ -4,7 +4,6 @@
  */
 
 #include <regmap.h>
-#include <regulator.h>
 #include <util.h>
 #include <mfd/axp803.h>
 #include <regulator/axp803.h>
@@ -155,16 +154,22 @@ static const struct axp803_regulator_info axp803_regulators[] = {
 	},
 };
 
-static int
-axp803_regulator_get_state(const struct device *dev UNUSED, uint8_t id)
+static inline const struct axp803_regulator *
+to_axp803_regulator(const struct device *dev)
 {
-	const struct regmap *map = &axp803.map;
+	return container_of(dev, const struct axp803_regulator, dev);
+}
+
+static int
+axp803_regulator_get_state(const struct device *dev, uint8_t id)
+{
+	const struct axp803_regulator *self = to_axp803_regulator(dev);
 	uint8_t reg  = axp803_regulators[id].enable_register;
 	uint8_t mask = axp803_regulators[id].enable_mask;
 	uint8_t val;
 	int err;
 
-	if ((err = regmap_read(map, reg, &val)))
+	if ((err = regmap_read(self->map, reg, &val)))
 		return err;
 
 	/*
@@ -181,7 +186,7 @@ static int
 axp803_regulator_set_state(const struct device *dev UNUSED, uint8_t id,
                            bool enabled)
 {
-	const struct regmap *map = &axp803.map;
+	const struct axp803_regulator *self = to_axp803_regulator(dev);
 	uint8_t reg  = axp803_regulators[id].enable_register;
 	uint8_t mask = axp803_regulators[id].enable_mask;
 	uint8_t val;
@@ -195,13 +200,29 @@ axp803_regulator_set_state(const struct device *dev UNUSED, uint8_t id,
 	else
 		val = enabled ? mask : 0;
 
-	return regmap_update_bits(map, reg, mask, val);
+	return regmap_update_bits(self->map, reg, mask, val);
+}
+
+static int
+axp803_regulator_probe(const struct device *dev)
+{
+	const struct axp803_regulator *self = to_axp803_regulator(dev);
+
+	return regmap_user_probe(self->map);
+}
+
+static void
+axp803_regulator_release(const struct device *dev)
+{
+	const struct axp803_regulator *self = to_axp803_regulator(dev);
+
+	regmap_user_release(self->map);
 }
 
 static const struct regulator_driver axp803_regulator_driver = {
 	.drv = {
-		.probe   = axp803_subdevice_probe,
-		.release = axp803_subdevice_release,
+		.probe   = axp803_regulator_probe,
+		.release = axp803_regulator_release,
 	},
 	.ops = {
 		.get_state = axp803_regulator_get_state,
@@ -209,8 +230,11 @@ static const struct regulator_driver axp803_regulator_driver = {
 	},
 };
 
-const struct device axp803_regulator = {
-	.name  = "axp803-regulator",
-	.drv   = &axp803_regulator_driver.drv,
-	.state = DEVICE_STATE_INIT,
+const struct axp803_regulator axp803_regulator = {
+	.dev = {
+		.name  = "axp803-regulator",
+		.drv   = &axp803_regulator_driver.drv,
+		.state = DEVICE_STATE_INIT,
+	},
+	.map = &axp803.map,
 };

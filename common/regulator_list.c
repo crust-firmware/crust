@@ -18,7 +18,7 @@ static const uint8_t inactive_ids[] = {
 };
 
 const struct regulator_list inactive_list = {
-	.dev    = &axp803_regulator,
+	.dev    = &axp803_regulator.dev,
 	.ids    = inactive_ids,
 	.nr_ids = ARRAY_SIZE(inactive_ids),
 };
