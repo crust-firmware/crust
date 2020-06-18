@@ -164,8 +164,8 @@ static int
 axp803_regulator_get_state(const struct device *dev, uint8_t id)
 {
 	const struct axp803_regulator *self = to_axp803_regulator(dev);
-	uint8_t reg  = axp803_regulators[id].enable_register;
-	uint8_t mask = axp803_regulators[id].enable_mask;
+	uint8_t reg  = self->info[id].enable_register;
+	uint8_t mask = self->info[id].enable_mask;
 	uint8_t val;
 	int err;
 
@@ -187,8 +187,8 @@ axp803_regulator_set_state(const struct device *dev UNUSED, uint8_t id,
                            bool enabled)
 {
 	const struct axp803_regulator *self = to_axp803_regulator(dev);
-	uint8_t reg  = axp803_regulators[id].enable_register;
-	uint8_t mask = axp803_regulators[id].enable_mask;
+	uint8_t reg  = self->info[id].enable_register;
+	uint8_t mask = self->info[id].enable_mask;
 	uint8_t val;
 
 	/*
@@ -236,5 +236,6 @@ const struct axp803_regulator axp803_regulator = {
 		.drv   = &axp803_regulator_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
-	.map = &axp803.map,
+	.map  = &axp803.map,
+	.info = axp803_regulators,
 };

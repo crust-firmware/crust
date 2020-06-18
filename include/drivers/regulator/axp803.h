@@ -36,8 +36,9 @@ enum {
 };
 
 struct axp803_regulator {
-	struct device        dev;
-	const struct regmap *map;
+	struct device                       dev;
+	const struct regmap                *map;
+	const struct axp803_regulator_info *info;
 };
 
 extern const struct axp803_regulator axp803_regulator;
