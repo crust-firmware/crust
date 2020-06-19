@@ -207,7 +207,7 @@ $(TGT)/%.o: $(SRC)/%.S
 
 $(TGT)/%.ld.o: $(SRC)/%.ld.S
 	$(M) CPP $@
-	$(Q) $(CC) $(CPPFLAGS) -E -MMD -P -o $@ $<
+	$(Q) $(CC) $(CPPFLAGS) -E -MMD -MT $@ -P -o $@ $<
 
 $(SRC)/Makefile:;
 $(SRC)/%.h:;
