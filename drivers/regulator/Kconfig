@@ -9,6 +9,10 @@ config REGULATOR_AXP803
 	bool
 	default MFD_AXP803
 
+config REGULATOR_AXP805
+	bool
+	default MFD_AXP805
+
 config REGULATOR_SY8106A
 	bool "Silergy SY8106A voltage regulator"
 	depends on I2C

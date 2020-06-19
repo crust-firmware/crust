@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <util.h>
 #include <regulator/axp803.h>
+#include <regulator/axp805.h>
 #include <regulator/sy8106a.h>
 
 #if CONFIG(REGULATOR_AXP803)
