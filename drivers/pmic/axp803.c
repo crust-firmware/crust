@@ -8,49 +8,14 @@
 #include <mfd/axp20x.h>
 #include <pmic/axp803.h>
 
-#include "pmic.h"
+#include "axp20x.h"
 
-#define WAKEUP_CTRL_REG   0x31
-#define POWER_DISABLE_REG 0x32
-#define PIN_FUNCTION_REG  0x8f
-
-static inline const struct axp803_pmic *
-to_axp803_pmic(const struct device *dev)
-{
-	return container_of(dev, const struct axp803_pmic, dev);
-}
-
-static int
-axp803_pmic_reset(const struct device *dev)
-{
-	const struct axp803_pmic *self = to_axp803_pmic(dev);
-
-	/* Trigger soft power restart. */
-	return regmap_set_bits(self->map, WAKEUP_CTRL_REG, BIT(6));
-}
-
-static int
-axp803_pmic_resume(const struct device *dev)
-{
-	const struct axp803_pmic *self = to_axp803_pmic(dev);
-
-	/* Trigger soft power resume. */
-	return regmap_set_bits(self->map, WAKEUP_CTRL_REG, BIT(5));
-}
-
-static int
-axp803_pmic_shutdown(const struct device *dev)
-{
-	const struct axp803_pmic *self = to_axp803_pmic(dev);
-
-	/* Trigger soft power off. */
-	return regmap_set_bits(self->map, POWER_DISABLE_REG, BIT(7));
-}
+#define PIN_FUNCTION_REG 0x8f
 
 static int
 axp803_pmic_suspend(const struct device *dev)
 {
-	const struct axp803_pmic *self = to_axp803_pmic(dev);
+	const struct axp20x_pmic *self = to_axp20x_pmic(dev);
 	int err;
 
 	/* Remember previous voltages when waking up from suspend. */
@@ -61,36 +26,20 @@ axp803_pmic_suspend(const struct device *dev)
 	return regmap_set_bits(self->map, WAKEUP_CTRL_REG, BIT(4) | BIT(3));
 }
 
-static int
-axp803_pmic_probe(const struct device *dev)
-{
-	const struct axp803_pmic *self = to_axp803_pmic(dev);
-
-	return regmap_user_probe(self->map);
-}
-
-static void
-axp803_pmic_release(const struct device *dev)
-{
-	const struct axp803_pmic *self = to_axp803_pmic(dev);
-
-	regmap_user_release(self->map);
-}
-
 static const struct pmic_driver axp803_pmic_driver = {
 	.drv = {
-		.probe   = axp803_pmic_probe,
-		.release = axp803_pmic_release,
+		.probe   = axp20x_pmic_probe,
+		.release = axp20x_pmic_release,
 	},
 	.ops = {
-		.reset    = axp803_pmic_reset,
-		.resume   = axp803_pmic_resume,
-		.shutdown = axp803_pmic_shutdown,
+		.reset    = axp20x_pmic_reset,
+		.resume   = axp20x_pmic_resume,
+		.shutdown = axp20x_pmic_shutdown,
 		.suspend  = axp803_pmic_suspend,
 	},
 };
 
-const struct axp803_pmic axp803_pmic = {
+const struct axp20x_pmic axp803_pmic = {
 	.dev = {
 		.name  = "axp803-pmic",
 		.drv   = &axp803_pmic_driver.drv,

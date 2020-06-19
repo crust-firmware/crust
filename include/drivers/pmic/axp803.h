@@ -6,15 +6,8 @@
 #ifndef DRIVERS_PMIC_AXP803_H
 #define DRIVERS_PMIC_AXP803_H
 
-#include <device.h>
-#include <pmic.h>
-#include <regmap.h>
+#include <pmic/axp20x.h>
 
-struct axp803_pmic {
-	struct device        dev;
-	const struct regmap *map;
-};
-
-extern const struct axp803_pmic axp803_pmic;
+extern const struct axp20x_pmic axp803_pmic;
 
 #endif /* DRIVERS_PMIC_AXP803_H */
