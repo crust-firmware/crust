@@ -45,27 +45,34 @@ struct scpi_cmd {
 	((((x) & 0xff) << 24) | (((y) & 0xff) << 16) | ((z) & 0xffff))
 #define SCPI_PAYLOAD_LIMITS(x, y)   (((x) & 0x01ff) << 16 | ((y) & 0x01ff))
 #define SCPI_PROTOCOL_VERSION(x, y) (((x) & 0xffff) << 16 | ((y) & 0xffff))
-
-static const uint32_t scpi_cmd_get_scp_cap_tx_payload[] = {
+static int
+scpi_cmd_get_scp_cap_handler(uint32_t *rx_payload UNUSED,
+                             uint32_t *tx_payload, uint16_t *tx_size)
+{
 	/* SCPI protocol version. */
-	SCPI_PROTOCOL_VERSION(1, 2),
+	tx_payload[0] = SCPI_PROTOCOL_VERSION(1, 2);
 	/* Payload size limits. */
-	SCPI_PAYLOAD_LIMITS(SCPI_PAYLOAD_SIZE, SCPI_PAYLOAD_SIZE),
+	tx_payload[1] = SCPI_PAYLOAD_LIMITS(SCPI_PAYLOAD_SIZE,
+	                                    SCPI_PAYLOAD_SIZE);
 	/* Firmware version. */
-	SCP_FIRMWARE_VERSION(0, 1, 9000),
+	tx_payload[2] = SCP_FIRMWARE_VERSION(0, 1, 9000);
 	/* Commands enabled 0. */
-	BIT(SCPI_CMD_SCP_READY) |
-	BIT(SCPI_CMD_GET_SCP_CAP) |
-	BIT(SCPI_CMD_SET_CSS_PWR) |
-	BIT(SCPI_CMD_GET_CSS_PWR) |
-	BIT(SCPI_CMD_SET_SYS_PWR),
+	tx_payload[3] = BIT(SCPI_CMD_SCP_READY) |
+	                BIT(SCPI_CMD_GET_SCP_CAP) |
+	                BIT(SCPI_CMD_SET_CSS_PWR) |
+	                BIT(SCPI_CMD_GET_CSS_PWR) |
+	                BIT(SCPI_CMD_SET_SYS_PWR);
 	/* Commands enabled 1. */
-	0,
+	tx_payload[4] = 0;
 	/* Commands enabled 2. */
-	0,
+	tx_payload[5] = 0;
 	/* Commands enabled 3. */
-	0,
-};
+	tx_payload[6] = 0;
+
+	*tx_size = 7 * sizeof(*tx_payload);
+
+	return SCPI_OK;
+}
 
 /*
  * Handler/payload data for SCPI_CMD_SET_CSS_PWR: Set CSS power state.
@@ -169,8 +176,7 @@ static const struct scpi_cmd scpi_cmds[] = {
 		.flags = FLAG_EMPTY_PAYLOAD | FLAG_NO_REPLY | FLAG_SECURE_ONLY,
 	},
 	[SCPI_CMD_GET_SCP_CAP] = {
-		.tx_payload = scpi_cmd_get_scp_cap_tx_payload,
-		.tx_size    = sizeof(scpi_cmd_get_scp_cap_tx_payload),
+		.handler = scpi_cmd_get_scp_cap_handler,
 	},
 	[SCPI_CMD_SET_CSS_PWR] = {
 		.handler = scpi_cmd_set_css_pwr_handler,
