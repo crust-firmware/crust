@@ -28,8 +28,10 @@
 #define DEV_USBOTG      0x01c19000
 #define DEV_USB0        0x01c1a000
 #define DEV_USB1        0x01c1b000
+#if CONFIG(SOC_H5)
 #define DEV_USB2        0x01c1c000
 #define DEV_USB3        0x01c1d000
+#endif
 #define DEV_TZASC       0x01c1e000
 #define DEV_CCU         0x01c20000
 #define DEV_PIO         0x01c20800
@@ -47,12 +49,20 @@
 #define DEV_UART1       0x01c28400
 #define DEV_UART2       0x01c28800
 #define DEV_UART3       0x01c28c00
+#if CONFIG(SOC_A64)
+#define DEV_UART4       0x01c29000
+#endif
 #define DEV_I2C0        0x01c2ac00
 #define DEV_I2C1        0x01c2b000
 #define DEV_I2C2        0x01c2b400
 #define DEV_SCR0        0x01c2c400
+#if CONFIG(SOC_H5)
 #define DEV_SCR1        0x01c2c800
+#endif
 #define DEV_EMAC        0x01c30000
+#if CONFIG(SOC_A64)
+#define DEV_GPU         0x01c40000
+#endif
 #define DEV_HSTIMER     0x01c60000
 #define DEV_DRAMCOM     0x01c62000
 #define DEV_DRAMCTL     0x01c63000
@@ -62,11 +72,18 @@
 #define DEV_SCU         0x01c80000
 #define DEV_GICD        0x01c81000
 #define DEV_GICC        0x01c82000
+#if CONFIG(SOC_A64)
+#define DEV_MIPI_DSI    0x01ca0000
+#define DEV_MIPI_DPHY   0x01ca1000
+#endif
 #define DEV_CSI         0x01cb0000
 #define DEV_DEINTERLACE 0x01e00000
+#if CONFIG(SOC_H5)
 #define DEV_TVE         0x01e40000
 #define DEV_GPU         0x01e80000
+#endif
 #define DEV_HDMI        0x01ee0000
+#define DEV_HDMI_PHY    0x01ef0000
 #define DEV_RTC         0x01f00000
 #define DEV_R_TIMER     0x01f00800
 #define DEV_R_INTC      0x01f00c00
