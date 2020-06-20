@@ -5,7 +5,7 @@
 
 #include <ctype.h>
 #include <debug.h>
-#include <math.h>
+#include <division.h>
 #include <serial.h>
 #include <stdarg.h>
 #include <stdbool.h>
