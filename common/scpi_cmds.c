@@ -16,12 +16,10 @@
 #include <util.h>
 
 enum {
-	/** Replies to this command do not contain any payload data. */
-	FLAG_EMPTY_PAYLOAD = BIT(0),
 	/** Do not send a reply to this command. */
-	FLAG_NO_REPLY      = BIT(1),
+	FLAG_NO_REPLY    = BIT(0),
 	/** Reject this command from the non-secure message box channel. */
-	FLAG_SECURE_ONLY   = BIT(2),
+	FLAG_SECURE_ONLY = BIT(1),
 };
 
 struct scpi_cmd {
@@ -229,9 +227,6 @@ scpi_handle_cmd(uint8_t client, struct scpi_mem *mem)
 	} else if (rx_msg->size != cmd->rx_size) {
 		/* Check that the request payload matches the expected size. */
 		tx_msg->status = SCPI_E_SIZE;
-	} else if (cmd->flags & FLAG_EMPTY_PAYLOAD) {
-		/* Some reply messages do not need an additional payload. */
-		tx_msg->status = SCPI_OK;
 	} else if (cmd->handler) {
 		/* Run the handler for this command to make a response. */
 		tx_msg->status = cmd->handler(rx_msg->payload, tx_msg->payload,
