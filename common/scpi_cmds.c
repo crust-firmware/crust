@@ -35,6 +35,17 @@ struct scpi_cmd {
 };
 
 /*
+ * Handler for SCPI_CMD_SCP_READY: Response to SCP ready.
+ */
+static int
+scpi_cmd_scp_ready_handler(uint32_t *rx_payload UNUSED,
+                           uint32_t *tx_payload UNUSED,
+                           uint16_t *tx_size UNUSED)
+{
+	return SCPI_OK;
+}
+
+/*
  * Handler for SCPI_CMD_GET_SCP_CAP: Get SCP capability.
  */
 #define SCP_FIRMWARE_VERSION(x, y, z) \
@@ -169,7 +180,8 @@ scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
  */
 static const struct scpi_cmd scpi_cmds[] = {
 	[SCPI_CMD_SCP_READY] = {
-		.flags = FLAG_EMPTY_PAYLOAD | FLAG_NO_REPLY | FLAG_SECURE_ONLY,
+		.handler = scpi_cmd_scp_ready_handler,
+		.flags   = FLAG_NO_REPLY | FLAG_SECURE_ONLY,
 	},
 	[SCPI_CMD_GET_SCP_CAP] = {
 		.handler = scpi_cmd_get_scp_cap_handler,
