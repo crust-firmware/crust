@@ -26,20 +26,16 @@ enum {
 
 struct scpi_cmd {
 	/** Handler that can process a message and create a dynamic reply. */
-	int             (*handler)(uint32_t *rx_payload, uint32_t *tx_payload,
-	                           uint16_t *tx_size);
-	/** Fixed reply payload. */
-	const uint32_t *tx_payload;
+	int     (*handler)(uint32_t *rx_payload, uint32_t *tx_payload,
+	                   uint16_t *tx_size);
 	/** Expected size of received payload. */
-	uint8_t         rx_size;
-	/** Size of fixed reply payload, if present. */
-	uint8_t         tx_size;
+	uint8_t rx_size;
 	/** Any combination of flags from above, if applicable. */
-	uint8_t         flags;
+	uint8_t flags;
 };
 
 /*
- * Handler/payload data for SCPI_CMD_GET_SCP_CAP: Get SCP capability.
+ * Handler for SCPI_CMD_GET_SCP_CAP: Get SCP capability.
  */
 #define SCP_FIRMWARE_VERSION(x, y, z) \
 	((((x) & 0xff) << 24) | (((y) & 0xff) << 16) | ((z) & 0xffff))
@@ -75,7 +71,7 @@ scpi_cmd_get_scp_cap_handler(uint32_t *rx_payload UNUSED,
 }
 
 /*
- * Handler/payload data for SCPI_CMD_SET_CSS_PWR: Set CSS power state.
+ * Handler for SCPI_CMD_SET_CSS_PWR: Set CSS power state.
  *
  * This sets the power state of a single core, its parent cluster, and the CSS.
  *
@@ -118,7 +114,7 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
 }
 
 /*
- * Handler/payload data for SCPI_CMD_GET_CSS_PWR: Get CSS power state.
+ * Handler for SCPI_CMD_GET_CSS_PWR: Get CSS power state.
  *
  * This gets the power states of all clusters and all cores they contain.
  */
@@ -147,7 +143,7 @@ scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload UNUSED,
 }
 
 /*
- * Handler/payload data for SCPI_CMD_SET_SYS_PWR: Set system power state.
+ * Handler for SCPI_CMD_SET_SYS_PWR: Set system power state.
  */
 static int
 scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
@@ -224,11 +220,6 @@ scpi_handle_cmd(uint8_t client, struct scpi_mem *mem)
 	} else if (cmd->flags & FLAG_EMPTY_PAYLOAD) {
 		/* Some reply messages do not need an additional payload. */
 		tx_msg->status = SCPI_OK;
-	} else if (cmd->tx_payload != NULL) {
-		/* Use a fixed reply payload, if present. */
-		tx_msg->size   = cmd->tx_size;
-		tx_msg->status = SCPI_OK;
-		memcpy(&tx_msg->payload, cmd->tx_payload, cmd->tx_size);
 	} else if (cmd->handler) {
 		/* Run the handler for this command to make a response. */
 		tx_msg->status = cmd->handler(rx_msg->payload, tx_msg->payload,
