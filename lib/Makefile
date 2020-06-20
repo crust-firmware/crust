@@ -4,4 +4,3 @@
 #
 
 lib-y += bitfield.o
-lib-y += string.o

@@ -10,7 +10,6 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 
 #define BYTES_PER_ROW  16
 #define BYTES_PER_WORD sizeof(uint32_t)
