@@ -57,5 +57,6 @@ savedefconfig: $(obj)/conf
 
 $(obj)/lexer.lex.c: | $(obj)/.
 $(obj)/lexer.lex.o: $(obj)/parser.tab.c
+$(obj)/parser.tab.c: | $(obj)/.
 
 .PHONY: $(simple-targets) config defconfig %_defconfig nconfig savedefconfig
