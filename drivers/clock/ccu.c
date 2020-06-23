@@ -36,12 +36,13 @@ ccu_get_state(const struct clock_handle *clock, int *state)
 {
 	const struct ccu *self      = to_ccu(clock->dev);
 	const struct ccu_clock *clk = &self->clocks[clock->id];
+	uintptr_t regs = self->regs;
 
 	/* Check the reset line, if present. */
-	if (clk->reset && !bitmap_get(self->regs, clk->reset))
+	if (clk->reset && !bitmap_get(regs, clk->reset))
 		*state = CLOCK_STATE_DISABLED;
 	/* Check the clock gate, if present. */
-	else if (clk->gate && !bitmap_get(self->regs, clk->gate))
+	else if (clk->gate && !bitmap_get(regs, clk->gate))
 		*state = CLOCK_STATE_GATED;
 	/* Otherwise, the clock is enabled. */
 	else
@@ -55,24 +56,25 @@ ccu_set_state(const struct clock_handle *clock, int state)
 {
 	const struct ccu *self      = to_ccu(clock->dev);
 	const struct ccu_clock *clk = &self->clocks[clock->id];
-	bool enable = state > CLOCK_STATE_DISABLED;
-	bool ungate = state > CLOCK_STATE_GATED;
+	bool enable    = state > CLOCK_STATE_DISABLED;
+	bool ungate    = state > CLOCK_STATE_GATED;
+	uintptr_t regs = self->regs;
 
 	/* Ungate the clock before taking the device out of reset. */
 	if (clk->gate && ungate)
-		bitmap_set(self->regs, clk->gate);
+		bitmap_set(regs, clk->gate);
 	/* Assert or deassert the reset line while the clock is running. */
 	if (clk->reset)
-		(enable ? bitmap_set : bitmap_clear)(self->regs, clk->reset);
+		(enable ? bitmap_set : bitmap_clear)(regs, clk->reset);
 	/* Gate the clock after putting the device in reset. */
 	if (clk->gate && !ungate)
-		bitmap_clear(self->regs, clk->gate);
+		bitmap_clear(regs, clk->gate);
 	/* Apply the changes by setting the update bit, if applicable. */
 	if (clk->update)
-		mmio_set_32(self->regs + clk->reg, BIT(clk->update));
+		mmio_set_32(regs + clk->reg, BIT(clk->update));
 	/* Wait for the lock bit to be set, if applicable. */
 	if (clk->lock && ungate)
-		mmio_poll_32(self->regs + clk->reg, BIT(clk->lock));
+		mmio_poll_32(regs + clk->reg, BIT(clk->lock));
 
 	return SUCCESS;
 }
