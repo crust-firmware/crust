@@ -6,17 +6,9 @@
 #ifndef DRIVERS_REGMAP_SUNXI_RSB_H
 #define DRIVERS_REGMAP_SUNXI_RSB_H
 
-#include <clock.h>
-#include <gpio.h>
 #include <regmap.h>
+#include <simple_device.h>
 
-struct sunxi_rsb {
-	struct device       dev;
-	struct clock_handle clock;
-	struct gpio_handle  pins[2];
-	uintptr_t           regs;
-};
-
-extern const struct sunxi_rsb r_rsb;
+extern const struct simple_device r_rsb;
 
 #endif /* DRIVERS_REGMAP_SUNXI_RSB_H */
