@@ -11,7 +11,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <msgbox/sunxi-msgbox.h>
 #include <platform/time.h>
 
 #define SCPI_MEM_AREA(n) (__scpi_mem[SCPI_CLIENTS - n - 1])
@@ -26,8 +25,6 @@ struct scpi_state {
 	bool     tx_full;
 };
 
-static const struct device *mailbox;
-
 /** The shared memory area, with an address defined in the linker script. */
 extern struct scpi_mem __scpi_mem[SCPI_CLIENTS];
 
@@ -39,7 +36,8 @@ static struct scpi_state scpi_state[SCPI_CLIENTS];
  * client must acknowledge the message.
  */
 static void
-scpi_send_message(uint8_t client, struct scpi_state *state)
+scpi_send_message(const struct device *mailbox, uint8_t client,
+                  struct scpi_state *state)
 {
 	int err;
 
@@ -58,12 +56,13 @@ scpi_send_message(uint8_t client, struct scpi_state *state)
 }
 
 void
-scpi_create_message(uint8_t client, uint8_t command)
+scpi_create_message(const struct device *mailbox, uint8_t client,
+                    uint8_t command)
 {
 	struct scpi_mem *mem     = &SCPI_MEM_AREA(client);
 	struct scpi_state *state = &scpi_state[client];
 
-	if (!mailbox || state->tx_full)
+	if (state->tx_full)
 		return;
 
 	/* Write the message header. */
@@ -73,7 +72,7 @@ scpi_create_message(uint8_t client, uint8_t command)
 	mem->tx_msg.status  = SCPI_OK;
 
 	/* Send the message. */
-	scpi_send_message(client, state);
+	scpi_send_message(mailbox, client, state);
 }
 
 /**
@@ -85,7 +84,7 @@ scpi_create_message(uint8_t client, uint8_t command)
  * separate the API functionality from communication/state management code.
  */
 static void
-scpi_poll_one_client(uint8_t client)
+scpi_poll_one_client(const struct device *mailbox, uint8_t client)
 {
 	struct scpi_state *state = &scpi_state[client];
 	uint8_t rx_chan = RX_CHAN(client);
@@ -124,31 +123,13 @@ scpi_poll_one_client(uint8_t client)
 
 		/* If the TX buffer now contains a reply, send it. */
 		if (reply_needed)
-			scpi_send_message(client, state);
+			scpi_send_message(mailbox, client, state);
 	}
 }
 
 void
-scpi_init(void)
+scpi_poll(const struct device *mailbox)
 {
-	mailbox = device_get_or_null(&msgbox.dev);
-}
-
-void
-scpi_poll(void)
-{
-	/* Do nothing if there is no mailbox available. */
-	if (!mailbox)
-		return;
-
 	for (uint8_t client = 0; client < SCPI_CLIENTS; ++client)
-		scpi_poll_one_client(client);
-}
-
-void
-scpi_exit(void)
-{
-	/* Drop the reference so the clock can be turned off in suspend. */
-	device_put(mailbox);
-	mailbox = NULL;
+		scpi_poll_one_client(mailbox, client);
 }

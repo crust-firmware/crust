@@ -20,6 +20,7 @@
 #include <watchdog.h>
 #include <clock/ccu.h>
 #include <gpio/sunxi-gpio.h>
+#include <msgbox/sunxi-msgbox.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/irq.h>
 #include <platform/time.h>
@@ -50,7 +51,7 @@ system_is_running(void)
 noreturn void
 system_state_machine(void)
 {
-	const struct device *gpio, *pmic, *watchdog;
+	const struct device *gpio, *mailbox, *pmic, *watchdog;
 	uint8_t cpus;
 
 	/*
@@ -66,6 +67,7 @@ system_state_machine(void)
 		/* Clear out inactive references. */
 		watchdog = NULL;
 		gpio     = NULL;
+		mailbox  = NULL;
 	} else {
 		system_state = SYSTEM_ACTIVE;
 
@@ -77,7 +79,9 @@ system_state_machine(void)
 		/* Initialize runtime services. */
 		ccu_init();
 		css_init();
-		scpi_init();
+
+		/* Acquire runtime-only devices. */
+		mailbox = device_get_or_null(&msgbox.dev);
 
 		/*
 		 * If only CPU0 is online, assume Linux has not booted yet, and
@@ -85,8 +89,8 @@ system_state_machine(void)
 		 * sending SCP_READY otherwise, to avoid filling up the mailbox
 		 * when nothing is listening.
 		 */
-		if (cpus == BIT(0)) {
-			scpi_create_message(SCPI_CLIENT_EL3,
+		if (mailbox && cpus == BIT(0)) {
+			scpi_create_message(mailbox, SCPI_CLIENT_EL3,
 			                    SCPI_CMD_SCP_READY);
 		}
 	}
@@ -99,14 +103,15 @@ system_state_machine(void)
 				watchdog_restart(watchdog);
 
 			/* Poll runtime services. */
-			scpi_poll();
+			if (mailbox)
+				scpi_poll(mailbox);
 
 			break;
 		case SYSTEM_SUSPEND:
 			debug("Suspending...");
 
-			/* Disable runtime services. */
-			scpi_exit();
+			/* Release runtime-only devices. */
+			device_put(mailbox), mailbox = NULL;
 
 			/* Enable wakeup sources. */
 
@@ -169,8 +174,8 @@ system_state_machine(void)
 			/* Configure the CCU for increased performance. */
 			ccu_resume();
 
-			/* Enable runtime services. */
-			scpi_init();
+			/* Acquire runtime-only devices. */
+			mailbox = device_get_or_null(&msgbox.dev);
 
 			/* Resume execution on the first CPU in the CSS. */
 			css_set_css_state(SCPI_CSS_ON);
@@ -183,8 +188,8 @@ system_state_machine(void)
 			system_state = SYSTEM_ACTIVE;
 			break;
 		case SYSTEM_SHUTDOWN:
-			/* Disable runtime services. */
-			scpi_exit();
+			/* Release runtime-only devices. */
+			device_put(mailbox), mailbox = NULL;
 
 			/* Enable a subset of wakeup sources. */
 

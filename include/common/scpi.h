@@ -26,10 +26,12 @@ enum {
  * Create and send an SCPI message. This is used for commands initiated by the
  * SCP.
  *
+ * @param mailbox The mailbox used to send the message.
  * @param client  The client that should receive the message.
  * @param command The command number to include in the message.
  */
-void scpi_create_message(uint8_t client, uint8_t command);
+void scpi_create_message(const struct device *mailbox, uint8_t client,
+                         uint8_t command);
 
 /**
  * Handle a received SCPI command. This function parses the message, performs
@@ -44,17 +46,6 @@ bool scpi_handle_cmd(uint8_t client, struct scpi_mem *mem);
 /**
  * Handle incoming SCPI commands and send replies as buffers become available.
  */
-void scpi_poll(void);
-
-/**
- * Stop processing SCPI API requests and free resources.
- */
-void scpi_exit(void);
-
-/**
- * Initialize the SCPI API handlers and report to the system that the firmware
- * has finished booting and is ready to accept requests.
- */
-void scpi_init(void);
+void scpi_poll(const struct device *mailbox);
 
 #endif /* COMMON_SCPI_H */
