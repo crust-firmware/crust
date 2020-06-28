@@ -44,4 +44,18 @@ int simple_device_probe(const struct device *dev);
  */
 void simple_device_release(const struct device *dev);
 
+/**
+ * Adjust the refcount of a device to match the state Linux left it in.
+ *
+ * If a device has no references, but its clock is running, acquire a
+ * persistent reference to prevent the device and its resources from being
+ * released.
+ *
+ * Similarly, if the only reference to a device is one previously acquired by
+ * this function, and the device's clock is not running, release the reference.
+ *
+ * This function must not be called if other references to the device are held.
+ */
+void simple_device_sync(const struct simple_device *sdev);
+
 #endif /* COMMON_SIMPLE_DEVICE_H */

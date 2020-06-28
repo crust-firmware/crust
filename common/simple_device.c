@@ -42,3 +42,21 @@ simple_device_release(const struct device *dev)
 	}
 	clock_put(&self->clock);
 }
+
+void
+simple_device_sync(const struct simple_device *sdev)
+{
+	uint8_t refcount = sdev->dev.state->refcount;
+	int state;
+
+	if (clock_get_state(&sdev->clock, &state))
+		return;
+
+	if (state == CLOCK_STATE_ENABLED) {
+		if (refcount == 0)
+			device_get(&sdev->dev);
+	} else {
+		if (refcount == 1)
+			device_put(&sdev->dev);
+	}
+}

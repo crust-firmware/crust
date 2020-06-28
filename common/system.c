@@ -12,6 +12,7 @@
 #include <regulator.h>
 #include <regulator_list.h>
 #include <scpi.h>
+#include <simple_device.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <system.h>
@@ -21,7 +22,6 @@
 #include <gpio/sunxi-gpio.h>
 #include <msgbox/sunxi-msgbox.h>
 #include <watchdog/sunxi-twd.h>
-#include <platform/irq.h>
 
 static uint8_t system_state;
 
@@ -47,7 +47,7 @@ system_is_running(void)
 noreturn void
 system_state_machine(void)
 {
-	const struct device *gpio, *mailbox, *pmic, *watchdog;
+	const struct device *mailbox, *pmic, *watchdog;
 	uint8_t cpus;
 
 	/*
@@ -62,7 +62,6 @@ system_state_machine(void)
 
 		/* Clear out inactive references. */
 		watchdog = NULL;
-		gpio     = NULL;
 		mailbox  = NULL;
 	} else {
 		system_state = SYSTEM_ACTIVE;
@@ -70,10 +69,7 @@ system_state_machine(void)
 		/* First, enable watchdog protection. */
 		watchdog = device_get_or_null(&r_twd.dev);
 
-		/* Initialize runtime devices. */
-		gpio = device_get_or_null(&r_pio.dev);
-
-		/* Initialize runtime services. */
+		/* Perform one-time device driver initialization. */
 		ccu_init();
 		css_init();
 
@@ -125,7 +121,8 @@ system_state_machine(void)
 			/* Release runtime-only devices. */
 			device_put(mailbox), mailbox = NULL;
 
-			/* Enable wakeup sources. */
+			/* Synchronize device state with Linux. */
+			simple_device_sync(&r_pio);
 
 			/* Configure the CCU for minimal power consumption. */
 			ccu_suspend();
@@ -143,12 +140,6 @@ system_state_machine(void)
 			 * and regulator actions before releasing the PMIC.
 			 */
 			device_put(pmic);
-
-			/* Turn off all unnecessary clocks. */
-			if (!irq_is_enabled(IRQ_R_PIO_PL)) {
-				device_put(gpio);
-				gpio = NULL;
-			}
 
 			debug("Suspend complete!");
 
@@ -172,10 +163,6 @@ system_state_machine(void)
 			/* First, enable watchdog protection. */
 			watchdog = device_get_or_null(&r_twd.dev);
 
-			/* Turn on previously-disabled clocks. */
-			if (!gpio)
-				gpio = device_get_or_null(&r_pio.dev);
-
 			/*
 			 * Perform PMIC-specific resume actions.
 			 * The PMIC is expected to restore regulator state.
@@ -187,8 +174,6 @@ system_state_machine(void)
 
 			/* Give regulator outputs time to rise. */
 			udelay(5000);
-
-			/* Disable wakeup sources. */
 
 			/* Configure the CCU for increased performance. */
 			ccu_resume();
