@@ -7,12 +7,19 @@
 #include <clock.h>
 #include <device.h>
 #include <error.h>
+#include <intrusive.h>
 #include <stdbool.h>
 #include <clock/ccu.h>
 
 #include "ccu.h"
 
-const struct clock_handle *
+static inline const struct ccu *
+to_ccu(const struct device *dev)
+{
+	return container_of(dev, const struct ccu, dev);
+}
+
+static const struct clock_handle *
 ccu_get_parent(const struct clock_handle *clock)
 {
 	const struct ccu *self      = to_ccu(clock->dev);
@@ -21,7 +28,7 @@ ccu_get_parent(const struct clock_handle *clock)
 	return clk->get_parent(self, clk);
 }
 
-uint32_t
+static uint32_t
 ccu_get_rate(const struct clock_handle *clock, uint32_t rate)
 {
 	const struct ccu *self      = to_ccu(clock->dev);
@@ -31,7 +38,7 @@ ccu_get_rate(const struct clock_handle *clock, uint32_t rate)
 	return clk->get_rate(self, clk, rate);
 }
 
-int
+static int
 ccu_get_state(const struct clock_handle *clock, int *state)
 {
 	const struct ccu *self      = to_ccu(clock->dev);
@@ -51,7 +58,7 @@ ccu_get_state(const struct clock_handle *clock, int *state)
 	return SUCCESS;
 }
 
-int
+static int
 ccu_set_state(const struct clock_handle *clock, int state)
 {
 	const struct ccu *self      = to_ccu(clock->dev);
@@ -78,3 +85,16 @@ ccu_set_state(const struct clock_handle *clock, int state)
 
 	return SUCCESS;
 }
+
+const struct clock_driver ccu_driver = {
+	.drv = {
+		.probe   = dummy_probe,
+		.release = dummy_release,
+	},
+	.ops = {
+		.get_parent = ccu_get_parent,
+		.get_rate   = ccu_get_rate,
+		.get_state  = ccu_get_state,
+		.set_state  = ccu_set_state,
+	},
+};

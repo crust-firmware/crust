@@ -7,7 +7,6 @@
 #define CCU_PRIVATE_H
 
 #include <clock.h>
-#include <intrusive.h>
 #include <stdint.h>
 #include <clock/ccu.h>
 
@@ -33,9 +32,6 @@ struct ccu_clock {
 	uint16_t reset;
 };
 
-/*
- * CCU helper functions
- */
 const struct clock_handle *ccu_helper_get_parent(const struct ccu *self,
                                                  const struct ccu_clock *clk);
 
@@ -52,21 +48,6 @@ uint32_t ccu_helper_get_rate_p(const struct ccu *self,
                                const struct ccu_clock *clk, uint32_t rate,
                                uint32_t p_shift, uint32_t p_width);
 
-/*
- * CCU driver functions
- */
-static inline const struct ccu *
-to_ccu(const struct device *dev)
-{
-	return container_of(dev, const struct ccu, dev);
-}
-
-const struct clock_handle *ccu_get_parent(const struct clock_handle *clock);
-
-uint32_t ccu_get_rate(const struct clock_handle *clock, uint32_t rate);
-
-int ccu_get_state(const struct clock_handle *clock, int *state);
-
-int ccu_set_state(const struct clock_handle *clock, int state);
+extern const struct clock_driver ccu_driver;
 
 #endif /* CCU_PRIVATE_H */

@@ -215,23 +215,10 @@ static const struct ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 	},
 };
 
-static const struct clock_driver sun8i_r_ccu_driver = {
-	.drv = {
-		.probe   = dummy_probe,
-		.release = dummy_release,
-	},
-	.ops = {
-		.get_parent = ccu_get_parent,
-		.get_rate   = ccu_get_rate,
-		.get_state  = ccu_get_state,
-		.set_state  = ccu_set_state,
-	},
-};
-
 const struct ccu r_ccu = {
 	.dev = {
 		.name  = "r_ccu",
-		.drv   = &sun8i_r_ccu_driver.drv,
+		.drv   = &ccu_driver.drv,
 		.state = CLOCK_DEVICE_STATE_INIT(SUN8I_R_CCU_CLOCKS),
 	},
 	.clocks = sun8i_r_ccu_clocks,
