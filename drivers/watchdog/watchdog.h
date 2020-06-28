@@ -10,9 +10,8 @@
 #include <stdint.h>
 
 struct watchdog_driver_ops {
-	void (*disable)(const struct device *dev);
-	int  (*enable)(const struct device *dev, uint32_t timeout);
 	void (*restart)(const struct device *dev);
+	void (*set_timeout)(const struct device *dev, uint32_t timeout);
 };
 
 struct watchdog_driver {

@@ -23,9 +23,6 @@
 #include <msgbox/sunxi-msgbox.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/irq.h>
-#include <platform/time.h>
-
-#define WATCHDOG_TIMEOUT (5 * REFCLK_HZ) /* 5 seconds */
 
 static uint8_t system_state;
 
@@ -71,9 +68,10 @@ system_state_machine(void)
 	} else {
 		system_state = SYSTEM_ACTIVE;
 
+		/* First, enable watchdog protection. */
+		watchdog = device_get_or_null(&r_twd.dev);
+
 		/* Initialize runtime devices. */
-		if ((watchdog = device_get_or_null(&r_twd.dev)))
-			watchdog_enable(watchdog, WATCHDOG_TIMEOUT);
 		gpio = device_get_or_null(&r_pio.dev);
 
 		/* Initialize runtime services. */
@@ -132,10 +130,14 @@ system_state_machine(void)
 				device_put(gpio);
 				gpio = NULL;
 			}
-			device_put(watchdog);
-			watchdog = NULL;
 
 			debug("Suspend complete!");
+
+			/*
+			 * Finally, disable watchdog protection.
+			 * Do nothing after this point except polling for IRQs.
+			 */
+			device_put(watchdog), watchdog = NULL;
 
 			/* The system is now inactive. */
 			system_state = SYSTEM_INACTIVE;
@@ -148,9 +150,10 @@ system_state_machine(void)
 		case SYSTEM_RESUME:
 			debug("Resuming...");
 
+			/* First, enable watchdog protection. */
+			watchdog = device_get_or_null(&r_twd.dev);
+
 			/* Turn on previously-disabled clocks. */
-			if ((watchdog = device_get_or_null(&r_twd.dev)))
-				watchdog_enable(watchdog, WATCHDOG_TIMEOUT);
 			if (!gpio)
 				gpio = device_get_or_null(&r_pio.dev);
 
@@ -210,8 +213,12 @@ system_state_machine(void)
 				device_put(gpio);
 				gpio = NULL;
 			}
-			device_put(watchdog);
-			watchdog = NULL;
+
+			/*
+			 * Finally, disable watchdog protection.
+			 * Do nothing after this point except polling for IRQs.
+			 */
+			device_put(watchdog), watchdog = NULL;
 
 			/* The system is now off. */
 			system_state = SYSTEM_OFF;
@@ -242,7 +249,7 @@ system_state_machine(void)
 			if (!watchdog)
 				watchdog = device_get_or_null(&r_twd.dev);
 			if (watchdog)
-				watchdog_enable(watchdog, 1);
+				watchdog_set_timeout(watchdog, 1);
 
 			/* Continue making reset attempts each iteration. */
 			system_state = SYSTEM_RESET;

@@ -23,19 +23,13 @@ watchdog_ops_for(const struct device *dev)
 }
 
 void
-watchdog_disable(const struct device *dev)
-{
-	watchdog_ops_for(dev)->disable(dev);
-}
-
-int
-watchdog_enable(const struct device *dev, uint32_t timeout)
-{
-	return watchdog_ops_for(dev)->enable(dev, timeout);
-}
-
-void
 watchdog_restart(const struct device *dev)
 {
 	watchdog_ops_for(dev)->restart(dev);
+}
+
+void
+watchdog_set_timeout(const struct device *dev, uint32_t timeout)
+{
+	watchdog_ops_for(dev)->set_timeout(dev, timeout);
 }

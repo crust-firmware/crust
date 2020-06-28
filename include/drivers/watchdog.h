@@ -7,22 +7,6 @@
 #define DRIVERS_WATCHDOG_H
 
 #include <device.h>
-#include <stdint.h>
-
-/**
- * Disable the watchdog.
- *
- * @param dev The watchdog device.
- */
-void watchdog_disable(const struct device *dev);
-
-/**
- * Enable and restart the watchdog.
- *
- * @param dev     The watchdog device.
- * @param timeout The watchdog timeout in clock cycles.
- */
-int watchdog_enable(const struct device *dev, uint32_t timeout);
 
 /**
  * Restart the watchdog. This must be called before the watchdog times out.
@@ -30,5 +14,13 @@ int watchdog_enable(const struct device *dev, uint32_t timeout);
  * @param dev The watchdog device.
  */
 void watchdog_restart(const struct device *dev);
+
+/**
+ * Set the watchdog timeout. It will take effect after the next restart.
+ *
+ * @param dev     The watchdog device.
+ * @param timeout The new watchdog timeout in clock cycles.
+ */
+void watchdog_set_timeout(const struct device *dev, uint32_t timeout);
 
 #endif /* DRIVERS_WATCHDOG_H */
