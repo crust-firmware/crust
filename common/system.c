@@ -106,7 +106,22 @@ system_state_machine(void)
 
 			break;
 		case SYSTEM_SUSPEND:
+		case SYSTEM_SHUTDOWN:
 			debug("Suspending...");
+
+			int (*pmic_action)(const struct device *);
+			const struct regulator_list *regulators;
+			uint8_t next_state;
+
+			if (system_state == SYSTEM_SUSPEND) {
+				pmic_action = pmic_suspend;
+				regulators  = &inactive_list;
+				next_state  = SYSTEM_INACTIVE;
+			} else {
+				pmic_action = pmic_shutdown;
+				regulators  = &off_list;
+				next_state  = SYSTEM_OFF;
+			}
 
 			/* Release runtime-only devices. */
 			device_put(mailbox), mailbox = NULL;
@@ -116,14 +131,19 @@ system_state_machine(void)
 			/* Configure the CCU for minimal power consumption. */
 			ccu_suspend();
 
-			/* Perform PMIC-specific suspend actions. */
-			if ((pmic = pmic_get())) {
-				pmic_suspend(pmic);
-				device_put(pmic);
-			}
+			/* Perform PMIC-specific actions. */
+			if ((pmic = pmic_get()))
+				pmic_action(pmic);
 
 			/* Turn off all unnecessary power domains. */
-			regulator_bulk_disable(&inactive_list);
+			regulator_bulk_disable(regulators);
+
+			/*
+			 * The regulator provider is often part of the same
+			 * device as the PMIC. Reduce churn by doing both PMIC
+			 * and regulator actions before releasing the PMIC.
+			 */
+			device_put(pmic);
 
 			/* Turn off all unnecessary clocks. */
 			if (!irq_is_enabled(IRQ_R_PIO_PL)) {
@@ -139,8 +159,8 @@ system_state_machine(void)
 			 */
 			device_put(watchdog), watchdog = NULL;
 
-			/* The system is now inactive. */
-			system_state = SYSTEM_INACTIVE;
+			/* The system is now inactive or off. */
+			system_state = next_state;
 			break;
 		case SYSTEM_INACTIVE:
 			/* Poll wakeup sources. Resume on wakeup. */
@@ -189,39 +209,6 @@ system_state_machine(void)
 
 			/* The system is now active. */
 			system_state = SYSTEM_ACTIVE;
-			break;
-		case SYSTEM_SHUTDOWN:
-			/* Release runtime-only devices. */
-			device_put(mailbox), mailbox = NULL;
-
-			/* Enable a subset of wakeup sources. */
-
-			/* Configure the CCU for minimal power consumption. */
-			ccu_suspend();
-
-			/* Perform PMIC-specific shutdown actions. */
-			if ((pmic = pmic_get())) {
-				pmic_shutdown(pmic);
-				device_put(pmic);
-			}
-
-			/* Turn off all possible power domains. */
-			regulator_bulk_disable(&off_list);
-
-			/* Turn off all possible clocks. */
-			if (!irq_is_enabled(IRQ_R_PIO_PL)) {
-				device_put(gpio);
-				gpio = NULL;
-			}
-
-			/*
-			 * Finally, disable watchdog protection.
-			 * Do nothing after this point except polling for IRQs.
-			 */
-			device_put(watchdog), watchdog = NULL;
-
-			/* The system is now off. */
-			system_state = SYSTEM_OFF;
 			break;
 		case SYSTEM_OFF:
 			/* Poll wakeup sources. Reboot on wakeup. */
