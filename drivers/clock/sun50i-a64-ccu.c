@@ -42,32 +42,16 @@ sun50i_a64_ccu_fixed_get_rate(const struct ccu *self UNUSED,
 	return 600000000U;
 }
 
-static const struct clock_handle sun50i_a64_ccu_cpux_parents[] = {
-	{
-		.dev = &r_ccu.dev,
-		.id  = CLK_OSC32K,
-	},
-	{
-		.dev = &r_ccu.dev,
-		.id  = CLK_OSC24M,
-	},
-	{
-		.dev = &ccu.dev,
-		.id  = CLK_PLL_CPUX,
-	},
-	{
-		.dev = &ccu.dev,
-		.id  = CLK_PLL_CPUX,
-	},
+static const struct clock_handle sun50i_a64_ccu_cpux_parent = {
+	.dev = &ccu.dev,
+	.id  = CLK_PLL_CPUX,
 };
 
 static const struct clock_handle *
-sun50i_a64_ccu_cpux_get_parent(const struct ccu *self,
-                               const struct ccu_clock *clk)
+sun50i_a64_ccu_cpux_get_parent(const struct ccu *self UNUSED,
+                               const struct ccu_clock *clk UNUSED)
 {
-	uint32_t val = mmio_read_32(self->regs + clk->reg);
-
-	return &sun50i_a64_ccu_cpux_parents[bitfield_get(val, 16, 2)];
+	return &sun50i_a64_ccu_cpux_parent;
 }
 
 static const struct clock_handle sun50i_a64_ccu_dram_parents[] = {
