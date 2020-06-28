@@ -4,10 +4,7 @@
  */
 
 #include <bitfield.h>
-#include <device.h>
 #include <error.h>
-#include <gpio.h>
-#include <intrusive.h>
 #include <limits.h>
 #include <mmio.h>
 #include <stdbool.h>
@@ -42,16 +39,10 @@
 #define GET_PORT(gpio)       ((gpio)->id / PINS_PER_PORT)
 #define GET_PIN(gpio)        ((gpio)->id % PINS_PER_PORT)
 
-static inline const struct sunxi_gpio *
-to_sunxi_gpio(const struct device *dev)
-{
-	return container_of(dev, const struct sunxi_gpio, dev);
-}
-
 static int
 sunxi_gpio_get_value(const struct gpio_handle *gpio, bool *value)
 {
-	const struct sunxi_gpio *self = to_sunxi_gpio(gpio->dev);
+	const struct simple_device *self = to_simple_device(gpio->dev);
 	uint8_t port   = GET_PORT(gpio);
 	uint8_t pin    = GET_PIN(gpio);
 	uintptr_t regs = self->regs;
@@ -65,7 +56,7 @@ sunxi_gpio_get_value(const struct gpio_handle *gpio, bool *value)
 static int
 sunxi_gpio_init_pin(const struct gpio_handle *gpio)
 {
-	const struct sunxi_gpio *self = to_sunxi_gpio(gpio->dev);
+	const struct simple_device *self = to_simple_device(gpio->dev);
 	uint8_t port   = GET_PORT(gpio);
 	uint8_t pin    = GET_PIN(gpio);
 	uintptr_t regs = self->regs;
@@ -95,7 +86,7 @@ sunxi_gpio_release_pin(const struct gpio_handle *gpio UNUSED)
 static int
 sunxi_gpio_set_value(const struct gpio_handle *gpio, bool value)
 {
-	const struct sunxi_gpio *self = to_sunxi_gpio(gpio->dev);
+	const struct simple_device *self = to_simple_device(gpio->dev);
 	uint8_t port   = GET_PORT(gpio);
 	uint8_t pin    = GET_PIN(gpio);
 	uintptr_t regs = self->regs;
@@ -106,30 +97,10 @@ sunxi_gpio_set_value(const struct gpio_handle *gpio, bool value)
 	return SUCCESS;
 }
 
-static int
-sunxi_gpio_probe(const struct device *dev)
-{
-	const struct sunxi_gpio *self = to_sunxi_gpio(dev);
-	int err;
-
-	if ((err = clock_get(&self->clock)))
-		return err;
-
-	return SUCCESS;
-}
-
-static void
-sunxi_gpio_release(const struct device *dev)
-{
-	const struct sunxi_gpio *self = to_sunxi_gpio(dev);
-
-	clock_put(&self->clock);
-}
-
 static const struct gpio_driver sunxi_gpio_driver = {
 	.drv = {
-		.probe   = sunxi_gpio_probe,
-		.release = sunxi_gpio_release,
+		.probe   = simple_device_probe,
+		.release = simple_device_release,
 	},
 	.ops = {
 		.get_value   = sunxi_gpio_get_value,
@@ -139,7 +110,7 @@ static const struct gpio_driver sunxi_gpio_driver = {
 	},
 };
 
-const struct sunxi_gpio r_pio = {
+const struct simple_device r_pio = {
 	.dev = {
 		.name  = "r_pio",
 		.drv   = &sunxi_gpio_driver.drv,
