@@ -4,9 +4,7 @@
  */
 
 #include <delay.h>
-#include <device.h>
 #include <error.h>
-#include <intrusive.h>
 #include <mmio.h>
 #include <regmap.h>
 #include <stdbool.h>
@@ -43,14 +41,8 @@ enum {
 	IDLE                 = 0xf8,
 };
 
-static inline const struct sun6i_i2c *
-to_sun6i_i2c(const struct device *dev)
-{
-	return container_of(dev, const struct sun6i_i2c, dev);
-}
-
 static bool
-sun6i_i2c_wait_idle(const struct sun6i_i2c *self)
+sun6i_i2c_wait_idle(const struct simple_device *self)
 {
 	/* With a single master on the bus, this should only take one cycle. */
 	int timeout = 2;
@@ -66,7 +58,7 @@ sun6i_i2c_wait_idle(const struct sun6i_i2c *self)
 }
 
 static bool
-sun6i_i2c_wait_start(const struct sun6i_i2c *self)
+sun6i_i2c_wait_start(const struct simple_device *self)
 {
 	/* With a single master on the bus, this should only take one cycle. */
 	int timeout = 2;
@@ -82,7 +74,7 @@ sun6i_i2c_wait_start(const struct sun6i_i2c *self)
 }
 
 static bool
-sun6i_i2c_wait_state(const struct sun6i_i2c *self, uint8_t state)
+sun6i_i2c_wait_state(const struct simple_device *self, uint8_t state)
 {
 	/* Wait for up to 8 transfer cycles, one ACK, and one extra cycle. */
 	int timeout = 10;
@@ -100,7 +92,7 @@ sun6i_i2c_wait_state(const struct sun6i_i2c *self, uint8_t state)
 static int
 sun6i_i2c_read(const struct regmap *map, uint8_t *data)
 {
-	const struct sun6i_i2c *self = to_sun6i_i2c(map->dev);
+	const struct simple_device *self = to_simple_device(map->dev);
 
 	/* Disable sending an ACK and trigger a state change. */
 	mmio_clrset_32(self->regs + I2C_CTRL_REG, BIT(2), BIT(3));
@@ -118,7 +110,7 @@ sun6i_i2c_read(const struct regmap *map, uint8_t *data)
 static int
 sun6i_i2c_start(const struct regmap *map, uint8_t direction)
 {
-	const struct sun6i_i2c *self = to_sun6i_i2c(map->dev);
+	const struct simple_device *self = to_simple_device(map->dev);
 	uint8_t init_state = mmio_read_32(self->regs + I2C_STAT_REG);
 	uint8_t state;
 
@@ -150,7 +142,7 @@ sun6i_i2c_start(const struct regmap *map, uint8_t direction)
 static void
 sun6i_i2c_stop(const struct regmap *map)
 {
-	const struct sun6i_i2c *self = to_sun6i_i2c(map->dev);
+	const struct simple_device *self = to_simple_device(map->dev);
 
 	/* Send a stop condition. */
 	mmio_set_32(self->regs + I2C_CTRL_REG, BIT(4) | BIT(3));
@@ -162,7 +154,7 @@ sun6i_i2c_stop(const struct regmap *map)
 static int
 sun6i_i2c_write(const struct regmap *map, uint8_t data)
 {
-	const struct sun6i_i2c *self = to_sun6i_i2c(map->dev);
+	const struct simple_device *self = to_simple_device(map->dev);
 
 	/* Write data, then trigger a state change. */
 	mmio_write_32(self->regs + I2C_DATA_REG, data);
@@ -178,15 +170,11 @@ sun6i_i2c_write(const struct regmap *map, uint8_t data)
 static int
 sun6i_i2c_probe(const struct device *dev)
 {
-	const struct sun6i_i2c *self = to_sun6i_i2c(dev);
+	const struct simple_device *self = to_simple_device(dev);
 	int err;
 
-	if ((err = clock_get(&self->clock)))
+	if ((err = simple_device_probe(dev)))
 		return err;
-	if ((err = gpio_get(&self->pins[0])))
-		goto err_put_clock;
-	if ((err = gpio_get(&self->pins[1])))
-		goto err_put_gpio0;
 
 	/* Set I2C bus clock divider for 400 KHz operation. */
 	mmio_write_32(self->regs + I2C_CCR_REG, 0x00000011);
@@ -205,36 +193,22 @@ sun6i_i2c_probe(const struct device *dev)
 	/* Wait for the bus to go idle. */
 	if (!sun6i_i2c_wait_idle(self)) {
 		err = EIO;
-		goto err_put_gpio1;
+		goto err_release;
 	}
 
 	return SUCCESS;
 
-err_put_gpio1:
-	gpio_put(&self->pins[1]);
-err_put_gpio0:
-	gpio_put(&self->pins[0]);
-err_put_clock:
-	clock_put(&self->clock);
+err_release:
+	simple_device_release(dev);
 
 	return err;
-}
-
-static void
-sun6i_i2c_release(const struct device *dev)
-{
-	const struct sun6i_i2c *self = to_sun6i_i2c(dev);
-
-	gpio_put(&self->pins[1]);
-	gpio_put(&self->pins[0]);
-	clock_put(&self->clock);
 }
 
 static const struct regmap_i2c_driver sun6i_i2c_driver = {
 	.drv = {
 		.drv = {
 			.probe   = sun6i_i2c_probe,
-			.release = sun6i_i2c_release,
+			.release = simple_device_release,
 		},
 		.ops = {
 			.prepare = regmap_i2c_prepare,
@@ -250,14 +224,14 @@ static const struct regmap_i2c_driver sun6i_i2c_driver = {
 	},
 };
 
-const struct sun6i_i2c r_i2c = {
+const struct simple_device r_i2c = {
 	.dev = {
 		.name  = "r_i2c",
 		.drv   = &sun6i_i2c_driver.drv.drv,
 		.state = DEVICE_STATE_INIT,
 	},
 	.clock = { .dev = &r_ccu.dev, .id = CLK_BUS_R_I2C },
-	.pins  = {
+	.pins  = SIMPLE_DEVICE_PINS_INIT {
 #if CONFIG(I2C_PINS_PL0_PL1)
 		{
 			.dev   = &r_pio.dev,

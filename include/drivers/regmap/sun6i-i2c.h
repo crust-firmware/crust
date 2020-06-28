@@ -6,17 +6,9 @@
 #ifndef DRIVERS_REGMAP_SUN6I_I2C_H
 #define DRIVERS_REGMAP_SUN6I_I2C_H
 
-#include <clock.h>
-#include <gpio.h>
 #include <regmap.h>
+#include <simple_device.h>
 
-struct sun6i_i2c {
-	struct device       dev;
-	struct clock_handle clock;
-	struct gpio_handle  pins[2];
-	uintptr_t           regs;
-};
-
-extern const struct sun6i_i2c r_i2c;
+extern const struct simple_device r_i2c;
 
 #endif /* DRIVERS_REGMAP_SUN6I_I2C_H */
