@@ -7,7 +7,6 @@
 #include <debug.h>
 #include <delay.h>
 #include <device.h>
-#include <error.h>
 #include <irq.h>
 #include <pmic.h>
 #include <regulator.h>
@@ -177,17 +176,14 @@ system_state_machine(void)
 			if (!gpio)
 				gpio = device_get_or_null(&r_pio.dev);
 
-			/* Turn on previously-disabled power domains. */
-
-			/* Perform PMIC-specific resume actions.
-			 * The PMIC is expected to restore regulator state. */
-			bool restored = false;
-			if ((pmic = pmic_get())) {
-				restored = pmic_resume(pmic) == SUCCESS;
-				device_put(pmic);
-			}
-			if (!restored)
+			/*
+			 * Perform PMIC-specific resume actions.
+			 * The PMIC is expected to restore regulator state.
+			 * If it fails, manually turn the regulators back on.
+			 */
+			if (!(pmic = pmic_get()) || pmic_resume(pmic))
 				regulator_bulk_enable(&inactive_list);
+			device_put(pmic);
 
 			/* Give regulator outputs time to rise. */
 			udelay(5000);
