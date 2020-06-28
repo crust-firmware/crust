@@ -47,16 +47,6 @@ bool scpi_handle_cmd(uint8_t client, struct scpi_mem *mem);
 void scpi_poll(void);
 
 /**
- * Notify the SCPI framework of a new SCPI command. The SCPI framework parses
- * the message, performs any requested actions, and possibly generates a reply
- * message.
- *
- * @param  client The client from which the message was received.
- * @param  msg    The message (virtual channel) received via the message box.
- */
-void scpi_receive_message(uint8_t client, uint32_t msg);
-
-/**
  * Stop processing SCPI API requests and free resources.
  */
 void scpi_exit(void);
