@@ -15,7 +15,6 @@
 #define BYTES_PER_WORD sizeof(uint32_t)
 
 static char *prefixes[LOG_LEVELS] = {
-	"PANIC:\t ",
 	"ERROR:\t ",
 	"WARNING: ",
 	"INFO:\t ",

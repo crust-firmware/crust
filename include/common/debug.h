@@ -8,11 +8,10 @@
 
 #include <stdint.h>
 
-#define LOG_STRING_PANIC   "\x01"
-#define LOG_STRING_ERROR   "\x02"
-#define LOG_STRING_WARNING "\x03"
-#define LOG_STRING_INFO    "\x04"
-#define LOG_STRING_DEBUG   "\x05"
+#define LOG_STRING_ERROR   "\x01"
+#define LOG_STRING_WARNING "\x02"
+#define LOG_STRING_INFO    "\x03"
+#define LOG_STRING_DEBUG   "\x04"
 
 #if CONFIG(ASSERT)
 #if CONFIG(ASSERT_VERBOSE)
@@ -26,7 +25,6 @@
 #endif
 
 enum {
-	LOG_LEVEL_PANIC = 0,
 	LOG_LEVEL_ERROR,
 	LOG_LEVEL_WARNING,
 	LOG_LEVEL_INFO,
@@ -38,7 +36,7 @@ void hexdump(uintptr_t addr, uint32_t bytes);
 void log(const char *fmt, ...) ATTRIBUTE(format(printf, 1, 2));
 noreturn void panic(const char *fmt, ...) ATTRIBUTE(format(printf, 1, 2));
 
-#define panic(...) panic(LOG_STRING_PANIC __VA_ARGS__)
+#define panic(...) panic(LOG_STRING_ERROR __VA_ARGS__)
 #define error(...) log(LOG_STRING_ERROR __VA_ARGS__)
 #define warn(...)  log(LOG_STRING_WARNING __VA_ARGS__)
 #define info(...)  log(LOG_STRING_INFO __VA_ARGS__)
