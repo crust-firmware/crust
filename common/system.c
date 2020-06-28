@@ -260,15 +260,17 @@ system_reset(void)
 void
 system_shutdown(void)
 {
-	if (system_state == SYSTEM_ACTIVE)
-		system_state = SYSTEM_SHUTDOWN;
+	assert(system_state == SYSTEM_ACTIVE);
+
+	system_state = SYSTEM_SHUTDOWN;
 }
 
 void
 system_suspend(void)
 {
-	if (system_state == SYSTEM_ACTIVE)
-		system_state = SYSTEM_SUSPEND;
+	assert(system_state == SYSTEM_ACTIVE);
+
+	system_state = SYSTEM_SUSPEND;
 }
 
 void
@@ -276,6 +278,6 @@ system_wakeup(void)
 {
 	if (system_state == SYSTEM_INACTIVE)
 		system_state = SYSTEM_RESUME;
-	if (system_state == SYSTEM_OFF)
-		system_state = SYSTEM_RESET;
+	else
+		system_state = SYSTEM_REBOOT;
 }

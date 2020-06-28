@@ -45,35 +45,35 @@ noreturn void system_state_machine(void);
 /**
  * Reboot the board, including the SoC and external peripherals.
  *
- * Should not be called during a system state transition.
+ * May be called at any time.
  */
 void system_reboot(void);
 
 /**
  * Reset the SoC, including all CPUs and internal peripherals.
  *
- * Should not be called during a system state transition.
+ * May be called at any time.
  */
 void system_reset(void);
 
 /**
  * Shut down the SoC, and turn off all possible power domains.
  *
- * Should not be called during a system state transition.
+ * Must only be called while the system is active.
  */
 void system_shutdown(void);
 
 /**
  * Suspend the SoC, and turn off all non-wakeup power domains.
  *
- * Should not be called during a system state transition.
+ * Must only be called while the system is active.
  */
 void system_suspend(void);
 
 /**
  * Wake up the SoC, and turn on previously-disabled power domains.
  *
- * Should not be called during a system state transition.
+ * Should only be called while the system is inactive (suspended).
  */
 void system_wakeup(void);
 
