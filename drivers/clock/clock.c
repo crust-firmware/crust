@@ -111,9 +111,6 @@ clock_get_rate(const struct clock_handle *clock)
 	const struct clock_handle *parent;
 	uint32_t rate = 0;
 
-	/* Calling this function is only allowed after calling clock_get(). */
-	assert(clock_state_for(clock)->refcount);
-
 	/* Initialize the rate with the parent's rate or a known safe value. */
 	if ((parent = ops->get_parent(clock)))
 		rate = clock_get_rate(parent);
@@ -128,9 +125,6 @@ clock_get_state(const struct clock_handle *clock, int *state)
 	const struct clock_driver_ops *ops = clock_ops_for(clock);
 	const struct clock_handle *parent;
 	int err;
-
-	/* Calling this function is only allowed after calling clock_get(). */
-	assert(clock_state_for(clock)->refcount);
 
 	/* If the clock has a parent, check the parent's state. */
 	if ((parent = ops->get_parent(clock))) {
