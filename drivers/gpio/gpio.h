@@ -11,10 +11,9 @@
 #include <stdbool.h>
 
 struct gpio_driver_ops {
-	int  (*get_value)(const struct gpio_handle *gpio, bool *value);
-	int  (*init_pin)(const struct gpio_handle *gpio);
-	void (*release_pin)(const struct gpio_handle *gpio);
-	int  (*set_value)(const struct gpio_handle *gpio, bool value);
+	int (*get_value)(const struct gpio_handle *gpio, bool *value);
+	int (*init_pin)(const struct gpio_handle *gpio);
+	int (*set_value)(const struct gpio_handle *gpio, bool value);
 };
 
 struct gpio_driver {

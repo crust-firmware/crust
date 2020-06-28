@@ -53,9 +53,6 @@ gpio_get_value(const struct gpio_handle *gpio, bool *value)
 void
 gpio_put(const struct gpio_handle *gpio)
 {
-	/* Set the GPIO pin back to its disabled state. */
-	gpio_ops_for(gpio)->release_pin(gpio);
-
 	device_put(gpio->dev);
 }
 

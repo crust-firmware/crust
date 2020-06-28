@@ -74,15 +74,6 @@ sunxi_gpio_init_pin(const struct gpio_handle *gpio)
 	return SUCCESS;
 }
 
-static void
-sunxi_gpio_release_pin(const struct gpio_handle *gpio UNUSED)
-{
-	/*
-	 * Linux cannot currently save/restore pin configuration during
-	 * suspend/resume, so we cannot yet disable pins after using them.
-	 */
-}
-
 static int
 sunxi_gpio_set_value(const struct gpio_handle *gpio, bool value)
 {
@@ -103,10 +94,9 @@ static const struct gpio_driver sunxi_gpio_driver = {
 		.release = simple_device_release,
 	},
 	.ops = {
-		.get_value   = sunxi_gpio_get_value,
-		.init_pin    = sunxi_gpio_init_pin,
-		.release_pin = sunxi_gpio_release_pin,
-		.set_value   = sunxi_gpio_set_value,
+		.get_value = sunxi_gpio_get_value,
+		.init_pin  = sunxi_gpio_init_pin,
+		.set_value = sunxi_gpio_set_value,
 	},
 };
 
