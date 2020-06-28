@@ -4,11 +4,8 @@
  */
 
 #include <debug.h>
-#include <device.h>
 #include <error.h>
-#include <intrusive.h>
 #include <mmio.h>
-#include <msgbox.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <util.h>
@@ -39,16 +36,10 @@
 
 #define MSG_DATA_REG(n)     (0x0180 + 0x4 * (n))
 
-static inline const struct sunxi_msgbox *
-to_sunxi_msgbox(const struct device *dev)
-{
-	return container_of(dev, const struct sunxi_msgbox, dev);
-}
-
 static bool
 sunxi_msgbox_peek_data(const struct device *dev, uint8_t chan)
 {
-	const struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+	const struct simple_device *self = to_simple_device(dev);
 
 	return mmio_read_32(self->regs + MSG_STAT_REG(chan)) & MSG_STAT_MASK;
 }
@@ -56,7 +47,7 @@ sunxi_msgbox_peek_data(const struct device *dev, uint8_t chan)
 static void
 sunxi_msgbox_ack_rx(const struct device *dev, uint8_t chan)
 {
-	const struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+	const struct simple_device *self = to_simple_device(dev);
 
 	mmio_write_32(self->regs + IRQ_STAT_REG, RX_IRQ(chan));
 }
@@ -64,7 +55,7 @@ sunxi_msgbox_ack_rx(const struct device *dev, uint8_t chan)
 static bool
 sunxi_msgbox_last_tx_done(const struct device *dev, uint8_t chan)
 {
-	const struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+	const struct simple_device *self = to_simple_device(dev);
 
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
@@ -75,7 +66,7 @@ sunxi_msgbox_last_tx_done(const struct device *dev, uint8_t chan)
 static int
 sunxi_msgbox_receive(const struct device *dev, uint8_t chan, uint32_t *msg)
 {
-	const struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+	const struct simple_device *self = to_simple_device(dev);
 
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
@@ -90,7 +81,7 @@ sunxi_msgbox_receive(const struct device *dev, uint8_t chan, uint32_t *msg)
 static int
 sunxi_msgbox_send(const struct device *dev, uint8_t chan, uint32_t msg)
 {
-	const struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+	const struct simple_device *self = to_simple_device(dev);
 
 	assert(chan < SUNXI_MSGBOX_CHANS);
 
@@ -105,10 +96,10 @@ sunxi_msgbox_send(const struct device *dev, uint8_t chan, uint32_t msg)
 static int
 sunxi_msgbox_probe(const struct device *dev)
 {
-	const struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
+	const struct simple_device *self = to_simple_device(dev);
 	int err;
 
-	if ((err = clock_get(&self->clock)))
+	if ((err = simple_device_probe(dev)))
 		return err;
 
 	/* Set even channels ARM -> SCP and odd channels SCP -> ARM. */
@@ -128,18 +119,10 @@ sunxi_msgbox_probe(const struct device *dev)
 	return SUCCESS;
 }
 
-static void
-sunxi_msgbox_release(const struct device *dev)
-{
-	const struct sunxi_msgbox *self = to_sunxi_msgbox(dev);
-
-	clock_put(&self->clock);
-}
-
 static const struct msgbox_driver sunxi_msgbox_driver = {
 	.drv = {
 		.probe   = sunxi_msgbox_probe,
-		.release = sunxi_msgbox_release,
+		.release = simple_device_release,
 	},
 	.ops = {
 		.ack_rx       = sunxi_msgbox_ack_rx,
@@ -149,7 +132,7 @@ static const struct msgbox_driver sunxi_msgbox_driver = {
 	},
 };
 
-const struct sunxi_msgbox msgbox = {
+const struct simple_device msgbox = {
 	.dev = {
 		.name  = "msgbox",
 		.drv   = &sunxi_msgbox_driver.drv,

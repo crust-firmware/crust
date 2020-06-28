@@ -6,20 +6,12 @@
 #ifndef DRIVERS_MSGBOX_SUNXI_MSGBOX_H
 #define DRIVERS_MSGBOX_SUNXI_MSGBOX_H
 
-#include <clock.h>
-#include <device.h>
 #include <msgbox.h>
-#include <stdint.h>
+#include <simple_device.h>
 
 /* The message box hardware provides 8 unidirectional channels. */
 #define SUNXI_MSGBOX_CHANS 8
 
-struct sunxi_msgbox {
-	struct device       dev;
-	struct clock_handle clock;
-	uintptr_t           regs;
-};
-
-extern const struct sunxi_msgbox msgbox;
+extern const struct simple_device msgbox;
 
 #endif /* DRIVERS_MSGBOX_SUNXI_MSGBOX_H */
