@@ -55,3 +55,19 @@ const struct ccu ccu = {
 	.clocks = sun8i_a83t_ccu_clocks,
 	.regs   = DEV_CCU,
 };
+
+void
+ccu_suspend(void)
+{
+}
+
+void
+ccu_resume(void)
+{
+}
+
+void
+ccu_init(void)
+{
+	ccu_resume();
+}

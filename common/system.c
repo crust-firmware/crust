@@ -18,6 +18,7 @@
 #include <system.h>
 #include <util.h>
 #include <watchdog.h>
+#include <clock/ccu.h>
 #include <gpio/sunxi-gpio.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/irq.h>
@@ -74,6 +75,7 @@ system_state_machine(void)
 		gpio = device_get_or_null(&r_pio.dev);
 
 		/* Initialize runtime services. */
+		ccu_init();
 		css_init();
 		scpi_init();
 
@@ -107,6 +109,9 @@ system_state_machine(void)
 			scpi_exit();
 
 			/* Enable wakeup sources. */
+
+			/* Configure the CCU for minimal power consumption. */
+			ccu_suspend();
 
 			/* Perform PMIC-specific suspend actions. */
 			if ((pmic = pmic_get())) {
@@ -161,6 +166,9 @@ system_state_machine(void)
 
 			/* Disable wakeup sources. */
 
+			/* Configure the CCU for increased performance. */
+			ccu_resume();
+
 			/* Enable runtime services. */
 			scpi_init();
 
@@ -179,6 +187,9 @@ system_state_machine(void)
 			scpi_exit();
 
 			/* Enable a subset of wakeup sources. */
+
+			/* Configure the CCU for minimal power consumption. */
+			ccu_suspend();
 
 			/* Perform PMIC-specific shutdown actions. */
 			if ((pmic = pmic_get())) {

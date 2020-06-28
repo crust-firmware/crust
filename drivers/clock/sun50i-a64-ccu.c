@@ -158,58 +158,10 @@ static const struct ccu_clock sun50i_a64_ccu_clocks[SUN50I_A64_CCU_CLOCKS] = {
 	},
 };
 
-static int
-sun50i_a64_ccu_probe(const struct device *dev)
-{
-	const struct ccu *self = to_ccu(dev);
-
-	/* Set CPUX to PLL_CPUX, APB to CPUX/4, AXI to CPUX/3. */
-	mmio_write_32(self->regs + CPUX_AXI_CFG_REG,
-	              CPUX_CLK_SRC(2) |
-	              CPUX_APB_CLK_M(3) |
-	              AXI_CLK_M(2));
-
-	/* Set AHB1 to PLL_PERIPH0/3 (200MHz), APB1 to AHB1/2 (100MHz). */
-	mmio_write_32(self->regs + AHB1_APB1_CFG_REG,
-	              AHB1_CLK_SRC(3) |
-	              APB1_CLK_DIV(1) |
-	              AHB1_PRE_DIV(2) |
-	              AHB1_CLK_P(0));
-
-	/* Set APB2 to OSC24M/1 (24MHz). */
-	mmio_write_32(self->regs + APB2_CFG_REG,
-	              APB2_CLK_SRC(1) |
-	              APB2_CLK_P(0) |
-	              APB2_CLK_M(0));
-
-	/* Set AHB2 to PLL_PERIPH0/2 (300MHz). */
-	mmio_write_32(self->regs + AHB2_CFG_REG,
-	              AHB2_CLK_SRC(1));
-
-	return SUCCESS;
-}
-
-static void
-sun50i_a64_ccu_release(const struct device *dev)
-{
-	const struct ccu *self = to_ccu(dev);
-
-	/* Set AHB1 to LOSC/1 (32kHz), APB1 to AHB1/2 (16kHz). */
-	mmio_write_32(self->regs + AHB1_APB1_CFG_REG,
-	              AHB1_CLK_SRC(0) |
-	              APB1_CLK_DIV(1) |
-	              AHB1_PRE_DIV(2) |
-	              AHB1_CLK_P(0));
-
-	/* Set AHB2 to AHB1/1 (32kHz). */
-	mmio_write_32(self->regs + AHB2_CFG_REG,
-	              AHB2_CLK_SRC(0));
-}
-
 static const struct clock_driver sun50i_a64_ccu_driver = {
 	.drv = {
-		.probe   = sun50i_a64_ccu_probe,
-		.release = sun50i_a64_ccu_release,
+		.probe   = dummy_probe,
+		.release = dummy_release,
 	},
 	.ops = {
 		.get_parent = ccu_get_parent,
@@ -228,3 +180,51 @@ const struct ccu ccu = {
 	.clocks = sun50i_a64_ccu_clocks,
 	.regs   = DEV_CCU,
 };
+
+void
+ccu_suspend(void)
+{
+	/* Set AHB1 to LOSC/1 (32kHz), APB1 to AHB1/2 (16kHz). */
+	mmio_write_32(DEV_CCU + AHB1_APB1_CFG_REG,
+	              AHB1_CLK_SRC(0) |
+	              APB1_CLK_DIV(1) |
+	              AHB1_PRE_DIV(2) |
+	              AHB1_CLK_P(0));
+
+	/* Set AHB2 to AHB1/1 (32kHz). */
+	mmio_write_32(DEV_CCU + AHB2_CFG_REG,
+	              AHB2_CLK_SRC(0));
+}
+
+void
+ccu_resume(void)
+{
+	/* Set CPUX to PLL_CPUX, APB to CPUX/4, AXI to CPUX/3. */
+	mmio_write_32(DEV_CCU + CPUX_AXI_CFG_REG,
+	              CPUX_CLK_SRC(2) |
+	              CPUX_APB_CLK_M(3) |
+	              AXI_CLK_M(2));
+
+	/* Set AHB1 to PLL_PERIPH0/3 (200MHz), APB1 to AHB1/2 (100MHz). */
+	mmio_write_32(DEV_CCU + AHB1_APB1_CFG_REG,
+	              AHB1_CLK_SRC(3) |
+	              APB1_CLK_DIV(1) |
+	              AHB1_PRE_DIV(2) |
+	              AHB1_CLK_P(0));
+
+	/* Set APB2 to OSC24M/1 (24MHz). */
+	mmio_write_32(DEV_CCU + APB2_CFG_REG,
+	              APB2_CLK_SRC(1) |
+	              APB2_CLK_P(0) |
+	              APB2_CLK_M(0));
+
+	/* Set AHB2 to PLL_PERIPH0/2 (300MHz). */
+	mmio_write_32(DEV_CCU + AHB2_CFG_REG,
+	              AHB2_CLK_SRC(1));
+}
+
+void
+ccu_init(void)
+{
+	ccu_resume();
+}

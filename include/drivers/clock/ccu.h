@@ -28,4 +28,8 @@ struct ccu {
 extern const struct ccu ccu;
 extern const struct ccu r_ccu;
 
+void ccu_suspend(void);
+void ccu_resume(void);
+void ccu_init(void);
+
 #endif /* DRIVERS_CLOCK_CCU_H */
