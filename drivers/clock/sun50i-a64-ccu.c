@@ -21,7 +21,7 @@
 
 #define CPUX_CLK_SRC(x)   ((x) << 16)
 #define CPUX_APB_CLK_M(x) ((x) << 8)
-#define AXI_CLK_M(x)      ((x) << 0)
+#define CPUX_AXI_CLK_M(x) ((x) << 0)
 
 #define AHB1_CLK_SRC(x)   ((x) << 12)
 #define APB1_CLK_DIV(x)   ((x) << 8)
@@ -190,7 +190,7 @@ ccu_resume(void)
 	mmio_write_32(DEV_CCU + CPUX_AXI_CFG_REG,
 	              CPUX_CLK_SRC(2) |
 	              CPUX_APB_CLK_M(3) |
-	              AXI_CLK_M(2));
+	              CPUX_AXI_CLK_M(2));
 
 	/* Set AHB1 to PLL_PERIPH0/3 (200MHz), APB1 to AHB1/2 (100MHz). */
 	mmio_write_32(DEV_CCU + AHB1_APB1_CFG_REG,
