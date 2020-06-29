@@ -13,7 +13,7 @@ config ASSERT
 		bugs at runtime. If in doubt, say Y.
 
 config ASSERT_VERBOSE
-	bool "Report information about failed assertions"
+	bool "Verbose logging of assertion failures"
 	depends on ASSERT
 	help
 		When an assertion fails, print detailed information
@@ -21,10 +21,14 @@ config ASSERT_VERBOSE
 		that was checked, as well as the file and line number of
 		the call to assert().
 
-		Enabling this option makes it significantly easier to
-		find the code that triggered an assertion failure. Note
-		that this option significantly increases the size of the
-		final firmware binary. If in doubt, say N.
+		The address of the failed assertion is printed with or
+		without this option. Since all of the other details can
+		be derived from the address and debug info (see below),
+		enabling this option is only necessary when debug info
+		is unavailable.
+
+		Note that this option significantly increases the size
+		of the final firmware binary. If in doubt, say N.
 
 config COMPILE_TEST
 	bool "Allow compiling a firmware that does not run"

@@ -7,6 +7,7 @@
 #define COMMON_DEBUG_H
 
 #include <stdint.h>
+#include <trap.h>
 
 #define LOG_STRING_ERROR   "\x01"
 #define LOG_STRING_WARNING "\x02"
@@ -15,10 +16,10 @@
 
 #if CONFIG(ASSERT)
 #if CONFIG(ASSERT_VERBOSE)
-#define assert(e) ((void)((e) || (panic("Assertion failed: %s (%s:%d)", #e, \
-	                                __FILE__, __LINE__), 0)))
+#define assert(e) ((void)((e) || (error("Assertion failed: %s (%s:%d)", #e, \
+	                                __FILE__, __LINE__), trap(), 0)))
 #else
-#define assert(e) ((void)((e) || (panic("Assertion failed: %d", __LINE__), 0)))
+#define assert(e) ((void)((e) || (trap(), 0)))
 #endif
 #else
 #define assert(e) ((void)0)
@@ -34,9 +35,7 @@ enum {
 
 void hexdump(uintptr_t addr, uint32_t bytes);
 void log(const char *fmt, ...) ATTRIBUTE(format(printf, 1, 2));
-noreturn void panic(const char *fmt, ...) ATTRIBUTE(format(printf, 1, 2));
 
-#define panic(...) panic(LOG_STRING_ERROR __VA_ARGS__)
 #define error(...) log(LOG_STRING_ERROR __VA_ARGS__)
 #define warn(...)  log(LOG_STRING_WARNING __VA_ARGS__)
 #define info(...)  log(LOG_STRING_INFO __VA_ARGS__)

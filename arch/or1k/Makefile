@@ -10,6 +10,5 @@ CFLAGS		+= -msfimm -mshftimm -msoft-div -msoft-mul
 obj-y += scp.ld.o
 
 obj-y += math.o
-obj-y += panic.o
 obj-y += runtime.o
 obj-y += start.o
