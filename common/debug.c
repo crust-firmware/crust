@@ -42,11 +42,9 @@ hexdump(uintptr_t addr, uint32_t bytes)
 		/* The ARISC processor's data lines are swapped in hardware for
 		 * compatibility with the little-endian ARM CPUs. To examine
 		 * individual bytes, we must reverse each group of 4 bytes. */
-		for (int i = BYTES_PER_WORD - 1; i < BYTES_PER_ROW; --i) {
-			char c = ((char *)addr)[i];
+		for (int i = 0; i < BYTES_PER_ROW; ++i) {
+			char c = ((char *)addr)[i ^ 3];
 			serial_putc(isprint(c) ? c : '.');
-			if (i % BYTES_PER_WORD == 0)
-				i += 2 * BYTES_PER_WORD;
 		}
 		serial_putc('\n');
 	}
