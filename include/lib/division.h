@@ -7,6 +7,15 @@
 #define LIB_DIVISION_H
 
 /**
+ * Perform correctly-rounded unsigned division.
+ */
+static inline uint32_t
+udiv_round(uint32_t dividend, uint32_t divisor)
+{
+	return (dividend + divisor / 2) / divisor;
+}
+
+/**
  * Perform unsigned division.
  *
  * This function replaces the dividend with the quotient and returns the

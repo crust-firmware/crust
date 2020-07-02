@@ -5,6 +5,7 @@
 
 #include <counter.h>
 #include <debug.h>
+#include <division.h>
 #include <regmap.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -21,7 +22,7 @@ debug_print_battery(void)
 {
 	const struct regmap *map = &axp20x.map;
 	uint64_t now = counter_read();
-	int32_t  current, voltage;
+	uint32_t current, voltage;
 	uint8_t  hi, lo, val;
 
 	if (now - last_tick > DELAY) {
@@ -39,7 +40,7 @@ debug_print_battery(void)
 			goto err_put_mfd;
 		if (regmap_read(map, 0x79, &lo))
 			goto err_put_mfd;
-		voltage = (((hi << 4) | (lo & 0xf)) * 1100 + 500) / 1000;
+		voltage = udiv_round(((hi << 4) | (lo & 0xf)) * 1100, 1000);
 
 		if (regmap_read(map, 0x7c, &hi))
 			goto err_put_mfd;
@@ -47,8 +48,8 @@ debug_print_battery(void)
 			goto err_put_mfd;
 		current = (hi << 4) | (lo & 0xf);
 
-		info("Using %d mW (%d mA @ %d mV)",
-		     (current * voltage + 500) / 1000, current, voltage);
+		info("Using %u mW (%u mA @ %u mV)",
+		     udiv_round(current * voltage, 1000), current, voltage);
 
 err_put_mfd:
 		regmap_user_release(map);

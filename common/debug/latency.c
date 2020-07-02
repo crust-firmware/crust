@@ -4,6 +4,7 @@
  */
 
 #include <debug.h>
+#include <division.h>
 #include <spr.h>
 #include <system.h>
 #include <platform/time.h>
@@ -26,7 +27,7 @@ debug_print_latency(void)
 		mtspr(SPR_TICK_TTCR_ADDR, 0);
 	} else if (iterations <= ITERATIONS && iterations++ == ITERATIONS) {
 		info("Latency: average %d cycles/iteration in state %d",
-		     (mfspr(SPR_TICK_TTCR_ADDR) + ITERATIONS / 2) / ITERATIONS,
+		     udiv_round(mfspr(SPR_TICK_TTCR_ADDR), ITERATIONS),
 		     current_state);
 		mtspr(SPR_TICK_TTMR_ADDR, 0);
 	}
