@@ -15,10 +15,10 @@
 #define BYTES_PER_WORD sizeof(uint32_t)
 
 static char *prefixes[LOG_LEVELS] = {
-	"ERROR:\t ",
-	"WARNING: ",
-	"INFO:\t ",
-	"DEBUG:\t ",
+	"SCP/ERR: ",
+	"SCP/WRN: ",
+	"SCP/INF: ",
+	"SCP/DBG: ",
 };
 
 static void print_number(uint32_t num, int base, int width, bool zero);
