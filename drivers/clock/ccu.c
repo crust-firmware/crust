@@ -38,8 +38,8 @@ ccu_get_rate(const struct clock_handle *clock, uint32_t rate)
 	return clk->get_rate(self, clk, rate);
 }
 
-static int
-ccu_get_state(const struct clock_handle *clock, int *state)
+static uint32_t
+ccu_get_state(const struct clock_handle *clock)
 {
 	const struct ccu *self      = to_ccu(clock->dev);
 	const struct ccu_clock *clk = &self->clocks[clock->id];
@@ -47,19 +47,17 @@ ccu_get_state(const struct clock_handle *clock, int *state)
 
 	/* Check the reset line, if present. */
 	if (clk->reset && !bitmap_get(regs, clk->reset))
-		*state = CLOCK_STATE_DISABLED;
+		return CLOCK_STATE_DISABLED;
 	/* Check the clock gate, if present. */
-	else if (clk->gate && !bitmap_get(regs, clk->gate))
-		*state = CLOCK_STATE_GATED;
-	/* Otherwise, the clock is enabled. */
-	else
-		*state = CLOCK_STATE_ENABLED;
+	if (clk->gate && !bitmap_get(regs, clk->gate))
+		return CLOCK_STATE_GATED;
 
-	return SUCCESS;
+	/* Otherwise, the clock is enabled. */
+	return CLOCK_STATE_ENABLED;
 }
 
-static int
-ccu_set_state(const struct clock_handle *clock, int state)
+static void
+ccu_set_state(const struct clock_handle *clock, uint32_t state)
 {
 	const struct ccu *self      = to_ccu(clock->dev);
 	const struct ccu_clock *clk = &self->clocks[clock->id];
@@ -82,8 +80,6 @@ ccu_set_state(const struct clock_handle *clock, int state)
 	/* Wait for the lock bit to be set, if applicable. */
 	if (clk->lock && ungate)
 		mmio_poll_32(regs + clk->reg, BIT(clk->lock));
-
-	return SUCCESS;
 }
 
 const struct clock_driver ccu_driver = {

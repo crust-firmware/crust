@@ -36,32 +36,29 @@ clock_state_for(const struct clock_handle *clock)
 	return &state->cs[clock->id];
 }
 
-int
+void
 clock_disable(const struct clock_handle *clock)
 {
 	/* Calling this function is only allowed after calling clock_get(). */
 	assert(clock_state_for(clock)->refcount);
 
-	return clock_ops_for(clock)->set_state(clock, CLOCK_STATE_GATED);
+	clock_ops_for(clock)->set_state(clock, CLOCK_STATE_GATED);
 }
 
-int
+void
 clock_enable(const struct clock_handle *clock)
 {
 	const struct clock_driver_ops *ops = clock_ops_for(clock);
 	const struct clock_handle *parent;
-	int err;
 
 	/* Calling this function is only allowed after calling clock_get(). */
 	assert(clock_state_for(clock)->refcount);
 
 	/* If the clock has a parent, ensure the parent is enabled. */
-	if ((parent = ops->get_parent(clock))) {
-		if ((err = clock_enable(parent)))
-			return err;
-	}
+	if ((parent = ops->get_parent(clock)))
+		clock_enable(parent);
 
-	return ops->set_state(clock, CLOCK_STATE_ENABLED);
+	ops->set_state(clock, CLOCK_STATE_ENABLED);
 }
 
 int
@@ -93,10 +90,7 @@ clock_get(const struct clock_handle *clock)
 	++state->refcount;
 
 	/* Enable the clock. */
-	if ((err = clock_enable(clock))) {
-		clock_put(clock);
-		return err;
-	}
+	clock_enable(clock);
 
 	return SUCCESS;
 }
@@ -112,29 +106,28 @@ clock_get_rate(const struct clock_handle *clock)
 	if ((parent = ops->get_parent(clock)))
 		rate = clock_get_rate(parent);
 
-	/* Call the driver function to adjust this clock's rate. */
+	/* Call the driver function to calculate this clock's rate. */
 	return ops->get_rate(clock, rate);
 }
 
-int
-clock_get_state(const struct clock_handle *clock, int *state)
+uint32_t
+clock_get_state(const struct clock_handle *clock)
 {
 	const struct clock_driver_ops *ops = clock_ops_for(clock);
 	const struct clock_handle *parent;
-	int err;
+	uint32_t parent_state;
 
 	/* If the clock has a parent, check the parent's state. */
 	if ((parent = ops->get_parent(clock))) {
-		if ((err = clock_get_state(parent, state)))
-			return err;
+		parent_state = clock_get_state(parent);
 
 		/* If the parent is not enabled, this clock has that state. */
-		if (*state != CLOCK_STATE_ENABLED)
-			return SUCCESS;
+		if (parent_state != CLOCK_STATE_ENABLED)
+			return parent_state;
 	}
 
-	/* Call the driver function to read any gate this clock may have. */
-	return ops->get_state(clock, state);
+	/* Call the driver function to check this clock's state. */
+	return ops->get_state(clock);
 }
 
 void

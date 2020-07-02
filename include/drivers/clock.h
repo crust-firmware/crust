@@ -24,14 +24,11 @@ struct clock_handle {
  * Disable a clock.
  *
  * If the clock does not have a gate, this may have no effect on the hardware.
- *
- * This function may fail with:
- *   EIO    There was a problem communicating with the hardware.
+ * The clock's parent, if any, will be left as it is.
  *
  * @param clock A reference to a clock.
- * @return      Zero on success; an error code on failure.
  */
-int clock_disable(const struct clock_handle *clock);
+void clock_disable(const struct clock_handle *clock);
 
 /**
  * Enable a clock.
@@ -39,13 +36,9 @@ int clock_disable(const struct clock_handle *clock);
  * If the clock does not have a gate, this may have no effect on the hardware.
  * The clock's parent, if any, will also be enabled.
  *
- * This function may fail with:
- *   EIO    There was a problem communicating with the hardware.
- *
  * @param clock A reference to a clock.
- * @return      Zero on success; an error code on failure.
  */
-int clock_enable(const struct clock_handle *clock);
+void clock_enable(const struct clock_handle *clock);
 
 /**
  * Get a reference to a clock and its controller device, and enable the clock.
@@ -79,10 +72,9 @@ uint32_t clock_get_rate(const struct clock_handle *clock);
  *   EIO    There was a problem communicating with the hardware.
  *
  * @param clock A reference to a clock.
- * @param state The location to store the calculated clock state.
- * @return      Zero on success; an error code on failure.
+ * @return      One of the enumerated clock states.
  */
-int clock_get_state(const struct clock_handle *clock, int *state);
+uint32_t clock_get_state(const struct clock_handle *clock);
 
 /**
  * Release a reference to a clock and its controller device.
