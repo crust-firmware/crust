@@ -13,7 +13,7 @@ noreturn void
 main(uint32_t exception)
 {
 	if (exception) {
-		error("Unhandled exception %u at %p!",
+		error("Exception %u at %p!",
 		      exception, (void *)mfspr(SPR_SYS_EPCR_ADDR(0)));
 	}
 

@@ -72,9 +72,6 @@ clock_get(const struct clock_handle *clock)
 	struct clock_state *state = clock_state_for(clock);
 	int err;
 
-	debug("%s: Getting clock %u #%u", clock->dev->name, clock->id,
-	      state->refcount + 1);
-
 	/* Perform additional setup if this is the first reference. */
 	if (!state->refcount) {
 		/* Ensure the controller's driver is loaded. */
@@ -87,6 +84,9 @@ clock_get(const struct clock_handle *clock)
 			device_put(clock->dev);
 			return err;
 		}
+
+		debug("%s: Clock %u running at %u Hz", clock->dev->name,
+		      clock->id, clock_get_rate(clock));
 	}
 
 	/* Bump the refcount only after successfully acquiring dependencies. */
@@ -97,9 +97,6 @@ clock_get(const struct clock_handle *clock)
 		clock_put(clock);
 		return err;
 	}
-
-	debug("%s: Clock %u running at %u Hz", clock->dev->name, clock->id,
-	      clock_get_rate(clock));
 
 	return SUCCESS;
 }
@@ -146,10 +143,6 @@ clock_put(const struct clock_handle *clock)
 	const struct clock_driver_ops *ops = clock_ops_for(clock);
 	const struct clock_handle *parent;
 	struct clock_state *state = clock_state_for(clock);
-	int err;
-
-	debug("%s: Putting clock %u #%u", clock->dev->name, clock->id,
-	      state->refcount);
 
 	/* Calling this function is only allowed after calling clock_get(). */
 	assert(state->refcount);
@@ -158,11 +151,10 @@ clock_put(const struct clock_handle *clock)
 	if (--state->refcount)
 		return;
 
+	debug("%s: Releasing clock %u", clock->dev->name, clock->id);
+
 	/* Completely disable the clock once the last consumer is gone. */
-	if ((err = ops->set_state(clock, CLOCK_STATE_DISABLED))) {
-		debug("%s: Clock %u release failed",
-		      clock->dev->name, clock->id);
-	}
+	ops->set_state(clock, CLOCK_STATE_DISABLED);
 
 	/* Drop the reference to the parent clock. */
 	if ((parent = ops->get_parent(clock)))

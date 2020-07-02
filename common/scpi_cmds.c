@@ -231,7 +231,7 @@ scpi_handle_cmd(uint8_t client, struct scpi_mem *mem)
 		tx_msg->status = cmd->handler(rx_msg->payload, tx_msg->payload,
 		                              &tx_msg->size);
 	} else {
-		warn("SCPI: Unknown command %u", rx_msg->command);
+		debug("SCPI%u: Bad command: %u", client, rx_msg->command);
 	}
 
 	/* Report back if a reply should be sent. */

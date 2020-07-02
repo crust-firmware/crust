@@ -26,9 +26,8 @@ debug_print_latency(void)
 		      SPR_TICK_TTMR_MODE_CONTINUE << SPR_TICK_TTMR_MODE_LSB);
 		mtspr(SPR_TICK_TTCR_ADDR, 0);
 	} else if (iterations <= ITERATIONS && iterations++ == ITERATIONS) {
-		info("Latency: average %d cycles/iteration in state %d",
-		     udiv_round(mfspr(SPR_TICK_TTCR_ADDR), ITERATIONS),
-		     current_state);
+		info("State %d: %d cycles/iteration", current_state,
+		     udiv_round(mfspr(SPR_TICK_TTCR_ADDR), ITERATIONS));
 		mtspr(SPR_TICK_TTMR_ADDR, 0);
 	}
 }

@@ -52,7 +52,7 @@ scpi_send_message(const struct device *mailbox, uint8_t client,
 	/* Notify the client that the message has been sent. */
 	if ((err = msgbox_send(mailbox, TX_CHAN(client),
 	                       SCPI_VIRTUAL_CHANNEL)))
-		error("SCPI.%u: Send error: %d", client, err);
+		warn("SCPI%u: Send error: %d", client, err);
 }
 
 void

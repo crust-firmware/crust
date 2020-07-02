@@ -17,11 +17,11 @@ device_get(const struct device *dev)
 		return ENODEV;
 
 	if (!dev->state->refcount) {
-		debug("%s: Probing", dev->name);
 		if ((err = dev->drv->probe(dev))) {
-			error("%s: Probe failed: %d", dev->name, err);
+			warn("%s: Probe failed: %d", dev->name, err);
 			return err;
 		}
+		debug("%s: Probed", dev->name);
 	}
 
 	/* Increment the refcount only after successful initialization. */
