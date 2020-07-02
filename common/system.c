@@ -128,6 +128,7 @@ system_state_machine(void)
 			device_put(mailbox), mailbox = NULL;
 
 			/* Synchronize device state with Linux. */
+			simple_device_sync(&pio);
 			simple_device_sync(&r_pio);
 
 			/* Configure the CCU for minimal power consumption. */

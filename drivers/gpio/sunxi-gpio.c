@@ -100,6 +100,16 @@ static const struct gpio_driver sunxi_gpio_driver = {
 	},
 };
 
+const struct simple_device pio = {
+	.dev = {
+		.name  = "pio",
+		.drv   = &sunxi_gpio_driver.drv,
+		.state = DEVICE_STATE_INIT,
+	},
+	.clock = { .dev = &ccu.dev, .id = CLK_BUS_PIO },
+	.regs  = DEV_PIO,
+};
+
 const struct simple_device r_pio = {
 	.dev = {
 		.name  = "r_pio",

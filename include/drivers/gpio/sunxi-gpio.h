@@ -30,6 +30,7 @@ enum {
 	PULL_DOWN = 2,
 };
 
+extern const struct simple_device pio;
 extern const struct simple_device r_pio;
 
 #endif /* DRIVERS_GPIO_SUNXI_GPIO_H */
