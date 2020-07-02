@@ -8,7 +8,6 @@
 #include <regmap.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <system.h>
 #include <util.h>
 #include <mfd/axp20x.h>
 #include <platform/time.h>
@@ -24,9 +23,6 @@ debug_print_battery(void)
 	uint64_t now = counter_read();
 	int32_t  current, voltage;
 	uint8_t  hi, lo, val;
-
-	if (system_is_running())
-		return;
 
 	if (now - last_tick > DELAY) {
 		if (regmap_user_probe(map))

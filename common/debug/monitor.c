@@ -114,8 +114,6 @@ debug_monitor(void)
 {
 	unsigned char c;
 
-	if (system_is_running())
-		return;
 	if (!(c = serial_getc()))
 		return;
 

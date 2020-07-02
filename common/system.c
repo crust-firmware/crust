@@ -99,7 +99,13 @@ system_state_machine(void)
 			if (mailbox)
 				scpi_poll(mailbox);
 
-			break;
+			/*
+			 * Skip debugging hooks while the system is active,
+			 * even after triggering a state transition. This
+			 * avoids clobbering device state before the suspend
+			 * procedure runs.
+			 */
+			continue;
 		case SYSTEM_SUSPEND:
 		case SYSTEM_SHUTDOWN:
 			debug("Suspending...");
