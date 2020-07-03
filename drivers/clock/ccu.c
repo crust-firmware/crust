@@ -65,6 +65,10 @@ ccu_set_state(const struct clock_handle *clock, uint32_t state)
 	bool ungate    = state > CLOCK_STATE_GATED;
 	uintptr_t regs = self->regs;
 
+	/* Do nothing if the clock is already in the desired state. */
+	if (ccu_get_state(clock) == state)
+		return;
+
 	/* Ungate the clock before taking the device out of reset. */
 	if (clk->gate && ungate)
 		bitmap_set(regs, clk->gate);
