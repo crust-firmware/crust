@@ -8,6 +8,12 @@
 #include <error.h>
 #include <stddef.h>
 
+bool
+device_active(const struct device *dev)
+{
+	return dev->state->refcount;
+}
+
 int
 device_get(const struct device *dev)
 {

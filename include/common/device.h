@@ -43,6 +43,14 @@ struct driver {
 };
 
 /**
+ * Determine if a device is active (if it has any outstanding references).
+ *
+ * @param dev A device.
+ * @return    The state of the device.
+ */
+bool device_active(const struct device *dev);
+
+/**
  * Get a reference to a device.
  *
  * If this is the first reference to a device, that device's driver will be
