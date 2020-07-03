@@ -61,6 +61,9 @@ log(const char *fmt, ...)
 
 	assert(fmt);
 
+	if (!serial_ready())
+		return;
+
 	level = *fmt - 1;
 	if (level < LOG_LEVELS) {
 		serial_puts(prefixes[level]);

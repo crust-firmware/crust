@@ -13,5 +13,5 @@ obj-y += msgbox/
 obj-y += pmic/
 obj-y += regmap/
 obj-y += regulator/
-obj-y += serial/
+obj-$(CONFIG_SERIAL) += serial/
 obj-y += watchdog/

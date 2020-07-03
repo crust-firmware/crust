@@ -11,4 +11,10 @@ source "mfd/Kconfig"
 source "pmic/Kconfig"
 source "regulator/Kconfig"
 
+config SERIAL
+	bool "Serial input/output support"
+	default y
+	help
+		Use a serial port (UART) for error logs and debugging.
+
 endmenu

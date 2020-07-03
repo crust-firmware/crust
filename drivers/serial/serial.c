@@ -45,3 +45,9 @@ serial_puts(const char *s)
 	while ((c = *s++))
 		serial_putc(c);
 }
+
+bool
+serial_ready(void)
+{
+	return true;
+}

@@ -114,6 +114,8 @@ debug_monitor(void)
 {
 	unsigned char c;
 
+	if (!serial_ready())
+		return;
 	if (!(c = serial_getc()))
 		return;
 
