@@ -20,6 +20,11 @@ void serial_putc(char c);
 void serial_puts(const char *s);
 
 /**
+ * Initialize the UART.
+ */
+void serial_init(void);
+
+/**
  * Verify that the UART is ready to use.
  *
  * This function must be called before performing any I/O. Other serial I/O
@@ -42,6 +47,11 @@ serial_putc(char c UNUSED)
 
 static inline void
 serial_puts(const char *s UNUSED)
+{
+}
+
+static inline void
+serial_init(void)
 {
 }
 

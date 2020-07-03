@@ -5,27 +5,16 @@
 
 #include <mmio.h>
 #include <serial.h>
-#include <util.h>
-#include <platform/devices.h>
 
-enum {
-	UART_RBR = 0x0000,
-	UART_THR = 0x0000,
-	UART_LSR = 0x0014,
-};
-
-enum {
-	UART_LSR_DR   = BIT(0),
-	UART_LSR_THRE = BIT(5),
-};
+#include "uart.h"
 
 char
 serial_getc(void)
 {
-	if (!mmio_get_32(DEV_UART0 + UART_LSR, UART_LSR_DR))
+	if (!mmio_get_32(uart.regs + UART_LSR, UART_LSR_DR))
 		return 0;
 
-	return mmio_read_32(DEV_UART0 + UART_RBR);
+	return mmio_read_32(uart.regs + UART_RBR);
 }
 
 void
@@ -33,8 +22,8 @@ serial_putc(char c)
 {
 	if (c == '\n')
 		serial_putc('\r');
-	mmio_poll_32(DEV_UART0 + UART_LSR, UART_LSR_THRE);
-	mmio_write_32(DEV_UART0 + UART_THR, c);
+	mmio_poll_32(uart.regs + UART_LSR, UART_LSR_THRE);
+	mmio_write_32(uart.regs + UART_THR, c);
 }
 
 void
@@ -46,8 +35,23 @@ serial_puts(const char *s)
 		serial_putc(c);
 }
 
+void
+serial_init(void)
+{
+	device_get(&uart.dev);
+}
+
 bool
 serial_ready(void)
 {
-	return true;
+	bool ready = device_active(&uart.dev);
+
+	/*
+	 * If the UART is shared with other users, its clock may have been
+	 * gated. Ensure the clock is running before accessing the device.
+	 */
+	if (ready)
+		clock_enable(&uart.clock);
+
+	return ready;
 }

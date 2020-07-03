@@ -4,6 +4,7 @@
  */
 
 #include <debug.h>
+#include <serial.h>
 #include <spr.h>
 #include <system.h>
 
@@ -12,6 +13,9 @@ noreturn void main(uint32_t exception);
 noreturn void
 main(uint32_t exception)
 {
+	/* Enable logging via serial port as soon as possible. */
+	serial_init();
+
 	if (exception) {
 		error("Exception %u at %p!",
 		      exception, (void *)mfspr(SPR_SYS_EPCR_ADDR(0)));
