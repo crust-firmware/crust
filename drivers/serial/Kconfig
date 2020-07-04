@@ -23,6 +23,9 @@ config SERIAL_DEV_UART4
 	bool "UART4"
 	depends on SOC_A64 || PLATFORM_A83T
 
+config SERIAL_DEV_R_UART
+	bool "R_UART"
+
 endchoice
 
 config SERIAL_BAUD
