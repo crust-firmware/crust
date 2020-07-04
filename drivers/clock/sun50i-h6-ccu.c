@@ -46,10 +46,30 @@ sun50i_h6_ccu_fixed_get_rate(const struct ccu *self UNUSED,
 	return 600000000U;
 }
 
+/*
+ * APB2 has a mux, but it is assumed to always select OSC24M. Reparenting APB2
+ * to PLL_PERIPH0 in Linux for faster UART clocks is unsupported.
+ */
+static const struct clock_handle sun50i_h6_ccu_apb2_parent = {
+	.dev = &r_ccu.dev,
+	.id  = CLK_OSC24M,
+};
+
+static const struct clock_handle *
+sun50i_h6_ccu_apb2_get_parent(const struct ccu *self UNUSED,
+                              const struct ccu_clock *clk UNUSED)
+{
+	return &sun50i_h6_ccu_apb2_parent;
+}
+
 static const struct ccu_clock sun50i_h6_ccu_clocks[SUN50I_H6_CCU_CLOCKS] = {
 	[CLK_PLL_PERIPH0] = {
 		.get_parent = ccu_helper_get_parent,
 		.get_rate   = sun50i_h6_ccu_fixed_get_rate,
+	},
+	[CLK_APB2] = {
+		.get_parent = sun50i_h6_ccu_apb2_get_parent,
+		.get_rate   = ccu_helper_get_rate,
 	},
 	[CLK_BUS_MSGBOX] = {
 		.get_parent = ccu_helper_get_parent,
@@ -121,16 +141,16 @@ ccu_resume(void)
 	              APB1_CLK_SRC(3) |
 	              APB1_CLK_P(1) |
 	              APB1_CLK_M(2));
-
-	/* Set APB2 to OSC24M/1 (24MHz). */
-	mmio_write_32(DEV_CCU + APB2_CFG_REG,
-	              APB2_CLK_SRC(0) |
-	              APB2_CLK_P(0) |
-	              APB2_CLK_M(0));
 }
 
 void
 ccu_init(void)
 {
+	/* Set APB2 to OSC24M/1 (24MHz). */
+	mmio_write_32(DEV_CCU + APB2_CFG_REG,
+	              APB2_CLK_SRC(0) |
+	              APB2_CLK_P(0) |
+	              APB2_CLK_M(0));
+
 	ccu_resume();
 }

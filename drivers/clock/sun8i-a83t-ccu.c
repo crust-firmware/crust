@@ -12,6 +12,12 @@
 
 #include "ccu.h"
 
+#define APB2_CFG_REG    0x0058
+
+#define APB2_CLK_SRC(x) ((x) << 24)
+#define APB2_CLK_P(x)   ((x) << 16)
+#define APB2_CLK_M(x)   ((x) << 0)
+
 static uint32_t
 sun8i_a83t_ccu_fixed_get_rate(const struct ccu *self UNUSED,
                               const struct ccu_clock *clk UNUSED,
@@ -20,10 +26,30 @@ sun8i_a83t_ccu_fixed_get_rate(const struct ccu *self UNUSED,
 	return 600000000U;
 }
 
+/*
+ * APB2 has a mux, but it is assumed to always select OSC24M. Reparenting APB2
+ * to PLL_PERIPH0 in Linux for faster UART clocks is unsupported.
+ */
+static const struct clock_handle sun8i_a83t_ccu_apb2_parent = {
+	.dev = &r_ccu.dev,
+	.id  = CLK_OSC24M,
+};
+
+static const struct clock_handle *
+sun8i_a83t_ccu_apb2_get_parent(const struct ccu *self UNUSED,
+                               const struct ccu_clock *clk UNUSED)
+{
+	return &sun8i_a83t_ccu_apb2_parent;
+}
+
 static const struct ccu_clock sun8i_a83t_ccu_clocks[SUN8I_A83T_CCU_CLOCKS] = {
 	[CLK_PLL_PERIPH0] = {
 		.get_parent = ccu_helper_get_parent,
 		.get_rate   = sun8i_a83t_ccu_fixed_get_rate,
+	},
+	[CLK_APB2] = {
+		.get_parent = sun8i_a83t_ccu_apb2_get_parent,
+		.get_rate   = ccu_helper_get_rate,
 	},
 	[CLK_BUS_MSGBOX] = {
 		.get_parent = ccu_helper_get_parent,
@@ -61,5 +87,11 @@ ccu_resume(void)
 void
 ccu_init(void)
 {
+	/* Set APB2 to OSC24M/1 (24MHz). */
+	mmio_write_32(DEV_CCU + APB2_CFG_REG,
+	              APB2_CLK_SRC(1) |
+	              APB2_CLK_P(0) |
+	              APB2_CLK_M(0));
+
 	ccu_resume();
 }
