@@ -42,6 +42,18 @@ sun8i_a83t_ccu_apb2_get_parent(const struct ccu *self UNUSED,
 	return &sun8i_a83t_ccu_apb2_parent;
 }
 
+static const struct clock_handle sun8i_a83t_ccu_apb2_dev_parent = {
+	.dev = &ccu.dev,
+	.id  = CLK_APB2,
+};
+
+static const struct clock_handle *
+sun8i_a83t_ccu_apb2_dev_get_parent(const struct ccu *self UNUSED,
+                                   const struct ccu_clock *clk UNUSED)
+{
+	return &sun8i_a83t_ccu_apb2_dev_parent;
+}
+
 static const struct ccu_clock sun8i_a83t_ccu_clocks[SUN8I_A83T_CCU_CLOCKS] = {
 	[CLK_PLL_PERIPH0] = {
 		.get_parent = ccu_helper_get_parent,
@@ -61,6 +73,36 @@ static const struct ccu_clock sun8i_a83t_ccu_clocks[SUN8I_A83T_CCU_CLOCKS] = {
 		.get_parent = ccu_helper_get_parent,
 		.get_rate   = ccu_helper_get_rate,
 		.gate       = BITMAP_INDEX(0x0068, 5),
+	},
+	[CLK_BUS_UART0] = {
+		.get_parent = sun8i_a83t_ccu_apb2_dev_get_parent,
+		.get_rate   = ccu_helper_get_rate,
+		.gate       = BITMAP_INDEX(0x006c, 16),
+		.reset      = BITMAP_INDEX(0x02d8, 16),
+	},
+	[CLK_BUS_UART1] = {
+		.get_parent = sun8i_a83t_ccu_apb2_dev_get_parent,
+		.get_rate   = ccu_helper_get_rate,
+		.gate       = BITMAP_INDEX(0x006c, 17),
+		.reset      = BITMAP_INDEX(0x02d8, 17),
+	},
+	[CLK_BUS_UART2] = {
+		.get_parent = sun8i_a83t_ccu_apb2_dev_get_parent,
+		.get_rate   = ccu_helper_get_rate,
+		.gate       = BITMAP_INDEX(0x006c, 18),
+		.reset      = BITMAP_INDEX(0x02d8, 18),
+	},
+	[CLK_BUS_UART3] = {
+		.get_parent = sun8i_a83t_ccu_apb2_dev_get_parent,
+		.get_rate   = ccu_helper_get_rate,
+		.gate       = BITMAP_INDEX(0x006c, 19),
+		.reset      = BITMAP_INDEX(0x02d8, 19),
+	},
+	[CLK_BUS_UART4] = {
+		.get_parent = sun8i_a83t_ccu_apb2_dev_get_parent,
+		.get_rate   = ccu_helper_get_rate,
+		.gate       = BITMAP_INDEX(0x006c, 20),
+		.reset      = BITMAP_INDEX(0x02d8, 20),
 	},
 };
 

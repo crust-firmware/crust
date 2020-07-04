@@ -58,6 +58,18 @@ sun50i_a64_ccu_apb2_get_parent(const struct ccu *self UNUSED,
 	return &sun50i_a64_ccu_apb2_parent;
 }
 
+static const struct clock_handle sun50i_a64_ccu_apb2_dev_parent = {
+	.dev = &ccu.dev,
+	.id  = CLK_APB2,
+};
+
+static const struct clock_handle *
+sun50i_a64_ccu_apb2_dev_get_parent(const struct ccu *self UNUSED,
+                                   const struct ccu_clock *clk UNUSED)
+{
+	return &sun50i_a64_ccu_apb2_dev_parent;
+}
+
 static const struct clock_handle sun50i_a64_ccu_dram_parents[] = {
 	{
 		.dev = &ccu.dev,
@@ -135,6 +147,38 @@ static const struct ccu_clock sun50i_a64_ccu_clocks[SUN50I_A64_CCU_CLOCKS] = {
 		.get_rate   = ccu_helper_get_rate,
 		.gate       = BITMAP_INDEX(0x0068, 5),
 	},
+	[CLK_BUS_UART0] = {
+		.get_parent = sun50i_a64_ccu_apb2_dev_get_parent,
+		.get_rate   = ccu_helper_get_rate,
+		.gate       = BITMAP_INDEX(0x006c, 16),
+		.reset      = BITMAP_INDEX(0x02d8, 16),
+	},
+	[CLK_BUS_UART1] = {
+		.get_parent = sun50i_a64_ccu_apb2_dev_get_parent,
+		.get_rate   = ccu_helper_get_rate,
+		.gate       = BITMAP_INDEX(0x006c, 17),
+		.reset      = BITMAP_INDEX(0x02d8, 17),
+	},
+	[CLK_BUS_UART2] = {
+		.get_parent = sun50i_a64_ccu_apb2_dev_get_parent,
+		.get_rate   = ccu_helper_get_rate,
+		.gate       = BITMAP_INDEX(0x006c, 18),
+		.reset      = BITMAP_INDEX(0x02d8, 18),
+	},
+	[CLK_BUS_UART3] = {
+		.get_parent = sun50i_a64_ccu_apb2_dev_get_parent,
+		.get_rate   = ccu_helper_get_rate,
+		.gate       = BITMAP_INDEX(0x006c, 19),
+		.reset      = BITMAP_INDEX(0x02d8, 19),
+	},
+#if CONFIG(SOC_A64)
+	[CLK_BUS_UART4] = {
+		.get_parent = sun50i_a64_ccu_apb2_dev_get_parent,
+		.get_rate   = ccu_helper_get_rate,
+		.gate       = BITMAP_INDEX(0x006c, 20),
+		.reset      = BITMAP_INDEX(0x02d8, 20),
+	},
+#endif
 	[CLK_DRAM] = {
 		.get_parent = sun50i_a64_ccu_dram_get_parent,
 		.get_rate   = ccu_helper_get_rate,
