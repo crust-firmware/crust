@@ -31,6 +31,11 @@ static const struct ccu_clock sun8i_a83t_ccu_clocks[SUN8I_A83T_CCU_CLOCKS] = {
 		.gate       = BITMAP_INDEX(0x0064, 21),
 		.reset      = BITMAP_INDEX(0x02c4, 21),
 	},
+	[CLK_BUS_PIO] = {
+		.get_parent = ccu_helper_get_parent,
+		.get_rate   = ccu_helper_get_rate,
+		.gate       = BITMAP_INDEX(0x0068, 5),
+	},
 };
 
 const struct ccu ccu = {

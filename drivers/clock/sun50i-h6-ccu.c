@@ -57,6 +57,10 @@ static const struct ccu_clock sun50i_h6_ccu_clocks[SUN50I_H6_CCU_CLOCKS] = {
 		.gate       = BITMAP_INDEX(0x071c, 0),
 		.reset      = BITMAP_INDEX(0x071c, 16),
 	},
+	[CLK_BUS_PIO] = {
+		.get_parent = ccu_helper_get_parent,
+		.get_rate   = ccu_helper_get_rate,
+	},
 };
 
 const struct ccu ccu = {
