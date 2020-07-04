@@ -1,0 +1,40 @@
+#
+# Copyright © 2017-2020 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+choice
+	bool "Device"
+	default SERIAL_DEV_UART0
+
+config SERIAL_DEV_UART0
+	bool "UART0"
+
+config SERIAL_DEV_UART1
+	bool "UART1"
+
+config SERIAL_DEV_UART2
+	bool "UART2"
+
+config SERIAL_DEV_UART3
+	bool "UART3"
+
+config SERIAL_DEV_UART4
+	bool "UART4"
+	depends on SOC_A64 || PLATFORM_A83T
+
+endchoice
+
+config SERIAL_BAUD
+	int "Baud" if !SERIAL_DEV_UART0
+	range 0 1000000
+	default 0 if SERIAL_DEV_UART0
+	default 115200
+	help
+		If a positive number is entered, the firmware will set
+		up the serial port with that baud rate before using it.
+
+		If zero is entered, the firmware will assume the serial
+		port is already configured and keep the existing baud
+		rate. Use this option if the port is shared with other
+		users.

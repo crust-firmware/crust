@@ -12,7 +12,20 @@
 enum {
 	UART_RBR = 0x0000,
 	UART_THR = 0x0000,
+	UART_DLL = 0x0000,
+	UART_DLH = 0x0004,
+	UART_FCR = 0x0008,
+	UART_LCR = 0x000c,
 	UART_LSR = 0x0014,
+};
+
+enum {
+	UART_FCR_FIFOE = BIT(0),
+};
+
+enum {
+	UART_LCR_DLAB = BIT(7),
+	UART_LCR_DLS8 = GENMASK(1, 0),
 };
 
 enum {
