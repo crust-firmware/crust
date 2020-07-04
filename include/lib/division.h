@@ -6,6 +6,8 @@
 #ifndef LIB_DIVISION_H
 #define LIB_DIVISION_H
 
+#include <stdint.h>
+
 /**
  * Perform correctly-rounded unsigned division.
  */
