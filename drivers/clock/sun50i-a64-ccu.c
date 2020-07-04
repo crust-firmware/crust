@@ -42,18 +42,6 @@ sun50i_a64_ccu_fixed_get_rate(const struct ccu *self UNUSED,
 	return 600000000U;
 }
 
-static const struct clock_handle sun50i_a64_ccu_cpux_parent = {
-	.dev = &ccu.dev,
-	.id  = CLK_PLL_CPUX,
-};
-
-static const struct clock_handle *
-sun50i_a64_ccu_cpux_get_parent(const struct ccu *self UNUSED,
-                               const struct ccu_clock *clk UNUSED)
-{
-	return &sun50i_a64_ccu_cpux_parent;
-}
-
 static const struct clock_handle sun50i_a64_ccu_dram_parents[] = {
 	{
 		.dev = &ccu.dev,
@@ -111,11 +99,6 @@ static const struct ccu_clock sun50i_a64_ccu_clocks[SUN50I_A64_CCU_CLOCKS] = {
 		.gate       = BITMAP_INDEX(0x004c, 31),
 	},
 #endif
-	[CLK_CPUX] = {
-		.get_parent = sun50i_a64_ccu_cpux_get_parent,
-		.get_rate   = ccu_helper_get_rate,
-		.reg        = 0x0050,
-	},
 	[CLK_BUS_DRAM] = {
 		.get_parent = ccu_helper_get_parent,
 		.get_rate   = ccu_helper_get_rate,
@@ -152,9 +135,22 @@ const struct ccu ccu = {
 	.regs   = DEV_CCU,
 };
 
+static const struct clock_handle pll_cpux = {
+	.dev = &ccu.dev,
+	.id  = CLK_PLL_CPUX,
+};
+
 void
 ccu_suspend(void)
 {
+	/* Set CPUX to LOSC (32kHz), APB to CPUX/4, AXI to CPUX/3. */
+	mmio_write_32(DEV_CCU + CPUX_AXI_CFG_REG,
+	              CPUX_CLK_SRC(0) |
+	              CPUX_APB_CLK_M(3) |
+	              CPUX_AXI_CLK_M(2));
+
+	clock_put(&pll_cpux);
+
 	/* Set AHB1 to LOSC/1 (32kHz), APB1 to AHB1/2 (16kHz). */
 	mmio_write_32(DEV_CCU + AHB1_APB1_CFG_REG,
 	              AHB1_CLK_SRC(0) |
@@ -170,6 +166,8 @@ ccu_suspend(void)
 void
 ccu_resume(void)
 {
+	clock_get(&pll_cpux);
+
 	/* Set CPUX to PLL_CPUX, APB to CPUX/4, AXI to CPUX/3. */
 	mmio_write_32(DEV_CCU + CPUX_AXI_CFG_REG,
 	              CPUX_CLK_SRC(2) |

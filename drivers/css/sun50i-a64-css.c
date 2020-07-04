@@ -157,7 +157,6 @@ enum {
 	BUS_DRAM,
 	MBUS,
 	DRAM,
-	CPUX,
 };
 
 static const struct clock_handle css_clocks[] = {
@@ -172,10 +171,6 @@ static const struct clock_handle css_clocks[] = {
 	[DRAM] = {
 		.dev = &ccu.dev,
 		.id  = CLK_DRAM,
-	},
-	[CPUX] = {
-		.dev = &ccu.dev,
-		.id  = CLK_CPUX,
 	},
 };
 
@@ -243,7 +238,6 @@ css_init(void)
 	/* Get references to clocks that are already running. */
 	clock_get(&css_clocks[MBUS]);
 	clock_get(&css_clocks[DRAM]);
-	clock_get(&css_clocks[CPUX]);
 }
 
 int
@@ -381,8 +375,6 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 		return SCPI_OK;
 
 	if (state == SCPI_CSS_ON) {
-		/* Enable the CPUX clock. */
-		clock_get(&css_clocks[CPUX]);
 		/* Apply power to the cluster power domain. */
 		css_set_power_switch(CPU_PWR_CLAMP_REG(0), true);
 		/* Release the cluster output clamps. */
@@ -434,8 +426,6 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 		mmio_set_32(CLUSTER_PWROFF_GATING_REG, BIT(0));
 		/* Remove power from the cluster power domain. */
 		css_set_power_switch(CPU_PWR_CLAMP_REG(0), false);
-		/* Disable the CPUX clock. */
-		clock_put(&css_clocks[CPUX]);
 	} else {
 		return SCPI_E_PARAM;
 	}

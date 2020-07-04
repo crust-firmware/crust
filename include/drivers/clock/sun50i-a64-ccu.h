@@ -13,7 +13,6 @@ enum {
 #if CONFIG(SOC_A64)
 	CLK_PLL_DDR1,
 #endif
-	CLK_CPUX,
 	CLK_BUS_DRAM,
 	CLK_BUS_MSGBOX,
 	CLK_DRAM,
