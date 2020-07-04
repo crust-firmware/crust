@@ -137,6 +137,12 @@ const struct ccu ccu = {
 void
 ccu_suspend(void)
 {
+	/* Set CPUX to LOSC (32kHz), APB to CPUX/4, AXI to CPUX/3. */
+	mmio_write_32(DEV_CCU + CPUX_AXI_CFG_REG,
+	              CPUX_CLK_SRC(1) |
+	              CPUX_APB_CLK_M(3) |
+	              CPUX_AXI_CLK_M(2));
+
 	/* Set PSI/AHB1/AHB2 to LOSC/1 (32kHz). */
 	mmio_write_32(DEV_CCU + PSI_CFG_REG,
 	              PSI_CLK_SRC(1) |
