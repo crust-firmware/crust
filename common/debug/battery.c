@@ -3,29 +3,26 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <counter.h>
 #include <debug.h>
 #include <division.h>
 #include <regmap.h>
-#include <stddef.h>
 #include <stdint.h>
+#include <timeout.h>
 #include <util.h>
 #include <mfd/axp20x.h>
-#include <platform/time.h>
 
-#define DELAY (30 * REFCLK_HZ)
+#define MEASUREMENT_INTERVAL (30 * USEC_PER_SEC) /* 30s */
 
-static uint64_t last_tick;
+static uint32_t timeout;
 
 void
 debug_print_battery(void)
 {
 	const struct regmap *map = &axp20x.map;
-	uint64_t now = counter_read();
 	uint32_t current, voltage;
 	uint8_t  hi, lo, val;
 
-	if (now - last_tick > DELAY) {
+	if (timeout_expired(timeout)) {
 		if (regmap_user_probe(map))
 			return;
 
@@ -53,6 +50,6 @@ debug_print_battery(void)
 
 err_put_mfd:
 		regmap_user_release(map);
-		last_tick = now;
+		timeout = timeout_set(MEASUREMENT_INTERVAL);
 	}
 }

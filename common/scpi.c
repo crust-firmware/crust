@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <counter.h>
 #include <debug.h>
 #include <error.h>
 #include <msgbox.h>
@@ -11,17 +10,17 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <platform/time.h>
+#include <timeout.h>
 
 #define SCPI_MEM_AREA(n) (__scpi_mem[SCPI_CLIENTS - n - 1])
 
-#define SCPI_TX_TIMEOUT  (10 * REFCLK_KHZ) /* 10ms */
+#define SCPI_TX_TIMEOUT  (10 * USEC_PER_MSEC) /* 10ms */
 
 #define RX_CHAN(client)  (2 * (client))
 #define TX_CHAN(client)  (2 * (client) + 1)
 
 struct scpi_state {
-	uint64_t timeout;
+	uint32_t timeout;
 	bool     tx_full;
 };
 
@@ -45,7 +44,7 @@ scpi_send_message(const struct device *mailbox, uint8_t client,
 	barrier();
 
 	/* Ensure the timeout is updated before triggering transmission. */
-	state->timeout = counter_read() + SCPI_TX_TIMEOUT;
+	state->timeout = timeout_set(SCPI_TX_TIMEOUT);
 	state->tx_full = true;
 	barrier();
 
@@ -94,7 +93,7 @@ scpi_poll_one_client(const struct device *mailbox, uint8_t client)
 	 * previously-sent message is acknowledged or when it times out. */
 	if (state->tx_full) {
 		if (msgbox_last_tx_done(mailbox, tx_chan) ||
-		    counter_read() > state->timeout)
+		    timeout_expired(state->timeout))
 			state->tx_full = false;
 	}
 
