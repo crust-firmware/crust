@@ -36,6 +36,6 @@ func start
 	l.addi	r3, r3, 4
 	l.movhi	r1, hi(__stack_end)
 	l.ori	r1, r1, lo(__stack_end)	# Initialize stack pointer
-	l.j	main			# Jump to C entry point
+	l.j	system_state_machine	# Jump to C entry point
 	l.or	r3, r2, r2
 endfunc start

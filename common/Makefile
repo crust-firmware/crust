@@ -8,7 +8,6 @@ obj-y += debug/
 obj-y += debug.o
 obj-y += delay.o
 obj-y += device.o
-obj-y += main.o
 obj-y += regulator_list.o
 obj-y += scpi.o
 obj-y += scpi_cmds.o

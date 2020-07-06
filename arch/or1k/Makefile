@@ -10,6 +10,7 @@ CFLAGS		+= -msfimm -mshftimm -msoft-div -msoft-mul
 obj-y += scp.ld.o
 
 obj-y += counter.o
+obj-y += exception.o
 obj-y += math.o
 obj-y += runtime.o
 obj-y += start.o

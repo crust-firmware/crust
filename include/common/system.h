@@ -7,6 +7,7 @@
 #define COMMON_SYSTEM_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 enum {
 	SYSTEM_INVALID,  /**< Uninitialized state machine (initial state). */
@@ -38,9 +39,11 @@ bool system_is_running(void) ATTRIBUTE(pure);
 /**
  * Perform system state management.
  *
- * This is the main loop of the firmware, and never returns.
+ * This is the main loop of the firmware, which never returns.
+ *
+ * @param exception Exception information provided by startup assembly code.
  */
-noreturn void system_state_machine(void);
+noreturn void system_state_machine(uint32_t exception);
 
 /**
  * Reboot the board, including the SoC and external peripherals.

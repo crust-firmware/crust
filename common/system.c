@@ -8,11 +8,13 @@
 #include <debug.h>
 #include <delay.h>
 #include <device.h>
+#include <exception.h>
 #include <irq.h>
 #include <pmic.h>
 #include <regulator.h>
 #include <regulator_list.h>
 #include <scpi.h>
+#include <serial.h>
 #include <simple_device.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -46,7 +48,7 @@ system_is_running(void)
 }
 
 noreturn void
-system_state_machine(void)
+system_state_machine(uint32_t exception)
 {
 	const struct device *mailbox, *pmic, *watchdog;
 	uint8_t cpus;
@@ -77,17 +79,29 @@ system_state_machine(void)
 
 		/* Acquire runtime-only devices. */
 		mailbox = device_get_or_null(&msgbox.dev);
+	}
 
-		/*
-		 * If only CPU0 is online, assume Linux has not booted yet, and
-		 * Trusted Firmware is waiting for an SCP_READY message. Skip
-		 * sending SCP_READY otherwise, to avoid filling up the mailbox
-		 * when nothing is listening.
-		 */
-		if (mailbox && cpus == BIT(0)) {
-			scpi_create_message(mailbox, SCPI_CLIENT_EL3,
-			                    SCPI_CMD_SCP_READY);
-		}
+	/*
+	 * Initialize the serial port. Unless a preinitialized port (UART0) is
+	 * selected, errors occurring before this function call will not be
+	 * logged, and exceptions (such as those caused by assertion failures)
+	 * could result in a silent infinite loop.
+	 */
+	serial_init();
+
+	/* Log startup messages. */
+	report_exception(exception);
+	debug_print_sprs();
+
+	/*
+	 * If only CPU0 is online, assume Linux has not booted yet, and
+	 * Trusted Firmware is waiting for the SCP_READY message. Skip
+	 * sending SCP_READY otherwise, to avoid filling up the mailbox
+	 * when nothing is listening.
+	 */
+	if (mailbox && cpus == BIT(0)) {
+		scpi_create_message(mailbox, SCPI_CLIENT_EL3,
+		                    SCPI_CMD_SCP_READY);
 	}
 
 	for (;;) {
