@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
+#include <counter.h>
 #include <css.h>
 #include <debug.h>
 #include <delay.h>
@@ -70,6 +71,7 @@ system_state_machine(void)
 		watchdog = device_get_or_null(&r_twd.dev);
 
 		/* Perform one-time device driver initialization. */
+		counter_init();
 		ccu_init();
 		css_init();
 

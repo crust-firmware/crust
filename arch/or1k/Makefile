@@ -9,6 +9,7 @@ CFLAGS		+= -msfimm -mshftimm -msoft-div -msoft-mul
 # The first object is used as the linker script.
 obj-y += scp.ld.o
 
+obj-y += counter.o
 obj-y += math.o
 obj-y += runtime.o
 obj-y += start.o

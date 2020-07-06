@@ -4,7 +4,6 @@
 #
 
 obj-y += clock/
-obj-y += counter/
 obj-y += css/
 obj-y += gpio/
 obj-y += irq/
