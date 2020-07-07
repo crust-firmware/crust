@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
+#include <debug.h>
 #include <error.h>
 #include <mmio.h>
 #include <util.h>
@@ -16,6 +17,7 @@
 #define TWD_STATUS_REG  0x00
 #define TWD_CTRL_REG    0x10
 #define TWD_RESTART_REG 0x14
+#define TWD_LOW_CNT_REG 0x20
 #define TWD_INTV_REG    0x30
 
 #define TWD_RESTART_KEY (0xD14 << 16)
@@ -98,3 +100,11 @@ const struct simple_device r_twd = {
 	.clock = { .dev = &r_ccu.dev, .id = CLK_BUS_R_TWD },
 	.regs  = DEV_R_TWD,
 };
+
+uint32_t
+r_twd_counter_read(void)
+{
+	assert(device_active(&r_twd.dev));
+
+	return mmio_read_32(DEV_R_TWD + TWD_LOW_CNT_REG);
+}

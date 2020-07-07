@@ -20,7 +20,7 @@ timeout_expired(uint32_t timeout)
 uint32_t
 timeout_set(uint32_t useconds)
 {
-	uint32_t cycles = REFCLK_MHZ * useconds;
+	uint32_t cycles = CPUCLK_MHz * useconds;
 	uint32_t now    = counter_read();
 
 	/* Ensure the MSB is zero for the wraparound check above. */

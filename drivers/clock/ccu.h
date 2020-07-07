@@ -32,6 +32,8 @@ struct ccu_clock {
 	uint16_t reset;
 };
 
+void ccu_helper_calibrate_osc16m(const uint32_t *rate);
+
 const struct clock_handle *ccu_helper_get_parent(const struct ccu *self,
                                                  const struct ccu_clock *clk);
 
