@@ -32,4 +32,8 @@ void ccu_suspend(void);
 void ccu_resume(void);
 void ccu_init(void);
 
+void r_ccu_suspend(void);
+void r_ccu_resume(void);
+void r_ccu_init(void);
+
 #endif /* DRIVERS_CLOCK_CCU_H */

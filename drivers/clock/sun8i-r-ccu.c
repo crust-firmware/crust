@@ -225,3 +225,18 @@ const struct ccu r_ccu = {
 	.clocks = sun8i_r_ccu_clocks,
 	.regs   = DEV_R_PRCM,
 };
+
+void
+r_ccu_suspend(void)
+{
+}
+
+void
+r_ccu_resume(void)
+{
+}
+
+void
+r_ccu_init(void)
+{
+}

@@ -74,6 +74,7 @@ system_state_machine(uint32_t exception)
 
 		/* Perform one-time device driver initialization. */
 		counter_init();
+		r_ccu_init();
 		ccu_init();
 		css_init();
 
@@ -157,6 +158,9 @@ system_state_machine(uint32_t exception)
 			 */
 			device_put(watchdog), watchdog = NULL;
 
+			/* Gate the reset of the SoC before removing power. */
+			r_ccu_suspend();
+
 			/* Perform PMIC-specific actions. */
 			if ((pmic = pmic_get()))
 				pmic_action(pmic);
@@ -195,6 +199,9 @@ system_state_machine(uint32_t exception)
 
 			/* Give regulator outputs time to rise. */
 			udelay(5000);
+
+			/* Restore SoC-internal power domains. */
+			r_ccu_resume();
 
 			/* Enable watchdog protection. */
 			watchdog = device_get_or_null(&r_twd.dev);
@@ -236,6 +243,9 @@ system_state_machine(uint32_t exception)
 
 			/* Give regulator outputs time to rise. */
 			udelay(5000);
+
+			/* Restore SoC-internal power domains. */
+			r_ccu_resume();
 
 			/* Attempt to reset the SoC using the watchdog. */
 			if (!watchdog)
