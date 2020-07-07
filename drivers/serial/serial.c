@@ -44,14 +44,14 @@ serial_init(void)
 bool
 serial_ready(void)
 {
-	bool ready = device_active(&uart.dev);
+	bool active = device_active(&uart.dev);
 
 	/*
 	 * If the UART is shared with other users, its clock may have been
 	 * gated. Ensure the clock is running before accessing the device.
 	 */
-	if (ready)
+	if (active)
 		clock_enable(&uart.clock);
 
-	return ready;
+	return active || CONFIG_SERIAL_BAUD == 0;
 }
