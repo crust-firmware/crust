@@ -9,7 +9,7 @@
 #include <system.h>
 #include <platform/time.h>
 
-#define ITERATIONS 1000000
+#define ITERATIONS 10000
 
 static uint32_t iterations;
 static uint8_t  last_state;
@@ -25,8 +25,8 @@ debug_print_latency(void)
 		mtspr(SPR_TICK_TTMR_ADDR,
 		      SPR_TICK_TTMR_MODE_CONTINUE << SPR_TICK_TTMR_MODE_LSB);
 		mtspr(SPR_TICK_TTCR_ADDR, 0);
-	} else if (iterations <= ITERATIONS && iterations++ == ITERATIONS) {
-		info("State %d: %d cycles/iteration", current_state,
+	} else if (iterations < ITERATIONS && ++iterations == ITERATIONS) {
+		info("State %u: %u cycles/iteration", current_state,
 		     udiv_round(mfspr(SPR_TICK_TTCR_ADDR), ITERATIONS));
 		mtspr(SPR_TICK_TTMR_ADDR, 0);
 	}
