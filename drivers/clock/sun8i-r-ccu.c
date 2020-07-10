@@ -16,11 +16,13 @@
 
 #include "ccu.h"
 
-#define CPUS_CLK_REG    0x0000
+#define CPUS_CLK_REG              0x0000
+#define PLL_CTRL_REG1             0x0044
+#define VDD_SYS_PWROFF_GATING_REG 0x0110
 
-#define CPUS_CLK_SRC(x) ((x) << 16)
-#define CPUS_PRE_DIV(x) ((x) << 8)
-#define CPUS_CLK_P(x)   ((x) << 0)
+#define CPUS_CLK_SRC(x)           ((x) << 16)
+#define CPUS_PRE_DIV(x)           ((x) << 8)
+#define CPUS_CLK_P(x)             ((x) << 0)
 
 static const uint32_t sun8i_r_ccu_fixed_rates[] = {
 	[CLK_OSC16M] = 16000000U,
@@ -235,11 +237,21 @@ const struct ccu r_ccu = {
 void
 r_ccu_suspend(void)
 {
+	if (!CONFIG(SUSPEND_OSC24M))
+		return;
+
+	ccu_helper_disable_osc24m(DEV_R_PRCM + PLL_CTRL_REG1);
+	mmio_set_32(DEV_R_PRCM + VDD_SYS_PWROFF_GATING_REG, BIT(2));
 }
 
 void
 r_ccu_resume(void)
 {
+	if (!CONFIG(SUSPEND_OSC24M))
+		return;
+
+	mmio_clr_32(DEV_R_PRCM + VDD_SYS_PWROFF_GATING_REG, BIT(2));
+	ccu_helper_enable_osc24m(DEV_R_PRCM + PLL_CTRL_REG1);
 }
 
 void

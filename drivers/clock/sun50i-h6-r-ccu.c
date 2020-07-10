@@ -17,6 +17,7 @@
 #include "ccu.h"
 
 #define CPUS_CLK_REG    0x0000
+#define PLL_CTRL_REG1   0x0044
 
 #define CPUS_CLK_SRC(x) ((x) << 24)
 #define CPUS_PRE_DIV(x) ((x) << 8)
@@ -259,11 +260,19 @@ const struct ccu r_ccu = {
 void
 r_ccu_suspend(void)
 {
+	if (!CONFIG(SUSPEND_OSC24M))
+		return;
+
+	ccu_helper_disable_osc24m(DEV_R_PRCM + PLL_CTRL_REG1);
 }
 
 void
 r_ccu_resume(void)
 {
+	if (!CONFIG(SUSPEND_OSC24M))
+		return;
+
+	ccu_helper_enable_osc24m(DEV_R_PRCM + PLL_CTRL_REG1);
 }
 
 void

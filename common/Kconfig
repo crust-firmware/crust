@@ -1,0 +1,25 @@
+#
+# Copyright © 2017-2020 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+menu "Firmware features"
+
+config NEED_OSC24M
+	bool
+	help
+		Select this option to prevent the firmware from turning
+		off the external OSC24M crystal.
+
+config SUSPEND_OSC24M
+	bool "Disable OSC24M during suspend" if !NEED_OSC24M
+	default !NEED_OSC24M
+	help
+		If this option is enabled, the external OSC24M crystal
+		will be turned off while the system is suspended/off.
+
+		If possible, enable this option to reduce power usage.
+
+endmenu
+
+source "debug/Kconfig"

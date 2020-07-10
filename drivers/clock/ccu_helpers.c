@@ -8,10 +8,14 @@
 #include <mmio.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <util.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/time.h>
 
 #include "ccu.h"
+
+#define PLL_CTRL_REG1_KEY  (0xa7 << 24)
+#define PLL_CTRL_REG1_MASK GENMASK(2, 0)
 
 void
 ccu_helper_calibrate_osc16m(const uint32_t *rate)
@@ -44,6 +48,33 @@ ccu_helper_calibrate_osc16m(const uint32_t *rate)
 	 * during SYSTEM_INACTIVE/OFF, where r_ccu_init() does not get called.
 	 */
 	mmio_write_32((uintptr_t)rate, (after - before) << 9);
+}
+
+static void
+ccu_helper_update_osc24m(uintptr_t reg, uint32_t val)
+{
+	uint32_t tmp;
+
+	tmp  = mmio_read_32(reg);
+	tmp |= PLL_CTRL_REG1_KEY;
+	mmio_write_32(reg, tmp);
+	tmp &= ~PLL_CTRL_REG1_MASK;
+	tmp |= val;
+	mmio_write_32(reg, tmp);
+	tmp &= ~PLL_CTRL_REG1_KEY;
+	mmio_write_32(reg, tmp);
+}
+
+void
+ccu_helper_disable_osc24m(uintptr_t reg)
+{
+	ccu_helper_update_osc24m(reg, 0);
+}
+
+void
+ccu_helper_enable_osc24m(uintptr_t reg)
+{
+	ccu_helper_update_osc24m(reg, PLL_CTRL_REG1_MASK);
 }
 
 const struct clock_handle *
