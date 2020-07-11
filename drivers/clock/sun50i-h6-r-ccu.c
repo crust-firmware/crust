@@ -190,7 +190,8 @@ static const struct ccu_clock sun50i_h6_r_ccu_clocks[SUN50I_H6_R_CCU_CLOCKS] =
 		.reset      = BITMAP_INDEX(0x011c, 16),
 	},
 	[CLK_BUS_R_TWD] = {
-		.get_parent = sun50i_h6_r_ccu_r_apb1_dev_get_parent,
+		/* Parent omitted to allow enabling before CCU init. */
+		.get_parent = ccu_helper_get_parent,
 		.get_rate   = ccu_helper_get_rate,
 		.gate       = BITMAP_INDEX(0x012c, 0),
 		.reset      = BITMAP_INDEX(0x012c, 16),
