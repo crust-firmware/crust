@@ -150,6 +150,13 @@ system_state_machine(uint32_t exception)
 			/* Configure the CCU for minimal power consumption. */
 			ccu_suspend();
 
+			/*
+			 * Disable watchdog protection. Once devices outside
+			 * the SoC (oscillators and regulators) are disabled,
+			 * the watchdog cannot successfully reset the SoC.
+			 */
+			device_put(watchdog), watchdog = NULL;
+
 			/* Perform PMIC-specific actions. */
 			if ((pmic = pmic_get()))
 				pmic_action(pmic);
@@ -166,12 +173,6 @@ system_state_machine(uint32_t exception)
 
 			debug("Suspend complete!");
 
-			/*
-			 * Finally, disable watchdog protection.
-			 * Do nothing after this point except polling for IRQs.
-			 */
-			device_put(watchdog), watchdog = NULL;
-
 			/* The system is now inactive or off. */
 			system_state = next_state;
 			break;
@@ -182,9 +183,6 @@ system_state_machine(uint32_t exception)
 			fallthrough;
 		case SYSTEM_RESUME:
 			debug("Resuming...");
-
-			/* First, enable watchdog protection. */
-			watchdog = device_get_or_null(&r_twd.dev);
 
 			/*
 			 * Perform PMIC-specific resume actions.
@@ -197,6 +195,9 @@ system_state_machine(uint32_t exception)
 
 			/* Give regulator outputs time to rise. */
 			udelay(5000);
+
+			/* Enable watchdog protection. */
+			watchdog = device_get_or_null(&r_twd.dev);
 
 			/* Configure the CCU for increased performance. */
 			ccu_resume();
