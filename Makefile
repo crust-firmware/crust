@@ -185,6 +185,10 @@ $(OBJ)/include/config/auto.conf: $(OBJ)/3rdparty/kconfig/conf .config
 
 $(OBJ)/include/config/auto.conf.cmd: $(OBJ)/include/config/auto.conf;
 
+$(OBJ)/include/version.h: $(SRC)/scripts/version.sh FORCE
+	$(M) CHK $@
+	$(Q) $< $(SRC) $@
+
 $(TGT)/%.bin: $(TGT)/%.elf
 	$(M) OBJCOPY $@
 	$(Q) $(OBJCOPY) -O binary -S --reverse-bytes 4 $< $@
@@ -212,6 +216,6 @@ $(TGT)/%.ld.o: $(SRC)/%.ld.S
 $(SRC)/Makefile:;
 $(SRC)/%.h:;
 
-.PHONY: all check clean clobber distclean doc scp tools
+.PHONY: FORCE all check clean clobber distclean doc scp tools
 .SECONDARY:
 .SUFFIXES:

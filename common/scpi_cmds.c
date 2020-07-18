@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <system.h>
 #include <util.h>
+#include <version.h>
 
 enum {
 	/** Do not send a reply to this command. */
@@ -59,7 +60,9 @@ scpi_cmd_get_scp_cap_handler(uint32_t *rx_payload UNUSED,
 	tx_payload[1] = SCPI_PAYLOAD_LIMITS(SCPI_PAYLOAD_SIZE,
 	                                    SCPI_PAYLOAD_SIZE);
 	/* Firmware version. */
-	tx_payload[2] = SCP_FIRMWARE_VERSION(0, 1, 9000);
+	tx_payload[2] = SCP_FIRMWARE_VERSION(VERSION_MAJOR,
+	                                     VERSION_MINOR,
+	                                     VERSION_PATCH);
 	/* Commands enabled 0. */
 	tx_payload[3] = BIT(SCPI_CMD_SCP_READY) |
 	                BIT(SCPI_CMD_GET_SCP_CAP) |

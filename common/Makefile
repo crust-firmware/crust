@@ -14,3 +14,5 @@ obj-y += scpi_cmds.o
 obj-y += simple_device.o
 obj-y += system.o
 obj-y += timeout.o
+
+$(tgt)/scpi_cmds.o: $(OBJ)/include/version.h
