@@ -29,7 +29,6 @@ COMMON_CFLAGS	 = -Os -pipe -std=c11 \
 		   -fvar-tracking-assignments \
 		   -g$(if $(CONFIG_DEBUG_INFO),gdb,0) \
 		   -Wall -Wextra -Wformat=2 -Wpedantic -Wshadow \
-		   -Werror=implicit-fallthrough=5 \
 		   -Werror=implicit-function-declaration \
 		   -Werror=implicit-int \
 		   -Werror=pointer-arith \
@@ -54,7 +53,8 @@ BUILDCPPFLAGS	 = $(COMMON_CPPFLAGS) \
 BUILDLDFLAGS	 =
 BUILDLDLIBS	 =
 
-HOSTCFLAGS	 = $(COMMON_CFLAGS)
+HOSTCFLAGS	 = $(COMMON_CFLAGS) \
+		   -Werror=implicit-fallthrough=5
 HOSTCPPFLAGS	 = $(COMMON_CPPFLAGS) \
 		   -D_XOPEN_SOURCE=700
 HOSTLDFLAGS	 =
@@ -68,7 +68,8 @@ CFLAGS		 = $(COMMON_CFLAGS) \
 		   -fno-asynchronous-unwind-tables \
 		   -fno-pie \
 		   -fomit-frame-pointer \
-		   -funsigned-char
+		   -funsigned-char \
+		   -Werror=implicit-fallthrough=5
 CPPFLAGS	 = $(COMMON_CPPFLAGS) \
 		   -I$(SRC)/include/drivers \
 		   -I$(SRC)/include/stdlib \
