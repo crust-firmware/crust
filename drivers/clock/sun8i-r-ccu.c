@@ -241,7 +241,8 @@ r_ccu_suspend(void)
 		return;
 
 	ccu_helper_disable_osc24m(DEV_R_PRCM + PLL_CTRL_REG1);
-	mmio_set_32(DEV_R_PRCM + VDD_SYS_PWROFF_GATING_REG, BIT(2));
+	if (CONFIG(PLATFORM_A64))
+		mmio_set_32(DEV_R_PRCM + VDD_SYS_PWROFF_GATING_REG, BIT(2));
 }
 
 void
@@ -250,7 +251,8 @@ r_ccu_resume(void)
 	if (!CONFIG(SUSPEND_OSC24M))
 		return;
 
-	mmio_clr_32(DEV_R_PRCM + VDD_SYS_PWROFF_GATING_REG, BIT(2));
+	if (CONFIG(PLATFORM_A64))
+		mmio_clr_32(DEV_R_PRCM + VDD_SYS_PWROFF_GATING_REG, BIT(2));
 	ccu_helper_enable_osc24m(DEV_R_PRCM + PLL_CTRL_REG1);
 }
 
