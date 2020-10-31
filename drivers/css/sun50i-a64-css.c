@@ -276,13 +276,11 @@ css_set_css_state(uint8_t state UNUSED)
 		/* Configure DX pads. */
 		for (uint8_t n = 0; n < 4; ++n) {
 			mmio_clrset_32(DXnGCR0(n),
-			               DXnGCR0_DXEN |
 			               DXnGCR0_DXIOM |
 			               DXnGCR0_DXOEO |
 			               DXnGCR0_DXPDR |
 			               DXnGCR0_DXPDD |
 			               DXnGCR0_DQSRPD,
-			               DXnGCR0_DXEN_ENABLED |
 			               DXnGCR0_DXIOM_SSTL |
 			               DXnGCR0_DXOEO_DYNAMIC |
 			               DXnGCR0_DXPDR_DYNAMIC |
@@ -322,13 +320,11 @@ css_set_css_state(uint8_t state UNUSED)
 		/* Configure DX pads. */
 		for (uint8_t n = 0; n < 4; ++n) {
 			mmio_clrset_32(DXnGCR0(n),
-			               DXnGCR0_DXEN |
 			               DXnGCR0_DXIOM |
 			               DXnGCR0_DXOEO |
 			               DXnGCR0_DXPDR |
 			               DXnGCR0_DXPDD |
 			               DXnGCR0_DQSRPD,
-			               DXnGCR0_DXEN_DISABLED |
 			               DXnGCR0_DXIOM_CMOS |
 			               DXnGCR0_DXOEO_DISABLED |
 			               DXnGCR0_DXPDR_ENABLED |
