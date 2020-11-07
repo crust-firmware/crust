@@ -96,7 +96,6 @@ DOCS		 = $(wildcard $(SRC)/*.md $(SRC)/docs/*.md)
 
 export KCONFIG_AUTOCONFIG := $(OBJ)/include/config/auto.conf
 export KCONFIG_AUTOHEADER := $(OBJ)/include/config.h
-export KCONFIG_TRISTATE   := $(OBJ)/include/config/tristate.conf
 
 ifneq ($(filter-out %clean %clobber %config %format,$(GOALS)),)
   include $(OBJ)/include/config/auto.conf

@@ -9,7 +9,6 @@ ccflags-y	+= -D_GNU_SOURCE \
 		   -std=gnu11 \
 		   -Wno-implicit-fallthrough \
 		   -Wno-pedantic \
-		   -Wno-shadow \
 		   -Wno-sign-compare \
 		   -Wno-unused-parameter \
 		   -Wno-vla
@@ -26,7 +25,7 @@ BUILDLDLIBS_nconf := $(shell \
 
 buildprogs-y	+= conf nconf
 common-objs	:= confdata.o expr.o lexer.lex.o parser.tab.o \
-		   preprocess.o symbol.o
+		   preprocess.o symbol.o util.o
 conf-objs	:= $(common-objs) conf.o
 nconf-objs	:= $(common-objs) nconf.o nconf.gui.o
 
@@ -34,7 +33,7 @@ silent := $(if $(filter-out 0,$(V)),,-s)
 
 # These targets map 1:1 to the command line options of 'conf'.
 simple-targets := \
-	alldefconfig allnoconfig allyesconfig listnewconfig \
+	alldefconfig allnoconfig allyesconfig helpnewconfig listnewconfig \
 	oldconfig olddefconfig randconfig syncconfig
 
 $(simple-targets): $(obj)/conf
