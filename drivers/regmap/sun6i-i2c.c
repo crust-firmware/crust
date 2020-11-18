@@ -237,14 +237,14 @@ const struct simple_device r_i2c = {
 			.dev   = &r_pio.dev,
 			.id    = SUNXI_GPIO_PIN(0, 0),
 			.drive = DRIVE_10mA,
-			.mode  = CONFIG(SOC_H5) ? 2 : 3,
+			.mode  = CONFIG_I2C_PIN_MODE_PL0_PL1,
 			.pull  = PULL_UP,
 		},
 		{
 			.dev   = &r_pio.dev,
 			.id    = SUNXI_GPIO_PIN(0, 1),
 			.drive = DRIVE_10mA,
-			.mode  = CONFIG(SOC_H5) ? 2 : 3,
+			.mode  = CONFIG_I2C_PIN_MODE_PL0_PL1,
 			.pull  = PULL_UP,
 		},
 #elif CONFIG(I2C_PINS_PL8_PL9)

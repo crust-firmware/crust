@@ -44,6 +44,14 @@ config I2C_PINS_PL8_PL9
 
 endchoice
 
+config I2C_PIN_MODE_PL0_PL1
+	int
+	depends on I2C_PINS_PL0_PL1
+	default 3 if HAVE_RSB || PLATFORM_H6
+	default 2
+	help
+		Provide the pin mode that configures PL0/PL1 as I2C SCL/SDA.
+
 config I2C
 	bool
 	default HAVE_I2C && (!I2C_PINS_NONE || COMPILE_TEST)
