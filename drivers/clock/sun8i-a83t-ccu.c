@@ -27,7 +27,7 @@ sun8i_a83t_ccu_fixed_get_rate(const struct ccu *self UNUSED,
 }
 
 /*
- * APB2 has a mux, but it is assumed to always select OSC24M. Reparenting APB2
+ * While APB2 has a mux, assume its parent is OSC24M. Reparenting APB2
  * to PLL_PERIPH0 in Linux for faster UART clocks is unsupported.
  */
 static const struct clock_handle sun8i_a83t_ccu_apb2_parent = {

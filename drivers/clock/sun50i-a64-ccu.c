@@ -43,7 +43,7 @@ sun50i_a64_ccu_fixed_get_rate(const struct ccu *self UNUSED,
 }
 
 /*
- * APB2 has a mux, but it is assumed to always select OSC24M. Reparenting APB2
+ * While APB2 has a mux, assume its parent is OSC24M. Reparenting APB2
  * to PLL_PERIPH0 in Linux for faster UART clocks is unsupported.
  */
 static const struct clock_handle sun50i_a64_ccu_apb2_parent = {
@@ -83,7 +83,7 @@ static const struct clock_handle sun50i_a64_ccu_dram_parents[] = {
 #else
 	{
 		.dev = &ccu.dev,
-		.id  = CLK_PLL_PERIPH0,
+		.id  = CLK_PLL_PERIPH0, /* 2x */
 	},
 #endif
 };
@@ -131,6 +131,7 @@ static const struct ccu_clock sun50i_a64_ccu_clocks[SUN50I_A64_CCU_CLOCKS] = {
 		.get_parent = sun50i_a64_ccu_apb2_get_parent,
 		.get_rate   = ccu_helper_get_rate,
 	},
+	/* Reset requires re-training DRAM, so ignore it. */
 	[CLK_BUS_DRAM] = {
 		.get_parent = ccu_helper_get_parent,
 		.get_rate   = ccu_helper_get_rate,
