@@ -37,5 +37,3 @@ if ! test -f "$output" ||
    ! test "$(cat "$output.tmp")" = "$(cat "$output")"; then
   mv -f "$output.tmp" "$output"
 fi
-
-trap - EXIT
