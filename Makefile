@@ -187,7 +187,7 @@ $(OBJ)/include/config/auto.conf.cmd: $(OBJ)/include/config/auto.conf;
 
 $(OBJ)/include/version.h: $(SRC)/scripts/version.sh FORCE | $(OBJ)/include/.
 	$(M) CHK $@
-	$(Q) $< $(SRC) $@
+	$(Q) $< $(realpath $(SRC)) $@
 
 $(TGT)/%.bin: $(TGT)/%.elf
 	$(M) OBJCOPY $@
