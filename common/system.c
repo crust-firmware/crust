@@ -158,7 +158,7 @@ system_state_machine(uint32_t exception)
 			 */
 			device_put(watchdog), watchdog = NULL;
 
-			/* Gate the reset of the SoC before removing power. */
+			/* Gate the rest of the SoC before removing power. */
 			r_ccu_suspend();
 
 			/* Perform PMIC-specific actions. */
