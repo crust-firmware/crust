@@ -231,8 +231,8 @@ const struct simple_device r_i2c = {
 		.state = DEVICE_STATE_INIT,
 	},
 	.clock = { .dev = &r_ccu.dev, .id = CLK_BUS_R_I2C },
-	.pins  = SIMPLE_DEVICE_PINS_INIT {
 #if CONFIG(I2C_PINS_PL0_PL1)
+	.pins = SIMPLE_DEVICE_PINS_INIT {
 		{
 			.dev   = &r_pio.dev,
 			.id    = SUNXI_GPIO_PIN(0, 0),
@@ -247,7 +247,9 @@ const struct simple_device r_i2c = {
 			.mode  = CONFIG_I2C_PIN_MODE_PL0_PL1,
 			.pull  = PULL_UP,
 		},
+	},
 #elif CONFIG(I2C_PINS_PL8_PL9)
+	.pins = SIMPLE_DEVICE_PINS_INIT {
 		{
 			.dev   = &r_pio.dev,
 			.id    = SUNXI_GPIO_PIN(0, 8),
@@ -262,7 +264,7 @@ const struct simple_device r_i2c = {
 			.mode  = 2,
 			.pull  = PULL_UP,
 		},
-#endif
 	},
+#endif
 	.regs = DEV_R_I2C,
 };
