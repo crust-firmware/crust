@@ -66,9 +66,9 @@ scpi_cmd_get_scp_cap_handler(uint32_t *rx_payload UNUSED,
 	/* Commands enabled 0. */
 	tx_payload[3] = BIT(SCPI_CMD_SCP_READY) |
 	                BIT(SCPI_CMD_GET_SCP_CAP) |
-	                BIT(SCPI_CMD_SET_CSS_PWR) |
-	                BIT(SCPI_CMD_GET_CSS_PWR) |
-	                BIT(SCPI_CMD_SET_SYS_PWR);
+	                BIT(SCPI_CMD_SET_CSS_POWER) |
+	                BIT(SCPI_CMD_GET_CSS_POWER) |
+	                BIT(SCPI_CMD_SET_SYS_POWER);
 	/* Commands enabled 1. */
 	tx_payload[4] = 0;
 	/* Commands enabled 2. */
@@ -82,7 +82,7 @@ scpi_cmd_get_scp_cap_handler(uint32_t *rx_payload UNUSED,
 }
 
 /*
- * Handler for SCPI_CMD_SET_CSS_PWR: Set CSS power state.
+ * Handler for SCPI_CMD_SET_CSS_POWER: Set CSS power state.
  *
  * This sets the power state of a single core, its parent cluster, and the CSS.
  *
@@ -92,9 +92,9 @@ scpi_cmd_get_scp_cap_handler(uint32_t *rx_payload UNUSED,
  * parent, and no power domain is turned off before any of its children.
  */
 static int
-scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
-                             uint32_t *tx_payload UNUSED,
-                             uint16_t *tx_size UNUSED)
+scpi_cmd_set_css_power_handler(uint32_t *rx_payload,
+                               uint32_t *tx_payload UNUSED,
+                               uint16_t *tx_size UNUSED)
 {
 	uint32_t descriptor    = rx_payload[0];
 	uint8_t  core          = bitfield_get(descriptor, 0x00, 4);
@@ -125,7 +125,7 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
 }
 
 /*
- * Handler for SCPI_CMD_GET_CSS_PWR: Get CSS power state.
+ * Handler for SCPI_CMD_GET_CSS_POWER: Get CSS power state.
  *
  * This gets the power states of all clusters and all cores they contain.
  */
@@ -133,8 +133,8 @@ scpi_cmd_set_css_pwr_handler(uint32_t *rx_payload,
 #define CLUSTER_POWER_STATE(x) (((x) & GENMASK(3, 0)) << 4)
 #define CORE_POWER_STATES(x)   ((x) << 8)
 static int
-scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload UNUSED,
-                             uint32_t *tx_payload, uint16_t *tx_size)
+scpi_cmd_get_css_power_handler(uint32_t *rx_payload UNUSED,
+                               uint32_t *tx_payload, uint16_t *tx_size)
 {
 	uint8_t  clusters = css_get_cluster_count();
 	uint16_t descriptor;
@@ -154,7 +154,7 @@ scpi_cmd_get_css_pwr_handler(uint32_t *rx_payload UNUSED,
 }
 
 /*
- * Handler for SCPI_CMD_SET_SYS_PWR: Set system power state.
+ * Handler for SCPI_CMD_SET_SYS_POWER: Set system power state.
  */
 static int
 scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
@@ -186,15 +186,15 @@ static const struct scpi_cmd scpi_cmds[] = {
 	[SCPI_CMD_GET_SCP_CAP] = {
 		.handler = scpi_cmd_get_scp_cap_handler,
 	},
-	[SCPI_CMD_SET_CSS_PWR] = {
-		.handler = scpi_cmd_set_css_pwr_handler,
+	[SCPI_CMD_SET_CSS_POWER] = {
+		.handler = scpi_cmd_set_css_power_handler,
 		.rx_size = sizeof(uint32_t),
 		.flags   = FLAG_NO_REPLY | FLAG_SECURE_ONLY,
 	},
-	[SCPI_CMD_GET_CSS_PWR] = {
-		.handler = scpi_cmd_get_css_pwr_handler,
+	[SCPI_CMD_GET_CSS_POWER] = {
+		.handler = scpi_cmd_get_css_power_handler,
 	},
-	[SCPI_CMD_SET_SYS_PWR] = {
+	[SCPI_CMD_SET_SYS_POWER] = {
 		.handler = scpi_cmd_set_sys_power_handler,
 		.rx_size = sizeof(uint8_t),
 		.flags   = FLAG_SECURE_ONLY,

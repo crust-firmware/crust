@@ -40,9 +40,9 @@
 enum {
 	SCPI_CMD_SCP_READY         = 0x01, /**< SCP ready. */
 	SCPI_CMD_GET_SCP_CAP       = 0x02, /**< Get SCP capability. */
-	SCPI_CMD_SET_CSS_PWR       = 0x03, /**< Set CSS power state. */
-	SCPI_CMD_GET_CSS_PWR       = 0x04, /**< Get CSS power state. */
-	SCPI_CMD_SET_SYS_PWR       = 0x05, /**< Set system power state. */
+	SCPI_CMD_SET_CSS_POWER     = 0x03, /**< Set CSS power state. */
+	SCPI_CMD_GET_CSS_POWER     = 0x04, /**< Get CSS power state. */
+	SCPI_CMD_SET_SYS_POWER     = 0x05, /**< Set system power state. */
 	SCPI_CMD_SET_CPU_TIMER     = 0x06, /**< Set CPU timer. */
 	SCPI_CMD_CANCEL_CPU_TIMER  = 0x07, /**< Cancel CPU timer. */
 	SCPI_CMD_GET_DVFS_CAP      = 0x08, /**< Get DVFS capability. */
@@ -64,8 +64,8 @@ enum {
 	SCPI_CMD_CFG_SENSOR_PERIOD = 0x18, /**< Configure sensor period. */
 	SCPI_CMD_CFG_SENSOR_BOUNDS = 0x19, /**< Configure sensor bounds. */
 	SCPI_CMD_ASYNC_SENSOR      = 0x1a, /**< Asynchronous sensor value. */
-	SCPI_CMD_SET_DEV_PWR       = 0x1b, /**< Set device power state. */
-	SCPI_CMD_GET_DEV_PWR       = 0x1c, /**< Get device power state. */
+	SCPI_CMD_SET_DEV_POWER     = 0x1b, /**< Set device power state. */
+	SCPI_CMD_GET_DEV_POWER     = 0x1c, /**< Get device power state. */
 };
 
 /**

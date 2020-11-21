@@ -149,9 +149,9 @@ static const char *const scpi_command_names[] = {
 	"INVALID SCPI COMMAND",
 	STRINGIFY(SCPI_CMD_SCP_READY),
 	STRINGIFY(SCPI_CMD_GET_SCP_CAP),
-	STRINGIFY(SCPI_CMD_SET_CSS_PWR),
-	STRINGIFY(SCPI_CMD_GET_CSS_PWR),
-	STRINGIFY(SCPI_CMD_SET_SYS_PWR),
+	STRINGIFY(SCPI_CMD_SET_CSS_POWER),
+	STRINGIFY(SCPI_CMD_GET_CSS_POWER),
+	STRINGIFY(SCPI_CMD_SET_SYS_POWER),
 	STRINGIFY(SCPI_CMD_SET_CPU_TIMER),
 	STRINGIFY(SCPI_CMD_CANCEL_CPU_TIMER),
 	STRINGIFY(SCPI_CMD_GET_DVFS_CAP),
@@ -173,8 +173,8 @@ static const char *const scpi_command_names[] = {
 	STRINGIFY(SCPI_CMD_CFG_SENSOR_PERIOD),
 	STRINGIFY(SCPI_CMD_CFG_SENSOR_BOUNDS),
 	STRINGIFY(SCPI_CMD_ASYNC_SENSOR),
-	STRINGIFY(SCPI_CMD_SET_DEV_PWR),
-	STRINGIFY(SCPI_CMD_GET_DEV_PWR),
+	STRINGIFY(SCPI_CMD_SET_DEV_POWER),
+	STRINGIFY(SCPI_CMD_GET_DEV_POWER),
 };
 
 /** A bitmap of the available SCPI commands, from SCPI_CMD_GET_SCP_CAP. */
@@ -728,11 +728,11 @@ try_css_power(void)
 	struct scpi_msg msg;
 
 	/* Skip this test if the required commands are not available. */
-	if (!scpi_has_command(SCPI_CMD_GET_CSS_PWR))
+	if (!scpi_has_command(SCPI_CMD_GET_CSS_POWER))
 		return;
 
 	test_begin(TEST_CSS_INFO);
-	scpi_prepare_msg(&msg, SCPI_CMD_GET_CSS_PWR);
+	scpi_prepare_msg(&msg, SCPI_CMD_GET_CSS_POWER);
 	test_send_request(&msg);
 	test_assert(msg.status == SCPI_OK);
 	/* Assert that there is at least one cluster. */
@@ -1017,14 +1017,14 @@ try_sys_power(void)
 
 	/* Positive tests would reset the machine; only test failure cases. */
 	test_begin(TEST_SYS_POWER);
-	scpi_prepare_msg(&msg, SCPI_CMD_SET_SYS_PWR);
+	scpi_prepare_msg(&msg, SCPI_CMD_SET_SYS_POWER);
 	msg.size = 1;
 	/* 4 is not a valid system power state. */
 	((uint8_t *)msg.payload)[0] = 4;
 	test_send_request(&msg);
 	test_assert(msg.status == SCPI_E_PARAM);
 
-	scpi_prepare_msg(&msg, SCPI_CMD_SET_SYS_PWR);
+	scpi_prepare_msg(&msg, SCPI_CMD_SET_SYS_POWER);
 	msg.size = 1;
 	/* 20 is not a valid system power state. */
 	((uint8_t *)msg.payload)[0] = 20;
