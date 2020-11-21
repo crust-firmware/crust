@@ -11,10 +11,8 @@ patch=10000
 srcdir=$1
 output=$2
 
-cd "$srcdir"
-
-if test "$PWD" = "$(git rev-parse --show-toplevel 2>/dev/null)"; then
-  set -- $(git describe --dirty --long --match 'v[0-9]*' | tr '.-' '  ')
+if test "$srcdir" = "$(git -C "$srcdir" rev-parse --show-toplevel 2>/dev/null)"; then
+  set -- $(git -C "$srcdir" describe --dirty --long --match 'v[0-9]*' | tr '.-' '  ')
 
   if test "$#" -ge 4; then
     major=${1#v}
