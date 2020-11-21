@@ -6,8 +6,8 @@
 #include <platform/memory.h>
 
 #if CONFIG(COMPILE_TEST)
-#undef  SRAM_A2_LIMIT
-#define SRAM_A2_LIMIT 0xffffffff
+#undef  SRAM_A2_SIZE
+#define SRAM_A2_SIZE 0xffffffff
 #endif
 
 OUTPUT_ARCH(or1k)
@@ -54,9 +54,11 @@ SECTIONS
   . += STACK_SIZE;
   __stack_end = .;
 
+#if !CONFIG(COMPILE_TEST)
   ASSERT(. <= FIRMWARE_LIMIT, "Firmware overflows allocated memory area")
   ASSERT(. <= SCPI_MEM_BASE, "Firmware overflows into SCPI shared memory")
   ASSERT(. <= SRAM_A2_LIMIT, "Firmware overflows SRAM A2")
+#endif
 
   __scpi_mem = SCPI_MEM_BASE;
 
