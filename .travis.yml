@@ -1,19 +1,6 @@
 ---
 dist: bionic
 
-env:
-  matrix:
-      # Generic
-    - CONFIGS="allnoconfig allyesconfig defconfig randconfig randconfig randconfig"
-      # A64
-    - CONFIGS="orangepi_win_defconfig pine64_plus_defconfig pinebook_defconfig pinephone_defconfig"
-      # A83T / H5 / H6
-    - CONFIGS="tbs_a711_defconfig orangepi_pc2_defconfig orangepi_zero_plus_defconfig orangepi_3_defconfig pine_h64_defconfig"
-
-install:
-  - curl -LSs https://github.com/stffrdhrn/gcc/releases/download/or1k-9.1.1-20190507/or1k-linux-musl-9.1.1-20190507.tar.xz | tar xJf -
-  - export PATH=$PATH:$PWD/or1k-linux-musl/bin
-
 language: c
 
 matrix:
@@ -22,26 +9,18 @@ matrix:
         apt:
           packages:
             - codespell
-      cache:
-        directories:
-          - uncrustify
       env:
-        - BUILD_TYPE=check-format
+        - MAKEFLAGS=-j$(nproc)
       install:
-        - |-
-          if test -d uncrustify/.git; then
-            (cd uncrustify && git fetch -q && git reset -q --hard FETCH_HEAD)
-          else
-            git clone -q https://github.com/uncrustify/uncrustify
-          fi
-        - git -C uncrustify rev-parse HEAD
-        - sed -i 's/chunk_is_token(next, CT_SEMICOLON))$/!prev \&\& &/'
-            uncrustify/src/combine.cpp
+        - git clone --depth 1 -b uncrustify-0.72.0
+            https://github.com/uncrustify/uncrustify
         - mkdir -p uncrustify/build
         - (cd uncrustify/build && cmake -DCMAKE_INSTALL_PREFIX=$PWD
             -DCMAKE_C_COMPILER=gcc-7 -DCMAKE_CXX_COMPILER=g++-7 ..)
-        - make -C uncrustify/build -j$(nproc)
+        - make -C uncrustify/build
         - export PATH=$PATH:$PWD/uncrustify/build
+        - uncrustify --version
+      name: Run source code checks
       script:
         - make check-format
         - codespell -i 0 -q 4 $(git ls-files)
@@ -53,31 +32,41 @@ matrix:
             - graphviz
             - libc6-dev-arm64-cross
       env:
-        - BUILD_TYPE=out-of-tree
+        - CONFIGS="allnoconfig allyesconfig defconfig
+                   orangepi_3_defconfig
+                   orangepi_pc2_defconfig
+                   orangepi_win_defconfig
+                   orangepi_zero_plus_defconfig
+                   pine64_plus_defconfig
+                   pine_h64_defconfig
+                   pinebook_defconfig
+                   pinephone_defconfig
+                   tbs_a711_defconfig
+                   randconfig randconfig randconfig"
+        - GCC_VER=9.1.1-20190507
+        - HOST_COMPILE=aarch64-linux-gnu-
+        - MAKEFLAGS=-j$(nproc)
+      install:
+        - curl -LSs https://github.com/stffrdhrn/gcc/releases/download/or1k-$GCC_VER/or1k-linux-musl-$GCC_VER.tar.xz |
+            tar xJf -
+        - export PATH=$PATH:$PWD/or1k-linux-musl/bin
+      name: Build all configs
       script:
-        - set -e
-        - cd /tmp
-        - cp $TRAVIS_BUILD_DIR/Makefile .
-        - export HOST_COMPILE=aarch64-linux-gnu-
-        - make SRC=$TRAVIS_BUILD_DIR OBJ=$HOME/build defconfig
-        - make SRC=$TRAVIS_BUILD_DIR OBJ=$HOME/build -j$(nproc) V=1 all check html
-        - or1k-linux-musl-size $HOME/build/scp/scp.elf
-        - grep __bss_end $HOME/build/scp/scp.map
-        - sha256sum -b $HOME/build/scp/scp.bin
-
-script:
-  - |-
-    set -e
-    cat > all.config << 'EOF'
-    CONFIG_COMPILE_TEST=y
-    EOF
-    for config in ${CONFIGS}; do
-      echo ========== begin $config ==========
-      make -j$(nproc) KCONFIG_ALLCONFIG=1 V=1 "$config"
-      make -j$(nproc) TGT="\$(OBJ)/$config" V=1 scp
-      or1k-linux-musl-size build/$config/scp.elf
-      grep __bss_end build/$config/scp.map
-      sha256sum -b build/$config/scp.bin
-      echo =========== end $config ===========
-    done
+        - |-
+          set -e
+          cd /tmp
+          ln -s $TRAVIS_BUILD_DIR/Makefile .
+          cat > all.config << 'EOF'
+          CONFIG_COMPILE_TEST=y
+          EOF
+          for config in ${CONFIGS}; do
+            echo ========== begin $config ==========
+            make SRC=$TRAVIS_BUILD_DIR KCONFIG_ALLCONFIG=1 V=1 "$config"
+            make SRC=$TRAVIS_BUILD_DIR TGT="\$(OBJ)/$config" V=1 all check
+            or1k-linux-musl-size build/$config/scp.elf
+            grep __bss_end build/$config/scp.map
+            sha256sum -b build/$config/scp.bin
+            echo =========== end $config ===========
+          done
+          make SRC=$TRAVIS_BUILD_DIR V=1 html
 ...
