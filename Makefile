@@ -62,7 +62,6 @@ HOSTLDLIBS	 =
 
 AFLAGS		 = -Wa,--fatal-warnings
 CFLAGS		 = $(COMMON_CFLAGS) \
-		   -ffixed-r2 \
 		   -ffreestanding \
 		   -flto \
 		   -fno-asynchronous-unwind-tables \

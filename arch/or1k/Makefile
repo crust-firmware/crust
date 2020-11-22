@@ -4,7 +4,8 @@
 #
 
 CROSS_COMPILE	?= or1k-linux-musl-
-CFLAGS		+= -msfimm -mshftimm -msoft-div -msoft-mul
+CFLAGS		+= -ffixed-r2 \
+		   -msfimm -mshftimm -msoft-div -msoft-mul
 
 # The first object is used as the linker script.
 obj-y += scp.ld.o
