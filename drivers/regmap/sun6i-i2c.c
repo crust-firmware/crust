@@ -7,7 +7,6 @@
 #include <error.h>
 #include <mmio.h>
 #include <regmap.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <util.h>
 #include <clock/ccu.h>
@@ -41,7 +40,7 @@ enum {
 	IDLE                 = 0xf8,
 };
 
-static bool
+static int
 sun6i_i2c_wait_idle(const struct simple_device *self)
 {
 	/* With a single master on the bus, this should only take one cycle. */
@@ -51,13 +50,16 @@ sun6i_i2c_wait_idle(const struct simple_device *self)
 		/* 10μs is one 100kHz bus cycle. */
 		udelay(10);
 		if (timeout-- == 0)
-			return false;
+			return EIO;
 	}
 
-	return mmio_read_32(self->regs + I2C_STAT_REG) == IDLE;
+	if (mmio_read_32(self->regs + I2C_STAT_REG) != IDLE)
+		return EIO;
+
+	return SUCCESS;
 }
 
-static bool
+static int
 sun6i_i2c_wait_start(const struct simple_device *self)
 {
 	/* With a single master on the bus, this should only take one cycle. */
@@ -67,13 +69,13 @@ sun6i_i2c_wait_start(const struct simple_device *self)
 		/* 10μs is one 100kHz bus cycle. */
 		udelay(10);
 		if (timeout-- == 0)
-			return false;
+			return EIO;
 	}
 
-	return true;
+	return SUCCESS;
 }
 
-static bool
+static int
 sun6i_i2c_wait_state(const struct simple_device *self, uint8_t state)
 {
 	/* Wait for up to 8 transfer cycles, one ACK, and one extra cycle. */
@@ -83,23 +85,27 @@ sun6i_i2c_wait_state(const struct simple_device *self, uint8_t state)
 		/* 10μs is one 100kHz bus cycle. */
 		udelay(10);
 		if (timeout-- == 0)
-			return false;
+			return EIO;
 	}
 
-	return mmio_read_32(self->regs + I2C_STAT_REG) == state;
+	if (mmio_read_32(self->regs + I2C_STAT_REG) != state)
+		return EIO;
+
+	return SUCCESS;
 }
 
 static int
 sun6i_i2c_read(const struct regmap *map, uint8_t *data)
 {
 	const struct simple_device *self = to_simple_device(map->dev);
+	int err;
 
 	/* Disable sending an ACK and trigger a state change. */
 	mmio_clrset_32(self->regs + I2C_CTRL_REG, BIT(2), BIT(3));
 
 	/* Wait for data to arrive. */
-	if (!sun6i_i2c_wait_state(self, DATA_RX_NACK))
-		return EIO;
+	if ((err = sun6i_i2c_wait_state(self, DATA_RX_NACK)))
+		return err;
 
 	/* Read the data. */
 	*data = mmio_read_32(self->regs + I2C_DATA_REG);
@@ -113,19 +119,20 @@ sun6i_i2c_start(const struct regmap *map, uint8_t direction)
 	const struct simple_device *self = to_simple_device(map->dev);
 	uint8_t init_state = mmio_read_32(self->regs + I2C_STAT_REG);
 	uint8_t state;
+	int err;
 
 	/* Send a start condition. */
 	mmio_set_32(self->regs + I2C_CTRL_REG, BIT(5) | BIT(3));
 
 	/* Wait for the start condition to be sent. */
-	if (!sun6i_i2c_wait_start(self))
-		return EIO;
+	if ((err = sun6i_i2c_wait_start(self)))
+		return err;
 
 	/* Wait for the start state if the bus was previously idle; otherwise,
 	 * wait for the repeated start state. */
 	state = init_state == IDLE ? START_COND_TX : START_COND_TX_REPEAT;
-	if (!sun6i_i2c_wait_state(self, state))
-		return EIO;
+	if ((err = sun6i_i2c_wait_state(self, state)))
+		return err;
 
 	/* Write the address and direction, then trigger a state change. */
 	mmio_write_32(self->regs + I2C_DATA_REG, (map->id << 1) | direction);
@@ -133,8 +140,8 @@ sun6i_i2c_start(const struct regmap *map, uint8_t direction)
 
 	/* Check for address acknowledgement. */
 	state = direction == I2C_WRITE ? ADDR_WRITE_TX_ACK : ADDR_READ_TX_ACK;
-	if (!sun6i_i2c_wait_state(self, state))
-		return ENODEV;
+	if ((err = sun6i_i2c_wait_state(self, state)))
+		return err;
 
 	return SUCCESS;
 }
@@ -155,14 +162,15 @@ static int
 sun6i_i2c_write(const struct regmap *map, uint8_t data)
 {
 	const struct simple_device *self = to_simple_device(map->dev);
+	int err;
 
 	/* Write data, then trigger a state change. */
 	mmio_write_32(self->regs + I2C_DATA_REG, data);
 	mmio_set_32(self->regs + I2C_CTRL_REG, BIT(3));
 
 	/* Wait for data to be sent. */
-	if (!sun6i_i2c_wait_state(self, DATA_TX_ACK))
-		return EIO;
+	if ((err = sun6i_i2c_wait_state(self, DATA_TX_ACK)))
+		return err;
 
 	return SUCCESS;
 }
@@ -191,10 +199,8 @@ sun6i_i2c_probe(const struct device *dev)
 	mmio_set_32(self->regs + I2C_SRST_REG, BIT(0));
 
 	/* Wait for the bus to go idle. */
-	if (!sun6i_i2c_wait_idle(self)) {
-		err = EIO;
+	if ((err = sun6i_i2c_wait_idle(self)))
 		goto err_release;
-	}
 
 	return SUCCESS;
 
