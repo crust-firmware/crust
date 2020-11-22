@@ -87,6 +87,11 @@ system_state_machine(uint32_t exception)
 	 * selected, errors occurring before this function call will not be
 	 * logged, and exceptions (such as those caused by assertion failures)
 	 * could result in a silent infinite loop.
+	 *
+	 * Serial communication needs accurate clock frequencies. Specifically,
+	 * OSC16M must be calibrated before initializing R_UART, and R_UART
+	 * will only work after a SYSTEM_INACTIVE/OFF exception restart if the
+	 * calibrated OSC16M frequency is retained across the restart.
 	 */
 	serial_init();
 
