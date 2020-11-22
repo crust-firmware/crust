@@ -22,6 +22,14 @@ MEMORY {
 SECTIONS
 {
   ASSERT(FIRMWARE_BASE >= SRAM_A2_BASE, "Firmware must be placed in SRAM A2")
+  ASSERT(FIRMWARE_LIMIT <= SRAM_A2_LIMIT, "Firmware must fit inside SRAM A2")
+
+  /*
+   * If addresses within the firmware differ only in their lower 16 bits, a
+   * single l.movhi instruction can be shared by multiple symbol references.
+   */
+  ASSERT(FIRMWARE_BASE >> 16 == (FIRMWARE_LIMIT - 1) >> 16,
+         "Firmware must not cross a 64k address boundary")
 
   . = FIRMWARE_BASE;
 
@@ -57,7 +65,6 @@ SECTIONS
 #if !CONFIG(COMPILE_TEST)
   ASSERT(. <= FIRMWARE_LIMIT, "Firmware overflows allocated memory area")
   ASSERT(. <= SCPI_MEM_BASE, "Firmware overflows into SCPI shared memory")
-  ASSERT(. <= SRAM_A2_LIMIT, "Firmware overflows SRAM A2")
 #endif
 
   __scpi_mem = SCPI_MEM_BASE;
