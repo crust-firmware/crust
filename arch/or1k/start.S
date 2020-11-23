@@ -37,20 +37,18 @@ func start
 	l.nop
 
 	# Clear .bss
-	l.movhi	r3, hi(__bss_start)
-	l.ori	r3, r3, lo(__bss_start)
-	l.movhi	r4, hi(__bss_end)
-	l.ori	r4, r4, lo(__bss_end)
+	l.movhi	r10, hi(start)		# High word is common to all symbols
+	l.ori	r3, r10, lo(__bss_start)
+	l.ori	r4, r10, lo(__bss_end)
 1:	l.sw	0(r3), r0
 	l.sfltu	r3, r4
 	l.bf	1b
 	l.addi	r3, r3, 4
 
-	# Initialize stack pointer
-	l.movhi	r1, hi(__stack_end)
-	l.ori	r1, r1, lo(__stack_end)
+	# Prepare function arguments
+	l.or	r3, r2, r2
 
 	# Jump to the C entry point
 	l.j	system_state_machine
-	l.or	r3, r2, r2
+	l.ori	r1, r10, lo(__stack_end)
 endfunc start
