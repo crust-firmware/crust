@@ -177,7 +177,7 @@ static const struct clock_handle css_clocks[] = {
 /* Reset Vector Base Address. */
 static uint32_t rvba;
 
-uint8_t
+uint32_t
 css_get_css_state(void)
 {
 	/*
@@ -189,14 +189,14 @@ css_get_css_state(void)
 	return SCPI_CSS_ON;
 }
 
-uint8_t
+uint32_t
 css_get_cluster_count(void)
 {
 	return CLUSTER_MAX;
 }
 
-uint8_t
-css_get_cluster_state(uint8_t cluster UNUSED)
+uint32_t
+css_get_cluster_state(uint32_t cluster UNUSED)
 {
 	assert(cluster < CLUSTER_MAX);
 
@@ -209,14 +209,14 @@ css_get_cluster_state(uint8_t cluster UNUSED)
 	return SCPI_CSS_ON;
 }
 
-uint8_t
-css_get_core_count(uint8_t cluster UNUSED)
+uint32_t
+css_get_core_count(uint32_t cluster UNUSED)
 {
 	return CORE_MAX;
 }
 
-uint8_t
-css_get_core_state(uint8_t cluster UNUSED, uint8_t core)
+uint32_t
+css_get_core_state(uint32_t cluster UNUSED, uint32_t core)
 {
 	assert(cluster < CLUSTER_MAX);
 	assert(core < CORE_MAX);
@@ -241,7 +241,7 @@ css_init(void)
 }
 
 int
-css_set_css_state(uint8_t state UNUSED)
+css_set_css_state(uint32_t state UNUSED)
 {
 	if (state == css_get_css_state())
 		return SCPI_OK;
@@ -363,7 +363,7 @@ css_set_css_state(uint8_t state UNUSED)
 }
 
 int
-css_set_cluster_state(uint8_t cluster, uint8_t state)
+css_set_cluster_state(uint32_t cluster, uint32_t state)
 {
 	assert(cluster < CLUSTER_MAX);
 
@@ -396,7 +396,7 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 		mmio_write_32(CLUSTER_RESET_CTRL_REG,
 		              BIT(28) | BIT(24) | BIT(20) | BIT(12) | BIT(8));
 		/* Restore the reset vector base addresses for all cores. */
-		for (uint8_t core = 0; core < CORE_MAX; ++core)
+		for (uint32_t core = 0; core < CORE_MAX; ++core)
 			mmio_write_32(RVBA_LO_REG(core), rvba);
 	} else if (state == SCPI_CSS_OFF) {
 		/* Wait for all CPUs to be idle. */
@@ -430,7 +430,7 @@ css_set_cluster_state(uint8_t cluster, uint8_t state)
 }
 
 int
-css_set_core_state(uint8_t cluster, uint8_t core, uint8_t state)
+css_set_core_state(uint32_t cluster, uint32_t core, uint32_t state)
 {
 	assert(cluster < CLUSTER_MAX);
 	assert(core < CORE_MAX);

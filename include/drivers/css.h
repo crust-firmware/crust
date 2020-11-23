@@ -11,21 +11,21 @@
 /**
  * Get the state of the compute subsystem (CSS).
  */
-uint8_t css_get_css_state(void);
+uint32_t css_get_css_state(void);
 
 /**
  * Get the number of clusters in the compute subsystem.
  *
  * The number returned cannot be greater than 8.
  */
-uint8_t css_get_cluster_count(void) ATTRIBUTE(const);
+uint32_t css_get_cluster_count(void) ATTRIBUTE(const);
 
 /**
  * Get the state of a cluster.
  *
  * @param cluster The index of the cluster.
  */
-uint8_t css_get_cluster_state(uint8_t cluster);
+uint32_t css_get_cluster_state(uint32_t cluster);
 
 /**
  * Get the number of cores present in a cluster.
@@ -34,7 +34,7 @@ uint8_t css_get_cluster_state(uint8_t cluster);
  *
  * @param cluster The index of the cluster.
  */
-uint8_t css_get_core_count(uint8_t cluster) ATTRIBUTE(const);
+uint32_t css_get_core_count(uint32_t cluster) ATTRIBUTE(const);
 
 /**
  * Get the state of a CPU core.
@@ -42,7 +42,7 @@ uint8_t css_get_core_count(uint8_t cluster) ATTRIBUTE(const);
  * @param cluster The index of the cluster.
  * @param core    The index of the core within the cluster.
  */
-uint8_t css_get_core_state(uint8_t cluster, uint8_t core);
+uint32_t css_get_core_state(uint32_t cluster, uint32_t core);
 
 /**
  * Get a bitmask of the states of the cores in a cluster. A zero bit indicates
@@ -51,7 +51,7 @@ uint8_t css_get_core_state(uint8_t cluster, uint8_t core);
  *
  * @param cluster The index of the cluster.
  */
-uint8_t css_get_online_cores(uint8_t cluster);
+uint32_t css_get_online_cores(uint32_t cluster);
 
 /**
  * Initialize the CSS driver, assuming the CSS is already running. Since the
@@ -66,7 +66,7 @@ void css_init(void);
  *
  * @param state The coordinated requested state for the CSS.
  */
-int css_set_css_state(uint8_t state);
+int css_set_css_state(uint32_t state);
 
 /**
  * Set the state of a cluster. This state must not be numbered lower than the
@@ -75,7 +75,7 @@ int css_set_css_state(uint8_t state);
  * @param cluster The index of the cluster.
  * @param state   The coordinated requested state for the cluster.
  */
-int css_set_cluster_state(uint8_t cluster, uint8_t state);
+int css_set_cluster_state(uint32_t cluster, uint32_t state);
 
 /**
  * Set the state of a CPU core. This state must not be numbered lower than the
@@ -85,6 +85,6 @@ int css_set_cluster_state(uint8_t cluster, uint8_t state);
  * @param core    The index of the core within the cluster.
  * @param state   The coordinated requested state for the CPU core.
  */
-int css_set_core_state(uint8_t cluster, uint8_t core, uint8_t state);
+int css_set_core_state(uint32_t cluster, uint32_t core, uint32_t state);
 
 #endif /* COMMON_CSS_H */

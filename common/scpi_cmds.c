@@ -97,11 +97,11 @@ scpi_cmd_set_css_power_handler(uint32_t *rx_payload,
                                uint16_t *tx_size UNUSED)
 {
 	uint32_t descriptor    = rx_payload[0];
-	uint8_t  core          = bitfield_get(descriptor, 0x00, 4);
-	uint8_t  cluster       = bitfield_get(descriptor, 0x04, 4);
-	uint8_t  core_state    = bitfield_get(descriptor, 0x08, 4);
-	uint8_t  cluster_state = bitfield_get(descriptor, 0x0c, 4);
-	uint8_t  css_state     = bitfield_get(descriptor, 0x10, 4);
+	uint32_t core          = bitfield_get(descriptor, 0x00, 4);
+	uint32_t cluster       = bitfield_get(descriptor, 0x04, 4);
+	uint32_t core_state    = bitfield_get(descriptor, 0x08, 4);
+	uint32_t cluster_state = bitfield_get(descriptor, 0x0c, 4);
+	uint32_t css_state     = bitfield_get(descriptor, 0x10, 4);
 	int err;
 
 	/* Do not check if the CSS should be turned on, as receiving this
@@ -136,11 +136,11 @@ static int
 scpi_cmd_get_css_power_handler(uint32_t *rx_payload UNUSED,
                                uint32_t *tx_payload, uint16_t *tx_size)
 {
-	uint8_t  clusters = css_get_cluster_count();
+	uint32_t clusters = css_get_cluster_count();
 	uint16_t descriptor;
 
 	/* Each cluster has its own power state descriptor. */
-	for (uint8_t i = 0; i < clusters; ++i) {
+	for (uint32_t i = 0; i < clusters; ++i) {
 		descriptor = CLUSTER_ID(i) |
 		             CLUSTER_POWER_STATE(css_get_cluster_state(i)) |
 		             CORE_POWER_STATES(css_get_online_cores(i));
