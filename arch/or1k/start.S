@@ -9,13 +9,9 @@
 func start
 	# Save the exception vector address
 	l.mfspr	r2, r0, SPR_SYS_PPC_ADDR
-	l.sfltui r2, 0x4000		# Size of exception vector area
-	l.bf	1f
-	l.srli	r2, r2, 8		# Vector address → exception number
-	l.addi	r2, r0, 0		# Set to zero if not an exception
 
 	# Invalidate the instruction cache
-1:	l.addi	r3, r0, 0
+	l.addi	r3, r0, 0
 	l.addi	r4, r0, 4096		# Cache lines (256) * block size (16)
 1:	l.mtspr	r0, r3, SPR_ICACHE_ICBIR_ADDR
 	l.sfltu	r3, r4
@@ -46,9 +42,12 @@ func start
 	l.addi	r3, r3, 4
 
 	# Prepare function arguments
-	l.or	r3, r2, r2
+	l.sfltui r2, 0x4000		# Did PC come from an exception vector?
+	l.bnf	1f
+	l.movhi	r3, 0			# Set to zero if not an exception
+	l.srli	r3, r2, 8		# Else compute the exception number
 
 	# Jump to the C entry point
-	l.j	system_state_machine
+1:	l.j	system_state_machine
 	l.ori	r1, r10, lo(__stack_end)
 endfunc start
