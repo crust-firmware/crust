@@ -104,19 +104,11 @@ scpi_cmd_set_css_power_handler(uint32_t *rx_payload,
 	uint32_t css_state     = bitfield_get(descriptor, 0x10, 4);
 	int err;
 
-	/* Do not check if the CSS should be turned on, as receiving this
-	 * command from an ARM CPU via PSCI implies that it is already on. */
-	if (cluster_state == SCPI_CSS_ON &&
-	    (err = css_set_cluster_state(cluster, cluster_state)))
+	err = css_set_power_state(cluster, core, core_state,
+	                          cluster_state, css_state);
+	if (err)
 		return err;
-	if ((err = css_set_core_state(cluster, core, core_state)))
-		return err;
-	if (cluster_state != SCPI_CSS_ON &&
-	    (err = css_set_cluster_state(cluster, cluster_state)))
-		return err;
-	if (css_state != SCPI_CSS_ON &&
-	    (err = css_set_css_state(css_state)))
-		return err;
+
 	/* Turning everything off means system suspend. */
 	if (css_state == SCPI_CSS_OFF)
 		system_suspend();

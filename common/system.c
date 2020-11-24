@@ -219,9 +219,8 @@ system_state_machine(uint32_t exception)
 			mailbox = device_get_or_null(&msgbox.dev);
 
 			/* Resume execution on the first CPU in the CSS. */
-			css_set_css_state(SCPI_CSS_ON);
-			css_set_cluster_state(0, SCPI_CSS_ON);
-			css_set_core_state(0, 0, SCPI_CSS_ON);
+			css_set_power_state(0, 0, SCPI_CSS_ON,
+			                    SCPI_CSS_ON, SCPI_CSS_ON);
 
 			debug("Resume complete!");
 

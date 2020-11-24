@@ -157,3 +157,27 @@ css_set_core_state(uint32_t cluster, uint32_t core, uint32_t state)
 
 	return SCPI_OK;
 }
+
+int
+css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
+                    uint32_t cluster_state, uint32_t css_state)
+{
+	int err;
+
+	if (css_state == SCPI_CSS_ON &&
+	    (err = css_set_css_state(css_state)))
+		return err;
+	if (cluster_state == SCPI_CSS_ON &&
+	    (err = css_set_cluster_state(cluster, cluster_state)))
+		return err;
+	if ((err = css_set_core_state(cluster, core, core_state)))
+		return err;
+	if (cluster_state != SCPI_CSS_ON &&
+	    (err = css_set_cluster_state(cluster, cluster_state)))
+		return err;
+	if (css_state != SCPI_CSS_ON &&
+	    (err = css_set_css_state(css_state)))
+		return err;
+
+	return SCPI_OK;
+}

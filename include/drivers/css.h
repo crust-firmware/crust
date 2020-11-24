@@ -87,4 +87,19 @@ int css_set_cluster_state(uint32_t cluster, uint32_t state);
  */
 int css_set_core_state(uint32_t cluster, uint32_t core, uint32_t state);
 
+/**
+ * Set the state of a CPU core and its ancestor power domains. There are no
+ * restrictions on the requested power states; the best available power state
+ * will be computed for each power domain.
+ *
+ * @param cluster       The index of the cluster.
+ * @param core          The index of the core within the cluster.
+ * @param core_state    The requested power state for the core.
+ * @param cluster_state The requested power state for the core's cluster.
+ * @param css_state     The requested power state for the CSS.
+ * @return              An SCPI success or error status.
+ */
+int css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
+                        uint32_t cluster_state, uint32_t css_state);
+
 #endif /* COMMON_CSS_H */
