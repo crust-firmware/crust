@@ -91,8 +91,6 @@ css_set_css_state(uint32_t state UNUSED)
 int
 css_set_cluster_state(uint32_t cluster, uint32_t state)
 {
-	assert(cluster < CLUSTER_MAX);
-
 	if (state == css_get_cluster_state(cluster))
 		return SCPI_OK;
 
@@ -127,9 +125,6 @@ css_set_cluster_state(uint32_t cluster, uint32_t state)
 int
 css_set_core_state(uint32_t cluster, uint32_t core, uint32_t state)
 {
-	assert(cluster < CLUSTER_MAX);
-	assert(core < CORE_MAX);
-
 	if (state == css_get_core_state(cluster, core))
 		return SCPI_OK;
 

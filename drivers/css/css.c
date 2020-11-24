@@ -163,6 +163,11 @@ css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
 {
 	int err;
 
+	if (cluster >= css_get_cluster_count())
+		return SCPI_E_PARAM;
+	if (core >= css_get_core_count(cluster))
+		return SCPI_E_PARAM;
+
 	if (css_state == SCPI_CSS_ON &&
 	    (err = css_set_css_state(css_state)))
 		return err;
