@@ -15,9 +15,6 @@
 
 #include "css.h"
 
-#define CLUSTER_MAX               1
-#define CORE_MAX                  4
-
 #define CLUSTER_RESET_CTRL_REG    (DEV_CPUCFG + 0x0000)
 #define CLUSTER_CTRL_REG0         (DEV_CPUCFG + 0x0010)
 #define CLUSTER_CTRL_REG1         (DEV_CPUCFG + 0x0014)
@@ -39,15 +36,9 @@
 static uint32_t rvba;
 
 uint32_t
-css_get_cluster_count(void)
-{
-	return CLUSTER_MAX;
-}
-
-uint32_t
 css_get_cluster_state(uint32_t cluster UNUSED)
 {
-	assert(cluster < CLUSTER_MAX);
+	assert(cluster < css_get_cluster_count());
 
 	/*
 	 * The cluster is considered off if its L2 cache is in reset.
@@ -59,16 +50,10 @@ css_get_cluster_state(uint32_t cluster UNUSED)
 }
 
 uint32_t
-css_get_core_count(uint32_t cluster UNUSED)
-{
-	return CORE_MAX;
-}
-
-uint32_t
 css_get_core_state(uint32_t cluster UNUSED, uint32_t core)
 {
-	assert(cluster < CLUSTER_MAX);
-	assert(core < CORE_MAX);
+	assert(cluster < css_get_cluster_count());
+	assert(core < css_get_core_count(cluster));
 
 	/*
 	 * A core is considered off if it is in core reset. Regardless of any
@@ -98,8 +83,8 @@ css_set_cluster_state(uint32_t cluster, uint32_t state)
 		/* Put the cluster back into coherency (deassert ACINACTM). */
 		mmio_clr_32(CLUSTER_CTRL_REG1, BIT(0));
 		/* Restore the reset vector base addresses for all cores. */
-		for (uint32_t core = 0; core < CORE_MAX; ++core)
-			mmio_write_32(RVBA_LO_REG(core), rvba);
+		for (uint32_t i = 0; i < css_get_core_count(cluster); ++i)
+			mmio_write_32(RVBA_LO_REG(i), rvba);
 	} else if (state == SCPI_CSS_OFF) {
 		/* Wait for all CPUs to be idle. */
 		mmio_poll_32(CPU_STATUS_REG, GENMASK(19, 16));

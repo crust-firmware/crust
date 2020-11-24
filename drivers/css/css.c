@@ -9,6 +9,8 @@
 #include <stdint.h>
 #include <util.h>
 
+#include "css.h"
+
 /*
  * These generic functions provide a safe default implementation of the CSS
  * API, so platforms may implement power domain control functions
@@ -28,14 +30,12 @@ css_get_css_state(void)
 }
 
 /**
- * Generic implementation used when no platform support is available. Assume
- * the minimum possible number of clusters is present.
+ * Generic implementation using the platform-provided constants.
  */
 uint32_t WEAK
 css_get_cluster_count(void)
 {
-	/* Assume the CSS contains a single cluster with a single core. */
-	return 1;
+	return MAX_CLUSTERS;
 }
 
 /**
@@ -54,14 +54,13 @@ css_get_cluster_state(uint32_t cluster UNUSED)
 }
 
 /**
- * Generic implementation used when no platform support is available. Assume
- * the minimum possible number of cores is present in each cluster.
+ * Generic implementation using the platform-provided constants.
+ * Assume the same number of cores is present in each cluster.
  */
 uint32_t WEAK
 css_get_core_count(uint32_t cluster UNUSED)
 {
-	/* Assume the CSS contains a single cluster with a single core. */
-	return 1;
+	return MAX_CORES_PER_CLUSTER;
 }
 
 /**

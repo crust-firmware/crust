@@ -8,6 +8,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <platform/css.h>
 
 /**
  * Get the state of the compute subsystem (CSS).
