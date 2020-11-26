@@ -17,9 +17,9 @@ func start
 	# Invalidate the instruction cache
 1:	l.addi	r3, r0, 0
 	l.addi	r4, r0, 4096		# Cache lines (256) * block size (16)
-2:	l.mtspr	r0, r3, SPR_ICACHE_ICBIR_ADDR
+1:	l.mtspr	r0, r3, SPR_ICACHE_ICBIR_ADDR
 	l.sfltu	r3, r4
-	l.bf	2b
+	l.bf	1b
 	l.addi	r3, r3, 16		# Cache block size
 
 	# Flush the CPU pipeline
@@ -41,9 +41,9 @@ func start
 	l.ori	r3, r3, lo(__bss_start)
 	l.movhi	r4, hi(__bss_end)
 	l.ori	r4, r4, lo(__bss_end)
-3:	l.sw	0(r3), r0
+1:	l.sw	0(r3), r0
 	l.sfltu	r3, r4
-	l.bf	3b
+	l.bf	1b
 	l.addi	r3, r3, 4
 
 	# Initialize stack pointer
