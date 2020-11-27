@@ -26,7 +26,8 @@
 #include <msgbox/sunxi-msgbox.h>
 #include <watchdog/sunxi-twd.h>
 
-static uint8_t system_state;
+/* This variable is persisted across exception restarts. */
+static uint8_t system_state = SYSTEM_BOOT;
 
 uint8_t
 get_system_state(void)
@@ -51,22 +52,22 @@ noreturn void
 system_state_machine(uint32_t exception)
 {
 	const struct device *mailbox, *pmic, *watchdog;
-	uint8_t cpus;
+	uint8_t initial_state = system_state;
 
-	/*
-	 * If no CPU is online, assume the system is off. It could be
-	 * suspended, but resetting the board is safer than attempting to
-	 * resume in an unpredictable environment. Otherwise, prepare the
-	 * SYSTEM_ACTIVE state.
-	 */
-	cpus = css_get_online_cores(0);
-	if (!cpus) {
+	if (initial_state > SYSTEM_ACTIVE) {
+		/*
+		 * If the firmware started in any state other than the initial
+		 * state or SYSTEM_ACTIVE, assume the system is off. It could
+		 * be suspended, but resetting the board after an IRQ is safer
+		 * than attempting to resume in an unpredictable environment.
+		 */
 		system_state = SYSTEM_OFF;
 
 		/* Clear out inactive references. */
 		watchdog = NULL;
 		mailbox  = NULL;
 	} else {
+		/* Otherwise, prepare the SYSTEM_ACTIVE state. */
 		system_state = SYSTEM_ACTIVE;
 
 		/* First, enable watchdog protection. */
@@ -100,12 +101,12 @@ system_state_machine(uint32_t exception)
 	debug_print_sprs();
 
 	/*
-	 * If only CPU0 is online, assume Linux has not booted yet, and
-	 * Trusted Firmware is waiting for the SCP_READY message. Skip
-	 * sending SCP_READY otherwise, to avoid filling up the mailbox
-	 * when nothing is listening.
+	 * If the firmware started in the initial state, assume the secure
+	 * monitor is waiting for an SCP_READY message.  Otherwise, assume
+	 * nothing is listening, and skip sending the SCP_READY message to
+	 * avoid filling up the mailbox.
 	 */
-	if (mailbox && cpus == BIT(0)) {
+	if (mailbox && initial_state == SYSTEM_BOOT) {
 		scpi_create_message(mailbox, SCPI_CLIENT_EL3,
 		                    SCPI_CMD_SCP_READY);
 	}
