@@ -38,13 +38,7 @@
 #define APB2_CLK_P(x)     ((x) << 8)
 #define APB2_CLK_M(x)     ((x) << 0)
 
-static uint32_t
-ccu_get_pll_periph0_rate(const struct ccu *self UNUSED,
-                         const struct ccu_clock *clk UNUSED,
-                         uint32_t rate UNUSED)
-{
-	return 600000000U;
-}
+static DEFINE_FIXED_RATE(ccu_get_pll_periph0_rate, 600000000U)
 
 /*
  * While APB2 has a mux, assume its parent is OSC24M. Reparenting APB2

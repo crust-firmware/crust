@@ -23,23 +23,12 @@
 #define CPUS_PRE_DIV(x) ((x) << 8)
 #define CPUS_CLK_P(x)   ((x) << 0)
 
-static uint32_t r_ccu_fixed_rates[] = {
-	[CLK_OSC16M] = 16000000U,
-	[CLK_OSC24M] = 24000000U,
-	[CLK_OSC32K] = 32768U,
-};
+/* Persist this var as r_ccu_init() may not be called after an exception. */
+static uint32_t osc16m_rate = 16000000U;
 
-static uint32_t
-r_ccu_get_fixed_rate(const struct ccu *self,
-                     const struct ccu_clock *clk,
-                     uint32_t rate UNUSED)
-{
-	uintptr_t id = clk - self->clocks;
-
-	assert(id < ARRAY_SIZE(r_ccu_fixed_rates));
-
-	return r_ccu_fixed_rates[id];
-}
+static DEFINE_FIXED_RATE(r_ccu_get_osc16m_rate, osc16m_rate)
+static DEFINE_FIXED_RATE(r_ccu_get_osc24m_rate, 24000000U)
+static DEFINE_FIXED_RATE(r_ccu_get_osc32k_rate, 32768U)
 
 static const struct clock_handle r_ccu_bus_parents[] = {
 	{
@@ -156,15 +145,15 @@ r_ccu_get_module_parent(const struct ccu *self,
 static const struct ccu_clock r_ccu_clocks[SUN50I_H6_R_CCU_CLOCKS] = {
 	[CLK_OSC16M] = {
 		.get_parent = ccu_get_null_parent,
-		.get_rate   = r_ccu_get_fixed_rate,
+		.get_rate   = r_ccu_get_osc16m_rate,
 	},
 	[CLK_OSC24M] = {
 		.get_parent = ccu_get_null_parent,
-		.get_rate   = r_ccu_get_fixed_rate,
+		.get_rate   = r_ccu_get_osc24m_rate,
 	},
 	[CLK_OSC32K] = {
 		.get_parent = ccu_get_null_parent,
-		.get_rate   = r_ccu_get_fixed_rate,
+		.get_rate   = r_ccu_get_osc32k_rate,
 	},
 	[CLK_AR100] = {
 		.get_parent = r_ccu_get_bus_parent,
@@ -283,5 +272,5 @@ r_ccu_init(void)
 	              CPUS_PRE_DIV(0) |
 	              CPUS_CLK_P(0));
 
-	r_ccu_fixed_rates[CLK_OSC16M] = ccu_helper_calibrate_osc16m();
+	osc16m_rate = ccu_helper_calibrate_osc16m();
 }

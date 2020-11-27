@@ -12,6 +12,14 @@
 
 #include "clock.h"
 
+#define DEFINE_FIXED_RATE(_name, _rate) \
+	uint32_t \
+	_name(const struct ccu *self UNUSED, \
+	      const struct ccu_clock *clk UNUSED, \
+	      uint32_t rate UNUSED) { \
+		return _rate; \
+	}
+
 struct ccu_clock {
 	/** Hook for determining the parent clock. */
 	const struct clock_handle *(*get_parent)(const struct ccu *self,
