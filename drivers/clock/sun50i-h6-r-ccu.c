@@ -23,25 +23,25 @@
 #define CPUS_PRE_DIV(x) ((x) << 8)
 #define CPUS_CLK_P(x)   ((x) << 0)
 
-static uint32_t sun50i_h6_r_ccu_fixed_rates[] = {
+static uint32_t r_ccu_fixed_rates[] = {
 	[CLK_OSC16M] = 16000000U,
 	[CLK_OSC24M] = 24000000U,
 	[CLK_OSC32K] = 32768U,
 };
 
 static uint32_t
-sun50i_h6_r_ccu_fixed_get_rate(const struct ccu *self,
-                               const struct ccu_clock *clk,
-                               uint32_t rate UNUSED)
+r_ccu_get_fixed_rate(const struct ccu *self,
+                     const struct ccu_clock *clk,
+                     uint32_t rate UNUSED)
 {
 	uintptr_t id = clk - self->clocks;
 
-	assert(id < ARRAY_SIZE(sun50i_h6_r_ccu_fixed_rates));
+	assert(id < ARRAY_SIZE(r_ccu_fixed_rates));
 
-	return sun50i_h6_r_ccu_fixed_rates[id];
+	return r_ccu_fixed_rates[id];
 }
 
-static const struct clock_handle sun50i_h6_r_ccu_bus_parents[] = {
+static const struct clock_handle r_ccu_bus_parents[] = {
 	{
 		.dev = &r_ccu.dev,
 		.id  = CLK_OSC24M,
@@ -61,79 +61,79 @@ static const struct clock_handle sun50i_h6_r_ccu_bus_parents[] = {
 };
 
 static const struct clock_handle *
-sun50i_h6_r_ccu_bus_get_parent(const struct ccu *self,
-                               const struct ccu_clock *clk)
+r_ccu_get_bus_parent(const struct ccu *self,
+                     const struct ccu_clock *clk)
 {
 	uint32_t val = mmio_read_32(self->regs + clk->reg);
 
-	return &sun50i_h6_r_ccu_bus_parents[bitfield_get(val, 24, 2)];
+	return &r_ccu_bus_parents[bitfield_get(val, 24, 2)];
 }
 
 static uint32_t
-sun50i_h6_r_ccu_mp_get_rate(const struct ccu *self,
-                            const struct ccu_clock *clk, uint32_t rate)
+r_ccu_get_mp_rate(const struct ccu *self,
+                  const struct ccu_clock *clk, uint32_t rate)
 {
 	/* For AR100 and R_APB2, this assumes the pre-divider for PLL_PERIPH0
 	 * (parent 3) will only be set if parent 3 is selected in the mux. */
 	return ccu_helper_get_rate_mp(self, clk, rate, 0, 5, 8, 2);
 }
 
-static const struct clock_handle sun50i_h6_r_ccu_r_ahb_parent = {
+static const struct clock_handle r_ccu_ar100 = {
 	.dev = &r_ccu.dev,
 	.id  = CLK_AR100,
 };
 
 static const struct clock_handle *
-sun50i_h6_r_ccu_r_ahb_get_parent(const struct ccu *self UNUSED,
-                                 const struct ccu_clock *clk UNUSED)
+r_ccu_get_ar100(const struct ccu *self UNUSED,
+                const struct ccu_clock *clk UNUSED)
 {
-	return &sun50i_h6_r_ccu_r_ahb_parent;
+	return &r_ccu_ar100;
 }
 
-static const struct clock_handle sun50i_h6_r_ccu_r_apb1_parent = {
+static const struct clock_handle r_ccu_r_ahb = {
 	.dev = &r_ccu.dev,
 	.id  = CLK_R_AHB,
 };
 
 static const struct clock_handle *
-sun50i_h6_r_ccu_r_apb1_get_parent(const struct ccu *self UNUSED,
-                                  const struct ccu_clock *clk UNUSED)
+r_ccu_get_r_ahb(const struct ccu *self UNUSED,
+                const struct ccu_clock *clk UNUSED)
 {
-	return &sun50i_h6_r_ccu_r_apb1_parent;
+	return &r_ccu_r_ahb;
 }
 
 static uint32_t
-sun50i_h6_r_ccu_r_apb1_get_rate(const struct ccu *self,
-                                const struct ccu_clock *clk, uint32_t rate)
+r_ccu_get_r_apb1_rate(const struct ccu *self,
+                      const struct ccu_clock *clk, uint32_t rate)
 {
 	return ccu_helper_get_rate_m(self, clk, rate, 0, 2);
 }
 
-static const struct clock_handle sun50i_h6_r_ccu_r_apb1_dev_parent = {
+static const struct clock_handle r_ccu_r_apb1 = {
 	.dev = &r_ccu.dev,
 	.id  = CLK_R_APB1,
 };
 
 static const struct clock_handle *
-sun50i_h6_r_ccu_r_apb1_dev_get_parent(const struct ccu *self UNUSED,
-                                      const struct ccu_clock *clk UNUSED)
+r_ccu_get_r_apb1(const struct ccu *self UNUSED,
+                 const struct ccu_clock *clk UNUSED)
 {
-	return &sun50i_h6_r_ccu_r_apb1_dev_parent;
+	return &r_ccu_r_apb1;
 }
 
-static const struct clock_handle sun50i_h6_r_ccu_r_apb2_dev_parent = {
+static const struct clock_handle r_ccu_r_apb2 = {
 	.dev = &r_ccu.dev,
 	.id  = CLK_R_APB2,
 };
 
 static const struct clock_handle *
-sun50i_h6_r_ccu_r_apb2_dev_get_parent(const struct ccu *self UNUSED,
-                                      const struct ccu_clock *clk UNUSED)
+r_ccu_get_r_apb2(const struct ccu *self UNUSED,
+                 const struct ccu_clock *clk UNUSED)
 {
-	return &sun50i_h6_r_ccu_r_apb2_dev_parent;
+	return &r_ccu_r_apb2;
 }
 
-static const struct clock_handle sun50i_h6_r_ccu_module_parents[] = {
+static const struct clock_handle r_ccu_module_parents[] = {
 	{
 		.dev = &r_ccu.dev,
 		.id  = CLK_OSC32K,
@@ -145,53 +145,52 @@ static const struct clock_handle sun50i_h6_r_ccu_module_parents[] = {
 };
 
 static const struct clock_handle *
-sun50i_h6_r_ccu_module_get_parent(const struct ccu *self,
-                                  const struct ccu_clock *clk)
+r_ccu_get_module_parent(const struct ccu *self,
+                        const struct ccu_clock *clk)
 {
 	uint32_t val = mmio_read_32(self->regs + clk->reg);
 
-	return &sun50i_h6_r_ccu_module_parents[bitfield_get(val, 24, 1)];
+	return &r_ccu_module_parents[bitfield_get(val, 24, 1)];
 }
 
-static const struct ccu_clock sun50i_h6_r_ccu_clocks[SUN50I_H6_R_CCU_CLOCKS] =
-{
+static const struct ccu_clock r_ccu_clocks[SUN50I_H6_R_CCU_CLOCKS] = {
 	[CLK_OSC16M] = {
 		.get_parent = ccu_get_null_parent,
-		.get_rate   = sun50i_h6_r_ccu_fixed_get_rate,
+		.get_rate   = r_ccu_get_fixed_rate,
 	},
 	[CLK_OSC24M] = {
 		.get_parent = ccu_get_null_parent,
-		.get_rate   = sun50i_h6_r_ccu_fixed_get_rate,
+		.get_rate   = r_ccu_get_fixed_rate,
 	},
 	[CLK_OSC32K] = {
 		.get_parent = ccu_get_null_parent,
-		.get_rate   = sun50i_h6_r_ccu_fixed_get_rate,
+		.get_rate   = r_ccu_get_fixed_rate,
 	},
 	[CLK_AR100] = {
-		.get_parent = sun50i_h6_r_ccu_bus_get_parent,
-		.get_rate   = sun50i_h6_r_ccu_mp_get_rate,
+		.get_parent = r_ccu_get_bus_parent,
+		.get_rate   = r_ccu_get_mp_rate,
 		.reg        = CPUS_CLK_REG,
 	},
 	[CLK_R_AHB] = {
-		.get_parent = sun50i_h6_r_ccu_r_ahb_get_parent,
+		.get_parent = r_ccu_get_ar100,
 		.get_rate   = ccu_get_parent_rate,
 	},
 	[CLK_R_APB1] = {
-		.get_parent = sun50i_h6_r_ccu_r_apb1_get_parent,
-		.get_rate   = sun50i_h6_r_ccu_r_apb1_get_rate,
+		.get_parent = r_ccu_get_r_ahb,
+		.get_rate   = r_ccu_get_r_apb1_rate,
 		.reg        = 0x000c,
 	},
 	[CLK_R_APB2] = {
-		.get_parent = sun50i_h6_r_ccu_bus_get_parent,
-		.get_rate   = sun50i_h6_r_ccu_mp_get_rate,
+		.get_parent = r_ccu_get_bus_parent,
+		.get_rate   = r_ccu_get_mp_rate,
 		.reg        = 0x0010,
 	},
 	[CLK_BUS_R_PIO] = {
-		.get_parent = sun50i_h6_r_ccu_r_apb1_dev_get_parent,
+		.get_parent = r_ccu_get_r_apb1,
 		.get_rate   = ccu_get_parent_rate,
 	},
 	[CLK_BUS_R_TIMER] = {
-		.get_parent = sun50i_h6_r_ccu_r_apb1_dev_get_parent,
+		.get_parent = r_ccu_get_r_apb1,
 		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x011c, 0),
 		.reset      = BITMAP_INDEX(0x011c, 16),
@@ -204,44 +203,44 @@ static const struct ccu_clock sun50i_h6_r_ccu_clocks[SUN50I_H6_R_CCU_CLOCKS] =
 		.reset      = BITMAP_INDEX(0x012c, 16),
 	},
 	[CLK_BUS_R_PWM] = {
-		.get_parent = sun50i_h6_r_ccu_r_apb1_dev_get_parent,
+		.get_parent = r_ccu_get_r_apb1,
 		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x013c, 0),
 		.reset      = BITMAP_INDEX(0x013c, 16),
 	},
 	[CLK_BUS_R_UART] = {
-		.get_parent = sun50i_h6_r_ccu_r_apb2_dev_get_parent,
+		.get_parent = r_ccu_get_r_apb2,
 		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x018c, 0),
 		.reset      = BITMAP_INDEX(0x018c, 16),
 	},
 	[CLK_BUS_R_I2C] = {
-		.get_parent = sun50i_h6_r_ccu_r_apb2_dev_get_parent,
+		.get_parent = r_ccu_get_r_apb2,
 		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x019c, 0),
 		.reset      = BITMAP_INDEX(0x019c, 16),
 	},
 	[CLK_BUS_R_CIR] = {
-		.get_parent = sun50i_h6_r_ccu_r_apb1_dev_get_parent,
+		.get_parent = r_ccu_get_r_apb1,
 		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x01cc, 0),
 		.reset      = BITMAP_INDEX(0x01cc, 16),
 	},
 	[CLK_BUS_R_W1] = {
-		.get_parent = sun50i_h6_r_ccu_r_apb1_dev_get_parent,
+		.get_parent = r_ccu_get_r_apb1,
 		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x01ec, 0),
 		.reset      = BITMAP_INDEX(0x01ec, 16),
 	},
 	[CLK_R_CIR] = {
-		.get_parent = sun50i_h6_r_ccu_module_get_parent,
-		.get_rate   = sun50i_h6_r_ccu_mp_get_rate,
+		.get_parent = r_ccu_get_module_parent,
+		.get_rate   = r_ccu_get_mp_rate,
 		.reg        = 0x01c0,
 		.gate       = BITMAP_INDEX(0x01c0, 31),
 	},
 	[CLK_R_W1] = {
-		.get_parent = sun50i_h6_r_ccu_module_get_parent,
-		.get_rate   = sun50i_h6_r_ccu_mp_get_rate,
+		.get_parent = r_ccu_get_module_parent,
+		.get_rate   = r_ccu_get_mp_rate,
 		.reg        = 0x01e0,
 		.gate       = BITMAP_INDEX(0x01e0, 31),
 	},
@@ -253,7 +252,7 @@ const struct ccu r_ccu = {
 		.drv   = &ccu_driver.drv,
 		.state = CLOCK_DEVICE_STATE_INIT(SUN50I_H6_R_CCU_CLOCKS),
 	},
-	.clocks = sun50i_h6_r_ccu_clocks,
+	.clocks = r_ccu_clocks,
 	.regs   = DEV_R_PRCM,
 };
 
@@ -284,6 +283,5 @@ r_ccu_init(void)
 	              CPUS_PRE_DIV(0) |
 	              CPUS_CLK_P(0));
 
-	sun50i_h6_r_ccu_fixed_rates[CLK_OSC16M] =
-		ccu_helper_calibrate_osc16m();
+	r_ccu_fixed_rates[CLK_OSC16M] = ccu_helper_calibrate_osc16m();
 }
