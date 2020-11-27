@@ -35,37 +35,6 @@
 /* Reset Vector Base Address. */
 static uint32_t rvba;
 
-uint32_t
-css_get_cluster_state(uint32_t cluster UNUSED)
-{
-	assert(cluster < css_get_cluster_count());
-
-	/*
-	 * The cluster is considered off if its L2 cache is in reset.
-	 */
-	if (!mmio_get_32(CLUSTER_RESET_CTRL_REG, BIT(8)))
-		return SCPI_CSS_OFF;
-
-	return SCPI_CSS_ON;
-}
-
-uint32_t
-css_get_core_state(uint32_t cluster UNUSED, uint32_t core)
-{
-	assert(cluster < css_get_cluster_count());
-	assert(core < css_get_core_count(cluster));
-
-	/*
-	 * A core is considered off if it is in core reset. Regardless of any
-	 * deeper "off" state the core may or may not be in, if it is in
-	 * core reset, it is not running instructions or maintaining state.
-	 */
-	if (!mmio_get_32(CLUSTER_RESET_CTRL_REG, BIT(core)))
-		return SCPI_CSS_OFF;
-
-	return SCPI_CSS_ON;
-}
-
 int
 css_set_css_state(uint32_t state UNUSED)
 {
@@ -74,11 +43,8 @@ css_set_css_state(uint32_t state UNUSED)
 }
 
 int
-css_set_cluster_state(uint32_t cluster, uint32_t state)
+css_set_cluster_state(uint32_t cluster UNUSED, uint32_t state)
 {
-	if (state == css_get_cluster_state(cluster))
-		return SCPI_OK;
-
 	if (state == SCPI_CSS_ON) {
 		/* Put the cluster back into coherency (deassert ACINACTM). */
 		mmio_clr_32(CLUSTER_CTRL_REG1, BIT(0));
@@ -108,11 +74,8 @@ css_set_cluster_state(uint32_t cluster, uint32_t state)
 }
 
 int
-css_set_core_state(uint32_t cluster, uint32_t core, uint32_t state)
+css_set_core_state(uint32_t cluster UNUSED, uint32_t core, uint32_t state)
 {
-	if (state == css_get_core_state(cluster, core))
-		return SCPI_OK;
-
 	if (state == SCPI_CSS_ON) {
 		/* Deassert DBGPWRDUP (prevent debug access to the core). */
 		mmio_clr_32(DEBUG_REG0, BIT(core));

@@ -174,49 +174,6 @@ static const struct clock_handle css_clocks[] = {
 /* Reset Vector Base Address. */
 static uint32_t rvba;
 
-uint32_t
-css_get_css_state(void)
-{
-	/*
-	 * The CSS is considered off if the DRAM pads are being held.
-	 */
-	if (mmio_get_32(VDD_SYS_PWROFF_GATING_REG, GENMASK(1, 0)))
-		return SCPI_CSS_OFF;
-
-	return SCPI_CSS_ON;
-}
-
-uint32_t
-css_get_cluster_state(uint32_t cluster UNUSED)
-{
-	assert(cluster < css_get_cluster_count());
-
-	/*
-	 * The cluster is considered off if its L2 cache is in reset.
-	 */
-	if (!mmio_get_32(CLUSTER_RESET_CTRL_REG, BIT(8)))
-		return SCPI_CSS_OFF;
-
-	return SCPI_CSS_ON;
-}
-
-uint32_t
-css_get_core_state(uint32_t cluster UNUSED, uint32_t core)
-{
-	assert(cluster < css_get_cluster_count());
-	assert(core < css_get_core_count(cluster));
-
-	/*
-	 * A core is considered off if it is in core reset. Regardless of any
-	 * deeper "off" state the core may or may not be in, if it is in
-	 * core reset, it is not running instructions or maintaining state.
-	 */
-	if (!mmio_get_32(CLUSTER_RESET_CTRL_REG, BIT(core)))
-		return SCPI_CSS_OFF;
-
-	return SCPI_CSS_ON;
-}
-
 void
 css_init(void)
 {
@@ -228,9 +185,6 @@ css_init(void)
 int
 css_set_css_state(uint32_t state UNUSED)
 {
-	if (state == css_get_css_state())
-		return SCPI_OK;
-
 	/* Enable DRAM controller register access. */
 	clock_get(&css_clocks[BUS_DRAM]);
 
@@ -348,11 +302,8 @@ css_set_css_state(uint32_t state UNUSED)
 }
 
 int
-css_set_cluster_state(uint32_t cluster, uint32_t state)
+css_set_cluster_state(uint32_t cluster UNUSED, uint32_t state)
 {
-	if (state == css_get_cluster_state(cluster))
-		return SCPI_OK;
-
 	if (state == SCPI_CSS_ON) {
 		/* Apply power to the cluster power domain. */
 		css_set_power_switch(CPU_PWR_CLAMP_REG(0), true);
@@ -413,11 +364,8 @@ css_set_cluster_state(uint32_t cluster, uint32_t state)
 }
 
 int
-css_set_core_state(uint32_t cluster, uint32_t core, uint32_t state)
+css_set_core_state(uint32_t cluster UNUSED, uint32_t core, uint32_t state)
 {
-	if (state == css_get_core_state(cluster, core))
-		return SCPI_OK;
-
 	if (state == SCPI_CSS_ON) {
 		/* Deassert DBGPWRDUP (prevent debug access to the core). */
 		mmio_clr_32(DEBUG_REG0, BIT(core));

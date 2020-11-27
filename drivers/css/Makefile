@@ -4,6 +4,7 @@
 #
 
 obj-y += css.o
+obj-y += css_default.o
 obj-y += css_helpers.o
 
 obj-$(CONFIG_PLATFORM_A64) += sun50i-a64-css.o

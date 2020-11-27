@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
+#include <platform/css.h>
 #include <platform/memory.h>
 
 #if CONFIG(COMPILE_TEST)
@@ -54,7 +55,8 @@ SECTIONS
    * boot. Before changing this value, verify the firmware can recover from a
    * crash even after the new data is modified.
    */
-  ASSERT(SIZEOF(.data) == 0x08, "Changes to .data persist after an exception!")
+  ASSERT(SIZEOF(.data) == MAX_CLUSTERS * MAX_CORES_PER_CLUSTER + 0x08,
+         "Changes to .data persist after an exception!")
 
   .bss . : ALIGN(4) {
     __bss_start = .;

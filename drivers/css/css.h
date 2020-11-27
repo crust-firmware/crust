@@ -10,17 +10,13 @@
 #include <stdint.h>
 #include <platform/css.h>
 
-/**
- * Get the state of the compute subsystem (CSS).
- */
-uint32_t css_get_css_state(void);
+struct power_state {
+	uint8_t core[MAX_CLUSTERS][MAX_CORES_PER_CLUSTER];
+	uint8_t cluster[MAX_CLUSTERS];
+	uint8_t css;
+};
 
-/**
- * Get the state of a cluster.
- *
- * @param cluster The index of the cluster.
- */
-uint32_t css_get_cluster_state(uint32_t cluster);
+extern struct power_state power_state;
 
 /**
  * Get the number of cores present in a cluster.
@@ -30,14 +26,6 @@ uint32_t css_get_cluster_state(uint32_t cluster);
  * @param cluster The index of the cluster.
  */
 uint32_t css_get_core_count(uint32_t cluster) ATTRIBUTE(const);
-
-/**
- * Get the state of a CPU core.
- *
- * @param cluster The index of the cluster.
- * @param core    The index of the core within the cluster.
- */
-uint32_t css_get_core_state(uint32_t cluster, uint32_t core);
 
 /**
  * Set the state of the compute subsystem (CSS). This state must not be
