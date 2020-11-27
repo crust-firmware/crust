@@ -6,7 +6,7 @@
 
 ## What is it?
 
-The crust is the lowest-level component of a delicious fruit pie. Similary,
+The crust is the lowest-level component of a delicious fruit pie. Similarly,
 Crust is the lowest-level firmware component that runs on `$FRUIT` (Banana,
 Orange, Lichee) Pi single-board computers and other Allwinner-based devices,
 such as the Pine64 Pinebook and PinePhone.

@@ -12,8 +12,8 @@
 /**
  * Enable or disable power to a core or cluster power domain.
  *
- * When enabing a power switch, the power domain will be turned on gradually to
- * minimize inrush current and voltage drops.
+ * When enabling a power switch, the power domain will be turned on gradually
+ * to minimize inrush current and voltage drops.
  *
  * The mapping of cores/clusters to register addresses is platform-dependent.
  *
