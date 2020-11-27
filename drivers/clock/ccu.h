@@ -36,11 +36,18 @@ uint32_t ccu_helper_calibrate_osc16m(void);
 void ccu_helper_disable_osc24m(uintptr_t reg);
 void ccu_helper_enable_osc24m(uintptr_t reg);
 
-const struct clock_handle *ccu_helper_get_parent(const struct ccu *self,
-                                                 const struct ccu_clock *clk);
+/**
+ * Default .get_parent implementation, returns NULL.
+ */
+const struct clock_handle *ccu_get_null_parent(const struct ccu *self,
+                                               const struct ccu_clock *clk);
 
-uint32_t ccu_helper_get_rate(const struct ccu *self,
+/**
+ * Default .get_rate implementation, returns the parent's rate unmodified.
+ */
+uint32_t ccu_get_parent_rate(const struct ccu *self,
                              const struct ccu_clock *clk, uint32_t rate);
+
 uint32_t ccu_helper_get_rate_m(const struct ccu *self,
                                const struct ccu_clock *clk, uint32_t rate,
                                uint32_t m_shift, uint32_t m_width);

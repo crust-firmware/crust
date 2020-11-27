@@ -73,20 +73,6 @@ ccu_helper_enable_osc24m(uintptr_t reg)
 	ccu_helper_update_osc24m(reg, PLL_CTRL_REG1_MASK);
 }
 
-const struct clock_handle *
-ccu_helper_get_parent(const struct ccu *self UNUSED,
-                      const struct ccu_clock *clk UNUSED)
-{
-	return NULL;
-}
-
-uint32_t
-ccu_helper_get_rate(const struct ccu *self UNUSED,
-                    const struct ccu_clock *clk UNUSED, uint32_t rate)
-{
-	return rate;
-}
-
 uint32_t
 ccu_helper_get_rate_m(const struct ccu *self,
                       const struct ccu_clock *clk, uint32_t rate,

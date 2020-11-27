@@ -150,15 +150,15 @@ sun8i_r_ccu_r_cir_get_rate(const struct ccu *self,
 
 static const struct ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 	[CLK_OSC16M] = {
-		.get_parent = ccu_helper_get_parent,
+		.get_parent = ccu_get_null_parent,
 		.get_rate   = sun8i_r_ccu_fixed_get_rate,
 	},
 	[CLK_OSC24M] = {
-		.get_parent = ccu_helper_get_parent,
+		.get_parent = ccu_get_null_parent,
 		.get_rate   = sun8i_r_ccu_fixed_get_rate,
 	},
 	[CLK_OSC32K] = {
-		.get_parent = ccu_helper_get_parent,
+		.get_parent = ccu_get_null_parent,
 		.get_rate   = sun8i_r_ccu_fixed_get_rate,
 	},
 	[CLK_AR100] = {
@@ -168,7 +168,7 @@ static const struct ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 	},
 	[CLK_AHB0] = {
 		.get_parent = sun8i_r_ccu_ahb0_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 	},
 	[CLK_APB0] = {
 		.get_parent = sun8i_r_ccu_apb0_get_parent,
@@ -177,45 +177,45 @@ static const struct ccu_clock sun8i_r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 	},
 	[CLK_BUS_R_PIO] = {
 		.get_parent = sun8i_r_ccu_apb0_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x0028, 0),
 	},
 	[CLK_BUS_R_CIR] = {
 		.get_parent = sun8i_r_ccu_apb0_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x0028, 1),
 		.reset      = BITMAP_INDEX(0x00b0, 1),
 	},
 	[CLK_BUS_R_TIMER] = {
 		.get_parent = sun8i_r_ccu_apb0_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x0028, 2),
 		.reset      = BITMAP_INDEX(0x00b0, 2),
 	},
 #if CONFIG(HAVE_RSB)
 	[CLK_BUS_R_RSB] = {
 		.get_parent = sun8i_r_ccu_apb0_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x0028, 3),
 		.reset      = BITMAP_INDEX(0x00b0, 3),
 	},
 #endif
 	[CLK_BUS_R_UART] = {
 		.get_parent = sun8i_r_ccu_apb0_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x0028, 4),
 		.reset      = BITMAP_INDEX(0x00b0, 4),
 	},
 	[CLK_BUS_R_I2C] = {
 		.get_parent = sun8i_r_ccu_apb0_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x0028, 6),
 		.reset      = BITMAP_INDEX(0x00b0, 6),
 	},
 	[CLK_BUS_R_TWD] = {
 		/* Parent omitted to allow enabling before CCU init. */
-		.get_parent = ccu_helper_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_parent = ccu_get_null_parent,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x0028, 7),
 	},
 	[CLK_R_CIR] = {

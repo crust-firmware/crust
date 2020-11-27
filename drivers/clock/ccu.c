@@ -19,6 +19,13 @@ to_ccu(const struct device *dev)
 	return container_of(dev, const struct ccu, dev);
 }
 
+const struct clock_handle *
+ccu_get_null_parent(const struct ccu *self UNUSED,
+                    const struct ccu_clock *clk UNUSED)
+{
+	return NULL;
+}
+
 static const struct clock_handle *
 ccu_get_parent(const struct clock_handle *clock)
 {
@@ -26,6 +33,13 @@ ccu_get_parent(const struct clock_handle *clock)
 	const struct ccu_clock *clk = &self->clocks[clock->id];
 
 	return clk->get_parent(self, clk);
+}
+
+uint32_t
+ccu_get_parent_rate(const struct ccu *self UNUSED,
+                    const struct ccu_clock *clk UNUSED, uint32_t rate)
+{
+	return rate;
 }
 
 static uint32_t

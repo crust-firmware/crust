@@ -156,15 +156,15 @@ sun50i_h6_r_ccu_module_get_parent(const struct ccu *self,
 static const struct ccu_clock sun50i_h6_r_ccu_clocks[SUN50I_H6_R_CCU_CLOCKS] =
 {
 	[CLK_OSC16M] = {
-		.get_parent = ccu_helper_get_parent,
+		.get_parent = ccu_get_null_parent,
 		.get_rate   = sun50i_h6_r_ccu_fixed_get_rate,
 	},
 	[CLK_OSC24M] = {
-		.get_parent = ccu_helper_get_parent,
+		.get_parent = ccu_get_null_parent,
 		.get_rate   = sun50i_h6_r_ccu_fixed_get_rate,
 	},
 	[CLK_OSC32K] = {
-		.get_parent = ccu_helper_get_parent,
+		.get_parent = ccu_get_null_parent,
 		.get_rate   = sun50i_h6_r_ccu_fixed_get_rate,
 	},
 	[CLK_AR100] = {
@@ -174,7 +174,7 @@ static const struct ccu_clock sun50i_h6_r_ccu_clocks[SUN50I_H6_R_CCU_CLOCKS] =
 	},
 	[CLK_R_AHB] = {
 		.get_parent = sun50i_h6_r_ccu_r_ahb_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 	},
 	[CLK_R_APB1] = {
 		.get_parent = sun50i_h6_r_ccu_r_apb1_get_parent,
@@ -188,48 +188,48 @@ static const struct ccu_clock sun50i_h6_r_ccu_clocks[SUN50I_H6_R_CCU_CLOCKS] =
 	},
 	[CLK_BUS_R_PIO] = {
 		.get_parent = sun50i_h6_r_ccu_r_apb1_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 	},
 	[CLK_BUS_R_TIMER] = {
 		.get_parent = sun50i_h6_r_ccu_r_apb1_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x011c, 0),
 		.reset      = BITMAP_INDEX(0x011c, 16),
 	},
 	[CLK_BUS_R_TWD] = {
 		/* Parent omitted to allow enabling before CCU init. */
-		.get_parent = ccu_helper_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_parent = ccu_get_null_parent,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x012c, 0),
 		.reset      = BITMAP_INDEX(0x012c, 16),
 	},
 	[CLK_BUS_R_PWM] = {
 		.get_parent = sun50i_h6_r_ccu_r_apb1_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x013c, 0),
 		.reset      = BITMAP_INDEX(0x013c, 16),
 	},
 	[CLK_BUS_R_UART] = {
 		.get_parent = sun50i_h6_r_ccu_r_apb2_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x018c, 0),
 		.reset      = BITMAP_INDEX(0x018c, 16),
 	},
 	[CLK_BUS_R_I2C] = {
 		.get_parent = sun50i_h6_r_ccu_r_apb2_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x019c, 0),
 		.reset      = BITMAP_INDEX(0x019c, 16),
 	},
 	[CLK_BUS_R_CIR] = {
 		.get_parent = sun50i_h6_r_ccu_r_apb1_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x01cc, 0),
 		.reset      = BITMAP_INDEX(0x01cc, 16),
 	},
 	[CLK_BUS_R_W1] = {
 		.get_parent = sun50i_h6_r_ccu_r_apb1_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x01ec, 0),
 		.reset      = BITMAP_INDEX(0x01ec, 16),
 	},

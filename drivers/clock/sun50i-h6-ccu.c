@@ -76,48 +76,48 @@ sun50i_h6_ccu_apb2_dev_get_parent(const struct ccu *self UNUSED,
 
 static const struct ccu_clock sun50i_h6_ccu_clocks[SUN50I_H6_CCU_CLOCKS] = {
 	[CLK_PLL_PERIPH0] = {
-		.get_parent = ccu_helper_get_parent,
+		.get_parent = ccu_get_null_parent,
 		.get_rate   = sun50i_h6_ccu_fixed_get_rate,
 	},
 	[CLK_APB2] = {
 		.get_parent = sun50i_h6_ccu_apb2_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 	},
 	[CLK_BUS_MSGBOX] = {
-		.get_parent = ccu_helper_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_parent = ccu_get_null_parent,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x071c, 0),
 		.reset      = BITMAP_INDEX(0x071c, 16),
 	},
 	[CLK_BUS_PIO] = {
-		.get_parent = ccu_helper_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_parent = ccu_get_null_parent,
+		.get_rate   = ccu_get_parent_rate,
 	},
 #if CONFIG(SERIAL_DEV_UART0)
 	[CLK_BUS_UART0] = {
 		.get_parent = sun50i_h6_ccu_apb2_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x090c, 0),
 		.reset      = BITMAP_INDEX(0x090c, 16),
 	},
 #elif CONFIG(SERIAL_DEV_UART1)
 	[CLK_BUS_UART1] = {
 		.get_parent = sun50i_h6_ccu_apb2_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x090c, 1),
 		.reset      = BITMAP_INDEX(0x090c, 17),
 	},
 #elif CONFIG(SERIAL_DEV_UART2)
 	[CLK_BUS_UART2] = {
 		.get_parent = sun50i_h6_ccu_apb2_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x090c, 2),
 		.reset      = BITMAP_INDEX(0x090c, 18),
 	},
 #elif CONFIG(SERIAL_DEV_UART3)
 	[CLK_BUS_UART3] = {
 		.get_parent = sun50i_h6_ccu_apb2_dev_get_parent,
-		.get_rate   = ccu_helper_get_rate,
+		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x090c, 3),
 		.reset      = BITMAP_INDEX(0x090c, 19),
 	},
