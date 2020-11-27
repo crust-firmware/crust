@@ -68,29 +68,8 @@ r_ccu_get_ar100_rate(const struct ccu *self,
 	return ccu_helper_get_rate_mp(self, clk, rate, 8, 5, 4, 2);
 }
 
-static const struct clock_handle r_ccu_ar100 = {
-	.dev = &r_ccu.dev,
-	.id  = CLK_AR100,
-};
-
-static const struct clock_handle *
-r_ccu_get_ar100(const struct ccu *self UNUSED,
-                const struct ccu_clock *clk UNUSED)
-{
-	return &r_ccu_ar100;
-}
-
-static const struct clock_handle r_ccu_ahb0 = {
-	.dev = &r_ccu.dev,
-	.id  = CLK_AHB0,
-};
-
-static const struct clock_handle *
-r_ccu_get_ahb0(const struct ccu *self UNUSED,
-               const struct ccu_clock *clk UNUSED)
-{
-	return &r_ccu_ahb0;
-}
+static DEFINE_FIXED_PARENT(r_ccu_get_ar100, r_ccu, CLK_AR100)
+static DEFINE_FIXED_PARENT(r_ccu_get_ahb0, r_ccu, CLK_AHB0)
 
 static uint32_t
 r_ccu_get_apb0_rate(const struct ccu *self,
@@ -99,17 +78,7 @@ r_ccu_get_apb0_rate(const struct ccu *self,
 	return ccu_helper_get_rate_m(self, clk, rate, 0, 2);
 }
 
-static const struct clock_handle r_ccu_apb0 = {
-	.dev = &r_ccu.dev,
-	.id  = CLK_APB0,
-};
-
-static const struct clock_handle *
-r_ccu_get_apb0(const struct ccu *self UNUSED,
-               const struct ccu_clock *clk UNUSED)
-{
-	return &r_ccu_apb0;
-}
+static DEFINE_FIXED_PARENT(r_ccu_get_apb0, r_ccu, CLK_APB0)
 
 static const struct clock_handle r_ccu_r_cir_parents[] = {
 	{

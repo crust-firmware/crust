@@ -12,6 +12,17 @@
 
 #include "clock.h"
 
+#define DEFINE_FIXED_PARENT(_name, _dev, _id) \
+	UNUSED const struct clock_handle * \
+	_name(const struct ccu *self UNUSED, \
+	      const struct ccu_clock *clk UNUSED) { \
+		static const struct clock_handle _name ## _handle = { \
+			.dev = &_dev.dev, \
+			.id  = _id, \
+		}; \
+		return &_name ## _handle; \
+	}
+
 #define DEFINE_FIXED_RATE(_name, _rate) \
 	uint32_t \
 	_name(const struct ccu *self UNUSED, \

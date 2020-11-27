@@ -24,29 +24,8 @@ static DEFINE_FIXED_RATE(ccu_get_pll_periph0_rate, 600000000U)
  * While APB2 has a mux, assume its parent is OSC24M. Reparenting APB2
  * to PLL_PERIPH0 in Linux for faster UART clocks is unsupported.
  */
-static const struct clock_handle ccu_apb2_parent = {
-	.dev = &r_ccu.dev,
-	.id  = CLK_OSC24M,
-};
-
-static const struct clock_handle *
-ccu_get_apb2_parent(const struct ccu *self UNUSED,
-                    const struct ccu_clock *clk UNUSED)
-{
-	return &ccu_apb2_parent;
-}
-
-static const struct clock_handle ccu_apb2 = {
-	.dev = &ccu.dev,
-	.id  = CLK_APB2,
-};
-
-UNUSED static const struct clock_handle *
-ccu_get_apb2(const struct ccu *self UNUSED,
-             const struct ccu_clock *clk UNUSED)
-{
-	return &ccu_apb2;
-}
+static DEFINE_FIXED_PARENT(ccu_get_apb2_parent, r_ccu, CLK_OSC24M)
+static DEFINE_FIXED_PARENT(ccu_get_apb2, ccu, CLK_APB2)
 
 static const struct ccu_clock ccu_clocks[SUN8I_A83T_CCU_CLOCKS] = {
 	[CLK_PLL_PERIPH0] = {
