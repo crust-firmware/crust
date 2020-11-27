@@ -45,13 +45,21 @@ uint32_t css_get_core_count(uint32_t cluster) ATTRIBUTE(const);
 uint32_t css_get_core_state(uint32_t cluster, uint32_t core);
 
 /**
- * Get a bitmask of the states of the cores in a cluster. A zero bit indicates
- * that a core is completely off (i.e. it has no execution context, and must be
- * manually woken up). Any other state is represented by a set bit.
+ * Get the state of a cluster and the cores it contains.
  *
- * @param cluster The index of the cluster.
+ * The state of the cluster is returned in cluster_state.
+ *
+ * A bitmap representing the state of each core in the cluster is returned in
+ * online_cores. A zero bit indicates that a core is completely off (it has no
+ * execution context). Any other state is represented by a set bit.
+ *
+ * @param cluster       The index of the cluster.
+ * @param cluster_state Where to store the cluster state.
+ * @param online_cores  Where to store the bitmap of online cores.
+ * @return              An SCPI success or error status.
  */
-uint32_t css_get_online_cores(uint32_t cluster);
+int css_get_power_state(uint32_t cluster, uint32_t *cluster_state,
+                        uint32_t *online_cores);
 
 /**
  * Initialize the CSS driver, assuming the CSS is already running. Since the

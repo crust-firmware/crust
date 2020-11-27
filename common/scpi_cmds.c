@@ -130,12 +130,18 @@ scpi_cmd_get_css_power_handler(uint32_t *rx_payload UNUSED,
 {
 	uint32_t clusters = css_get_cluster_count();
 	uint16_t descriptor;
+	int err;
 
 	/* Each cluster has its own power state descriptor. */
 	for (uint32_t i = 0; i < clusters; ++i) {
+		uint32_t state, online_cores;
+
+		if ((err = css_get_power_state(i, &state, &online_cores)))
+			return err;
+
 		descriptor = CLUSTER_ID(i) |
-		             CLUSTER_POWER_STATE(css_get_cluster_state(i)) |
-		             CORE_POWER_STATES(css_get_online_cores(i));
+		             CLUSTER_POWER_STATE(state) |
+		             CORE_POWER_STATES(online_cores);
 		/* Work around the hardware byte swapping, since this is an
 		 * array of elements each aligned to less than 4 bytes. */
 		((uint16_t *)tx_payload)[i ^ 1] = descriptor;

@@ -81,27 +81,26 @@ css_get_core_state(uint32_t cluster, uint32_t core)
 	return SCPI_CSS_ON;
 }
 
-/*
- * There should usually be no reason to override this weak definition. It
- * correctly implements the algorithm specified in the CSS API using the
- * lower-level core state API. However, this definition is declared weak for
- * consistency with the other functions and flexibility for future platforms.
- */
-uint32_t WEAK
-css_get_online_cores(uint32_t cluster)
+int
+css_get_power_state(uint32_t cluster, uint32_t *cluster_state,
+                    uint32_t *online_cores)
 {
 	uint32_t cores;
 	uint32_t mask = 0;
 
-	assert(cluster < css_get_cluster_count());
+	if (cluster >= css_get_cluster_count())
+		return SCPI_E_PARAM;
+
+	*cluster_state = css_get_cluster_state(cluster);
 
 	cores = css_get_core_count(cluster);
 	for (uint32_t core = 0; core < cores; ++core) {
 		if (css_get_core_state(cluster, core) != SCPI_CSS_OFF)
 			mask |= BIT(core);
 	}
+	*online_cores = mask;
 
-	return mask;
+	return SCPI_OK;
 }
 
 /**
