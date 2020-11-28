@@ -5,6 +5,7 @@
 
 obj-y += clock/
 obj-y += css/
+obj-y += dram/
 obj-y += gpio/
 obj-y += irq/
 obj-y += mfd/

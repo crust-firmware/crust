@@ -8,6 +8,7 @@
 #include <debug.h>
 #include <delay.h>
 #include <device.h>
+#include <dram.h>
 #include <exception.h>
 #include <irq.h>
 #include <pmic.h>
@@ -19,7 +20,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <system.h>
-#include <util.h>
 #include <watchdog.h>
 #include <clock/ccu.h>
 #include <gpio/sunxi-gpio.h>
@@ -78,6 +78,7 @@ system_state_machine(uint32_t exception)
 		r_ccu_init();
 		ccu_init();
 		css_init();
+		dram_init();
 
 		/* Acquire runtime-only devices. */
 		mailbox = device_get_or_null(&msgbox.dev);
@@ -154,7 +155,8 @@ system_state_machine(uint32_t exception)
 			simple_device_sync(&pio);
 			simple_device_sync(&r_pio);
 
-			/* Configure the CCU for minimal power consumption. */
+			/* Configure the SoC for minimal power consumption. */
+			dram_suspend();
 			ccu_suspend();
 
 			/*
@@ -212,8 +214,9 @@ system_state_machine(uint32_t exception)
 			/* Enable watchdog protection. */
 			watchdog = device_get_or_null(&r_twd.dev);
 
-			/* Configure the CCU for increased performance. */
+			/* Configure the SoC for full functionality. */
 			ccu_resume();
+			dram_resume();
 
 			/* Acquire runtime-only devices. */
 			mailbox = device_get_or_null(&msgbox.dev);
