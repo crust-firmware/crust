@@ -24,7 +24,7 @@
 #define CPUS_PRE_DIV(x)           ((x) << 8)
 #define CPUS_CLK_P(x)             ((x) << 0)
 
-static const uint32_t sun8i_r_ccu_fixed_rates[] = {
+static uint32_t sun8i_r_ccu_fixed_rates[] = {
 	[CLK_OSC16M] = 16000000U,
 	[CLK_OSC24M] = 24000000U,
 	[CLK_OSC32K] = 32768U,
@@ -267,5 +267,5 @@ r_ccu_init(void)
 	              CPUS_PRE_DIV(0) |
 	              CPUS_CLK_P(0));
 
-	ccu_helper_calibrate_osc16m(&sun8i_r_ccu_fixed_rates[CLK_OSC16M]);
+	sun8i_r_ccu_fixed_rates[CLK_OSC16M] = ccu_helper_calibrate_osc16m();
 }

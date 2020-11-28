@@ -32,7 +32,7 @@ struct ccu_clock {
 	uint16_t reset;
 };
 
-void ccu_helper_calibrate_osc16m(const uint32_t *rate);
+uint32_t ccu_helper_calibrate_osc16m(void);
 void ccu_helper_disable_osc24m(uintptr_t reg);
 void ccu_helper_enable_osc24m(uintptr_t reg);
 

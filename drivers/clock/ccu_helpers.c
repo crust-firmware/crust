@@ -17,8 +17,8 @@
 #define PLL_CTRL_REG1_KEY  (0xa7 << 24)
 #define PLL_CTRL_REG1_MASK GENMASK(2, 0)
 
-void
-ccu_helper_calibrate_osc16m(const uint32_t *rate)
+uint32_t
+ccu_helper_calibrate_osc16m(void)
 {
 	uint32_t after, before, end, now;
 
@@ -42,12 +42,8 @@ ccu_helper_calibrate_osc16m(const uint32_t *rate)
 	 * Convert the number of OSC16M cycles in 1/512 second to Hz. 512 is
 	 * chosen because it is the largest power-of-two factor of 24MHz, the
 	 * reference clock frequency.
-	 *
-	 * This writes to a location in .rodata, which is important, because
-	 * the value needs to be preserved in case of an exception restart
-	 * during SYSTEM_INACTIVE/OFF, where r_ccu_init() does not get called.
 	 */
-	mmio_write_32((uintptr_t)rate, (after - before) << 9);
+	return (after - before) << 9;
 }
 
 static void

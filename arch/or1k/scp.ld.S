@@ -54,7 +54,7 @@ SECTIONS
    * boot. Before changing this value, verify the firmware can recover from a
    * crash even after the new data is modified.
    */
-  ASSERT(SIZEOF(.data) == 0, "Changes to .data persist after an exception!")
+  ASSERT(SIZEOF(.data) == 0x0c, "Changes to .data persist after an exception!")
 
   .bss . : ALIGN(4) {
     __bss_start = .;
