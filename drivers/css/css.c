@@ -107,6 +107,7 @@ css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
 {
 	uint32_t core_old, cluster_old, css_old;
 	uint8_t *core_ps, *cluster_ps, *css_ps;
+	uint8_t *cluster_cores, *css_clusters;
 	int err;
 
 	if (cluster >= css_get_cluster_count())
@@ -114,16 +115,30 @@ css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
 	if (core >= css_get_core_count(cluster))
 		return SCPI_E_PARAM;
 
-	core_ps    = &power_state.core[cluster][core];
-	cluster_ps = &power_state.cluster[cluster];
-	css_ps     = &power_state.css;
+	core_ps       = &power_state.core[cluster][core];
+	cluster_cores = power_state.core[cluster];
+	cluster_ps    = &power_state.cluster[cluster];
+	css_clusters  = power_state.cluster;
+	css_ps        = &power_state.css;
 
-	core_old    = *core_ps;
-	*core_ps    = core_state;
+	core_old = *core_ps;
+	*core_ps = core_state;
+
+	/* A cluster must be on if any of its cores is on. */
+	for (uint32_t i = 0; i < css_get_core_count(cluster); ++i)
+		if (cluster_cores[i] < cluster_state)
+			cluster_state = cluster_cores[i];
+
 	cluster_old = *cluster_ps;
 	*cluster_ps = cluster_state;
-	css_old     = *css_ps;
-	*css_ps     = css_state;
+
+	/* The CSS must be on if any of its clusters is on. */
+	for (uint32_t i = 0; i < css_get_cluster_count(); ++i)
+		if (css_clusters[i] < css_state)
+			css_state = css_clusters[i];
+
+	css_old = *css_ps;
+	*css_ps = css_state;
 
 	if (css_state < css_old &&
 	    (err = css_set_css_state(css_state)))
