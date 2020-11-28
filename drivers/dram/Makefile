@@ -4,3 +4,5 @@
 #
 
 obj-y += dram.o
+
+obj-$(CONFIG_PLATFORM_A64) += sun8i-h3-dram.o
