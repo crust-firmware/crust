@@ -49,7 +49,12 @@ SECTIONS
     . = ALIGN(4);
   } >SRAM_A2
 
-  ASSERT(SIZEOF(.data) == 0, "Global data must be constant or set at runtime")
+  /*
+   * With few exceptions, global data should be constant or initialized during
+   * boot. Before changing this value, verify the firmware can recover from a
+   * crash even after the new data is modified.
+   */
+  ASSERT(SIZEOF(.data) == 0, "Changes to .data persist after an exception!")
 
   .bss . : ALIGN(4) {
     __bss_start = .;
