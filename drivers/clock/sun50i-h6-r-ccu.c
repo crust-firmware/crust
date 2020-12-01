@@ -167,6 +167,12 @@ static const struct ccu_clock r_ccu_clocks[SUN50I_H6_R_CCU_CLOCKS] = {
 		.gate       = BITMAP_INDEX(0x019c, 0),
 		.reset      = BITMAP_INDEX(0x019c, 16),
 	},
+	[CLK_BUS_R_RSB] = {
+		.get_parent = r_ccu_get_r_apb2,
+		.get_rate   = ccu_get_parent_rate,
+		.gate       = BITMAP_INDEX(0x01bc, 0),
+		.reset      = BITMAP_INDEX(0x01bc, 16),
+	},
 	[CLK_BUS_R_CIR] = {
 		.get_parent = r_ccu_get_r_apb1,
 		.get_rate   = ccu_get_parent_rate,
