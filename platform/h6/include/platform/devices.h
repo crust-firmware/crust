@@ -81,6 +81,7 @@
 #define DEV_R_W1      0x07040400
 #define DEV_R_UART    0x07080000
 #define DEV_R_I2C     0x07081400
+#define DEV_R_RSB     0x07083000
 #define DEV_CPUSYSCFG 0x08100000
 #define DEV_CNT_R     0x08110000
 #define DEV_CNT_C     0x08120000
