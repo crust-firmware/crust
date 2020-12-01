@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <debug.h>
 #include <error.h>
 #include <mmio.h>
 #include <util.h>
@@ -26,7 +25,7 @@
 #define RSB_CMD_REG      0x2c
 #define RSB_SADDR_REG    0x30
 
-#define RSB_RTADDR(addr) ((addr) << 16)
+#define RSB_RUNTIME_ADDR (0x2d << 16)
 
 #define I2C_BCAST_ADDR   0
 
@@ -42,15 +41,6 @@ enum {
 	RSB_WR16 = 0x59,
 	RSB_WR32 = 0x63,
 };
-
-static uint16_t
-sunxi_rsb_get_hwaddr(uint8_t rtaddr UNUSED)
-{
-	/* Currently only a primary PMIC is supported. */
-	assert(rtaddr == 0x2d);
-
-	return 0x3a3;
-}
 
 static int
 sunxi_rsb_do_command(const struct simple_device *self, uint32_t addr,
@@ -70,7 +60,7 @@ static int
 sunxi_rsb_prepare(const struct regmap *map)
 {
 	const struct simple_device *self = to_simple_device(map->dev);
-	uint32_t addr = RSB_RTADDR(map->id) | sunxi_rsb_get_hwaddr(map->id);
+	uint32_t addr = RSB_RUNTIME_ADDR | map->id;
 
 	/* Set the device's runtime address. */
 	return sunxi_rsb_do_command(self, addr, RSB_SRTA);
@@ -84,7 +74,7 @@ sunxi_rsb_read(const struct regmap *map, uint8_t addr, uint8_t *data)
 
 	mmio_write_32(self->regs + RSB_ADDR_REG, addr);
 
-	if ((err = sunxi_rsb_do_command(self, RSB_RTADDR(map->id), RSB_RD8)))
+	if ((err = sunxi_rsb_do_command(self, RSB_RUNTIME_ADDR, RSB_RD8)))
 		return err;
 
 	*data = mmio_read_32(self->regs + RSB_DATA_REG);
@@ -100,7 +90,7 @@ sunxi_rsb_write(const struct regmap *map, uint8_t addr, uint8_t data)
 	mmio_write_32(self->regs + RSB_ADDR_REG, addr);
 	mmio_write_32(self->regs + RSB_DATA_REG, data);
 
-	return sunxi_rsb_do_command(self, RSB_RTADDR(map->id), RSB_WR8);
+	return sunxi_rsb_do_command(self, RSB_RUNTIME_ADDR, RSB_WR8);
 }
 
 static void
