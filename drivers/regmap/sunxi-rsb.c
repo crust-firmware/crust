@@ -163,14 +163,14 @@ const struct simple_device r_rsb = {
 		{
 			.dev   = &r_pio.dev,
 			.id    = SUNXI_GPIO_PIN(0, 0),
-			.drive = DRIVE_10mA,
+			.drive = DRIVE_30mA,
 			.mode  = 2,
 			.pull  = PULL_UP,
 		},
 		{
 			.dev   = &r_pio.dev,
 			.id    = SUNXI_GPIO_PIN(0, 1),
-			.drive = DRIVE_10mA,
+			.drive = DRIVE_30mA,
 			.mode  = 2,
 			.pull  = PULL_UP,
 		},
