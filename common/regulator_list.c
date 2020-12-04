@@ -26,6 +26,21 @@ const struct regulator_list inactive_list = {
 
 extern const struct regulator_list off_list ATTRIBUTE(alias("inactive_list"));
 
+#elif CONFIG(REGULATOR_AXP805)
+
+static const uint8_t inactive_ids[] = {
+	AXP805_REGL_DCDCA,
+	AXP805_REGL_DCDCB,
+};
+
+const struct regulator_list inactive_list = {
+	.dev    = &axp805_regulator.dev,
+	.ids    = inactive_ids,
+	.nr_ids = ARRAY_SIZE(inactive_ids),
+};
+
+extern const struct regulator_list off_list ATTRIBUTE(alias("inactive_list"));
+
 #elif CONFIG(REGULATOR_SY8106A)
 
 static const uint8_t inactive_ids[] = {
