@@ -83,15 +83,12 @@ ccu_set_state(const struct clock_handle *clock, uint32_t state)
 	if (ccu_get_state(clock) == state)
 		return;
 
-	/* Ungate the clock before taking the device out of reset. */
-	if (clk->gate && ungate)
-		bitmap_set(regs, clk->gate);
-	/* Assert or deassert the reset line while the clock is running. */
+	/* First, (de)assert the reset line. */
 	if (clk->reset)
 		(enable ? bitmap_set : bitmap_clear)(regs, clk->reset);
-	/* Gate the clock after putting the device in reset. */
-	if (clk->gate && !ungate)
-		bitmap_clear(regs, clk->gate);
+	/* Once the device is in/out of reset, (un)gate the clock. */
+	if (clk->gate)
+		(ungate ? bitmap_set : bitmap_clear)(regs, clk->gate);
 	/* Apply the changes by setting the update bit, if applicable. */
 	if (clk->update)
 		mmio_set_32(regs + clk->reg, BIT(clk->update));
