@@ -14,26 +14,30 @@
 
 #include "ccu.h"
 
-#define PLL_CTRL_REG1_MASK (PLL_CTRL_REG1_CRYSTAL_EN | PLL_CTRL_REG1_LDO_EN)
+#define PLL_CTRL_REG1_MASK (PLL_CTRL_REG1_KEY_FIELD | \
+	                    PLL_CTRL_REG1_CRYSTAL_EN | \
+	                    PLL_CTRL_REG1_LDO_EN)
 
 /* Persist this var as r_ccu_init() may not be called after an exception. */
 static uint32_t osc16m_rate = 16000000U;
 
 DEFINE_FIXED_RATE(r_ccu_common_get_osc16m_rate, osc16m_rate)
 
+/**
+ * Write two consecutive values to PLL_CTRL_REG1 with a delay in between.
+ */
 static void
-r_ccu_common_update_pll_ctrl_reg1(uint32_t val)
+r_ccu_common_update_pll_ctrl_reg1(uint32_t v1, uint32_t delay, uint32_t v2)
 {
-	uint32_t tmp;
+	uint32_t val = mmio_read_32(PLL_CTRL_REG1) & ~PLL_CTRL_REG1_MASK;
 
-	tmp  = mmio_read_32(PLL_CTRL_REG1);
-	tmp |= PLL_CTRL_REG1_KEY;
-	mmio_write_32(PLL_CTRL_REG1, tmp);
-	tmp &= ~PLL_CTRL_REG1_MASK;
-	tmp |= val;
-	mmio_write_32(PLL_CTRL_REG1, tmp);
-	tmp &= ~PLL_CTRL_REG1_KEY;
-	mmio_write_32(PLL_CTRL_REG1, tmp);
+	/* Step 1: unlock if locked, otherwise write first value. */
+	mmio_write_32(PLL_CTRL_REG1, val | v1 | PLL_CTRL_REG1_KEY);
+	/* Step 2: write first value if just unlocked, otherwise write same. */
+	mmio_write_32(PLL_CTRL_REG1, val | v1 | PLL_CTRL_REG1_KEY);
+	udelay(delay);
+	/* Step 3: write second value and lock. */
+	mmio_write_32(PLL_CTRL_REG1, val | v2);
 }
 
 void
@@ -42,7 +46,7 @@ r_ccu_common_suspend(void)
 	if (!CONFIG(SUSPEND_OSC24M))
 		return;
 
-	r_ccu_common_update_pll_ctrl_reg1(0);
+	r_ccu_common_update_pll_ctrl_reg1(PLL_CTRL_REG1_LDO_EN, 1, 0);
 	mmio_set_32(VDD_SYS_PWROFF_GATING_REG, VCC_PLL_GATING);
 }
 
@@ -56,7 +60,9 @@ r_ccu_common_resume(void)
 		return;
 
 	mmio_clr_32(VDD_SYS_PWROFF_GATING_REG, VCC_PLL_GATING);
-	r_ccu_common_update_pll_ctrl_reg1(PLL_CTRL_REG1_MASK);
+	r_ccu_common_update_pll_ctrl_reg1(PLL_CTRL_REG1_LDO_EN, 2000,
+	                                  PLL_CTRL_REG1_CRYSTAL_EN |
+	                                  PLL_CTRL_REG1_LDO_EN);
 }
 
 void WEAK ATTRIBUTE(alias("r_ccu_common_resume"))
