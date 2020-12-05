@@ -14,6 +14,7 @@
 #include <util.h>
 #include <clock/ccu.h>
 #include <platform/devices.h>
+#include <platform/prcm.h>
 
 #include "css.h"
 
@@ -146,7 +147,6 @@
 #define CPU_SYS_RESET_REG         (DEV_R_CPUCFG + 0x0140)
 
 #define CLUSTER_PWROFF_GATING_REG (DEV_R_PRCM + 0x0100)
-#define VDD_SYS_PWROFF_GATING_REG (DEV_R_PRCM + 0x0110)
 #define CPU_PWR_CLAMP_REG(n)      (DEV_R_PRCM + 0x0140 + 0x04 * (n))
 
 /* Clocks needed by this driver. */
@@ -196,7 +196,7 @@ css_set_css_state(uint32_t state UNUSED)
 		mmio_write_32(CLKEN, CLKEN_VALUE);
 		udelay(10);
 		/* Disable pad hold. */
-		mmio_clr_32(VDD_SYS_PWROFF_GATING_REG, GENMASK(1, 0));
+		mmio_clr_32(VDD_SYS_PWROFF_GATING_REG, DRAM_PAD_HOLD);
 		udelay(10);
 		/* Configure AC pads. */
 		mmio_clrset_32(ACIOCR0,
@@ -285,7 +285,7 @@ css_set_css_state(uint32_t state UNUSED)
 		               ACIOCR0_CKOE_DISABLED |
 		               ACIOCR0_CKEOE_ENABLED);
 		/* Enable pad hold. */
-		mmio_set_32(VDD_SYS_PWROFF_GATING_REG, GENMASK(1, 0));
+		mmio_set_32(VDD_SYS_PWROFF_GATING_REG, DRAM_PAD_HOLD);
 		udelay(10);
 		/* Disable DRAM controller clocks. */
 		mmio_write_32(CLKEN, 0);

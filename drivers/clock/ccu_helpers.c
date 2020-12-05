@@ -10,12 +10,12 @@
 #include <stdint.h>
 #include <util.h>
 #include <watchdog/sunxi-twd.h>
+#include <platform/prcm.h>
 #include <platform/time.h>
 
 #include "ccu.h"
 
-#define PLL_CTRL_REG1_KEY  (0xa7 << 24)
-#define PLL_CTRL_REG1_MASK GENMASK(2, 0)
+#define PLL_CTRL_REG1_MASK (PLL_CTRL_REG1_CRYSTAL_EN | PLL_CTRL_REG1_LDO_EN)
 
 uint32_t
 ccu_helper_calibrate_osc16m(void)

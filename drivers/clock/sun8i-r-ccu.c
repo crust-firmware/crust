@@ -13,16 +13,15 @@
 #include <stdint.h>
 #include <clock/ccu.h>
 #include <platform/devices.h>
+#include <platform/prcm.h>
 
 #include "ccu.h"
 
-#define CPUS_CLK_REG              0x0000
-#define PLL_CTRL_REG1             0x0044
-#define VDD_SYS_PWROFF_GATING_REG 0x0110
+#define CPUS_CLK_REG    0x0000
 
-#define CPUS_CLK_SRC(x)           ((x) << 16)
-#define CPUS_PRE_DIV(x)           ((x) << 8)
-#define CPUS_CLK_P(x)             ((x) << 0)
+#define CPUS_CLK_SRC(x) ((x) << 16)
+#define CPUS_PRE_DIV(x) ((x) << 8)
+#define CPUS_CLK_P(x)   ((x) << 0)
 
 /* Persist this var as r_ccu_init() may not be called after an exception. */
 static uint32_t osc16m_rate = 16000000U;
@@ -201,9 +200,9 @@ r_ccu_suspend(void)
 	if (!CONFIG(SUSPEND_OSC24M))
 		return;
 
-	ccu_helper_disable_osc24m(DEV_R_PRCM + PLL_CTRL_REG1);
+	ccu_helper_disable_osc24m(PLL_CTRL_REG1);
 	if (CONFIG(PLATFORM_A64))
-		mmio_set_32(DEV_R_PRCM + VDD_SYS_PWROFF_GATING_REG, BIT(2));
+		mmio_set_32(VDD_SYS_PWROFF_GATING_REG, VCC_PLL_GATING);
 }
 
 void
@@ -213,8 +212,8 @@ r_ccu_resume(void)
 		return;
 
 	if (CONFIG(PLATFORM_A64))
-		mmio_clr_32(DEV_R_PRCM + VDD_SYS_PWROFF_GATING_REG, BIT(2));
-	ccu_helper_enable_osc24m(DEV_R_PRCM + PLL_CTRL_REG1);
+		mmio_clr_32(VDD_SYS_PWROFF_GATING_REG, VCC_PLL_GATING);
+	ccu_helper_enable_osc24m(PLL_CTRL_REG1);
 }
 
 void
