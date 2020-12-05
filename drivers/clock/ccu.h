@@ -51,9 +51,12 @@ struct ccu_clock {
 	uint16_t reset;
 };
 
-uint32_t ccu_helper_calibrate_osc16m(void);
-void ccu_helper_disable_osc24m(uintptr_t reg);
-void ccu_helper_enable_osc24m(uintptr_t reg);
+/*
+ * ccu.c
+ * =====
+ */
+
+extern const struct clock_driver ccu_driver;
 
 /**
  * Default .get_parent implementation, returns NULL.
@@ -67,6 +70,11 @@ const struct clock_handle *ccu_get_null_parent(const struct ccu *self,
 uint32_t ccu_get_parent_rate(const struct ccu *self,
                              const struct ccu_clock *clk, uint32_t rate);
 
+/*
+ * ccu_helpers.c
+ * =============
+ */
+
 uint32_t ccu_helper_get_rate_m(const struct ccu *self,
                                const struct ccu_clock *clk, uint32_t rate,
                                uint32_t m_shift, uint32_t m_width);
@@ -78,6 +86,16 @@ uint32_t ccu_helper_get_rate_p(const struct ccu *self,
                                const struct ccu_clock *clk, uint32_t rate,
                                uint32_t p_shift, uint32_t p_width);
 
-extern const struct clock_driver ccu_driver;
+/*
+ * r_ccu_common.c
+ * ==============
+ */
+
+uint32_t r_ccu_common_get_osc16m_rate(const struct ccu *self,
+                                      const struct ccu_clock *clk,
+                                      uint32_t rate);
+void r_ccu_common_suspend(void);
+void r_ccu_common_resume(void);
+void r_ccu_common_init(void);
 
 #endif /* CCU_PRIVATE_H */

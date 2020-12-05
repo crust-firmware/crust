@@ -4,74 +4,10 @@
  */
 
 #include <bitfield.h>
-#include <counter.h>
 #include <mmio.h>
-#include <stddef.h>
 #include <stdint.h>
-#include <util.h>
-#include <watchdog/sunxi-twd.h>
-#include <platform/prcm.h>
-#include <platform/time.h>
 
 #include "ccu.h"
-
-#define PLL_CTRL_REG1_MASK (PLL_CTRL_REG1_CRYSTAL_EN | PLL_CTRL_REG1_LDO_EN)
-
-uint32_t
-ccu_helper_calibrate_osc16m(void)
-{
-	uint32_t after, before, end, now;
-
-	/* Cycle until the interval will not span a counter wraparound. */
-	do {
-		before = counter_read();
-		barrier();
-		now = r_twd_counter_read();
-		end = now + (REFCLK_HZ >> 9);
-	} while (end < now);
-
-	/* Cycle until the end of the interval. */
-	do {
-		after = counter_read();
-		/* Ensure the counters are read in a consistent order. */
-		barrier();
-		now = r_twd_counter_read();
-	} while (now < end);
-
-	/*
-	 * Convert the number of OSC16M cycles in 1/512 second to Hz. 512 is
-	 * chosen because it is the largest power-of-two factor of 24MHz, the
-	 * reference clock frequency.
-	 */
-	return (after - before) << 9;
-}
-
-static void
-ccu_helper_update_osc24m(uintptr_t reg, uint32_t val)
-{
-	uint32_t tmp;
-
-	tmp  = mmio_read_32(reg);
-	tmp |= PLL_CTRL_REG1_KEY;
-	mmio_write_32(reg, tmp);
-	tmp &= ~PLL_CTRL_REG1_MASK;
-	tmp |= val;
-	mmio_write_32(reg, tmp);
-	tmp &= ~PLL_CTRL_REG1_KEY;
-	mmio_write_32(reg, tmp);
-}
-
-void
-ccu_helper_disable_osc24m(uintptr_t reg)
-{
-	ccu_helper_update_osc24m(reg, 0);
-}
-
-void
-ccu_helper_enable_osc24m(uintptr_t reg)
-{
-	ccu_helper_update_osc24m(reg, PLL_CTRL_REG1_MASK);
-}
 
 uint32_t
 ccu_helper_get_rate_m(const struct ccu *self,

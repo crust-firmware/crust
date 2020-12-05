@@ -23,10 +23,6 @@
 #define CPUS_PRE_DIV(x) ((x) << 8)
 #define CPUS_CLK_P(x)   ((x) << 0)
 
-/* Persist this var as r_ccu_init() may not be called after an exception. */
-static uint32_t osc16m_rate = 16000000U;
-
-static DEFINE_FIXED_RATE(r_ccu_get_osc16m_rate, osc16m_rate)
 static DEFINE_FIXED_RATE(r_ccu_get_osc24m_rate, 24000000U)
 static DEFINE_FIXED_RATE(r_ccu_get_osc32k_rate, 32768U)
 
@@ -109,7 +105,7 @@ ccu_get_r_cir_rate(const struct ccu *self,
 static const struct ccu_clock r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 	[CLK_OSC16M] = {
 		.get_parent = ccu_get_null_parent,
-		.get_rate   = r_ccu_get_osc16m_rate,
+		.get_rate   = r_ccu_common_get_osc16m_rate,
 	},
 	[CLK_OSC24M] = {
 		.get_parent = ccu_get_null_parent,
@@ -195,28 +191,6 @@ const struct ccu r_ccu = {
 };
 
 void
-r_ccu_suspend(void)
-{
-	if (!CONFIG(SUSPEND_OSC24M))
-		return;
-
-	ccu_helper_disable_osc24m(PLL_CTRL_REG1);
-	if (CONFIG(PLATFORM_A64))
-		mmio_set_32(VDD_SYS_PWROFF_GATING_REG, VCC_PLL_GATING);
-}
-
-void
-r_ccu_resume(void)
-{
-	if (!CONFIG(SUSPEND_OSC24M))
-		return;
-
-	if (CONFIG(PLATFORM_A64))
-		mmio_clr_32(VDD_SYS_PWROFF_GATING_REG, VCC_PLL_GATING);
-	ccu_helper_enable_osc24m(PLL_CTRL_REG1);
-}
-
-void
 r_ccu_init(void)
 {
 	/* Set CPUS to OSC16M/1 (16MHz). */
@@ -225,5 +199,5 @@ r_ccu_init(void)
 	              CPUS_PRE_DIV(0) |
 	              CPUS_CLK_P(0));
 
-	osc16m_rate = ccu_helper_calibrate_osc16m();
+	r_ccu_common_init();
 }

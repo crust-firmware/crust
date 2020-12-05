@@ -7,6 +7,7 @@ obj-y += clock.o
 
 obj-y += ccu.o
 obj-y += ccu_helpers.o
+obj-y += r_ccu_common.o
 
 obj-$(CONFIG_PLATFORM_A64)  += sun50i-a64-ccu.o
 obj-$(CONFIG_PLATFORM_A64)  += sun8i-r-ccu.o
