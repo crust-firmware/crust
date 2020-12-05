@@ -17,12 +17,6 @@
 
 #include "ccu.h"
 
-#define CPUS_CLK_REG    0x0000
-
-#define CPUS_CLK_SRC(x) ((x) << 24)
-#define CPUS_PRE_DIV(x) ((x) << 8)
-#define CPUS_CLK_P(x)   ((x) << 0)
-
 static DEFINE_FIXED_RATE(r_ccu_get_osc24m_rate, 24000000U)
 static DEFINE_FIXED_RATE(r_ccu_get_osc32k_rate, 32768U)
 
@@ -112,7 +106,7 @@ static const struct ccu_clock r_ccu_clocks[SUN50I_H6_R_CCU_CLOCKS] = {
 	[CLK_AR100] = {
 		.get_parent = r_ccu_get_bus_parent,
 		.get_rate   = r_ccu_get_mp_rate,
-		.reg        = CPUS_CLK_REG,
+		.reg        = 0x0000,
 	},
 	[CLK_R_AHB] = {
 		.get_parent = r_ccu_get_ar100,
@@ -209,10 +203,10 @@ void
 r_ccu_init(void)
 {
 	/* Set CPUS to OSC16M/1 (16MHz). */
-	mmio_write_32(DEV_R_PRCM + CPUS_CLK_REG,
-	              CPUS_CLK_SRC(2) |
-	              CPUS_PRE_DIV(0) |
-	              CPUS_CLK_P(0));
+	mmio_write_32(CPUS_CLK_REG,
+	              CPUS_CLK_REG_CLK_SRC(2) |
+	              CPUS_CLK_REG_PRE_DIV(0) |
+	              CPUS_CLK_REG_DIV_P(0));
 
 	r_ccu_common_init();
 }

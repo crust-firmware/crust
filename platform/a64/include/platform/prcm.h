@@ -9,6 +9,21 @@
 #include <util.h>
 #include <platform/devices.h>
 
+#define CPUS_CLK_REG                      (DEV_R_PRCM + 0x0000)
+#define CPUS_CLK_REG_CLK_SRC(x)           ((x) << 16)
+#define CPUS_CLK_REG_CLK_SRC_MASK         (0x3 << 16)
+#define CPUS_CLK_REG_PRE_DIV(x)           ((x) << 8)
+#define CPUS_CLK_REG_PRE_DIV_MASK         (0x1f << 8)
+#define CPUS_CLK_REG_DIV_P(x)             ((x) << 4)
+#define CPUS_CLK_REG_DIV_P_MASK           (0x3 << 4)
+
+#define APB0_CLK_REG                      (DEV_R_PRCM + 0x000c)
+#define APB0_CLK_REG_DIV_M(x)             ((x) << 0)
+#define APB0_CLK_REG_DIV_M_MASK           (0x3 << 0)
+
+/* See r_ccu driver for bit definitions */
+#define APB0_GATE_REG                     (DEV_R_PRCM + 0x0028)
+
 /* Documented in A23/A31s manual; all bits are present on A64 */
 #define PLL_CTRL_REG0                     (DEV_R_PRCM + 0x0040)
 #define PLL_CTRL_REG0_TEST_CLK_SEL        BIT(24)
@@ -31,6 +46,10 @@
 #define PLL_CTRL_REG1_CLKTEST_EN          BIT(3)
 #define PLL_CTRL_REG1_CRYSTAL_EN          BIT(2)
 #define PLL_CTRL_REG1_LDO_EN              (0x3 << 0)
+
+/* See r_ccu driver for bit definitions */
+#define R_CIR_RX_CLK_REG                  (DEV_R_PRCM + 0x0054)
+#define APB0_RESET_REG                    (DEV_R_PRCM + 0x00b0)
 
 #define VDD_SYS_PWROFF_GATING_REG         (DEV_R_PRCM + 0x0110)
 #define VDD_CPUS_GATING                   BIT(3)

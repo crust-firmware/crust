@@ -9,6 +9,39 @@
 #include <util.h>
 #include <platform/devices.h>
 
+#define CPUS_CLK_REG                     (DEV_R_PRCM + 0x0000)
+#define CPUS_CLK_REG_CLK_SRC(x)          ((x) << 24)
+#define CPUS_CLK_REG_CLK_SRC_MASK        (0x3 << 24)
+#define CPUS_CLK_REG_DIV_P(x)            ((x) << 8)
+#define CPUS_CLK_REG_DIV_P_MASK          (0x3 << 8)
+#define CPUS_CLK_REG_PRE_DIV(x)          ((x) << 0)
+#define CPUS_CLK_REG_PRE_DIV_MASK        (0x1f << 0)
+
+#define R_APB1_CLK_REG                   (DEV_R_PRCM + 0x000c)
+#define R_APB1_CLK_REG_DIV_M(x)          ((x) << 0)
+#define R_APB1_CLK_REG_DIV_M_MASK        (0x3 << 0)
+
+#define R_APB2_CLK_REG                   (DEV_R_PRCM + 0x0010)
+#define R_APB2_CLK_REG_CLK_SRC(x)        ((x) << 24)
+#define R_APB2_CLK_REG_CLK_SRC_MASK      (0x3 << 24)
+#define R_APB2_CLK_REG_DIV_P(x)          ((x) << 8)
+#define R_APB2_CLK_REG_DIV_P_MASK        (0x3 << 8)
+#define R_APB2_CLK_REG_PRE_DIV(x)        ((x) << 0)
+#define R_APB2_CLK_REG_PRE_DIV_MASK      (0x1f << 0)
+
+/* See r_ccu driver for bit definitions */
+#define R_TIMER_GATE_REG                 (DEV_R_PRCM + 0x011c)
+#define R_TWDOG_GATE_REG                 (DEV_R_PRCM + 0x012c)
+#define R_PWM_GATE_REG                   (DEV_R_PRCM + 0x013c)
+#define R_UART_GATE_REG                  (DEV_R_PRCM + 0x018c)
+#define R_I2C_GATE_REG                   (DEV_R_PRCM + 0x019c)
+#define R_RSB_GATE_REG                   (DEV_R_PRCM + 0x01bc)
+#define R_CIR_CLK_REG                    (DEV_R_PRCM + 0x01c0)
+#define R_CIR_GATE_REG                   (DEV_R_PRCM + 0x01cc)
+#define R_OWC_CLK_REG                    (DEV_R_PRCM + 0x01e0)
+#define R_OWC_GATE_REG                   (DEV_R_PRCM + 0x01ec)
+#define R_RTC_GATE_REG                   (DEV_R_PRCM + 0x020c)
+
 /* Differs from earlier generations; only the bits below are valid */
 #define PLL_CTRL_REG0                    (DEV_R_PRCM + 0x0240)
 #define PLL_CTRL_REG0_UNK_BIT_24         BIT(24)
