@@ -6,7 +6,7 @@
 #include <dram.h>
 
 void WEAK
-dram_init(void)
+dram_suspend(void)
 {
 }
 
@@ -16,6 +16,6 @@ dram_resume(void)
 }
 
 void WEAK
-dram_suspend(void)
+dram_init(void)
 {
 }

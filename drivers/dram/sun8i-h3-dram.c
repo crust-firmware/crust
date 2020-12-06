@@ -149,11 +149,63 @@ static const struct clock_handle dram_clocks[] = {
 };
 
 void
-dram_init(void)
+dram_suspend(void)
 {
-	/* Get references to clocks that are already running. */
-	clock_get(&dram_clocks[MBUS]);
-	clock_get(&dram_clocks[DRAM]);
+	/* Enable DRAM controller register access. */
+	clock_get(&dram_clocks[BUS_DRAM]);
+
+	/* Disable all controller masters. */
+	mmio_write_32(MC_MAER, 0);
+	/* Enable DRAM self-refresh. */
+	mmio_set_32(PWRCTL, PWRCTL_SELFREF_EN);
+	/* Wait until the DRAM controller enters self-refresh. */
+	mmio_polleq_32(STATR, STATR_OP_MODE, STATR_OP_MODE_SELFREF);
+	udelay(1);
+	/* Disable CKEN and CKNEN. */
+	mmio_clrset_32(PGCR3,
+	               PGCR3_CKEN |
+	               PGCR3_CKNEN,
+	               PGCR3_CKEN_DISABLED |
+	               PGCR3_CKNEN_DISABLED);
+	udelay(1);
+	/* Configure DX pads. */
+	for (uint8_t n = 0; n < 4; ++n) {
+		mmio_clrset_32(DXnGCR0(n),
+		               DXnGCR0_DXIOM |
+		               DXnGCR0_DXOEO |
+		               DXnGCR0_DXPDR |
+		               DXnGCR0_DXPDD |
+		               DXnGCR0_DQSRPD,
+		               DXnGCR0_DXIOM_CMOS |
+		               DXnGCR0_DXOEO_DISABLED |
+		               DXnGCR0_DXPDR_ENABLED |
+		               DXnGCR0_DXPDD_ENABLED |
+		               DXnGCR0_DQSRPD_ENABLED);
+	}
+	/* Configure AC pads. */
+	mmio_clrset_32(ACIOCR0,
+	               ACIOCR0_ACPDD |
+	               ACIOCR0_ACPDR |
+	               ACIOCR0_ACOE |
+	               ACIOCR0_ACIOM |
+	               ACIOCR0_CKOE |
+	               ACIOCR0_CKEOE,
+	               ACIOCR0_ACPDD_ENABLED |
+	               ACIOCR0_ACPDR_ENABLED |
+	               ACIOCR0_ACOE_DISABLED |
+	               ACIOCR0_ACIOM_CMOS |
+	               ACIOCR0_CKOE_DISABLED |
+	               ACIOCR0_CKEOE_ENABLED);
+	/* Enable pad hold. */
+	mmio_set_32(VDD_SYS_PWROFF_GATING_REG, GENMASK(1, 0));
+	udelay(10);
+	/* Disable DRAM controller clocks. */
+	mmio_write_32(CLKEN, 0);
+	clock_put(&dram_clocks[DRAM]);
+	clock_put(&dram_clocks[MBUS]);
+
+	/* Disable further DRAM controller register access. */
+	clock_put(&dram_clocks[BUS_DRAM]);
 }
 
 void
@@ -220,61 +272,9 @@ dram_resume(void)
 }
 
 void
-dram_suspend(void)
+dram_init(void)
 {
-	/* Enable DRAM controller register access. */
-	clock_get(&dram_clocks[BUS_DRAM]);
-
-	/* Disable all controller masters. */
-	mmio_write_32(MC_MAER, 0);
-	/* Enable DRAM self-refresh. */
-	mmio_set_32(PWRCTL, PWRCTL_SELFREF_EN);
-	/* Wait until the DRAM controller enters self-refresh. */
-	mmio_polleq_32(STATR, STATR_OP_MODE, STATR_OP_MODE_SELFREF);
-	udelay(1);
-	/* Disable CKEN and CKNEN. */
-	mmio_clrset_32(PGCR3,
-	               PGCR3_CKEN |
-	               PGCR3_CKNEN,
-	               PGCR3_CKEN_DISABLED |
-	               PGCR3_CKNEN_DISABLED);
-	udelay(1);
-	/* Configure DX pads. */
-	for (uint8_t n = 0; n < 4; ++n) {
-		mmio_clrset_32(DXnGCR0(n),
-		               DXnGCR0_DXIOM |
-		               DXnGCR0_DXOEO |
-		               DXnGCR0_DXPDR |
-		               DXnGCR0_DXPDD |
-		               DXnGCR0_DQSRPD,
-		               DXnGCR0_DXIOM_CMOS |
-		               DXnGCR0_DXOEO_DISABLED |
-		               DXnGCR0_DXPDR_ENABLED |
-		               DXnGCR0_DXPDD_ENABLED |
-		               DXnGCR0_DQSRPD_ENABLED);
-	}
-	/* Configure AC pads. */
-	mmio_clrset_32(ACIOCR0,
-	               ACIOCR0_ACPDD |
-	               ACIOCR0_ACPDR |
-	               ACIOCR0_ACOE |
-	               ACIOCR0_ACIOM |
-	               ACIOCR0_CKOE |
-	               ACIOCR0_CKEOE,
-	               ACIOCR0_ACPDD_ENABLED |
-	               ACIOCR0_ACPDR_ENABLED |
-	               ACIOCR0_ACOE_DISABLED |
-	               ACIOCR0_ACIOM_CMOS |
-	               ACIOCR0_CKOE_DISABLED |
-	               ACIOCR0_CKEOE_ENABLED);
-	/* Enable pad hold. */
-	mmio_set_32(VDD_SYS_PWROFF_GATING_REG, GENMASK(1, 0));
-	udelay(10);
-	/* Disable DRAM controller clocks. */
-	mmio_write_32(CLKEN, 0);
-	clock_put(&dram_clocks[DRAM]);
-	clock_put(&dram_clocks[MBUS]);
-
-	/* Disable further DRAM controller register access. */
-	clock_put(&dram_clocks[BUS_DRAM]);
+	/* Get references to clocks that are already running. */
+	clock_get(&dram_clocks[MBUS]);
+	clock_get(&dram_clocks[DRAM]);
 }
