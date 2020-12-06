@@ -31,7 +31,9 @@
 #define DEV_GICD      0x03021000
 #define DEV_GICC      0x03022000
 #define DEV_IOMMU     0x030f0000
-#define DEV_DRAMCTL   0x04002000
+#define DEV_DRAMCOM   0x04002000
+#define DEV_DRAMCTL   0x04003000
+#define DEV_DRAMPHY   0x04005000
 #define DEV_NAND      0x04011000
 #define DEV_MMC0      0x04020000
 #define DEV_MMC1      0x04021000

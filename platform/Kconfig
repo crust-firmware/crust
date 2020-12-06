@@ -26,6 +26,7 @@ config PLATFORM_A83T
 config PLATFORM_H6
 	bool "H6"
 	depends on ARCH_OR1K
+	select HAVE_DRAM_SUSPEND
 	select HAVE_RSB
 
 endchoice
