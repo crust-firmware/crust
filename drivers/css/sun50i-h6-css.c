@@ -30,9 +30,6 @@ css_set_cluster_state(uint32_t cluster UNUSED, uint32_t state)
 		for (uint32_t i = 0; i < css_get_core_count(cluster); ++i)
 			mmio_write_32(RVBA_LO_REG(i), rvba);
 	} else if (state == SCPI_CSS_OFF) {
-		/* Wait for all CPUs to be idle. */
-		mmio_poll_32(C0_CPU_STATUS_REG,
-		             C0_CPU_STATUS_REG_STANDBYWFI_MASK);
 		/* Save the power-on reset vector base address from core 0. */
 		rvba = mmio_read_32(RVBA_LO_REG(0));
 		/* Assert L2FLUSHREQ to clean the cluster L2 cache. */
