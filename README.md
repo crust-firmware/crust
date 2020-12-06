@@ -43,7 +43,7 @@ to choose the appropriate options (there aren't many).
 | A64   | Production/stable | Yes  | Yes       | Yes           | Yes  | Yes  |
 | A83T  | Known to compile  | Yes  | No        | No            | No   | No   |
 | H5    | Production/stable | Yes  | Yes       | Yes           | Yes  | N/A  |
-| H6    | Known to run      | Yes  | Yes       | Yes           | No   | Yes  |
+| H6    | "Beta"/stable     | Yes  | Yes       | Yes           | Yes  | Yes  |
 
 Support for the H3 SoC is planned, but it has not yet been implemented. Patches
 providing support for H3 or older chips are welcome, as are patches providing
