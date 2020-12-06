@@ -10,19 +10,6 @@ source "regmap/Kconfig"
 source "mfd/Kconfig"
 source "pmic/Kconfig"
 source "regulator/Kconfig"
-
-config SERIAL
-	bool "Serial input/output support"
-	default y
-	help
-		Use a serial port (UART) for error logs and debugging.
-		Note that depending on the port and options selected,
-		this may interfere with other users of that serial port.
-
-		If you are unsure, use the default port and baud rate.
-
-if SERIAL
 source "serial/Kconfig"
-endif
 
 endmenu

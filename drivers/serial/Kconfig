@@ -3,6 +3,27 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
+config HAVE_UART4
+	bool
+	default SOC_A64 || PLATFORM_A83T
+	help
+		This option is selected on platforms that have a UART4.
+
+config SERIAL
+	bool "Serial input/output support"
+	default y
+	help
+		Use a serial port (UART) for error logs and debugging.
+		Note that depending on the port and options selected,
+		this may interfere with other users of that serial port.
+
+		If you are unsure, use the default port and baud rate.
+
+		For maximum power savings, select the R_UART device or
+		disable this option entirely.
+
+if SERIAL
+
 choice
 	bool "Device"
 	default SERIAL_DEV_UART0
@@ -25,7 +46,7 @@ config SERIAL_DEV_UART3
 
 config SERIAL_DEV_UART4
 	bool "UART4"
-	depends on SOC_A64 || PLATFORM_A83T
+	depends on HAVE_UART4
 	select NEED_OSC24M
 
 config SERIAL_DEV_R_UART
@@ -47,3 +68,5 @@ config SERIAL_BAUD
 		port is already configured and keep the existing baud
 		rate. Use this option if the port is shared with other
 		users.
+
+endif
