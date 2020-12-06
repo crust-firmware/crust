@@ -208,5 +208,11 @@ r_ccu_init(void)
 	              CPUS_CLK_REG_PRE_DIV(0) |
 	              CPUS_CLK_REG_DIV_P(0));
 
+	/* Set R_APB2 to OSC16M/1 (16MHz). */
+	mmio_write_32(R_APB2_CLK_REG,
+	              R_APB2_CLK_REG_CLK_SRC(2) |
+	              R_APB2_CLK_REG_PRE_DIV(0) |
+	              R_APB2_CLK_REG_DIV_P(0));
+
 	r_ccu_common_init();
 }
