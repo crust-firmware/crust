@@ -19,10 +19,13 @@ config PLATFORM_A64
 config PLATFORM_A83T
 	bool "A83T"
 	depends on ARCH_OR1K
+	select HAVE_RSB
+	select HAVE_UART4
 
 config PLATFORM_H6
 	bool "H6"
 	depends on ARCH_OR1K
+	select HAVE_RSB
 
 endchoice
 

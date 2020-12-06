@@ -5,7 +5,6 @@
 
 config HAVE_UART4
 	bool
-	default SOC_A64 || PLATFORM_A83T
 	help
 		This option is selected on platforms that have a UART4.
 

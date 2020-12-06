@@ -62,7 +62,6 @@ config I2C
 
 config HAVE_RSB
 	bool
-	default SOC_A64 || PLATFORM_A83T || PLATFORM_H6
 	help
 		This option is selected on platforms that have RSB
 		controller hardware.

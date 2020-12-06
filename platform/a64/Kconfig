@@ -8,6 +8,8 @@ choice
 
 config SOC_A64
 	bool "A64"
+	select HAVE_RSB
+	select HAVE_UART4
 
 config SOC_H5
 	bool "H5"
