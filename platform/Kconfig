@@ -15,6 +15,7 @@ choice
 config PLATFORM_A64
 	bool "A64/H5"
 	depends on ARCH_OR1K
+	select HAVE_DRAM_SUSPEND
 
 config PLATFORM_A83T
 	bool "A83T"

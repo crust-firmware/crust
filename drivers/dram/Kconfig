@@ -1,0 +1,10 @@
+#
+# Copyright © 2020 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+config HAVE_DRAM_SUSPEND
+	bool
+	help
+		This option is selected on platforms that have the
+		ability to suspend the DRAM controller.

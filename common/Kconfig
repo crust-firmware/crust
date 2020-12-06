@@ -12,8 +12,9 @@ config NEED_OSC24M
 		off the external OSC24M crystal.
 
 config SUSPEND_OSC24M
-	bool "Disable OSC24M during suspend" if !NEED_OSC24M
-	default !NEED_OSC24M
+	bool "Disable OSC24M during suspend"
+	depends on HAVE_DRAM_SUSPEND && !NEED_OSC24M
+	default y
 	help
 		If this option is enabled, the external OSC24M crystal
 		will be turned off while the system is suspended/off.
