@@ -11,6 +11,12 @@ config MFD_AXP20X
 		voltage regulator functionality of an AXP2xx or AXP8xx
 		series power management IC.
 
+comment "X-Powers PMIC will communicate via I2C"
+	depends on MFD_AXP20X && !RSB
+
+comment "X-Powers PMIC will communicate via RSB"
+	depends on MFD_AXP20X && RSB
+
 choice
 	bool "X-Powers PMIC variant"
 	depends on MFD_AXP20X
