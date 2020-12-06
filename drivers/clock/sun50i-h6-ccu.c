@@ -40,6 +40,8 @@
 
 static DEFINE_FIXED_RATE(ccu_get_pll_periph0_rate, 600000000U)
 
+static DEFINE_FIXED_PARENT(ccu_get_pll_ddr0, ccu, CLK_PLL_DDR0)
+
 /*
  * While APB2 has a mux, assume its parent is OSC24M. Reparenting APB2
  * to PLL_PERIPH0 in Linux for faster UART clocks is unsupported.
@@ -48,6 +50,13 @@ static DEFINE_FIXED_PARENT(ccu_get_apb2_parent, r_ccu, CLK_OSC24M)
 static DEFINE_FIXED_PARENT(ccu_get_apb2, ccu, CLK_APB2)
 
 static const struct ccu_clock ccu_clocks[SUN50I_H6_CCU_CLOCKS] = {
+	[CLK_PLL_DDR0] = {
+		.get_parent = ccu_get_null_parent,
+		.get_rate   = ccu_get_parent_rate,
+		.reg        = 0x0010,
+		.lock       = 28,
+		.gate       = BITMAP_INDEX(0x0010, 31),
+	},
 	[CLK_PLL_PERIPH0] = {
 		.get_parent = ccu_get_null_parent,
 		.get_rate   = ccu_get_pll_periph0_rate,
@@ -56,11 +65,30 @@ static const struct ccu_clock ccu_clocks[SUN50I_H6_CCU_CLOCKS] = {
 		.get_parent = ccu_get_apb2_parent,
 		.get_rate   = ccu_get_parent_rate,
 	},
+	[CLK_MBUS] = {
+		.get_parent = ccu_get_null_parent,
+		.get_rate   = ccu_get_parent_rate,
+		.gate       = BITMAP_INDEX(0x0540, 31),
+		.reset      = BITMAP_INDEX(0x0540, 30),
+	},
 	[CLK_BUS_MSGBOX] = {
 		.get_parent = ccu_get_null_parent,
 		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x071c, 0),
 		.reset      = BITMAP_INDEX(0x071c, 16),
+	},
+	[CLK_DRAM] = {
+		.get_parent = ccu_get_pll_ddr0,
+		.get_rate   = ccu_get_parent_rate,
+		.reg        = 0x0800,
+		.update     = 27,
+		.reset      = BITMAP_INDEX(0x0800, 30),
+	},
+	/* Reset requires re-training DRAM, so ignore it. */
+	[CLK_BUS_DRAM] = {
+		.get_parent = ccu_get_null_parent,
+		.get_rate   = ccu_get_parent_rate,
+		.gate       = BITMAP_INDEX(0x080c, 0),
 	},
 	[CLK_BUS_PIO] = {
 		.get_parent = ccu_get_null_parent,
