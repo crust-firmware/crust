@@ -13,6 +13,7 @@ config HAVE_I2C
 choice
 	bool "I2C controller pin selection"
 	depends on HAVE_I2C
+	default I2C_PINS_PL0_PL1 if PLATFORM_H6 # For Linux compatibility
 	default I2C_PINS_NONE if HAVE_RSB
 	default I2C_PINS_PL0_PL1
 	help
@@ -47,7 +48,7 @@ endchoice
 config I2C_PIN_MODE_PL0_PL1
 	int
 	depends on I2C_PINS_PL0_PL1
-	default 3 if HAVE_RSB || PLATFORM_H6
+	default 3 if HAVE_RSB
 	default 2
 	help
 		Provide the pin mode that configures PL0/PL1 as I2C SCL/SDA.
@@ -61,7 +62,7 @@ config I2C
 
 config HAVE_RSB
 	bool
-	default SOC_A64 || PLATFORM_A83T
+	default SOC_A64 || PLATFORM_A83T || PLATFORM_H6
 	help
 		This option is selected on platforms that have RSB
 		controller hardware.
