@@ -47,7 +47,8 @@ r_ccu_common_suspend(void)
 		return;
 
 	r_ccu_common_update_pll_ctrl_reg1(PLL_CTRL_REG1_LDO_EN, 1, 0);
-	mmio_set_32(VDD_SYS_PWROFF_GATING_REG, VCC_PLL_GATING);
+	mmio_set_32(VDD_SYS_PWROFF_GATING_REG,
+	            CONFIG(GATE_VDD_SYS) * VDD_CPUS_GATING | VCC_PLL_GATING);
 }
 
 void WEAK ATTRIBUTE(alias("r_ccu_common_suspend"))
@@ -59,7 +60,8 @@ r_ccu_common_resume(void)
 	if (!CONFIG(SUSPEND_OSC24M))
 		return;
 
-	mmio_clr_32(VDD_SYS_PWROFF_GATING_REG, VCC_PLL_GATING);
+	mmio_clr_32(VDD_SYS_PWROFF_GATING_REG,
+	            CONFIG(GATE_VDD_SYS) * VDD_CPUS_GATING | VCC_PLL_GATING);
 	r_ccu_common_update_pll_ctrl_reg1(PLL_CTRL_REG1_LDO_EN, 2000,
 	                                  PLL_CTRL_REG1_CRYSTAL_EN |
 	                                  PLL_CTRL_REG1_LDO_EN);

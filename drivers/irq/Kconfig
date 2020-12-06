@@ -7,6 +7,7 @@ menu "Interrupt and wakeup options"
 
 config IRQ_POLL_EINT
 	bool "Poll the GPIO controller for EINT IRQs"
+	select NEED_VDD_SYS
 	help
 		Check the main GPIO controller (the one containing ports
 		A through H) for external interrupts (EINTs) when
