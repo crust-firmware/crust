@@ -24,8 +24,20 @@ int
 css_set_cluster_state(uint32_t cluster UNUSED, uint32_t state)
 {
 	if (state == SCPI_CSS_ON) {
+		/* Deassert the CPU subsystem reset (active-low). */
+		mmio_write_32(CPU_SYS_RESET_REG, CPU_SYS_RESET_REG_nCSS_RST);
+		/* Deassert the cluster hard reset (active-low). */
+		mmio_write_32(C0_PWRON_RESET_REG, C0_PWRON_RESET_REG_nH_RST);
+		/* Deassert DBGPWRDUP for all cores. */
+		mmio_write_32(DBG_REG0, 0);
+		/* Assert all cluster and core resets (active-low). */
+		mmio_write_32(C0_RST_CTRL_REG, 0);
+		/* Enable hardware L2 cache flush (active-low). */
+		mmio_clr_32(C0_CTRL_REG0, C0_CTRL_REG0_L2RSTDISABLE);
 		/* Put the cluster back into coherency (deassert ACINACTM). */
 		mmio_clr_32(C0_CTRL_REG1, C0_CTRL_REG1_ACINACTM);
+		/* Deassert all cluster resets (active-low). */
+		mmio_write_32(C0_RST_CTRL_REG, C0_RST_CTRL_REG_MASK);
 		/* Restore the reset vector base addresses for all cores. */
 		for (uint32_t i = 0; i < css_get_core_count(cluster); ++i)
 			mmio_write_32(RVBA_LO_REG(i), rvba);
@@ -43,6 +55,12 @@ css_set_cluster_state(uint32_t cluster UNUSED, uint32_t state)
 		/* Wait for the cluster (L2 cache) to be idle. */
 		mmio_poll_32(C0_CPU_STATUS_REG,
 		             C0_CPU_STATUS_REG_STANDBYWFIL2);
+		/* Assert all cluster resets (active-low). */
+		mmio_write_32(C0_RST_CTRL_REG, 0);
+		/* Assert all power-on resets (active-low). */
+		mmio_write_32(C0_PWRON_RESET_REG, 0);
+		/* Assert the CPU subsystem reset (active-low). */
+		mmio_write_32(CPU_SYS_RESET_REG, 0);
 	} else {
 		return SCPI_E_PARAM;
 	}
