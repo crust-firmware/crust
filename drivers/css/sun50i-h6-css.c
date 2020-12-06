@@ -54,8 +54,6 @@ int
 css_set_core_state(uint32_t cluster UNUSED, uint32_t core, uint32_t state)
 {
 	if (state == SCPI_CSS_ON) {
-		/* Deassert DBGPWRDUP (prevent debug access to the core). */
-		mmio_clr_32(DBG_REG0, DBG_REG0_DBGPWRDUP(core));
 		/* Assert core reset (active-low). */
 		mmio_clr_32(C0_RST_CTRL_REG, C0_RST_CTRL_REG_nCORERESET(core));
 		/* Assert core power-on reset (active-low). */

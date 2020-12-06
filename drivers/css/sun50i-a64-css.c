@@ -34,6 +34,8 @@ css_set_cluster_state(uint32_t cluster UNUSED, uint32_t state)
 		/* Deassert the CPU subsystem reset (active-low). */
 		mmio_set_32(CPU_SYS_RESET_REG, CPU_SYS_RESET_REG_nCSS_RST);
 		udelay(1);
+		/* Deassert DBGPWRDUP for all cores. */
+		mmio_write_32(DBG_REG0, 0);
 		/* Assert all cluster and core resets (active-low). */
 		mmio_write_32(C0_RST_CTRL_REG, 0);
 		/* Enable hardware L2 cache flush (active-low). */
@@ -79,8 +81,6 @@ int
 css_set_core_state(uint32_t cluster UNUSED, uint32_t core, uint32_t state)
 {
 	if (state == SCPI_CSS_ON) {
-		/* Deassert DBGPWRDUP (prevent debug access to the core). */
-		mmio_clr_32(DBG_REG0, DBG_REG0_DBGPWRDUP(core));
 		/* Assert core reset (active-low). */
 		mmio_clr_32(C0_RST_CTRL_REG, C0_RST_CTRL_REG_nCORERESET(core));
 		/* Assert core power-on reset (active-low). */
