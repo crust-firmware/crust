@@ -32,7 +32,7 @@ config I2C_PINS_PL0_PL1
 		Select this option if your board has a PMIC or regulator
 		connected via I2C using the normal set of pins.
 
-		Note that if you SoC contains an RSB controller,
+		Note that if your SoC contains an RSB controller,
 		choosing this option will prevent you from using it.
 
 config I2C_PINS_PL8_PL9
