@@ -51,6 +51,11 @@
 #define R_CIR_RX_CLK_REG                  (DEV_R_PRCM + 0x0054)
 #define APB0_RESET_REG                    (DEV_R_PRCM + 0x00b0)
 
+/* CPU0 does not have its own gating */
+#define C0_PWROFF_GATING_REG              (DEV_R_PRCM + 0x0100)
+#define C0_CPUn_PWROFF_GATING(n)          BIT(0 + (n))
+#define C0_PWROFF_GATING                  BIT(0)
+
 #define VDD_SYS_PWROFF_GATING_REG         (DEV_R_PRCM + 0x0110)
 #define VDD_CPUS_GATING                   BIT(3)
 #define VCC_PLL_GATING                    BIT(2)
@@ -61,6 +66,8 @@
 
 #define VDD_SYS_RESET_REG                 (DEV_R_PRCM + 0x0120)
 #define VDD_SYS_RESET                     BIT(0)
+
+#define C0_CPUn_PWR_SWITCH_REG(n)         (DEV_R_PRCM + 0x0140 + 0x04 * (n))
 
 #define PRCM_SEC_SWITCH_REG               (DEV_R_PRCM + 0x01d0)
 #define PRCM_SEC_SWITCH_REG_POWER_SEC     BIT(2)

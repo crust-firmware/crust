@@ -51,6 +51,10 @@
 #define R_CIR_CLK_REG                     (DEV_R_PRCM + 0x0054)
 #define APB0_RESET_REG                    (DEV_R_PRCM + 0x00b0)
 
+#define Cm_PWROFF_GATING_REG(m)           (DEV_R_PRCM + 0x0100 + 0x04 * (m))
+#define Cm_CPUn_PWROFF_GATING(n)          BIT((n) ? 0 + (n) : 4)
+#define Cm_PWROFF_GATING                  BIT(0)
+
 #define VDD_SYS_PWROFF_GATING_REG         (DEV_R_PRCM + 0x0110)
 #define VCC_GPIO_GATING                   BIT(12)
 #define VCC_PLL_GATING                    BIT(8)
@@ -63,6 +67,9 @@
 
 #define VDD_SYS_RESET_REG                 (DEV_R_PRCM + 0x0120)
 #define VDD_SYS_RESET                     BIT(0)
+
+#define Cm_CPUn_PWR_SWITCH_REG(m, n)      (DEV_R_PRCM + 0x0140 + \
+	                                   0x10 * (m) + 0x04 * (n))
 
 #define R_PIO_HOLD_REG                    (DEV_R_PRCM + 0x01f0)
 #define R_PIO_HOLD_REG_WRITE_PULSE        BIT(31)

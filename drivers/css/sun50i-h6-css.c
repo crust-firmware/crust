@@ -3,34 +3,12 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <css.h>
-#include <debug.h>
-#include <delay.h>
 #include <mmio.h>
 #include <scpi_protocol.h>
-#include <stdbool.h>
 #include <stdint.h>
-#include <util.h>
-#include <platform/devices.h>
+#include <platform/cpucfg.h>
 
 #include "css.h"
-
-#define CLUSTER_RESET_CTRL_REG    (DEV_CPUCFG + 0x0000)
-#define CLUSTER_CTRL_REG0         (DEV_CPUCFG + 0x0010)
-#define CLUSTER_CTRL_REG1         (DEV_CPUCFG + 0x0014)
-#define CLUSTER_CTRL_REG2         (DEV_CPUCFG + 0x0018)
-#define CACHE_CFG_REG0            (DEV_CPUCFG + 0x0024)
-#define RVBA_LO_REG(n)            (DEV_CPUCFG + 0x0040 + 0x08 * (n))
-#define RVBA_HI_REG(n)            (DEV_CPUCFG + 0x0044 + 0x08 * (n))
-#define CPU_STATUS_REG            (DEV_CPUCFG + 0x0080)
-#define L2_STATUS_REG             (DEV_CPUCFG + 0x0084)
-#define DEBUG_REG0                (DEV_CPUCFG + 0x00c0)
-#define DEBUG_REG1                (DEV_CPUCFG + 0x00c4)
-
-#define CLUSTER_PWRON_RESET_REG   (DEV_R_CPUCFG + 0x0040)
-#define CLUSTER_PWROFF_GATING_REG (DEV_R_CPUCFG + 0x0044)
-#define CPU_PWR_CLAMP_REG(n)      (DEV_R_CPUCFG + 0x0050 + 0x04 * (n))
-#define CPU_SYS_RESET_REG         (DEV_R_CPUCFG + 0x00a0)
 
 /* Reset Vector Base Address. */
 static uint32_t rvba;
@@ -47,25 +25,25 @@ css_set_cluster_state(uint32_t cluster UNUSED, uint32_t state)
 {
 	if (state == SCPI_CSS_ON) {
 		/* Put the cluster back into coherency (deassert ACINACTM). */
-		mmio_clr_32(CLUSTER_CTRL_REG1, BIT(0));
+		mmio_clr_32(C0_CTRL_REG1, BIT(0));
 		/* Restore the reset vector base addresses for all cores. */
 		for (uint32_t i = 0; i < css_get_core_count(cluster); ++i)
 			mmio_write_32(RVBA_LO_REG(i), rvba);
 	} else if (state == SCPI_CSS_OFF) {
 		/* Wait for all CPUs to be idle. */
-		mmio_poll_32(CPU_STATUS_REG, GENMASK(19, 16));
+		mmio_poll_32(C0_CPU_STATUS_REG, GENMASK(19, 16));
 		/* Save the power-on reset vector base address from core 0. */
 		rvba = mmio_read_32(RVBA_LO_REG(0));
 		/* Assert L2FLUSHREQ to clean the cluster L2 cache. */
-		mmio_set_32(CLUSTER_CTRL_REG2, BIT(8));
+		mmio_set_32(C0_CTRL_REG2, BIT(8));
 		/* Wait for L2FLUSHDONE to go high. */
 		mmio_poll_32(L2_STATUS_REG, BIT(10));
 		/* Deassert L2FLUSHREQ. */
-		mmio_clr_32(CLUSTER_CTRL_REG2, BIT(8));
+		mmio_clr_32(C0_CTRL_REG2, BIT(8));
 		/* Remove the cluster from coherency (assert ACINACTM). */
-		mmio_set_32(CLUSTER_CTRL_REG1, BIT(0));
+		mmio_set_32(C0_CTRL_REG1, BIT(0));
 		/* Wait for the cluster (L2 cache) to be idle. */
-		mmio_poll_32(CPU_STATUS_REG, BIT(0));
+		mmio_poll_32(C0_CPU_STATUS_REG, BIT(0));
 	} else {
 		return SCPI_E_PARAM;
 	}
@@ -78,36 +56,36 @@ css_set_core_state(uint32_t cluster UNUSED, uint32_t core, uint32_t state)
 {
 	if (state == SCPI_CSS_ON) {
 		/* Deassert DBGPWRDUP (prevent debug access to the core). */
-		mmio_clr_32(DEBUG_REG0, BIT(core));
+		mmio_clr_32(DBG_REG0, BIT(core));
 		/* Assert core reset (active-low). */
-		mmio_clr_32(CLUSTER_RESET_CTRL_REG, BIT(core));
+		mmio_clr_32(C0_RST_CTRL_REG, BIT(core));
 		/* Assert core power-on reset (active-low). */
-		mmio_clr_32(CLUSTER_PWRON_RESET_REG, BIT(core));
+		mmio_clr_32(C0_PWRON_RESET_REG, BIT(core));
 		/* Program the core to start in AArch64 mode. */
-		mmio_set_32(CLUSTER_CTRL_REG0, BIT(24 + core));
+		mmio_set_32(C0_CTRL_REG0, BIT(24 + core));
 		/* Turn on power to the core power domain. */
-		css_set_power_switch(CPU_PWR_CLAMP_REG(core), true);
+		css_set_power_switch(C0_CPUn_PWR_SWITCH_REG(core), true);
 		/* Release the core output clamps. */
-		mmio_clr_32(CLUSTER_PWROFF_GATING_REG, BIT(core));
+		mmio_clr_32(C0_PWROFF_GATING_REG, BIT(core));
 		/* Deassert core power-on reset (active-low). */
-		mmio_set_32(CLUSTER_PWRON_RESET_REG, BIT(core));
+		mmio_set_32(C0_PWRON_RESET_REG, BIT(core));
 		/* Deassert core reset (active-low). */
-		mmio_set_32(CLUSTER_RESET_CTRL_REG, BIT(core));
+		mmio_set_32(C0_RST_CTRL_REG, BIT(core));
 		/* Assert DBGPWRDUP (allow debug access to the core). */
-		mmio_set_32(DEBUG_REG0, BIT(core));
+		mmio_set_32(DBG_REG0, BIT(core));
 	} else if (state == SCPI_CSS_OFF) {
 		/* Wait for the core to be in WFI and ready to shut down. */
-		mmio_poll_32(CPU_STATUS_REG, BIT(16 + core));
+		mmio_poll_32(C0_CPU_STATUS_REG, BIT(16 + core));
 		/* Deassert DBGPWRDUP (prevent debug access to the core). */
-		mmio_clr_32(DEBUG_REG0, BIT(core));
+		mmio_clr_32(DBG_REG0, BIT(core));
 		/* Activate the core output clamps. */
-		mmio_set_32(CLUSTER_PWROFF_GATING_REG, BIT(core));
+		mmio_set_32(C0_PWROFF_GATING_REG, BIT(core));
 		/* Assert core reset (active-low). */
-		mmio_clr_32(CLUSTER_RESET_CTRL_REG, BIT(core));
+		mmio_clr_32(C0_RST_CTRL_REG, BIT(core));
 		/* Assert core power-on reset (active-low). */
-		mmio_clr_32(CLUSTER_PWRON_RESET_REG, BIT(core));
+		mmio_clr_32(C0_PWRON_RESET_REG, BIT(core));
 		/* Remove power from the core power domain. */
-		css_set_power_switch(CPU_PWR_CLAMP_REG(core), false);
+		css_set_power_switch(C0_CPUn_PWR_SWITCH_REG(core), false);
 	} else {
 		/* Unknown power state requested. */
 		return SCPI_E_PARAM;
