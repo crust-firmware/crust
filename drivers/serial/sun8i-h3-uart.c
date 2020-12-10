@@ -79,14 +79,14 @@ const struct simple_device uart = {
 			.dev   = &pio.dev,
 			.id    = SUNXI_GPIO_PIN(0, 0), /* PA0 */
 			.drive = DRIVE_10mA,
-			.mode  = 4,
+			.mode  = 2,
 			.pull  = PULL_NONE,
 		},
 		{
 			.dev   = &pio.dev,
 			.id    = SUNXI_GPIO_PIN(0, 1), /* PA1 */
 			.drive = DRIVE_10mA,
-			.mode  = 4,
+			.mode  = 2,
 			.pull  = PULL_UP,
 		},
 	},
@@ -107,14 +107,14 @@ const struct simple_device uart = {
 			.dev   = &pio.dev,
 			.id    = SUNXI_GPIO_PIN(0, 13), /* PA13 */
 			.drive = DRIVE_10mA,
-			.mode  = 4,
+			.mode  = 3,
 			.pull  = PULL_NONE,
 		},
 		{
 			.dev   = &pio.dev,
 			.id    = SUNXI_GPIO_PIN(0, 14), /* PA14 */
 			.drive = DRIVE_10mA,
-			.mode  = 4,
+			.mode  = 3,
 			.pull  = PULL_UP,
 		},
 	},
