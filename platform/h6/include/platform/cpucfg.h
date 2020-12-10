@@ -100,6 +100,6 @@
 #define C0_CPUn_PWR_SWITCH_REG(n)         (DEV_R_CPUCFG + 0x0050 + 0x04 * (n))
 
 #define CPU_SYS_RESET_REG                 (DEV_R_CPUCFG + 0x00a0)
-#define CPU_SYS_RESET_REG_nCSS_RST        BIT(0)
+#define CPU_SYS_RESET                     BIT(0)
 
 #endif /* PLATFORM_CPUCFG_H */

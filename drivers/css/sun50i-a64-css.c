@@ -32,7 +32,7 @@ css_set_cluster_state(uint32_t cluster UNUSED, uint32_t state)
 		mmio_clr_32(C0_PWROFF_GATING_REG, C0_PWROFF_GATING);
 		udelay(1);
 		/* Deassert the CPU subsystem reset (active-low). */
-		mmio_write_32(CPU_SYS_RESET_REG, CPU_SYS_RESET_REG_nCSS_RST);
+		mmio_write_32(CPU_SYS_RESET_REG, CPU_SYS_RESET);
 		udelay(1);
 		/* Deassert DBGPWRDUP for all cores. */
 		mmio_write_32(DBG_REG0, 0);

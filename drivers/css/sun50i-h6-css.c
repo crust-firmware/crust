@@ -25,7 +25,7 @@ css_set_cluster_state(uint32_t cluster UNUSED, uint32_t state)
 {
 	if (state == SCPI_CSS_ON) {
 		/* Deassert the CPU subsystem reset (active-low). */
-		mmio_write_32(CPU_SYS_RESET_REG, CPU_SYS_RESET_REG_nCSS_RST);
+		mmio_write_32(CPU_SYS_RESET_REG, CPU_SYS_RESET);
 		/* Deassert the cluster hard reset (active-low). */
 		mmio_write_32(C0_PWRON_RESET_REG, C0_PWRON_RESET_REG_nH_RST);
 		/* Deassert DBGPWRDUP for all cores. */

@@ -91,6 +91,6 @@
 #define C0_PWRON_RESET_REG_nCPUPORESET(n) BIT(0 + (n))
 
 #define CPU_SYS_RESET_REG                 (DEV_R_CPUCFG + 0x0140)
-#define CPU_SYS_RESET_REG_nCSS_RST        BIT(0)
+#define CPU_SYS_RESET                     BIT(0)
 
 #endif /* PLATFORM_CPUCFG_H */
