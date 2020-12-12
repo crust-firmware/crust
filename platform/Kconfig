@@ -7,6 +7,7 @@ config PLATFORM
 	string
 	default "a64"  if PLATFORM_A64
 	default "a83t" if PLATFORM_A83T
+	default "h3"   if PLATFORM_H3
 	default "h6"   if PLATFORM_H6
 
 choice
@@ -22,6 +23,10 @@ config PLATFORM_A83T
 	depends on ARCH_OR1K
 	select HAVE_RSB
 	select HAVE_UART4
+
+config PLATFORM_H3
+	bool "H3"
+	depends on ARCH_OR1K
 
 config PLATFORM_H6
 	bool "H6"

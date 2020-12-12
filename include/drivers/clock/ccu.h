@@ -14,6 +14,9 @@
 #elif CONFIG(PLATFORM_A83T)
 #include <clock/sun8i-a83t-ccu.h>
 #include <clock/sun8i-r-ccu.h>
+#elif CONFIG(PLATFORM_H3)
+#include <clock/sun8i-h3-ccu.h>
+#include <clock/sun8i-r-ccu.h>
 #elif CONFIG(PLATFORM_H6)
 #include <clock/sun50i-h6-ccu.h>
 #include <clock/sun50i-h6-r-ccu.h>
