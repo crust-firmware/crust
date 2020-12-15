@@ -17,11 +17,11 @@
 #if CONFIG(MFD_AXP803)
 #define IC_TYPE_VALUE 0x41
 #define I2C_ADDRESS   0x34
-#define RSB_HWADDR    0x3a3
+#define RSB_ADDRESS   (0x2d << 16 | 0x3a3)
 #elif CONFIG(MFD_AXP805)
 #define IC_TYPE_VALUE 0x40
 #define I2C_ADDRESS   0x36
-#define RSB_HWADDR    0x745
+#define RSB_ADDRESS   (0x3a << 16 | 0x745)
 #endif
 
 static int
@@ -61,6 +61,6 @@ const struct regmap_device axp20x = {
 	},
 	.map = {
 		.dev = CONFIG(RSB) ? &r_rsb.dev : &r_i2c.dev,
-		.id  = CONFIG(RSB) ? RSB_HWADDR : I2C_ADDRESS,
+		.id  = CONFIG(RSB) ? RSB_ADDRESS : I2C_ADDRESS,
 	},
 };

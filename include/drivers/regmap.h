@@ -12,7 +12,7 @@
 
 struct regmap {
 	const struct device *dev;
-	uint16_t             id;
+	uint32_t             id;
 };
 
 struct regmap_device {
