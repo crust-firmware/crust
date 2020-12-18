@@ -18,13 +18,11 @@ static const uint8_t inactive_ids[] = {
 	AXP803_REGL_DCDC3,
 };
 
-const struct regulator_list inactive_list = {
+const struct regulator_list cpu_supply = {
 	.dev    = &axp803_regulator.dev,
 	.ids    = inactive_ids,
 	.nr_ids = ARRAY_SIZE(inactive_ids),
 };
-
-extern const struct regulator_list off_list ATTRIBUTE(alias("inactive_list"));
 
 #elif CONFIG(REGULATOR_AXP805)
 
@@ -33,13 +31,11 @@ static const uint8_t inactive_ids[] = {
 	AXP805_REGL_DCDCB,
 };
 
-const struct regulator_list inactive_list = {
+const struct regulator_list cpu_supply = {
 	.dev    = &axp805_regulator.dev,
 	.ids    = inactive_ids,
 	.nr_ids = ARRAY_SIZE(inactive_ids),
 };
-
-extern const struct regulator_list off_list ATTRIBUTE(alias("inactive_list"));
 
 #elif CONFIG(REGULATOR_SY8106A)
 
@@ -47,20 +43,16 @@ static const uint8_t inactive_ids[] = {
 	SY8106A_REGL_VOUT,
 };
 
-const struct regulator_list inactive_list = {
+const struct regulator_list cpu_supply = {
 	.dev    = &sy8106a.dev,
 	.ids    = inactive_ids,
 	.nr_ids = ARRAY_SIZE(inactive_ids),
 };
 
-extern const struct regulator_list off_list ATTRIBUTE(alias("inactive_list"));
-
 #else
 
-const struct regulator_list inactive_list = {
+const struct regulator_list cpu_supply = {
 	.dev = NULL,
 };
-
-extern const struct regulator_list off_list ATTRIBUTE(alias("inactive_list"));
 
 #endif

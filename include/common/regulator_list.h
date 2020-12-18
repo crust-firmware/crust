@@ -9,13 +9,8 @@
 #include <regulator.h>
 
 /**
- * The list of regulators to disable while the system is inactive (suspended).
+ * The list of regulators supplying VDD-CPUX.
  */
-extern const struct regulator_list inactive_list;
-
-/**
- * The list of regulators to disable while system power is off.
- */
-extern const struct regulator_list off_list;
+extern const struct regulator_list cpu_supply;
 
 #endif /* COMMON_REGULATOR_LIST_H */

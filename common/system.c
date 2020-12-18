@@ -135,16 +135,13 @@ system_state_machine(uint32_t exception)
 			debug("Suspending...");
 
 			int (*pmic_action)(const struct device *);
-			const struct regulator_list *regulators;
 			uint8_t next_state;
 
 			if (system_state == SYSTEM_SUSPEND) {
 				pmic_action = pmic_suspend;
-				regulators  = &inactive_list;
 				next_state  = SYSTEM_INACTIVE;
 			} else {
 				pmic_action = pmic_shutdown;
-				regulators  = &off_list;
 				next_state  = SYSTEM_OFF;
 			}
 
@@ -174,7 +171,7 @@ system_state_machine(uint32_t exception)
 				pmic_action(pmic);
 
 			/* Turn off all unnecessary power domains. */
-			regulator_bulk_disable(regulators);
+			regulator_bulk_disable(&cpu_supply);
 
 			/*
 			 * The regulator provider is often part of the same
@@ -202,7 +199,7 @@ system_state_machine(uint32_t exception)
 			 * If it fails, manually turn the regulators back on.
 			 */
 			if (!(pmic = pmic_get()) || pmic_resume(pmic))
-				regulator_bulk_enable(&inactive_list);
+				regulator_bulk_enable(&cpu_supply);
 			device_put(pmic);
 
 			/* Give regulator outputs time to rise. */
@@ -247,7 +244,7 @@ system_state_machine(uint32_t exception)
 		case SYSTEM_RESET:
 		default:
 			/* Turn on regulators required to boot. */
-			regulator_bulk_enable(&off_list);
+			regulator_bulk_enable(&cpu_supply);
 
 			/* Give regulator outputs time to rise. */
 			udelay(5000);
