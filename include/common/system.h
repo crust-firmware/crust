@@ -20,36 +20,39 @@ noreturn void system_state_machine(uint32_t exception);
 /**
  * Reboot the board, including the SoC and external peripherals.
  *
- * May be called at any time.
+ * Must only be called while the system is awake.
  */
 void system_reboot(void);
 
 /**
  * Reset the SoC, including all CPUs and internal peripherals.
  *
- * May be called at any time.
+ * Must only be called while the system is awake.
  */
 void system_reset(void);
 
 /**
  * Shut down the SoC, and turn off all possible power domains.
  *
- * Must only be called while the system is active.
+ * Must only be called while the system is awake.
  */
 void system_shutdown(void);
 
 /**
  * Suspend the SoC, and turn off all non-wakeup power domains.
  *
- * Must only be called while the system is active.
+ * Must only be called while the system is awake.
  */
 void system_suspend(void);
 
 /**
- * Wake up the SoC, and turn on previously-disabled power domains.
+ * Wake the system.
  *
- * Should only be called while the system is inactive (suspended).
+ * Transition to a state where the rich OS is awake and running, by resetting
+ * the SoC or the entire board if necessary.
+ *
+ * May be called at any time.
  */
-void system_wakeup(void);
+void system_wake(void);
 
 #endif /* COMMON_SYSTEM_H */

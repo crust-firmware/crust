@@ -99,14 +99,9 @@ run_command(const char *cmd)
 		}
 		return;
 #endif
-	case 's':
-		/* System: "sb", "sr", or "sw". */
-		if (*cmd == 'b')
-			system_reboot();
-		else if (*cmd == 'r')
-			system_reset();
-		else if (*cmd == 'w')
-			system_wakeup();
+	case 'w':
+		/* Wake: "w". */
+		system_wake();
 		return;
 	}
 }

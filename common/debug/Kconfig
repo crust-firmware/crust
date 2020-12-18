@@ -57,15 +57,13 @@ config DEBUG_LOG
 		informational messages that may aid in debugging.
 
 config DEBUG_MONITOR
-	bool "Provide an interactive debug monitor while off/suspended"
+	bool "Provide an interactive debug monitor while off/asleep"
 	help
-		While the system is inactive, accept simple commands on
-		the serial port. Parsing is extremely basic, and line
+		While the system is off or asleep, accept simple commands
+		on the serial port. Parsing is extremely basic, and line
 		editing is not supported. Available commands are:
 			m <address> [value] -- read/write memory
-			sb -- trigger board-level reboot
-			sr -- trigger SoC-level reset
-			sw -- trigger wakeup
+			w -- trigger wakeup
 
 		With a PMIC present, additional commands are supported:
 			p <address> [value] -- read/write PMIC registers
@@ -76,10 +74,10 @@ config DEBUG_MONITOR_PMIC
 	default MFD_AXP20X
 
 config DEBUG_PRINT_BATTERY
-	bool "Print battery consumption periodically while off/suspended"
+	bool "Print battery consumption periodically while off/asleep"
 	depends on MFD_AXP803
 	help
-		While the system is inactive and the battery is
+		While the system is off or asleep and the battery is
 		discharging, print the battery voltage, discharge
 		current, and calculated power usage every 30 seconds.
 
