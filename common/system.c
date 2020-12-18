@@ -17,7 +17,6 @@
 #include <scpi.h>
 #include <serial.h>
 #include <simple_device.h>
-#include <stdbool.h>
 #include <stddef.h>
 #include <system.h>
 #include <watchdog.h>
@@ -28,25 +27,6 @@
 
 /* This variable is persisted across exception restarts. */
 static uint8_t system_state = SYSTEM_BOOT;
-
-uint8_t
-get_system_state(void)
-{
-	return system_state;
-}
-
-bool
-system_can_wake(void)
-{
-	return system_state == SYSTEM_INACTIVE ||
-	       system_state == SYSTEM_OFF;
-}
-
-bool
-system_is_running(void)
-{
-	return system_state == SYSTEM_ACTIVE;
-}
 
 noreturn void
 system_state_machine(uint32_t exception)
@@ -265,7 +245,7 @@ system_state_machine(uint32_t exception)
 
 		debug_monitor();
 		debug_print_battery();
-		debug_print_latency();
+		debug_print_latency(system_state);
 	}
 }
 

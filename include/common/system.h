@@ -6,7 +6,6 @@
 #ifndef COMMON_SYSTEM_H
 #define COMMON_SYSTEM_H
 
-#include <stdbool.h>
 #include <stdint.h>
 
 enum {
@@ -20,21 +19,6 @@ enum {
 	SYSTEM_REBOOT,   /**< Board-level reset is in progress. */
 	SYSTEM_RESET,    /**< SoC-level reset is in progress (final state). */
 };
-
-/**
- * Get the current system state.
- */
-uint8_t get_system_state(void);
-
-/**
- * Check if the system is in a state where it can be woken up.
- */
-bool system_can_wake(void) ATTRIBUTE(pure);
-
-/**
- * Check if the system is in a state where the main CPUs are executing.
- */
-bool system_is_running(void) ATTRIBUTE(pure);
 
 /**
  * Perform system state management.

@@ -73,12 +73,12 @@ debug_print_battery(void)
 
 #if CONFIG(DEBUG_PRINT_LATENCY)
 
-void debug_print_latency(void);
+void debug_print_latency(uint8_t current_state);
 
 #else
 
 static inline void
-debug_print_latency(void)
+debug_print_latency(uint8_t current_state UNUSED)
 {
 }
 
