@@ -25,6 +25,18 @@
 #include <msgbox/sunxi-msgbox.h>
 #include <watchdog/sunxi-twd.h>
 
+enum {
+	SYSTEM_BOOT = 1, /**< First boot of the firmware after system reset. */
+	SYSTEM_ACTIVE,   /**< ARM CPUs are running firmware or an OS. */
+	SYSTEM_SUSPEND,  /**< Transition from active to inactive. */
+	SYSTEM_INACTIVE, /**< ARM CPUs are not running; RAM is preserved. */
+	SYSTEM_RESUME,   /**< Transition from inactive to active. */
+	SYSTEM_SHUTDOWN, /**< Transition from active to off. */
+	SYSTEM_OFF,      /**< ARM CPUs are not running; RAM is invalid. */
+	SYSTEM_REBOOT,   /**< Board-level reset is in progress. */
+	SYSTEM_RESET,    /**< SoC-level reset is in progress (final state). */
+};
+
 /* This variable is persisted across exception restarts. */
 static uint8_t system_state = SYSTEM_BOOT;
 
