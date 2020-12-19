@@ -5,6 +5,25 @@
 
 menu "Firmware features"
 
+config PMIC_SHUTDOWN
+	bool "Use PMIC for full hardware shutdown"
+	depends on PMIC
+	default y
+	help
+		Command the PMIC to turn off all outputs during the
+		shutdown procedure. This reduces power usage to almost
+		zero, but also stops the firmware. In this state, only a
+		power button connected directly to the PMIC can turn the
+		system back on.
+
+		If this option is disabled, the shutdown procedure will
+		be implemented in software only (similar to the suspend
+		procedure), so the firmware can turn the system back on.
+
+		Say Y if your board is powered by a battery, or N if you
+		need some other method of turning on the system, such as
+		an IR remote control or a GPIO input.
+
 config NEED_OSC24M
 	bool
 	help

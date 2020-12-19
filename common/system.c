@@ -163,7 +163,8 @@ system_state_machine(uint32_t exception)
 
 			/* Perform PMIC-specific actions. */
 			if ((pmic = pmic_get())) {
-				if (system_state == SS_SHUTDOWN)
+				if (system_state == SS_SHUTDOWN &&
+				    CONFIG(PMIC_SHUTDOWN))
 					pmic_shutdown(pmic);
 				else
 					pmic_suspend(pmic);
