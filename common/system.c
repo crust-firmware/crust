@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
+#include <cir.h>
 #include <counter.h>
 #include <css.h>
 #include <debug.h>
@@ -63,7 +64,7 @@ static uint8_t system_state = SS_BOOT;
 noreturn void
 system_state_machine(uint32_t exception)
 {
-	const struct device *mailbox, *pmic, *watchdog;
+	const struct device *cir, *mailbox, *pmic, *watchdog;
 	uint8_t initial_state = system_state;
 
 	if (initial_state > SS_BOOT) {
@@ -76,6 +77,7 @@ system_state_machine(uint32_t exception)
 		system_state = SS_OFF;
 
 		/* Clear out inactive references. */
+		cir      = NULL;
 		watchdog = NULL;
 		mailbox  = NULL;
 	} else {
@@ -147,6 +149,9 @@ system_state_machine(uint32_t exception)
 			simple_device_sync(&pio);
 			simple_device_sync(&r_pio);
 
+			/* Acquire wakeup sources. */
+			cir = cir_get();
+
 			/* Configure the SoC for minimal power consumption. */
 			dram_suspend();
 			ccu_suspend();
@@ -191,7 +196,7 @@ system_state_machine(uint32_t exception)
 			debug_print_battery();
 
 			/* Poll wakeup sources. Reset or resume on wakeup. */
-			if (irq_poll())
+			if (cir_poll(cir) || irq_poll())
 				system_state = NEXT_STATE;
 
 			/* This must run last so the state change is seen. */
@@ -226,6 +231,9 @@ system_state_machine(uint32_t exception)
 			/* Configure the SoC for full functionality. */
 			ccu_resume();
 			dram_resume();
+
+			/* Release wakeup sources. */
+			device_put(cir), cir = NULL;
 
 			/* Acquire runtime-only devices. */
 			mailbox = device_get_or_null(&msgbox.dev);

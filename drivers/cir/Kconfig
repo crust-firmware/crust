@@ -1,0 +1,23 @@
+#
+# Copyright © 2020 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+config CIR
+	bool "CIR (infrared) receiver"
+	select NEED_OSC24M
+	help
+		Listen for input from an infrared remote controller or
+		keyboard. This can be used as a wakeup source.
+
+if CIR
+
+config R_CIR_RX_PIN
+	int
+	default  9 if PLATFORM_H6
+	default 11 if PLATFORM_A64 || PLATFORM_H3
+	default 12 if PLATFORM_A83T
+	help
+		Provide the Port L pin number used by the CIR receiver.
+
+endif

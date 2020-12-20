@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
+obj-$(CONFIG_CIR) += cir/
 obj-y += clock/
 obj-y += css/
 obj-y += dram/
