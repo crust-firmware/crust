@@ -48,7 +48,7 @@
 #define PLL_CTRL_REG1_LDO_EN              (0x3 << 0)
 
 /* See r_ccu driver for bit definitions */
-#define R_CIR_CLK_REG                     (DEV_R_PRCM + 0x0054)
+#define R_CIR_RX_CLK_REG                  (DEV_R_PRCM + 0x0054)
 #define APB0_RESET_REG                    (DEV_R_PRCM + 0x00b0)
 
 #define Cm_PWROFF_GATING_REG(m)           (DEV_R_PRCM + 0x0100 + 0x04 * (m))
