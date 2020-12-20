@@ -11,6 +11,15 @@ config CIR
 
 if CIR
 
+config CIR_WAKE_CODE
+	hex "Scan code for wakeup"
+	range 0x1 0xffffffff
+	default 0x800f040c
+	help
+		Choose the scan code that will wake the system when detected.
+
+		The default value will work with an RC6 MCE remote controller.
+
 config R_CIR_RX_PIN
 	int
 	default  9 if PLATFORM_H6

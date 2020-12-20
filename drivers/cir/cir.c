@@ -19,5 +19,5 @@ cir_poll(const struct device *dev)
 	if (!dev)
 		return 0;
 
-	return sunxi_cir_poll(dev);
+	return sunxi_cir_poll(dev) == CONFIG_CIR_WAKE_CODE;
 }
