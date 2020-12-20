@@ -4,5 +4,6 @@
 #
 
 obj-y += cir.o
+obj-y += rc6.o
 
 obj-y += sunxi-cir.o
