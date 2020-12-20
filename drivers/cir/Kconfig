@@ -5,7 +5,6 @@
 
 config CIR
 	bool "CIR (infrared) receiver"
-	select NEED_OSC24M
 	help
 		Listen for input from an infrared remote controller or
 		keyboard. This can be used as a wakeup source.
