@@ -89,7 +89,7 @@ config DEBUG_PRINT_LATENCY
 		After each system state transition, calculate the
 		average latency of the main loop, in AR100 clock cycles.
 		The latency will be printed after the firmware has
-		performed 1 million iterations in that state.
+		performed 10000 iterations in that state.
 
 config DEBUG_PRINT_SPRS
 	bool "Print the contents of Special Purpose Registers at boot"
