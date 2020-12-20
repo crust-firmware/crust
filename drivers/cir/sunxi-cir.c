@@ -12,6 +12,8 @@
 #include <platform/devices.h>
 #include <platform/prcm.h>
 
+#include "rc6.h"
+
 #define CIR_RXCTL  0x00
 #define CIR_RXPCFG 0x10
 #define CIR_RXFIFO 0x20
@@ -21,9 +23,22 @@
 
 struct sunxi_cir_state {
 	struct device_state ds;
+	struct rc6_ctx      rc6_ctx;
 	uint32_t            clk_stash;
 	uint32_t            cfg_stash;
 	uint32_t            ctl_stash;
+};
+
+/* These durations are based on a 32768 Hz sample clock. */
+static const int8_t sunxi_cir_rc6_durations[RC6_STATES] = {
+	[RC6_IDLE]      = 6 * 14,
+	[RC6_LEADER_S]  = 2 * 14,
+	[RC6_HEADER_P]  = 1 * 14,
+	[RC6_HEADER_N]  = 1 * 14,
+	[RC6_TRAILER_P] = 2 * 14,
+	[RC6_TRAILER_N] = 2 * 14,
+	[RC6_DATA_P]    = 1 * 14,
+	[RC6_DATA_N]    = 1 * 14,
 };
 
 static inline const struct sunxi_cir *
@@ -41,9 +56,22 @@ sunxi_cir_state_for(const struct device *dev)
 uint32_t
 sunxi_cir_poll(const struct device *dev)
 {
-	const struct sunxi_cir *self = to_sunxi_cir(dev);
+	const struct sunxi_cir *self  = to_sunxi_cir(dev);
+	struct sunxi_cir_state *state = sunxi_cir_state_for(dev);
+	struct rc6_ctx *rc6_ctx       = &state->rc6_ctx;
 
-	return mmio_get_32(self->regs + CIR_RXSTA, BIT(1));
+	/* Feed the decoder data as needed and as it becomes available. */
+	if (rc6_ctx->width <= 0) {
+		/* If no data is available, do not call the decoder. */
+		if (!(mmio_read_32(self->regs + CIR_RXSTA) >> 8))
+			return 0;
+
+		uint32_t sample = mmio_read_32(self->regs + CIR_RXFIFO);
+		rc6_ctx->pulse = sample >> 7;
+		rc6_ctx->width = sample & GENMASK(6, 0);
+	}
+
+	return rc6_decode(rc6_ctx);
 }
 
 static int
@@ -51,6 +79,8 @@ sunxi_cir_probe(const struct device *dev UNUSED)
 {
 	const struct sunxi_cir *self  = to_sunxi_cir(dev);
 	struct sunxi_cir_state *state = sunxi_cir_state_for(dev);
+
+	state->rc6_ctx.durations = sunxi_cir_rc6_durations;
 
 	state->clk_stash = mmio_read_32(R_CIR_RX_CLK_REG);
 	mmio_write_32(R_CIR_RX_CLK_REG, 0x80000000);
