@@ -7,4 +7,5 @@ obj-y += regulator.o
 
 obj-$(CONFIG_REGULATOR_AXP803)  += axp20x.o axp803.o
 obj-$(CONFIG_REGULATOR_AXP805)  += axp20x.o axp805.o
+obj-$(CONFIG_REGULATOR_GPIO)    += gpio.o
 obj-$(CONFIG_REGULATOR_SY8106A) += sy8106a.o

@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include <regulator/axp803.h>
 #include <regulator/axp805.h>
+#include <regulator/gpio.h>
 #include <regulator/sy8106a.h>
 
 #if CONFIG(REGULATOR_AXP803)
@@ -30,6 +31,12 @@ const struct regulator_handle cpu_supply = {
 	.id  = SY8106A_REGL_VOUT,
 };
 
+#elif CONFIG(REGULATOR_GPIO_CPU)
+
+const struct regulator_handle cpu_supply = {
+	.dev = &gpio_cpu_regulator.dev,
+};
+
 #else
 
 const struct regulator_handle cpu_supply = {
@@ -50,6 +57,12 @@ const struct regulator_handle dram_supply = {
 const struct regulator_handle dram_supply = {
 	.dev = &axp805_regulator.dev,
 	.id  = AXP805_REGL_DCDCE,
+};
+
+#elif CONFIG(REGULATOR_GPIO_DRAM)
+
+const struct regulator_handle dram_supply = {
+	.dev = &gpio_dram_regulator.dev,
 };
 
 #else
