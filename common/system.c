@@ -177,6 +177,8 @@ system_state_machine(uint32_t exception)
 
 			/* Turn off all unnecessary power domains. */
 			regulator_disable(&cpu_supply);
+			if (system_state == SS_SHUTDOWN)
+				regulator_disable(&dram_supply);
 
 			/*
 			 * The regulator provider is often part of the same
@@ -209,8 +211,10 @@ system_state_machine(uint32_t exception)
 			 * The PMIC is expected to restore regulator state.
 			 * If it fails, manually turn the regulators back on.
 			 */
-			if (!(pmic = pmic_get()) || pmic_resume(pmic))
+			if (!(pmic = pmic_get()) || pmic_resume(pmic)) {
 				regulator_enable(&cpu_supply);
+				regulator_enable(&dram_supply);
+			}
 			device_put(pmic);
 
 			/* Give regulator outputs time to rise. */

@@ -13,4 +13,9 @@
  */
 extern const struct regulator_handle cpu_supply;
 
+/**
+ * The regulator supplying VCC-DRAM.
+ */
+extern const struct regulator_handle dram_supply;
+
 #endif /* COMMON_REGULATOR_LIST_H */

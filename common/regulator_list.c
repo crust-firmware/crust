@@ -37,3 +37,25 @@ const struct regulator_handle cpu_supply = {
 };
 
 #endif
+
+#if CONFIG(REGULATOR_AXP803)
+
+const struct regulator_handle dram_supply = {
+	.dev = &axp803_regulator.dev,
+	.id  = AXP803_REGL_DCDC5,
+};
+
+#elif CONFIG(REGULATOR_AXP805)
+
+const struct regulator_handle dram_supply = {
+	.dev = &axp805_regulator.dev,
+	.id  = AXP805_REGL_DCDCE,
+};
+
+#else
+
+const struct regulator_handle dram_supply = {
+	.dev = NULL,
+};
+
+#endif
