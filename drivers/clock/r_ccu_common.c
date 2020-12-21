@@ -24,20 +24,17 @@ static uint32_t osc16m_rate = 16000000U;
 DEFINE_FIXED_RATE(r_ccu_common_get_osc16m_rate, osc16m_rate)
 
 /**
- * Write two consecutive values to PLL_CTRL_REG1 with a delay in between.
+ * Write a value to the lockable bits in PLL_CTRL_REG1.
  */
 static void
-r_ccu_common_update_pll_ctrl_reg1(uint32_t v1, uint32_t delay, uint32_t v2)
+write_pll_ctrl_reg1(uint32_t new)
 {
 	uint32_t val = mmio_read_32(PLL_CTRL_REG1) & ~PLL_CTRL_REG1_MASK;
 
-	/* Step 1: unlock if locked, otherwise write first value. */
-	mmio_write_32(PLL_CTRL_REG1, val | v1 | PLL_CTRL_REG1_KEY);
-	/* Step 2: write first value if just unlocked, otherwise write same. */
-	mmio_write_32(PLL_CTRL_REG1, val | v1 | PLL_CTRL_REG1_KEY);
-	udelay(delay);
-	/* Step 3: write second value and lock. */
-	mmio_write_32(PLL_CTRL_REG1, val | v2);
+	/* Unlock if locked, otherwise write value. */
+	mmio_write_32(PLL_CTRL_REG1, val | new | PLL_CTRL_REG1_KEY);
+	/* Write value if just unlocked, otherwise write same; lock. */
+	mmio_write_32(PLL_CTRL_REG1, val | new);
 }
 
 void
@@ -46,7 +43,9 @@ r_ccu_common_suspend(void)
 	if (!CONFIG(SUSPEND_OSC24M))
 		return;
 
-	r_ccu_common_update_pll_ctrl_reg1(PLL_CTRL_REG1_LDO_EN, 1, 0);
+	write_pll_ctrl_reg1(PLL_CTRL_REG1_LDO_EN);
+	udelay(1);
+	write_pll_ctrl_reg1(0);
 	mmio_set_32(VDD_SYS_PWROFF_GATING_REG,
 	            CONFIG(GATE_VDD_SYS) * VDD_CPUS_GATING | VCC_PLL_GATING);
 }
@@ -62,9 +61,9 @@ r_ccu_common_resume(void)
 
 	mmio_clr_32(VDD_SYS_PWROFF_GATING_REG,
 	            CONFIG(GATE_VDD_SYS) * VDD_CPUS_GATING | VCC_PLL_GATING);
-	r_ccu_common_update_pll_ctrl_reg1(PLL_CTRL_REG1_LDO_EN, 2000,
-	                                  PLL_CTRL_REG1_CRYSTAL_EN |
-	                                  PLL_CTRL_REG1_LDO_EN);
+	write_pll_ctrl_reg1(PLL_CTRL_REG1_LDO_EN);
+	udelay(2000);
+	write_pll_ctrl_reg1(PLL_CTRL_REG1_CRYSTAL_EN | PLL_CTRL_REG1_LDO_EN);
 }
 
 void WEAK ATTRIBUTE(alias("r_ccu_common_resume"))
