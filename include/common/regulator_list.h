@@ -9,8 +9,8 @@
 #include <regulator.h>
 
 /**
- * The list of regulators supplying VDD-CPUX.
+ * The regulator supplying VDD-CPUX.
  */
-extern const struct regulator_list cpu_supply;
+extern const struct regulator_handle cpu_supply;
 
 #endif /* COMMON_REGULATOR_LIST_H */

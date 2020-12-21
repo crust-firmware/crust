@@ -5,53 +5,34 @@
 
 #include <regulator_list.h>
 #include <stddef.h>
-#include <stdint.h>
-#include <util.h>
 #include <regulator/axp803.h>
 #include <regulator/axp805.h>
 #include <regulator/sy8106a.h>
 
 #if CONFIG(REGULATOR_AXP803)
 
-static const uint8_t inactive_ids[] = {
-	AXP803_REGL_DCDC2,
-	AXP803_REGL_DCDC3,
-};
-
-const struct regulator_list cpu_supply = {
-	.dev    = &axp803_regulator.dev,
-	.ids    = inactive_ids,
-	.nr_ids = ARRAY_SIZE(inactive_ids),
+const struct regulator_handle cpu_supply = {
+	.dev = &axp803_regulator.dev,
+	.id  = AXP803_REGL_DCDC2,
 };
 
 #elif CONFIG(REGULATOR_AXP805)
 
-static const uint8_t inactive_ids[] = {
-	AXP805_REGL_DCDCA,
-	AXP805_REGL_DCDCB,
-};
-
-const struct regulator_list cpu_supply = {
-	.dev    = &axp805_regulator.dev,
-	.ids    = inactive_ids,
-	.nr_ids = ARRAY_SIZE(inactive_ids),
+const struct regulator_handle cpu_supply = {
+	.dev = &axp805_regulator.dev,
+	.id  = AXP805_REGL_DCDCA,
 };
 
 #elif CONFIG(REGULATOR_SY8106A)
 
-static const uint8_t inactive_ids[] = {
-	SY8106A_REGL_VOUT,
-};
-
-const struct regulator_list cpu_supply = {
-	.dev    = &sy8106a.dev,
-	.ids    = inactive_ids,
-	.nr_ids = ARRAY_SIZE(inactive_ids),
+const struct regulator_handle cpu_supply = {
+	.dev = &sy8106a.dev,
+	.id  = SY8106A_REGL_VOUT,
 };
 
 #else
 
-const struct regulator_list cpu_supply = {
+const struct regulator_handle cpu_supply = {
 	.dev = NULL,
 };
 

@@ -11,8 +11,8 @@
 #include <stdint.h>
 
 struct regulator_driver_ops {
-	int (*get_state)(const struct device *dev, uint8_t id);
-	int (*set_state)(const struct device *dev, uint8_t id, bool enable);
+	int (*get_state)(const struct regulator_handle *handle);
+	int (*set_state)(const struct regulator_handle *handle, bool enable);
 };
 
 struct regulator_driver {

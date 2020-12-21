@@ -25,39 +25,43 @@ regulator_ops_for(const struct device *dev)
 }
 
 static int
-regulator_bulk_set(const struct regulator_list *list, bool enable)
+regulator_set_state(const struct regulator_handle *handle, bool enable)
 {
-	const struct regulator_driver_ops *ops = regulator_ops_for(list->dev);
-	int err, ret = SUCCESS;
+	int err;
 
-	if ((err = device_get(list->dev)))
+	if ((err = device_get(handle->dev)))
 		return err;
 
-	for (uint8_t i = 0; i < list->nr_ids; ++i) {
-		err = ops->set_state(list->dev, list->ids[i], enable);
-		if (err && !ret)
-			ret = err;
-	}
+	err = regulator_ops_for(handle->dev)->set_state(handle, enable);
 
-	device_put(list->dev);
+	device_put(handle->dev);
 
-	return ret;
+	return err;
 }
 
 int
-regulator_bulk_disable(const struct regulator_list *list)
+regulator_disable(const struct regulator_handle *handle)
 {
-	return regulator_bulk_set(list, false);
+	return regulator_set_state(handle, false);
 }
 
 int
-regulator_bulk_enable(const struct regulator_list *list)
+regulator_enable(const struct regulator_handle *handle)
 {
-	return regulator_bulk_set(list, true);
+	return regulator_set_state(handle, true);
 }
 
 int
-regulator_get_state(const struct device *dev, uint8_t id)
+regulator_get_state(const struct regulator_handle *handle)
 {
-	return regulator_ops_for(dev)->get_state(dev, id);
+	int err;
+
+	if ((err = device_get(handle->dev)))
+		return err;
+
+	err = regulator_ops_for(handle->dev)->get_state(handle);
+
+	device_put(handle->dev);
+
+	return err;
 }

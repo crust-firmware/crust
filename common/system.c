@@ -176,7 +176,7 @@ system_state_machine(uint32_t exception)
 			}
 
 			/* Turn off all unnecessary power domains. */
-			regulator_bulk_disable(&cpu_supply);
+			regulator_disable(&cpu_supply);
 
 			/*
 			 * The regulator provider is often part of the same
@@ -210,7 +210,7 @@ system_state_machine(uint32_t exception)
 			 * If it fails, manually turn the regulators back on.
 			 */
 			if (!(pmic = pmic_get()) || pmic_resume(pmic))
-				regulator_bulk_enable(&cpu_supply);
+				regulator_enable(&cpu_supply);
 			device_put(pmic);
 
 			/* Give regulator outputs time to rise. */
