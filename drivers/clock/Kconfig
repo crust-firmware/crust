@@ -1,0 +1,30 @@
+#
+# Copyright © 2020 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+config HAVE_DCXO
+	bool
+	help
+		Select this option on platforms that have a DCXO in the
+		RTC domain in addition to X24M pads in the PLL domain.
+
+choice
+	bool "OSC24M clock source"
+	default OSC24M_SRC_DCXO if HAVE_DCXO
+	default OSC24M_SRC_X24M
+
+config OSC24M_SRC_DCXO
+	bool "DCXO"
+	depends on HAVE_DCXO
+	help
+		Select this option if your board has the 24 MHz crystal
+		connected to the DCXO pads on the SoC.
+
+config OSC24M_SRC_X24M
+	bool "X24M"
+	help
+		Select this option if your board has the 24 MHz crystal
+		connected to the X24M pads on the SoC.
+
+endchoice
