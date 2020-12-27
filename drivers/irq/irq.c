@@ -5,9 +5,7 @@
 
 #include <irq.h>
 #include <mmio.h>
-#include <stdbool.h>
 #include <stdint.h>
-#include <util.h>
 #include <platform/devices.h>
 
 #define INTC_VECTOR_REG    0x0000
@@ -21,18 +19,6 @@
 
 #define EINT_CTL_REG(n)    (0x20 * (n) + 0x0210)
 #define EINT_STATUS_REG(n) (0x20 * (n) + 0x0214)
-
-bool
-irq_is_enabled(uint32_t irq)
-{
-	return mmio_get_32(DEV_R_INTC + INTC_EN_REG, BIT(irq));
-}
-
-bool
-irq_is_pending(uint32_t irq)
-{
-	return mmio_get_32(DEV_R_INTC + INTC_IRQ_PEND_REG, BIT(irq));
-}
 
 uint32_t
 irq_poll(void)
