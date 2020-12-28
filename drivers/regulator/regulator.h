@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 struct regulator_driver_ops {
-	int (*get_state)(const struct regulator_handle *handle);
+	int (*get_state)(const struct regulator_handle *handle, bool *enabled);
 	int (*set_state)(const struct regulator_handle *handle, bool enable);
 };
 

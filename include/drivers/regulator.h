@@ -48,10 +48,10 @@ int regulator_enable(const struct regulator_handle *handle);
  * This function may fail with:
  *   EIO    There was a problem communicating with the hardware.
  *
- * @param handle A reference to a regulator and its supplier.
- * @return       On success, Boolean true or false for if the regulator is
- *               enabled; a defined error code on failure.
+ * @param handle  A reference to a regulator and its supplier.
+ * @param enabled Pointer to where the state is stored.
+ * @return        Zero on success; a defined error code on failure.
  */
-int regulator_get_state(const struct regulator_handle *handle);
+int regulator_get_state(const struct regulator_handle *handle, bool *enabled);
 
 #endif /* DRIVERS_REGULATOR_H */

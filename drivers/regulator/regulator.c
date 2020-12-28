@@ -52,14 +52,14 @@ regulator_enable(const struct regulator_handle *handle)
 }
 
 int
-regulator_get_state(const struct regulator_handle *handle)
+regulator_get_state(const struct regulator_handle *handle, bool *enabled)
 {
 	int err;
 
 	if ((err = device_get(handle->dev)))
 		return err;
 
-	err = regulator_ops_for(handle->dev)->get_state(handle);
+	err = regulator_ops_for(handle->dev)->get_state(handle, enabled);
 
 	device_put(handle->dev);
 
