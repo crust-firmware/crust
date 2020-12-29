@@ -36,11 +36,17 @@ clock_state_for(const struct clock_handle *clock)
 	return &state->cs[clock->id];
 }
 
+bool
+clock_active(const struct clock_handle *clock)
+{
+	return clock_state_for(clock)->refcount;
+}
+
 void
 clock_disable(const struct clock_handle *clock)
 {
 	/* Calling this function is only allowed after calling clock_get(). */
-	assert(clock_state_for(clock)->refcount);
+	assert(clock_active(clock));
 
 	clock_ops_for(clock)->set_state(clock, CLOCK_STATE_GATED);
 }
@@ -52,7 +58,7 @@ clock_enable(const struct clock_handle *clock)
 	const struct clock_handle *parent;
 
 	/* Calling this function is only allowed after calling clock_get(). */
-	assert(clock_state_for(clock)->refcount);
+	assert(clock_active(clock));
 
 	/* If the clock has a parent, ensure the parent is enabled. */
 	if ((parent = ops->get_parent(clock)))

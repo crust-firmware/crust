@@ -21,6 +21,17 @@ struct clock_handle {
 };
 
 /**
+ * Determine if a clock is active.
+ *
+ * A clock is active if it has any outstanding references. The state of the
+ * hardware gate, if any, is not considered.
+ *
+ * @param clock A reference to a clock.
+ * @return      The state of the clock.
+ */
+bool clock_active(const struct clock_handle *clock);
+
+/**
  * Disable a clock.
  *
  * If the clock does not have a gate, this may have no effect on the hardware.
