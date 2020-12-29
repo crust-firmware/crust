@@ -62,7 +62,7 @@
 
 #define VDD_SYS_PWROFF_GATING_REG        (DEV_R_PRCM + 0x0250)
 #define VDD_CPUS_GATING                  BIT(3)
-#define VCC_PLL_GATING                   BIT(2)
+#define AVCC_GATING                      BIT(2)
 #define DRAM_PAD_HOLD                    (0x3 << 0)
 
 #define GPU_PWROFF_GATING_REG            (DEV_R_PRCM + 0x0254)

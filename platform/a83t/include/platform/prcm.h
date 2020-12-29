@@ -60,6 +60,7 @@
 #define VCC_PLL_GATING                    BIT(8)
 #define VCC_PLL_LOW_VOLTAGE_GATING        BIT(4)
 #define VDD_CPUS_GATING                   BIT(3)
+#define AVCC_GATING                       0 /* Not applicable */
 #define DRAM_PAD_HOLD                     (0x3 << 0)
 
 #define GPU_PWROFF_GATING_REG             (DEV_R_PRCM + 0x0118)
