@@ -7,6 +7,7 @@
 #include <delay.h>
 #include <mmio.h>
 #include <stdint.h>
+#include <system.h>
 #include <watchdog/sunxi-twd.h>
 #include <platform/devices.h>
 #include <platform/prcm.h>
@@ -38,9 +39,9 @@ write_pll_ctrl_reg1(uint32_t new)
 }
 
 void
-r_ccu_common_suspend(void)
+r_ccu_common_suspend(uint8_t depth)
 {
-	if (!CONFIG(SUSPEND_OSC24M))
+	if (depth == SD_NONE)
 		return;
 
 	if (CONFIG(OSC24M_SRC_X24M)) {
@@ -48,21 +49,27 @@ r_ccu_common_suspend(void)
 		udelay(1);
 	}
 	write_pll_ctrl_reg1(0);
-	mmio_set_32(VDD_SYS_PWROFF_GATING_REG,
-	            CONFIG(GATE_VDD_SYS) * VDD_CPUS_GATING | AVCC_GATING);
+	mmio_set_32(VDD_SYS_PWROFF_GATING_REG, AVCC_GATING);
+	if (depth == SD_AVCC)
+		return;
+
+	mmio_set_32(VDD_SYS_PWROFF_GATING_REG, VDD_CPUS_GATING);
+	if (depth == SD_VDD_SYS)
+		return;
 }
 
 void WEAK ATTRIBUTE(alias("r_ccu_common_suspend"))
-r_ccu_suspend(void);
+r_ccu_suspend(uint8_t depth);
 
 void
 r_ccu_common_resume(void)
 {
-	if (!CONFIG(SUSPEND_OSC24M))
-		return;
-
-	mmio_clr_32(VDD_SYS_PWROFF_GATING_REG,
-	            CONFIG(GATE_VDD_SYS) * VDD_CPUS_GATING | AVCC_GATING);
+	/*
+	 * The suspend/resume steps are incremental and idempotent. There is no
+	 * need to branch based on the suspend depth; just run them all. This
+	 * simplifies handling a firmware restart where the depth is unknown.
+	 */
+	mmio_clr_32(VDD_SYS_PWROFF_GATING_REG, VDD_CPUS_GATING | AVCC_GATING);
 	write_pll_ctrl_reg1(PLL_CTRL_REG1_LDO_EN);
 	if (CONFIG(OSC24M_SRC_X24M)) {
 		udelay(2000);

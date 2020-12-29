@@ -8,6 +8,12 @@
 
 #include <stdint.h>
 
+enum {
+	SD_NONE,    /**< Perform no extra suspend actions. */
+	SD_AVCC,    /**< Power down OSC24M and gate AVCC. */
+	SD_VDD_SYS, /**< Gate the VDD_SYS power domain. */
+};
+
 /**
  * Perform system state management.
  *

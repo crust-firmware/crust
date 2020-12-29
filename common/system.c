@@ -61,11 +61,22 @@ enum {
 /* This variable is persisted across exception restarts. */
 static uint8_t system_state = SS_BOOT;
 
+static uint8_t
+select_suspend_depth(void)
+{
+	if (!CONFIG(SUSPEND_OSC24M))
+		return SD_NONE;
+	if (!CONFIG(GATE_VDD_SYS))
+		return SD_AVCC;
+	return SD_VDD_SYS;
+}
+
 noreturn void
 system_state_machine(uint32_t exception)
 {
 	const struct device *cir, *mailbox, *pmic, *watchdog;
 	uint8_t initial_state = system_state;
+	uint8_t suspend_depth;
 
 	if (initial_state > SS_BOOT) {
 		/*
@@ -164,7 +175,8 @@ system_state_machine(uint32_t exception)
 			device_put(watchdog), watchdog = NULL;
 
 			/* Gate the rest of the SoC before removing power. */
-			r_ccu_suspend();
+			suspend_depth = select_suspend_depth();
+			r_ccu_suspend(suspend_depth);
 
 			/* Perform PMIC-specific actions. */
 			if ((pmic = pmic_get())) {
@@ -187,7 +199,7 @@ system_state_machine(uint32_t exception)
 			 */
 			device_put(pmic);
 
-			debug("Suspend complete!");
+			debug("Suspend to %d complete!", suspend_depth);
 
 			/* The system is now off or asleep. */
 			system_state = NEXT_STATE;
