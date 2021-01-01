@@ -62,7 +62,7 @@ enum {
 static uint8_t system_state = SS_BOOT;
 
 static uint8_t
-select_suspend_depth(void)
+select_suspend_depth(uint8_t current_state)
 {
 	static const struct clock_handle osc24m = { &r_ccu.dev, CLK_OSC24M };
 
@@ -71,7 +71,7 @@ select_suspend_depth(void)
 		return SD_NONE;
 	if (irq_needs_avcc())
 		return SD_OSC24M;
-	if (irq_needs_vdd_sys())
+	if (current_state != SS_SHUTDOWN || irq_needs_vdd_sys())
 		return SD_AVCC;
 	return SD_VDD_SYS;
 }
@@ -180,7 +180,7 @@ system_state_machine(uint32_t exception)
 			device_put(watchdog), watchdog = NULL;
 
 			/* Gate the rest of the SoC before removing power. */
-			suspend_depth = select_suspend_depth();
+			suspend_depth = select_suspend_depth(system_state);
 			r_ccu_suspend(suspend_depth);
 
 			/* Perform PMIC-specific actions. */

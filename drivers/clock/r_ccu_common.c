@@ -57,6 +57,7 @@ r_ccu_common_suspend(uint8_t depth)
 		return;
 
 	mmio_set_32(VDD_SYS_PWROFF_GATING_REG, VDD_CPUS_GATING);
+	mmio_write_32(VDD_SYS_RESET_REG, 0);
 	if (depth == SD_VDD_SYS)
 		return;
 }
@@ -72,6 +73,7 @@ r_ccu_common_resume(void)
 	 * need to branch based on the suspend depth; just run them all. This
 	 * simplifies handling a firmware restart where the depth is unknown.
 	 */
+	mmio_write_32(VDD_SYS_RESET_REG, VDD_SYS_RESET);
 	mmio_clr_32(VDD_SYS_PWROFF_GATING_REG, VDD_CPUS_GATING | AVCC_GATING);
 	write_pll_ctrl_reg1(PLL_CTRL_REG1_LDO_EN);
 	if (CONFIG(OSC24M_SRC_X24M)) {
