@@ -10,6 +10,8 @@
 
 /**
  * Get a bitmask of the IRQs that are both enabled and pending.
+ *
+ * @return Nonzero if some IRQ is enabled and pending, else zero.
  */
 uint32_t irq_poll(void);
 
