@@ -24,6 +24,15 @@
 #define NUM_IRQ_REGS         (CONFIG(PLATFORM_H6) ? 2 : 1)
 #define NUM_MUX_REGS         4
 
+/* Gating AVCC will prevent receiving any of these interrupts. */
+static const uint32_t mux_needs_avcc[NUM_MUX_REGS] = {
+#if CONFIG(PLATFORM_A64) || CONFIG(PLATFORM_H3)
+	[0] = BIT(62 - 32), /* LRADC */
+#else
+	0 /* No applicable interrupts */
+#endif
+};
+
 /* Gating VDD_SYS will prevent receiving any of these interrupts. */
 static const uint32_t mux_needs_vdd_sys[NUM_MUX_REGS] = {
 #if CONFIG(PLATFORM_A64) && CONFIG(SOC_A64)
@@ -49,6 +58,23 @@ static const uint32_t mux_needs_vdd_sys[NUM_MUX_REGS] = {
 	0 /* No applicable interrupts */
 #endif
 };
+
+uint32_t
+irq_needs_avcc(void)
+{
+	uint32_t enabled = 0;
+
+	/* Only read registers with relevant bits. */
+	for (int i = 0; i < NUM_MUX_REGS; ++i) {
+		if (!mux_needs_avcc[i])
+			continue;
+
+		enabled |= mmio_read_32(DEV_R_INTC + INTC_MUX_EN_REG(i)) &
+		           mux_needs_avcc[i];
+	}
+
+	return enabled;
+}
 
 uint32_t
 irq_needs_vdd_sys(void)

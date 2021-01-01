@@ -10,7 +10,8 @@
 
 enum {
 	SD_NONE,    /**< Perform no extra suspend actions. */
-	SD_AVCC,    /**< Power down OSC24M and gate AVCC. */
+	SD_OSC24M,  /**< Power down the high-speed oscillator and PLLs. */
+	SD_AVCC,    /**< Gate the AVCC power domain. */
 	SD_VDD_SYS, /**< Gate the VDD_SYS power domain. */
 };
 

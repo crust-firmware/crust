@@ -49,6 +49,9 @@ r_ccu_common_suspend(uint8_t depth)
 		udelay(1);
 	}
 	write_pll_ctrl_reg1(0);
+	if (depth == SD_OSC24M)
+		return;
+
 	mmio_set_32(VDD_SYS_PWROFF_GATING_REG, AVCC_GATING);
 	if (depth == SD_AVCC)
 		return;

@@ -69,6 +69,8 @@ select_suspend_depth(void)
 	/* Bail if the DRAM controller or peripherals need running clocks. */
 	if (!CONFIG(HAVE_DRAM_SUSPEND) || clock_active(&osc24m))
 		return SD_NONE;
+	if (irq_needs_avcc())
+		return SD_OSC24M;
 	if (irq_needs_vdd_sys())
 		return SD_AVCC;
 	return SD_VDD_SYS;

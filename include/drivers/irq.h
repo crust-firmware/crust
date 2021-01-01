@@ -9,6 +9,13 @@
 #include <stdint.h>
 
 /**
+ * Determine if any enabled IRQ requires AVCC in order to be received.
+ *
+ * @return Nonzero if some IRQ requires AVCC, else zero.
+ */
+uint32_t irq_needs_avcc(void);
+
+/**
  * Determine if any enabled IRQ requires VDD_SYS in order to be received.
  *
  * @return Nonzero if some IRQ requires VDD_SYS, else zero.
