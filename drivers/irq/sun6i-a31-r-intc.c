@@ -6,6 +6,7 @@
 #include <irq.h>
 #include <mmio.h>
 #include <stdint.h>
+#include <util.h>
 #include <platform/devices.h>
 
 #include "irq.h"
@@ -22,6 +23,49 @@
 
 #define NUM_IRQ_REGS         (CONFIG(PLATFORM_H6) ? 2 : 1)
 #define NUM_MUX_REGS         4
+
+/* Gating VDD_SYS will prevent receiving any of these interrupts. */
+static const uint32_t mux_needs_vdd_sys[NUM_MUX_REGS] = {
+#if CONFIG(PLATFORM_A64) && CONFIG(SOC_A64)
+	[0] = BIT(43 - 32) | /* Port B */
+	      BIT(49 - 32) | /* Port G */
+	      BIT(53 - 32),  /* Port H */
+#elif CONFIG(PLATFORM_A64) && CONFIG(SOC_H5)
+	[0] = BIT(43 - 32) | /* Port A */
+	      BIT(49 - 32) | /* Port F */
+	      BIT(55 - 32),  /* Port G */
+#elif CONFIG(PLATFORM_A83T)
+	[0] = BIT(47 - 32) | /* Port B */
+	      BIT(49 - 32),  /* Port G */
+#elif CONFIG(PLATFORM_H3)
+	[0] = BIT(43 - 32) | /* Port A */
+	      BIT(49 - 32),  /* Port G */
+#elif CONFIG(PLATFORM_H6)
+	[1] = BIT(83 - 64) | /* Port B */
+	      BIT(85 - 64) | /* Port F */
+	      BIT(86 - 64) | /* Port G */
+	      BIT(91 - 64),  /* Port H */
+#else
+	0 /* No applicable interrupts */
+#endif
+};
+
+uint32_t
+irq_needs_vdd_sys(void)
+{
+	uint32_t enabled = CONFIG(IRQ_POLL_EINT);
+
+	/* Only read registers with relevant bits. */
+	for (int i = 0; i < NUM_MUX_REGS; ++i) {
+		if (!mux_needs_vdd_sys[i])
+			continue;
+
+		enabled |= mmio_read_32(DEV_R_INTC + INTC_MUX_EN_REG(i)) &
+		           mux_needs_vdd_sys[i];
+	}
+
+	return enabled;
+}
 
 uint32_t
 irq_poll(void)

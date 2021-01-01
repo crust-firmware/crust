@@ -32,6 +32,12 @@ irq_poll_eint(void)
 }
 
 uint32_t WEAK
+irq_needs_vdd_sys(void)
+{
+	return CONFIG(IRQ_POLL_EINT);
+}
+
+uint32_t WEAK
 irq_poll(void)
 {
 	return irq_poll_eint();

@@ -9,6 +9,13 @@
 #include <stdint.h>
 
 /**
+ * Determine if any enabled IRQ requires VDD_SYS in order to be received.
+ *
+ * @return Nonzero if some IRQ requires VDD_SYS, else zero.
+ */
+uint32_t irq_needs_vdd_sys(void);
+
+/**
  * Get a bitmask of the IRQs that are both enabled and pending.
  *
  * @return Nonzero if some IRQ is enabled and pending, else zero.

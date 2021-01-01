@@ -6,8 +6,7 @@
 menu "Interrupt and wakeup options"
 
 config IRQ_POLL_EINT
-	bool "Poll the GPIO controller for EINT IRQs"
-	select NEED_VDD_SYS
+	bool "Poll the GPIO controller for EINT IRQs (DEPRECATED)"
 	help
 		Check the main GPIO controller (the one containing ports
 		A through H) for external interrupts (EINTs) when
@@ -17,9 +16,13 @@ config IRQ_POLL_EINT
 		as wakeup sources. The pins must be configured as EINT
 		pins by Linux before entering suspend.
 
+		Note: This option is not needed when using a Linux patch
+		set released in 2021. The newer driver plumbs the EINT
+		IRQs through to R_INTC.
+
 		Say Y if your board has a device connected to port A-H
-		that must be able to wake up or turn on the system.
-		Otherwise, say N.
+		that must be able to wake up or turn on the system, and
+		you are using an older kernel. Otherwise, say N.
 
 if IRQ_POLL_EINT
 
