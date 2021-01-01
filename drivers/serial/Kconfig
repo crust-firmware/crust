@@ -29,24 +29,19 @@ choice
 
 config SERIAL_DEV_UART0
 	bool "UART0"
-	select NEED_OSC24M
 
 config SERIAL_DEV_UART1
 	bool "UART1"
-	select NEED_OSC24M
 
 config SERIAL_DEV_UART2
 	bool "UART2"
-	select NEED_OSC24M
 
 config SERIAL_DEV_UART3
 	bool "UART3"
-	select NEED_OSC24M
 
 config SERIAL_DEV_UART4
 	bool "UART4"
 	depends on HAVE_UART4
-	select NEED_OSC24M
 
 config SERIAL_DEV_R_UART
 	bool "R_UART"

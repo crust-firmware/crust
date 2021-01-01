@@ -24,22 +24,6 @@ config PMIC_SHUTDOWN
 		need some other method of turning on the system, such as
 		an IR remote control or a GPIO input.
 
-config NEED_OSC24M
-	bool
-	help
-		Select this option to prevent the firmware from turning
-		off the external OSC24M crystal.
-
-config SUSPEND_OSC24M
-	bool "Disable OSC24M during suspend"
-	depends on HAVE_DRAM_SUSPEND && !NEED_OSC24M
-	default y
-	help
-		If this option is enabled, the external OSC24M crystal
-		will be turned off while the system is suspended/off.
-
-		If possible, enable this option to reduce power usage.
-
 config NEED_VDD_SYS
 	bool
 	help
@@ -48,7 +32,7 @@ config NEED_VDD_SYS
 
 config GATE_VDD_SYS
 	bool "Disable access to VDD_SYS during suspend"
-	depends on SUSPEND_OSC24M && !NEED_VDD_SYS
+	depends on !NEED_VDD_SYS
 	default y
 	help
 		If this option is enabled, connections from VDD_CPUS to

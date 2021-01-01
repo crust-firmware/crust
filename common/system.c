@@ -64,7 +64,10 @@ static uint8_t system_state = SS_BOOT;
 static uint8_t
 select_suspend_depth(void)
 {
-	if (!CONFIG(SUSPEND_OSC24M))
+	static const struct clock_handle osc24m = { &r_ccu.dev, CLK_OSC24M };
+
+	/* Bail if the DRAM controller or peripherals need running clocks. */
+	if (!CONFIG(HAVE_DRAM_SUSPEND) || clock_active(&osc24m))
 		return SD_NONE;
 	if (!CONFIG(GATE_VDD_SYS))
 		return SD_AVCC;
