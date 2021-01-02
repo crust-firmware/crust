@@ -19,7 +19,7 @@ CC		 = $(CROSS_COMPILE)gcc
 OBJCOPY		 = $(CROSS_COMPILE)objcopy
 
 LEX		 = lex
-YACC		 = yacc
+YACC		 = bison
 
 COMMON_CFLAGS	 = -Os -pipe -std=c11 \
 		   -fdata-sections \
