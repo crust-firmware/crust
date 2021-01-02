@@ -11,7 +11,7 @@
 bool
 device_active(const struct device *dev)
 {
-	return dev->state->refcount;
+	return dev && dev->state->refcount;
 }
 
 int
