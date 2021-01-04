@@ -43,6 +43,7 @@ matrix:
                    pine_h64_defconfig
                    pinebook_defconfig
                    pinephone_defconfig
+                   tanix_tx6_defconfig
                    tbs_a711_defconfig
                    randconfig randconfig randconfig"
         - GCC_VER=9.1.1-20190507
