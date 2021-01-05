@@ -33,7 +33,7 @@ enum {
 	RC6_STATES
 };
 
-static const int8_t rc6_durations[RC6_STATES] = {
+static const int16_t rc6_durations[RC6_STATES] = {
 	[RC6_IDLE]      = RC6_UNITS_TO_CLKS(6),
 	[RC6_LEADER_S]  = RC6_UNITS_TO_CLKS(2),
 	[RC6_HEADER_P]  = RC6_UNITS_TO_CLKS(1),
