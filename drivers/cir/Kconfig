@@ -20,6 +20,19 @@ config CIR_WAKE_CODE
 
 		The default value will work with an RC6 MCE remote controller.
 
+config CIR_USE_OSC24M
+	bool "Use OSC24M as parent clock"
+	select NEED_OSC24M
+	default n
+	help
+		Sometimes boards come without external 32768 Hz oscillator and
+		thus RTC use internal RC oscilator as a source for generating
+		32768 Hz clock. However, such clock is not precise enough for
+		RC6 IR signal decoding purposes.
+
+		Set this option to y if your board doesn't have external 32768
+		Hz oscillator. Note that this increases power consumption.
+
 config R_CIR_RX_PIN
 	int
 	default  9 if PLATFORM_H6

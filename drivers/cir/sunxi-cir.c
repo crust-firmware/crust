@@ -21,7 +21,12 @@
 #define CIR_RXSTA  0x30
 #define CIR_RXCFG  0x34
 
+#if CONFIG(CIR_USE_OSC24M)
+/* parent clock is predivided by 192 */
+#define CIR_CLK_RATE 125000UL
+#else
 #define CIR_CLK_RATE 32768UL
+#endif
 
 /* RC6 time unit is 16 periods @ 36 kHz, ~444 us */
 #define RC6_TIME_UNIT 444UL
@@ -90,10 +95,15 @@ sunxi_cir_probe(const struct device *dev UNUSED)
 	state->rc6_ctx.durations = sunxi_cir_rc6_durations;
 
 	state->clk_stash = mmio_read_32(R_CIR_RX_CLK_REG);
-	mmio_write_32(R_CIR_RX_CLK_REG, 0x80000000);
-
 	state->cfg_stash = mmio_read_32(self->regs + CIR_RXCFG);
-	mmio_write_32(self->regs + CIR_RXCFG, 0x010f0310);
+
+	if (CONFIG(CIR_USE_OSC24M)) {
+		mmio_write_32(R_CIR_RX_CLK_REG, 0x81000002);
+		mmio_write_32(self->regs + CIR_RXCFG, 0x00001404);
+	} else {
+		mmio_write_32(R_CIR_RX_CLK_REG, 0x80000000);
+		mmio_write_32(self->regs + CIR_RXCFG, 0x010f0310);
+	}
 
 	state->ctl_stash = mmio_read_32(self->regs + CIR_RXCTL);
 	mmio_write_32(self->regs + CIR_RXCTL, 0x30);
