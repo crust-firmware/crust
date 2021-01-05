@@ -20,6 +20,12 @@ config CIR_WAKE_CODE
 
 		The default value will work with an RC6 MCE remote controller.
 
+config CIR_CLK_RATE
+	int
+	default 32768
+	help
+		Provide the sample frequency used for protocol decoding.
+
 config R_CIR_RX_PIN
 	int
 	default  9 if PLATFORM_H6

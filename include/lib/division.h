@@ -8,6 +8,9 @@
 
 #include <stdint.h>
 
+#define UDIV_ROUND(dividend, divisor) \
+	(((dividend) + (divisor) / 2) / (divisor))
+
 /**
  * Perform correctly-rounded unsigned division.
  */
