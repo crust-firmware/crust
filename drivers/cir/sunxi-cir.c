@@ -21,6 +21,14 @@
 #define CIR_RXSTA  0x30
 #define CIR_RXCFG  0x34
 
+#define CIR_CLK_RATE 32768UL
+
+/* RC6 time unit is 16 periods @ 36 kHz, ~444 us */
+#define RC6_TIME_UNIT 444UL
+
+/* convert specified number of time units to number of clock cycles */
+#define UNITS_TO_CLKS(num) (((num) * CIR_CLK_RATE * RC6_TIME_UNIT) / 1000000UL)
+
 struct sunxi_cir_state {
 	struct device_state ds;
 	struct rc6_ctx      rc6_ctx;
@@ -29,16 +37,15 @@ struct sunxi_cir_state {
 	uint32_t            ctl_stash;
 };
 
-/* These durations are based on a 32768 Hz sample clock. */
 static const int8_t sunxi_cir_rc6_durations[RC6_STATES] = {
-	[RC6_IDLE]      = 6 * 14,
-	[RC6_LEADER_S]  = 2 * 14,
-	[RC6_HEADER_P]  = 1 * 14,
-	[RC6_HEADER_N]  = 1 * 14,
-	[RC6_TRAILER_P] = 2 * 14,
-	[RC6_TRAILER_N] = 2 * 14,
-	[RC6_DATA_P]    = 1 * 14,
-	[RC6_DATA_N]    = 1 * 14,
+	[RC6_IDLE]      = UNITS_TO_CLKS(6),
+	[RC6_LEADER_S]  = UNITS_TO_CLKS(2),
+	[RC6_HEADER_P]  = UNITS_TO_CLKS(1),
+	[RC6_HEADER_N]  = UNITS_TO_CLKS(1),
+	[RC6_TRAILER_P] = UNITS_TO_CLKS(2),
+	[RC6_TRAILER_N] = UNITS_TO_CLKS(2),
+	[RC6_DATA_P]    = UNITS_TO_CLKS(1),
+	[RC6_DATA_N]    = UNITS_TO_CLKS(1),
 };
 
 static inline const struct sunxi_cir *
