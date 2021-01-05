@@ -37,7 +37,7 @@ struct sunxi_cir_state {
 	uint32_t            ctl_stash;
 };
 
-static const int8_t sunxi_cir_rc6_durations[RC6_STATES] = {
+static const int16_t sunxi_cir_rc6_durations[RC6_STATES] = {
 	[RC6_IDLE]      = UNITS_TO_CLKS(6),
 	[RC6_LEADER_S]  = UNITS_TO_CLKS(2),
 	[RC6_HEADER_P]  = UNITS_TO_CLKS(1),

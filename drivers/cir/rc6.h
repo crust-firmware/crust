@@ -21,12 +21,12 @@ enum {
 };
 
 struct rc6_ctx {
-	const int8_t *durations;
-	uint32_t      buffer;
-	uint8_t       bits;
-	uint8_t       state;
-	uint8_t       pulse;
-	int8_t        width;
+	const int16_t *durations;
+	uint32_t       buffer;
+	uint8_t        bits;
+	uint8_t        state;
+	uint8_t        pulse;
+	int8_t         width;
 };
 
 /**
