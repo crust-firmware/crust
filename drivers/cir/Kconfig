@@ -22,9 +22,22 @@ config CIR_WAKE_CODE
 
 config CIR_CLK_RATE
 	int
+	default 125000 if CIR_USE_OSC24M # 24 MHz divided by 192
 	default 32768
 	help
 		Provide the sample frequency used for protocol decoding.
+
+config CIR_USE_OSC24M
+	bool "Use OSC24M as parent clock"
+	help
+		Sometimes boards come without external 32768 Hz oscillator
+		and thus RTC use the internal RC oscilator as a source
+		for generating 32768 Hz clock. However, such clock is
+		not precise enough for IR signal decoding purposes.
+
+		Set this option to Y if your board doesn't have external
+		32768 Hz oscillator. Note that this increases power
+		consumption.
 
 config R_CIR_RX_PIN
 	int

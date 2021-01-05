@@ -66,7 +66,8 @@ sunxi_cir_probe(const struct device *dev)
 	int err;
 
 	/* Set module clock parent and divider. */
-	mmio_write_32(R_CIR_RX_CLK_REG, 0x0);
+	mmio_write_32(R_CIR_RX_CLK_REG,
+	              CONFIG(CIR_USE_OSC24M) ? 0x01000002 : 0x0);
 
 	if ((err = clock_get(&self->bus_clock)))
 		return err;
@@ -76,7 +77,8 @@ sunxi_cir_probe(const struct device *dev)
 		goto err_put_mod_clock;
 
 	/* Configure thresholds and sample clock. */
-	mmio_write_32(self->regs + CIR_RXCFG, 0x010f0310);
+	mmio_write_32(self->regs + CIR_RXCFG,
+	              CONFIG(CIR_USE_OSC24M) ? 0x00001404 : 0x010f0310);
 
 	/* Enable CIR module. */
 	mmio_write_32(self->regs + CIR_RXCTL, 0x33);
