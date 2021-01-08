@@ -11,6 +11,27 @@ config CIR
 
 if CIR
 
+choice
+	bool "IR protocol"
+	default CIR_PROTO_RC6
+
+config CIR_PROTO_NEC
+	bool "NEC"
+	help
+		Select this if your remote speaks NEC.
+
+config CIR_PROTO_NECX
+	bool "Extended NEC"
+	help
+		Select this if your remote speaks extended NEC.
+
+config CIR_PROTO_RC6
+	bool "RC6"
+	help
+		Select this for standard RC6 MCE remotes.
+
+endchoice
+
 config CIR_WAKE_CODE
 	hex "Scan code for wakeup"
 	range 0x1 0xffffffff

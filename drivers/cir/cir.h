@@ -9,14 +9,23 @@
 #include <stdint.h>
 
 /**
+ * Possible values for pulse type.
+ */
+enum {
+	CIR_SPACE,
+	CIR_MARK,
+};
+
+/**
  * Context for CIR pulse decoding.
  */
 struct cir_dec_ctx {
-	uint32_t buffer; /*<< Buffer to store a partial scancode. */
-	uint8_t  bits;   /*<< Number of bits decoded. */
-	uint8_t  state;  /*<< Internal decoder state. */
-	uint8_t  pulse;  /*<< Current pulse type (mark or space). */
-	int8_t   width;  /*<< Current pulse width in clock cycles. */
+	uint32_t buffer;  /*<< Buffer to store a partial scancode. */
+	uint32_t counter; /*<< Cumulative pulse width counter. */
+	uint8_t  bits;    /*<< Number of bits decoded. */
+	uint8_t  state;   /*<< Internal decoder state. */
+	uint8_t  pulse;   /*<< Current pulse type (mark or space). */
+	int8_t   width;   /*<< Current pulse width in clock cycles. */
 };
 
 /**
