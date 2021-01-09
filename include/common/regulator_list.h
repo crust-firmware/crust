@@ -18,4 +18,9 @@ extern const struct regulator_handle cpu_supply;
  */
 extern const struct regulator_handle dram_supply;
 
+/**
+ * The regulator supplying VDD-SYS.
+ */
+extern const struct regulator_handle vdd_sys_supply;
+
 #endif /* COMMON_REGULATOR_LIST_H */
