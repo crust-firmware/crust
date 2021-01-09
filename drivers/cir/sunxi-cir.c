@@ -29,18 +29,6 @@ struct sunxi_cir_state {
 	uint32_t            ctl_stash;
 };
 
-/* These durations are based on a 32768 Hz sample clock. */
-static const int8_t sunxi_cir_rc6_durations[RC6_STATES] = {
-	[RC6_IDLE]      = 6 * 14,
-	[RC6_LEADER_S]  = 2 * 14,
-	[RC6_HEADER_P]  = 1 * 14,
-	[RC6_HEADER_N]  = 1 * 14,
-	[RC6_TRAILER_P] = 2 * 14,
-	[RC6_TRAILER_N] = 2 * 14,
-	[RC6_DATA_P]    = 1 * 14,
-	[RC6_DATA_N]    = 1 * 14,
-};
-
 static inline const struct sunxi_cir *
 to_sunxi_cir(const struct device *dev)
 {
@@ -79,8 +67,6 @@ sunxi_cir_probe(const struct device *dev UNUSED)
 {
 	const struct sunxi_cir *self  = to_sunxi_cir(dev);
 	struct sunxi_cir_state *state = sunxi_cir_state_for(dev);
-
-	state->rc6_ctx.durations = sunxi_cir_rc6_durations;
 
 	state->clk_stash = mmio_read_32(R_CIR_RX_CLK_REG);
 	mmio_write_32(R_CIR_RX_CLK_REG, 0x80000000);

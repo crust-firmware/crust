@@ -12,10 +12,34 @@
 #define NUM_DATA_BITS   32
 #define NUM_HEADER_BITS 4
 
+enum {
+	RC6_IDLE,
+	RC6_LEADER_S,
+	RC6_HEADER_P,
+	RC6_HEADER_N,
+	RC6_TRAILER_P,
+	RC6_TRAILER_N,
+	RC6_DATA_P,
+	RC6_DATA_N,
+	RC6_STATES
+};
+
+/* These durations are based on a 32768 Hz sample clock. */
+static const int8_t rc6_durations[RC6_STATES] = {
+	[RC6_IDLE]      = 6 * 14,
+	[RC6_LEADER_S]  = 2 * 14,
+	[RC6_HEADER_P]  = 1 * 14,
+	[RC6_HEADER_N]  = 1 * 14,
+	[RC6_TRAILER_P] = 2 * 14,
+	[RC6_TRAILER_N] = 2 * 14,
+	[RC6_DATA_P]    = 1 * 14,
+	[RC6_DATA_N]    = 1 * 14,
+};
+
 uint32_t
 rc6_decode(struct rc6_ctx *ctx)
 {
-	int32_t duration = ctx->durations[ctx->state];
+	int32_t duration = rc6_durations[ctx->state];
 	int32_t epsilon  = duration >> 1;
 
 	/* Subtract the expected pulse with from the sample width. */

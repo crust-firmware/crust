@@ -8,25 +8,12 @@
 
 #include <stdint.h>
 
-enum {
-	RC6_IDLE,
-	RC6_LEADER_S,
-	RC6_HEADER_P,
-	RC6_HEADER_N,
-	RC6_TRAILER_P,
-	RC6_TRAILER_N,
-	RC6_DATA_P,
-	RC6_DATA_N,
-	RC6_STATES
-};
-
 struct rc6_ctx {
-	const int8_t *durations;
-	uint32_t      buffer;
-	uint8_t       bits;
-	uint8_t       state;
-	uint8_t       pulse;
-	int8_t        width;
+	uint32_t buffer;
+	uint8_t  bits;
+	uint8_t  state;
+	uint8_t  pulse;
+	int8_t   width;
 };
 
 /**
