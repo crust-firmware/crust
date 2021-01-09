@@ -61,6 +61,27 @@ config REGULATOR_GPIO_DRAM_PIN
 
 endif
 
+menuconfig REGULATOR_GPIO_VDD_SYS
+	bool "GPIO-controlled VDD-SYS power supply"
+	select REGULATOR_GPIO
+	help
+		Select this option if your board supplies power to the
+		SoC (VDD-SYS) via a GPIO-controlled voltage regulator.
+
+		This regulator will be disabled during the shutdown
+		procedure.
+
+if REGULATOR_GPIO_VDD_SYS
+
+config REGULATOR_GPIO_VDD_SYS_PIN
+	int "GPIO pin (port L)"
+	default 8
+	range 0 31
+	help
+		Select the GPIO pin used to control the VDD-SYS supply.
+
+endif
+
 config REGULATOR_SY8106A
 	bool "Silergy SY8106A voltage regulator"
 	depends on I2C

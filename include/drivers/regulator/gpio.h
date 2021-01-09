@@ -22,4 +22,8 @@ extern const struct gpio_regulator gpio_cpu_regulator;
 extern const struct gpio_regulator gpio_dram_regulator;
 #endif
 
+#if CONFIG(REGULATOR_GPIO_VDD_SYS)
+extern const struct gpio_regulator gpio_vdd_sys_regulator;
+#endif
+
 #endif /* DRIVERS_REGULATOR_GPIO_H */
