@@ -19,7 +19,6 @@ const struct regulator_handle cpu_supply = {
 	.id  = AXP805_REGL_DCDCA,
 #elif CONFIG(REGULATOR_SY8106A)
 	.dev = &sy8106a.dev,
-	.id  = SY8106A_REGL_VOUT,
 #elif CONFIG(REGULATOR_GPIO_CPU)
 	.dev = &gpio_cpu_regulator.dev,
 #else

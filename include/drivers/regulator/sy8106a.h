@@ -11,11 +11,6 @@
 
 #define SY8106A_I2C_ADDRESS 0x65
 
-enum {
-	SY8106A_REGL_VOUT,
-	SY8106A_REGL_COUNT,
-};
-
 extern const struct regmap_device sy8106a;
 
 #endif /* DRIVERS_REGULATOR_SY8106A_H */
