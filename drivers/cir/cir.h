@@ -3,21 +3,24 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#ifndef RC6_PRIVATE_H
-#define RC6_PRIVATE_H
+#ifndef CIR_PRIVATE_H
+#define CIR_PRIVATE_H
 
 #include <stdint.h>
 
-struct rc6_ctx {
-	uint32_t buffer;
-	uint8_t  bits;
-	uint8_t  state;
-	uint8_t  pulse;
-	int8_t   width;
+/**
+ * Context for CIR pulse decoding.
+ */
+struct cir_dec_ctx {
+	uint32_t buffer; /*<< Buffer to store a partial scancode. */
+	uint8_t  bits;   /*<< Number of bits decoded. */
+	uint8_t  state;  /*<< Internal decoder state. */
+	uint8_t  pulse;  /*<< Current pulse type (mark or space). */
+	int8_t   width;  /*<< Current pulse width in clock cycles. */
 };
 
 /**
- * Decode an RC6 pulse sequence.
+ * Decode a CIR pulse sequence.
  *
  * The pulse flag and width must be valid each time this function is called.
  * Each call will decode a single pulse, so decoding a complete scancode
@@ -27,6 +30,6 @@ struct rc6_ctx {
  *
  * @return A successfully decoded scancode, or zero.
  */
-uint32_t rc6_decode(struct rc6_ctx *ctx);
+uint32_t cir_decode(struct cir_dec_ctx *ctx);
 
-#endif /* RC6_PRIVATE_H */
+#endif /* CIR_PRIVATE_H */

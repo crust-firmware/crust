@@ -12,7 +12,7 @@
 #include <platform/devices.h>
 #include <platform/prcm.h>
 
-#include "rc6.h"
+#include "cir.h"
 
 #define CIR_RXCTL  0x00
 #define CIR_RXPCFG 0x10
@@ -23,7 +23,7 @@
 
 struct sunxi_cir_state {
 	struct device_state ds;
-	struct rc6_ctx      rc6_ctx;
+	struct cir_dec_ctx  dec_ctx;
 };
 
 static inline const struct sunxi_cir *
@@ -43,20 +43,20 @@ sunxi_cir_poll(const struct device *dev)
 {
 	const struct sunxi_cir *self  = to_sunxi_cir(dev);
 	struct sunxi_cir_state *state = sunxi_cir_state_for(dev);
-	struct rc6_ctx *rc6_ctx       = &state->rc6_ctx;
+	struct cir_dec_ctx *dec_ctx   = &state->dec_ctx;
 
 	/* Feed the decoder data as needed and as it becomes available. */
-	if (rc6_ctx->width <= 0) {
+	if (dec_ctx->width <= 0) {
 		/* If no data is available, do not call the decoder. */
 		if (!(mmio_read_32(self->regs + CIR_RXSTA) >> 8))
 			return 0;
 
 		uint32_t sample = mmio_read_32(self->regs + CIR_RXFIFO);
-		rc6_ctx->pulse = sample >> 7;
-		rc6_ctx->width = sample & GENMASK(6, 0);
+		dec_ctx->pulse = sample >> 7;
+		dec_ctx->width = sample & GENMASK(6, 0);
 	}
 
-	return rc6_decode(rc6_ctx);
+	return cir_decode(dec_ctx);
 }
 
 static int

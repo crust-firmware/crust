@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <util.h>
 
-#include "rc6.h"
+#include "cir.h"
 
 #define NUM_DATA_BITS   32
 #define NUM_HEADER_BITS 4
@@ -37,7 +37,7 @@ static const int8_t rc6_durations[RC6_STATES] = {
 };
 
 uint32_t
-rc6_decode(struct rc6_ctx *ctx)
+cir_decode(struct cir_dec_ctx *ctx)
 {
 	int32_t duration = rc6_durations[ctx->state];
 	int32_t epsilon  = duration >> 1;
