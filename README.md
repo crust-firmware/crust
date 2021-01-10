@@ -42,12 +42,9 @@ to choose the appropriate options (there aren't many).
 |-------|-------------------|------|-----------|---------------|------|------|
 | A64   | Production/stable | Yes  | Yes       | Yes           | Yes  | Yes  |
 | A83T  | Known to compile  | Yes  | No        | No            | No   | No   |
+| H3    | Work in progress  | Yes  | No        | No            | No   | N/A  |
 | H5    | Production/stable | Yes  | Yes       | Yes           | Yes  | N/A  |
 | H6    | "Beta"/stable     | Yes  | Yes       | Yes           | Yes  | Yes  |
-
-Support for the H3 SoC is planned, but it has not yet been implemented. Patches
-providing support for H3 or older chips are welcome, as are patches providing
-defconfigs for tested boards.
 
 ## Prerequisites
 
@@ -67,18 +64,19 @@ some patches are currently still needed.
   crust-firmware fork][crust-linux]. Those patches, plus additional changes for
   reduced power consumption (helpful even if you are not using Crust), are
   available in the `crust` branch.
-- U-Boot: some small patches are needed for U-Boot to load Crust to the right
-  place in SRAM at boot. There are in the `crust` branch of [the crust-firmware
-  fork][crust-u-boot]. While these patches are recommended, it is possible to
-  avoid them by padding your ATF binary to 48KiB (64KiB for H6) and then
+- U-Boot: upstream support for loading Crust into SRAM was merged in commit
+  [`18261b855223`][u-boot-18261b855223], and is present in all releases
+  starting with [v2021.01-rc1][u-boot-v2021.01-rc1]. It is also possible to
+  load Crust by padding your ATF binary to 48KiB (64KiB for H6) and then
   concatenating Crust onto the end.
 
 [atf-c335ad480d41]: https://github.com/ARM-Software/ARM-Trusted-Firmware/commits/c335ad480d41
 [atf-v2.3]: https://github.com/ARM-software/arm-trusted-firmware/releases/tag/v2.3
 [crust-atf]: https://github.com/crust-firmware/arm-trusted-firmware
 [crust-linux]: https://github.com/crust-firmware/linux
-[crust-u-boot]: https://github.com/crust-firmware/u-boot
 [scpi]: http://infocenter.arm.com/help/topic/com.arm.doc.dui0922-/index.html
+[u-boot-18261b855223]: https://github.com/u-boot/u-boot/commit/18261b855223
+[u-boot-v2021.01-rc1]: https://github.com/u-boot/u-boot/releases/tag/v2021.01-rc1
 
 ## Building the firmware
 
