@@ -218,7 +218,7 @@ system_state_machine(uint32_t exception)
 			debug_print_battery();
 
 			/* Poll wakeup sources. Reset or resume on wakeup. */
-			if (cir_poll(cir) || irq_poll())
+			if ((cir && cir_poll(cir)) || irq_poll())
 				system_state = NEXT_STATE;
 
 			/* This must run last so the state change is seen. */
