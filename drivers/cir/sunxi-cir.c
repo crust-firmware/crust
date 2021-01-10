@@ -24,9 +24,6 @@
 struct sunxi_cir_state {
 	struct device_state ds;
 	struct rc6_ctx      rc6_ctx;
-	uint32_t            clk_stash;
-	uint32_t            cfg_stash;
-	uint32_t            ctl_stash;
 };
 
 static inline const struct sunxi_cir *
@@ -63,34 +60,45 @@ sunxi_cir_poll(const struct device *dev)
 }
 
 static int
-sunxi_cir_probe(const struct device *dev UNUSED)
+sunxi_cir_probe(const struct device *dev)
 {
-	const struct sunxi_cir *self  = to_sunxi_cir(dev);
-	struct sunxi_cir_state *state = sunxi_cir_state_for(dev);
+	const struct sunxi_cir *self = to_sunxi_cir(dev);
+	int err;
 
-	state->clk_stash = mmio_read_32(R_CIR_RX_CLK_REG);
-	mmio_write_32(R_CIR_RX_CLK_REG, 0x80000000);
+	/* Set module clock parent and divider. */
+	mmio_write_32(R_CIR_RX_CLK_REG, 0x0);
 
-	state->cfg_stash = mmio_read_32(self->regs + CIR_RXCFG);
+	if ((err = clock_get(&self->bus_clock)))
+		return err;
+	if ((err = clock_get(&self->mod_clock)))
+		goto err_put_bus_clock;
+	if ((err = gpio_get(&self->pin)))
+		goto err_put_mod_clock;
+
+	/* Configure thresholds and sample clock. */
 	mmio_write_32(self->regs + CIR_RXCFG, 0x010f0310);
 
-	state->ctl_stash = mmio_read_32(self->regs + CIR_RXCTL);
-	mmio_write_32(self->regs + CIR_RXCTL, 0x30);
+	/* Enable CIR module. */
 	mmio_write_32(self->regs + CIR_RXCTL, 0x33);
 
 	return SUCCESS;
+
+err_put_mod_clock:
+	clock_put(&self->mod_clock);
+err_put_bus_clock:
+	clock_put(&self->bus_clock);
+
+	return err;
 }
 
 static void
-sunxi_cir_release(const struct device *dev UNUSED)
+sunxi_cir_release(const struct device *dev)
 {
-	const struct sunxi_cir *self  = to_sunxi_cir(dev);
-	struct sunxi_cir_state *state = sunxi_cir_state_for(dev);
+	const struct sunxi_cir *self = to_sunxi_cir(dev);
 
-	mmio_write_32(R_CIR_RX_CLK_REG, state->clk_stash);
-	mmio_write_32(self->regs + CIR_RXCFG, state->cfg_stash);
-	mmio_write_32(self->regs + CIR_RXCTL, 0x30);
-	mmio_write_32(self->regs + CIR_RXCTL, state->ctl_stash);
+	gpio_put(&self->pin);
+	clock_put(&self->mod_clock);
+	clock_put(&self->bus_clock);
 }
 
 static const struct driver sunxi_cir_driver = {
