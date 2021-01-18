@@ -48,7 +48,8 @@ uint32_t
 cir_decode(struct cir_dec_ctx *ctx)
 {
 	int32_t duration = rc6_durations[ctx->state];
-	int32_t epsilon  = duration >> 1;
+	int32_t epsilon  = ctx->state == RC6_IDLE ?
+	                   RC6_UNITS_TO_CLKS(1) : RC6_UNITS_TO_CLKS(1) / 2;
 
 	/* Subtract the expected pulse with from the sample width. */
 	ctx->width -= duration;
