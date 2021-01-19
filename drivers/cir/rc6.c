@@ -10,12 +10,18 @@
 
 #include "cir.h"
 
-#define NUM_DATA_BITS    32
-#define NUM_HEADER_BITS  4
+#define NUM_HEADER_BITS       4
+#define NUM_MODE_0_DATA_BITS  16
+#define NUM_MODE_6A_DATA_BITS 32
+
+#define RC6_MAN_MASK          GENMASK(31, 16)
+#define RC6_MAN_MCE           0x800f0000
+
+#define RC6_MODE(header)      ((header) & 7)
 
 /* RC6 time unit is 16 periods @ 36 kHz, ~444 us. */
-#define RC6_CARRIER_FREQ 36000
-#define RC6_UNIT_RATE    (RC6_CARRIER_FREQ / 16)
+#define RC6_CARRIER_FREQ      36000
+#define RC6_UNIT_RATE         (RC6_CARRIER_FREQ / 16)
 
 /* Convert specified number of time units to number of clock cycles. */
 #define RC6_UNITS_TO_CLKS(num) \
@@ -75,7 +81,7 @@ cir_decode(struct cir_dec_ctx *ctx)
 		if (!ctx->pulse)
 			break;
 		/* Found a leader mark. Initialize the context. */
-		ctx->bits   = 0;
+		ctx->bits   = NUM_HEADER_BITS;
 		ctx->buffer = 0;
 		ctx->state  = RC6_LEADER_S;
 		break;
@@ -85,7 +91,7 @@ cir_decode(struct cir_dec_ctx *ctx)
 		break;
 	case RC6_HEADER_P:
 	case RC6_DATA_P:
-		ctx->bits++;
+		ctx->bits--;
 		ctx->buffer = ctx->buffer << 1 | ctx->pulse;
 		ctx->state++;
 		break;
@@ -93,9 +99,11 @@ cir_decode(struct cir_dec_ctx *ctx)
 		/* This pulse must negate the previous pulse. */
 		if (ctx->pulse == (ctx->buffer & 1)) {
 			ctx->state = RC6_IDLE;
-		} else if (ctx->bits == NUM_HEADER_BITS) {
+		} else if (ctx->bits == 0) {
 			/* Reinitialize the buffer for decoding data. */
-			ctx->bits   = 0;
+			ctx->bits = RC6_MODE(ctx->buffer) == 6 ?
+			            NUM_MODE_6A_DATA_BITS :
+			            NUM_MODE_0_DATA_BITS;
 			ctx->buffer = 0;
 			ctx->state  = RC6_TRAILER_P;
 		} else {
@@ -110,11 +118,16 @@ cir_decode(struct cir_dec_ctx *ctx)
 		/* This pulse must negate the previous pulse. */
 		if (ctx->pulse == (ctx->buffer & 1)) {
 			ctx->state = RC6_IDLE;
-		} else if (ctx->bits == NUM_DATA_BITS) {
+		} else if (ctx->bits == 0) {
+			uint32_t code = ctx->buffer;
+
 			ctx->state = RC6_IDLE;
-			/* Return the scan code minus the toggle bit. */
-			debug("RC6 code %08x", ctx->buffer);
-			return ctx->buffer & ~BIT(15);
+
+			/* Remove MCE toggle bit. */
+			if ((code & RC6_MAN_MASK) == RC6_MAN_MCE)
+				code &= ~BIT(15);
+			debug("RC6 code %08x", code);
+			return code;
 		} else {
 			ctx->state = RC6_DATA_P;
 		}
