@@ -66,8 +66,6 @@ cir_decode(struct cir_dec_ctx *ctx)
 	 * a short pulse, or the decoder got out of sync. Restart the decoder.
 	 */
 	if (ctx->width < -epsilon) {
-		if (ctx->state != RC6_IDLE)
-			debug("RC6 fail %x", ctx->state);
 		ctx->state = RC6_IDLE;
 		return 0;
 	}
@@ -115,13 +113,12 @@ cir_decode(struct cir_dec_ctx *ctx)
 		ctx->state++;
 		break;
 	case RC6_DATA_N:
+		ctx->state = RC6_IDLE;
 		/* This pulse must negate the previous pulse. */
-		if (ctx->pulse == (ctx->buffer & 1)) {
-			ctx->state = RC6_IDLE;
-		} else if (ctx->bits == 0) {
+		if (ctx->pulse == (ctx->buffer & 1))
+			break;
+		if (ctx->bits == 0) {
 			uint32_t code = ctx->buffer;
-
-			ctx->state = RC6_IDLE;
 
 			/* Remove MCE toggle bit. */
 			if ((code & RC6_MAN_MASK) == RC6_MAN_MCE)
