@@ -87,3 +87,29 @@ config REGULATOR_SY8106A
 	depends on I2C
 
 endmenu
+
+if REGULATOR_AXP803 || REGULATOR_AXP805
+
+config VCC_PLL_POWERS_AVCC
+	bool "VCC-PLL also powers the AVCC power domain"
+	default PLATFORM_A64 || PLATFORM_H3
+	help
+		This option will keep the VCC-PLL regulator enabled as
+		long as AVCC is needed by a wakeup source.
+
+		Disable this option, if possible, after verifying it is
+		not needed on your board. If you are unsure, keep the
+		default value.
+
+config VCC_PLL_POWERS_DRAM
+	bool "VCC-PLL also powers the DRAM"
+	default PLATFORM_H6
+	help
+		This option will keep the VCC-PLL regulator enabled as
+		long as the DRAM is in use (i.e. during system sleep).
+
+		Disable this option, if possible, after verifying it is
+		not needed on your board. If you are unsure, keep the
+		default value.
+
+endif

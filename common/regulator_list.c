@@ -40,6 +40,18 @@ const struct regulator_handle dram_supply = {
 #endif
 };
 
+const struct regulator_handle vcc_pll_supply = {
+#if CONFIG(REGULATOR_AXP803)
+	.dev = &axp803_regulator.dev,
+	.id  = AXP803_REGL_ALDO3,
+#elif CONFIG(REGULATOR_AXP805)
+	.dev = &axp805_regulator.dev,
+	.id  = AXP805_REGL_BLDO1,
+#else
+	.dev = NULL,
+#endif
+};
+
 const struct regulator_handle vdd_sys_supply = {
 #if CONFIG(REGULATOR_AXP803)
 	.dev = &axp803_regulator.dev,

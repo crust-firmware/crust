@@ -194,11 +194,16 @@ system_state_machine(uint32_t exception)
 
 			/* Turn off all unnecessary power domains. */
 			regulator_disable(&cpu_supply);
-			if (system_state == SS_SHUTDOWN) {
+			if (system_state == SS_SHUTDOWN)
 				regulator_disable(&dram_supply);
-				if (suspend_depth >= SD_VDD_SYS)
-					regulator_disable(&vdd_sys_supply);
-			}
+			if (suspend_depth >= SD_OSC24M &&
+			    (!CONFIG(VCC_PLL_POWERS_AVCC) ||
+			     suspend_depth >= SD_AVCC) &&
+			    (!CONFIG(VCC_PLL_POWERS_DRAM) ||
+			     system_state == SS_SHUTDOWN))
+				regulator_disable(&vcc_pll_supply);
+			if (suspend_depth >= SD_VDD_SYS)
+				regulator_disable(&vdd_sys_supply);
 
 			/*
 			 * The regulator provider is often part of the same
@@ -232,10 +237,9 @@ system_state_machine(uint32_t exception)
 			 * If it fails, manually turn the regulators back on.
 			 */
 			if (!(pmic = pmic_get()) || pmic_resume(pmic)) {
-				if (system_state == SS_PRE_RESET) {
-					regulator_enable(&vdd_sys_supply);
-					regulator_enable(&dram_supply);
-				}
+				regulator_enable(&vdd_sys_supply);
+				regulator_enable(&vcc_pll_supply);
+				regulator_enable(&dram_supply);
 				regulator_enable(&cpu_supply);
 			}
 			device_put(pmic);
