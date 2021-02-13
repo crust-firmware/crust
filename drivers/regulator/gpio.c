@@ -91,6 +91,23 @@ const struct gpio_regulator gpio_dram_regulator = {
 };
 #endif
 
+#if CONFIG(REGULATOR_GPIO_VCC_PLL)
+const struct gpio_regulator gpio_vcc_pll_regulator = {
+	.dev = {
+		.name  = "gpio-vcc-pll-regulator",
+		.drv   = &gpio_regulator_driver.drv,
+		.state = DEVICE_STATE_INIT,
+	},
+	.pin = {
+		.dev   = &r_pio.dev,
+		.id    = CONFIG_REGULATOR_GPIO_VCC_PLL_PIN,
+		.drive = DRIVE_10mA,
+		.mode  = MODE_OUTPUT,
+		.pull  = PULL_NONE,
+	},
+};
+#endif
+
 #if CONFIG(REGULATOR_GPIO_VDD_SYS)
 const struct gpio_regulator gpio_vdd_sys_regulator = {
 	.dev = {

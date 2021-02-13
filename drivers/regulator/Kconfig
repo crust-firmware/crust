@@ -61,6 +61,27 @@ config REGULATOR_GPIO_DRAM_PIN
 
 endif
 
+menuconfig REGULATOR_GPIO_VCC_PLL
+	bool "GPIO-controlled VCC-PLL power supply"
+	select REGULATOR_GPIO
+	help
+		Select this option if your board supplies power to the
+		PLLs (VCC-PLL) via a GPIO-controlled voltage regulator.
+
+		This regulator will be disabled during the shutdown
+		procedure.
+
+if REGULATOR_GPIO_VCC_PLL
+
+config REGULATOR_GPIO_VCC_PLL_PIN
+	int "GPIO pin (port L)"
+	default 0
+	range 0 31
+	help
+		Select the GPIO pin used to control the VCC-PLL supply.
+
+endif
+
 menuconfig REGULATOR_GPIO_VDD_SYS
 	bool "GPIO-controlled VDD-SYS power supply"
 	select REGULATOR_GPIO

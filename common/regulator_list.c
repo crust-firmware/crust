@@ -47,6 +47,8 @@ const struct regulator_handle vcc_pll_supply = {
 #elif CONFIG(REGULATOR_AXP805)
 	.dev = &axp805_regulator.dev,
 	.id  = AXP805_REGL_BLDO1,
+#elif CONFIG(REGULATOR_GPIO_VCC_PLL)
+	.dev = &gpio_vcc_pll_regulator.dev,
 #else
 	.dev = NULL,
 #endif
