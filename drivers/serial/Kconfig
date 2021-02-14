@@ -50,7 +50,7 @@ endchoice
 
 config SERIAL_BAUD
 	int "Baud" if !SERIAL_DEV_UART0
-	range 0 1000000
+	range 0 1500000
 	default 0 if SERIAL_DEV_UART0
 	default 9600 if SERIAL_DEV_R_UART
 	default 115200
