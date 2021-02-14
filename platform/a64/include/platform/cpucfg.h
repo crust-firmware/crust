@@ -81,7 +81,8 @@
 #define RVBA_LO_REG(n)                    (DEV_CPUCFG + 0x00a0 + 0x08 * (n))
 #define RVBA_HI_REG(n)                    (DEV_CPUCFG + 0x00a4 + 0x08 * (n))
 
-#define CPUS_BYTE_SWAP_EN_REG             (DEV_R_CPUCFG + 0xc)
+/* Four of these ranges exist. */
+#define CPUS_BYTE_SWAP_EN_REG             (DEV_R_CPUCFG + 0x000c)
 #define CPUS_BYTE_SWAP_EN_REG_RANGEn(n)   BIT(0 + (n))
 
 #define CPUS_BYTE_SWAP_LO_REG(n)          (DEV_R_CPUCFG + 0x0010 + 0x08 * (n))

@@ -84,7 +84,8 @@
 #define DBG_REG1_DBGNOPWRDWN(n)           BIT(4 + (n))
 #define DBG_REG1_DBGPWRUPREQ(n)           BIT(0 + (n))
 
-#define CPUS_BYTE_SWAP_EN_REG             (DEV_R_CPUCFG + 0xc)
+/* Four of these ranges exist. */
+#define CPUS_BYTE_SWAP_EN_REG             (DEV_R_CPUCFG + 0x000c)
 #define CPUS_BYTE_SWAP_EN_REG_RANGEn(n)   BIT(0 + (n))
 
 #define CPUS_BYTE_SWAP_LO_REG(n)          (DEV_R_CPUCFG + 0x0010 + 0x08 * (n))
