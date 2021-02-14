@@ -31,6 +31,7 @@ cat > "$output.tmp" << EOF
 #define VERSION_MAJOR $major
 #define VERSION_MINOR $minor
 #define VERSION_PATCH $patch
+#define VERSION_STRING "v${major}.${minor}.${patch}"
 EOF
 
 if ! test -f "$output" ||

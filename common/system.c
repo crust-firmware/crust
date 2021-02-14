@@ -20,6 +20,7 @@
 #include <simple_device.h>
 #include <stddef.h>
 #include <system.h>
+#include <version.h>
 #include <watchdog.h>
 #include <clock/ccu.h>
 #include <gpio/sunxi-gpio.h>
@@ -138,6 +139,8 @@ system_state_machine(uint32_t exception)
 	 * avoid filling up the mailbox.
 	 */
 	if (mailbox && initial_state == SS_BOOT) {
+		info("Crust " VERSION_STRING);
+
 		scpi_create_message(mailbox, SCPI_CLIENT_EL3,
 		                    SCPI_CMD_SCP_READY);
 	}
