@@ -106,4 +106,40 @@
 #define CPU_SYS_RESET_REG                 (DEV_R_CPUCFG + 0x00a0)
 #define CPU_SYS_RESET                     BIT(0)
 
+#define CPUIDLE_EN_REG                    (DEV_R_CPUCFG + 0x0100)
+#define CPUIDLE_EN_REG_KEY0               (0x16aa << 16)
+#define CPUIDLE_EN_REG_KEY1               (0xaa16 << 16)
+#define CPUIDLE_EN_REG_KEY_FIELD          (0xffff << 16)
+#define CPUIDLE_EN_REG_CPUIDLE_EN         BIT(0)
+
+#define CLOSE_FLAG_REG                    (DEV_R_CPUCFG + 0x0104)
+#define CLOSE_FLAG_REG_CPUn_AND_C0(n)     BIT(16 + (n))
+#define CLOSE_FLAG_REG_CPUn_AND_C0_MASK   (0xf << 16)
+#define CLOSE_FLAG_REG_CPUn(n)            BIT(0 + (n))
+#define CLOSE_FLAG_REG_CPUn_MASK          (0xf << 0)
+
+#define CPUIDLE_PEND_REG                  (DEV_R_CPUCFG + 0x0108)
+#define CPUIDLE_PEND_REG_CPUn_IRQ(n)      BIT(0 + (n))
+#define CPUIDLE_PEND_REG_CPUn_IRQ_MASK    (0xf << 0)
+
+#define CPUIDLE_WAKE_REG                  (DEV_R_CPUCFG + 0x010c)
+#define CPUIDLE_WAKE_REG_CPUn_IRQ(n)      BIT(0 + (n))
+#define CPUIDLE_WAKE_REG_CPUn_IRQ_MASK    (0xf << 0)
+
+#define CPUIDLE_STAT_REG                  (DEV_R_CPUCFG + 0x0110)
+#define CPUIDLE_STAT_REG_C0_IDLE          BIT(13)
+#define CPUIDLE_STAT_REG_C0_OFF           BIT(12)
+#define CPUIDLE_STAT_REG_CPUn_VOTE(n)     BIT(8 + (n))
+#define CPUIDLE_STAT_REG_CPUn_VOTE_MASK   (0xf << 8)
+#define CPUIDLE_STAT_REG_CPUn_OFF(n)      BIT(4 + (n))
+#define CPUIDLE_STAT_REG_CPUn_OFF_MASK    (0xf << 4)
+#define CPUIDLE_STAT_REG_CPUn_IDLE(n)     BIT(0 + (n))
+#define CPUIDLE_STAT_REG_CPUn_IDLE_MASK   (0xf << 0)
+
+#define PWR_SW_DELAY_REG                  (DEV_R_CPUCFG + 0x0140)
+#define CONFIG_DELAY_REG                  (DEV_R_CPUCFG + 0x0144)
+#define PWR_DOWN_CFG_REG                  (DEV_R_CPUCFG + 0x0148)
+/* Six of these registers exist. */
+#define PWR_UP_CFG_REG(n)                 (DEV_R_CPUCFG + 0x0150 + 0x04 * (n))
+
 #endif /* PLATFORM_CPUCFG_H */
