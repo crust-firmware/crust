@@ -248,7 +248,7 @@ system_state_machine(uint32_t exception)
 			device_put(pmic);
 
 			/* Give regulator outputs time to rise. */
-			udelay(5000);
+			udelay(25000);
 
 			/* Restore SoC-internal power domains. */
 			r_ccu_resume();
