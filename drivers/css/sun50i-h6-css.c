@@ -13,14 +13,7 @@
 /* Reset Vector Base Address. */
 static uint32_t rvba;
 
-int
-css_set_css_state(uint32_t state UNUSED)
-{
-	/* Nothing to do. */
-	return SCPI_OK;
-}
-
-int
+void
 css_set_cluster_state(uint32_t cluster UNUSED, uint32_t state)
 {
 	if (state == SCPI_CSS_ON) {
@@ -61,14 +54,10 @@ css_set_cluster_state(uint32_t cluster UNUSED, uint32_t state)
 		mmio_write_32(C0_PWRON_RESET_REG, 0);
 		/* Assert the CPU subsystem reset (active-low). */
 		mmio_write_32(CPU_SYS_RESET_REG, 0);
-	} else {
-		return SCPI_E_PARAM;
 	}
-
-	return SCPI_OK;
 }
 
-int
+void
 css_set_core_state(uint32_t cluster UNUSED, uint32_t core, uint32_t state)
 {
 	if (state == SCPI_CSS_ON) {
@@ -105,10 +94,5 @@ css_set_core_state(uint32_t cluster UNUSED, uint32_t core, uint32_t state)
 		            C0_PWRON_RESET_REG_nCPUPORESET(core));
 		/* Remove power from the core power domain. */
 		css_set_power_switch(C0_CPUn_PWR_SWITCH_REG(core), false);
-	} else {
-		/* Unknown power state requested. */
-		return SCPI_E_PARAM;
 	}
-
-	return SCPI_OK;
 }

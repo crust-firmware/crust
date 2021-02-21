@@ -15,14 +15,7 @@
 /* Reset Vector Base Address. */
 static uint32_t rvba;
 
-int
-css_set_css_state(uint32_t state UNUSED)
-{
-	/* Nothing to do. */
-	return SCPI_OK;
-}
-
-int
+void
 css_set_cluster_state(uint32_t cluster UNUSED, uint32_t state)
 {
 	if (state == SCPI_CSS_ON) {
@@ -70,14 +63,10 @@ css_set_cluster_state(uint32_t cluster UNUSED, uint32_t state)
 		mmio_set_32(C0_PWROFF_GATING_REG, C0_PWROFF_GATING);
 		/* Remove power from the cluster power domain. */
 		css_set_power_switch(C0_CPUn_PWR_SWITCH_REG(0), false);
-	} else {
-		return SCPI_E_PARAM;
 	}
-
-	return SCPI_OK;
 }
 
-int
+void
 css_set_core_state(uint32_t cluster UNUSED, uint32_t core, uint32_t state)
 {
 	if (state == SCPI_CSS_ON) {
@@ -127,10 +116,5 @@ css_set_core_state(uint32_t cluster UNUSED, uint32_t core, uint32_t state)
 			css_set_power_switch(C0_CPUn_PWR_SWITCH_REG(core),
 			                     false);
 		}
-	} else {
-		/* Unknown power state requested. */
-		return SCPI_E_PARAM;
 	}
-
-	return SCPI_OK;
 }
