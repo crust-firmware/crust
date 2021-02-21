@@ -9,6 +9,9 @@
 #include <util.h>
 #include <platform/devices.h>
 
+#define CPUS_RESET_REG                   (DEV_R_CPUCFG + 0x0000)
+#define CPUS_RESET                       BIT(0)
+
 /* Four of these ranges exist. */
 #define CPUS_BYTE_SWAP_EN_REG            (DEV_R_CPUCFG + 0x000c)
 #define CPUS_BYTE_SWAP_EN_REG_RANGEn(n)  BIT(0 + (n))
