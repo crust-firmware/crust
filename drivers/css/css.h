@@ -28,31 +28,58 @@ extern struct power_state power_state;
 uint32_t css_get_core_count(uint32_t cluster) ATTRIBUTE(const);
 
 /**
- * Set the state of the compute subsystem (CSS). This state must not be
- * numbered higher than the lowest cluster state in the CSS.
+ * Suspend the compute subsystem (CSS).
  *
- * @param state The coordinated requested state for the CSS.
+ * This function assumes that the previous CSS power state was "on".
+ *
+ * @param new_state The new coordinated power state for the CSS.
  */
-void css_set_css_state(uint32_t state);
+void css_suspend_css(uint32_t new_state);
 
 /**
- * Set the state of a cluster. This state must not be numbered lower than the
- * CSS state, nor higher than the lowest core state for this cluster.
+ * Prepare the compute subsystem (CSS) to resume execution.
  *
- * @param cluster The index of the cluster.
- * @param state   The coordinated requested state for the cluster.
+ * @param old_state The previous coordinated power state for the CSS.
  */
-void css_set_cluster_state(uint32_t cluster, uint32_t state);
+void css_resume_css(uint32_t old_state);
 
 /**
- * Set the state of a CPU core. This state must not be numbered lower than the
- * core's cluster state.
+ * Suspend a cluster.
  *
- * @param cluster The index of the cluster.
- * @param core    The index of the core within the cluster.
- * @param state   The coordinated requested state for the CPU core.
+ * This function assumes that the previous cluster power state was "on".
+ *
+ * @param cluster   The index of the cluster.
+ * @param new_state The new coordinated power state for this cluster.
  */
-void css_set_core_state(uint32_t cluster, uint32_t core, uint32_t state);
+void css_suspend_cluster(uint32_t cluster, uint32_t new_state);
+
+/**
+ * Prepare a cluster to resume execution.
+ *
+ * @param cluster   The index of the cluster.
+ * @param old_state The previous coordinated power state for this cluster.
+ */
+void css_resume_cluster(uint32_t cluster, uint32_t old_state);
+
+/**
+ * Suspend a core.
+ *
+ * This function assumes that the previous core power state was "on".
+ *
+ * @param cluster   The index of the cluster.
+ * @param core      The index of the core within the cluster.
+ * @param new_state The new coordinated power state for this core.
+ */
+void css_suspend_core(uint32_t cluster, uint32_t core, uint32_t new_state);
+
+/**
+ * Begin or resume execution on a core.
+ *
+ * @param cluster   The index of the cluster.
+ * @param core      The index of the core within the cluster.
+ * @param old_state The previous coordinated power state for this core.
+ */
+void css_resume_core(uint32_t cluster, uint32_t core, uint32_t old_state);
 
 /**
  * Enable or disable power to a core or cluster power domain.

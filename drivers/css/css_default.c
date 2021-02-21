@@ -27,18 +27,34 @@ css_get_core_count(uint32_t cluster UNUSED)
  * Generic implementation used when no platform customization is needed.
  */
 void WEAK
-css_set_css_state(uint32_t state UNUSED)
+css_suspend_css(uint32_t new_state UNUSED)
 {
 }
 
 void WEAK
-css_set_cluster_state(uint32_t cluster UNUSED, uint32_t state UNUSED)
+css_resume_css(uint32_t old_state UNUSED)
 {
 }
 
 void WEAK
-css_set_core_state(uint32_t cluster UNUSED, uint32_t core UNUSED,
-                   uint32_t state UNUSED)
+css_suspend_cluster(uint32_t cluster UNUSED, uint32_t new_state UNUSED)
+{
+}
+
+void WEAK
+css_resume_cluster(uint32_t cluster UNUSED, uint32_t old_state UNUSED)
+{
+}
+
+void WEAK
+css_suspend_core(uint32_t cluster UNUSED, uint32_t core UNUSED,
+                 uint32_t new_state UNUSED)
+{
+}
+
+void WEAK
+css_resume_core(uint32_t cluster UNUSED, uint32_t core UNUSED,
+                uint32_t old_state UNUSED)
 {
 }
 
