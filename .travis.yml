@@ -33,6 +33,8 @@ matrix:
             - libc6-dev-arm64-cross
       env:
         - CONFIGS="allnoconfig allyesconfig defconfig
+                   libretech_all_h3_cc_h3_defconfig
+                   libretech_all_h3_cc_h5_defconfig
                    orangepi_3_defconfig
                    orangepi_one_defconfig
                    orangepi_pc2_defconfig
