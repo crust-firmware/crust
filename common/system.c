@@ -130,6 +130,7 @@ system_state_machine(uint32_t exception)
 	serial_init();
 
 	/* Log startup messages. */
+	info("Crust " VERSION_STRING);
 	report_exception(exception);
 	debug_print_sprs();
 
@@ -140,13 +141,13 @@ system_state_machine(uint32_t exception)
 	 * avoid filling up the mailbox.
 	 */
 	if (mailbox && initial_state == SS_BOOT) {
-		info("Crust " VERSION_STRING);
-
 		scpi_create_message(mailbox, SCPI_CLIENT_EL3,
 		                    SCPI_CMD_SCP_READY);
 	}
 
 	for (;;) {
+		debug_print_latency(system_state);
+
 		switch (system_state) {
 		case SS_AWAKE:
 			/* Poll runtime devices. */
@@ -162,12 +163,12 @@ system_state_machine(uint32_t exception)
 		case SS_SUSPEND:
 			debug("Suspending...");
 
-			/* Release runtime-only devices. */
-			device_put(mailbox), mailbox = NULL;
-
 			/* Synchronize device state with Linux. */
 			simple_device_sync(&pio);
 			simple_device_sync(&r_pio);
+
+			/* Release runtime-only devices. */
+			device_put(mailbox), mailbox = NULL;
 
 			/* Acquire wakeup sources. */
 			cir = cir_get();
@@ -227,8 +228,6 @@ system_state_machine(uint32_t exception)
 			if ((cir && cir_poll(cir)) || irq_poll())
 				system_state = NEXT_STATE;
 
-			/* This must run last so the state change is seen. */
-			debug_print_latency(system_state);
 			break;
 		case SS_PRE_RESET:
 		case SS_PRE_RESUME:
