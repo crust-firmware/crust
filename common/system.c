@@ -272,9 +272,8 @@ system_state_machine(uint32_t exception)
 			/* Acquire runtime-only devices. */
 			mailbox = device_get_or_null(&msgbox.dev);
 
-			/* Resume execution on the first CPU in the CSS. */
-			css_set_power_state(0, 0, SCPI_CSS_ON,
-			                    SCPI_CSS_ON, SCPI_CSS_ON);
+			/* Resume execution on the CSS. */
+			css_resume();
 
 			debug("Resume complete!");
 

@@ -11,6 +11,8 @@
 
 #include "css.h"
 
+static uint8_t lead_cluster, lead_core;
+
 int
 css_get_power_state(uint32_t cluster, uint32_t *cluster_state,
                     uint32_t *online_cores)
@@ -82,8 +84,13 @@ css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
 		*css_ps = css_state;
 
 		/* Suspend the system when powering off the CSS. */
-		if (css_state == SCPI_CSS_OFF)
+		if (css_state == SCPI_CSS_OFF) {
 			system_suspend();
+
+			/* Remember the last active core. */
+			lead_cluster = cluster;
+			lead_core    = core;
+		}
 	} else {
 		css_resume_css(*css_ps);
 		*css_ps = SCPI_CSS_ON;
@@ -96,4 +103,11 @@ css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
 	}
 
 	return SCPI_OK;
+}
+
+void
+css_resume(void)
+{
+	css_set_power_state(lead_cluster, lead_core,
+	                    SCPI_CSS_ON, SCPI_CSS_ON, SCPI_CSS_ON);
 }

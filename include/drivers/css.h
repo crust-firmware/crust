@@ -54,4 +54,9 @@ void css_init(void);
 int css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
                         uint32_t cluster_state, uint32_t css_state);
 
+/**
+ * Resume execution on the most recently active core in the CSS.
+ */
+void css_resume(void);
+
 #endif /* COMMON_CSS_H */
