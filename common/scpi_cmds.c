@@ -109,10 +109,6 @@ scpi_cmd_set_css_power_handler(uint32_t *rx_payload,
 	if (err)
 		return err;
 
-	/* Turning everything off means system suspend. */
-	if (css_state == SCPI_CSS_OFF)
-		system_suspend();
-
 	return SCPI_OK;
 }
 

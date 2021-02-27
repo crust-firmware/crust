@@ -7,6 +7,7 @@
 #include <debug.h>
 #include <scpi_protocol.h>
 #include <stdint.h>
+#include <system.h>
 #include <util.h>
 
 #include "css.h"
@@ -155,6 +156,10 @@ css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
 	if (css_state > css_old &&
 	    (err = css_set_css_state(css_state)))
 		return err;
+
+	/* Suspend the system when powering off the CSS. */
+	if (css_state == SCPI_CSS_OFF)
+		system_suspend();
 
 	return SCPI_OK;
 }
