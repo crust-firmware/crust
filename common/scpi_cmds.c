@@ -85,11 +85,6 @@ scpi_cmd_get_scp_cap_handler(uint32_t *rx_payload UNUSED,
  * Handler for SCPI_CMD_SET_CSS_POWER: Set CSS power state.
  *
  * This sets the power state of a single core, its parent cluster, and the CSS.
- *
- * The power state provided by PSCI is already coordinated. Simply turn things
- * on from highest to lowest power level, then turn things off from lowest to
- * highest power level. This ensures no power domain is turned on before its
- * parent, and no power domain is turned off before any of its children.
  */
 static int
 scpi_cmd_set_css_power_handler(uint32_t *rx_payload,
