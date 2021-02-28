@@ -100,6 +100,7 @@
 #define C0_PWRON_RESET_REG_nCPUPORESET(n) BIT(0 + (n))
 
 #define C0_PWROFF_GATING_REG              (DEV_R_CPUCFG + 0x0044)
+#define C0_PWROFF_GATING                  BIT(4)
 #define C0_CPUn_PWROFF_GATING(n)          BIT(0 + (n))
 
 #define C0_CPUn_PWR_SWITCH_REG(n)         (DEV_R_CPUCFG + 0x0050 + 0x04 * (n))

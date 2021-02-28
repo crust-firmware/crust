@@ -53,6 +53,8 @@ css_suspend_cluster(uint32_t cluster UNUSED, uint32_t new_state)
 	mmio_write_32(C0_RST_CTRL_REG, 0);
 	/* Assert all power-on resets (active-low). */
 	mmio_write_32(C0_PWRON_RESET_REG, 0);
+	/* Activate the cluster output clamps. */
+	mmio_set_32(C0_PWROFF_GATING_REG, C0_PWROFF_GATING);
 }
 
 void
@@ -61,6 +63,8 @@ css_resume_cluster(uint32_t cluster UNUSED, uint32_t old_state)
 	if (old_state < SCPI_CSS_OFF)
 		return;
 
+	/* Release the cluster output clamps. */
+	mmio_clr_32(C0_PWROFF_GATING_REG, C0_PWROFF_GATING);
 	/* Deassert the cluster hard reset (active-low). */
 	mmio_write_32(C0_PWRON_RESET_REG, C0_PWRON_RESET_REG_nH_RST);
 	/* Deassert DBGPWRDUP for all cores. */
