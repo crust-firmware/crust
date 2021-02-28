@@ -19,8 +19,6 @@ css_suspend_cluster(uint32_t cluster UNUSED, uint32_t new_state)
 	if (new_state < SCPI_CSS_OFF)
 		return;
 
-	/* Save the power-on reset vector base address from core 0. */
-	rvba = mmio_read_32(RVBA_LO_REG(0));
 	/* Assert L2FLUSHREQ to clean the cluster L2 cache. */
 	mmio_set_32(C0_CTRL_REG2, C0_CTRL_REG2_L2FLUSHREQ);
 	/* Wait for L2FLUSHDONE to go high. */
@@ -111,6 +109,8 @@ css_resume_core(uint32_t cluster UNUSED, uint32_t core, uint32_t old_state)
 void
 css_init(void)
 {
+	/* Save the power-on reset vector base address from core 0. */
+	rvba = mmio_read_32(RVBA_LO_REG(0));
 	/* Program all cores to start in AArch64 mode. */
 	mmio_set_32(C0_CTRL_REG0, C0_CTRL_REG0_AA64nAA32_MASK);
 }
