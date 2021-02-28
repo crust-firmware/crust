@@ -16,6 +16,26 @@
 static uint32_t rvba;
 
 void
+css_suspend_css(uint32_t new_state)
+{
+	if (new_state < SCPI_CSS_OFF)
+		return;
+
+	/* Assert the CPU subsystem reset (active-low). */
+	mmio_write_32(CPU_SYS_RESET_REG, 0);
+}
+
+void
+css_resume_css(uint32_t old_state)
+{
+	if (old_state < SCPI_CSS_OFF)
+		return;
+
+	/* Deassert the CPU subsystem reset (active-low). */
+	mmio_write_32(CPU_SYS_RESET_REG, CPU_SYS_RESET);
+}
+
+void
 css_suspend_cluster(uint32_t cluster UNUSED, uint32_t new_state)
 {
 	if (new_state < SCPI_CSS_OFF)
@@ -33,9 +53,6 @@ css_suspend_cluster(uint32_t cluster UNUSED, uint32_t new_state)
 	mmio_poll_32(C0_CPU_STATUS_REG, C0_CPU_STATUS_REG_STANDBYWFIL2);
 	/* Assert all cluster resets (active-low). */
 	mmio_write_32(C0_RST_CTRL_REG, 0);
-	/* Assert the CPU subsystem reset (active-low). */
-	mmio_write_32(CPU_SYS_RESET_REG, 0);
-	udelay(1);
 	/* Activate the cluster output clamps. */
 	mmio_set_32(C0_PWROFF_GATING_REG, C0_PWROFF_GATING);
 	/* Remove power from the cluster power domain. */
@@ -52,9 +69,6 @@ css_resume_cluster(uint32_t cluster UNUSED, uint32_t old_state)
 	css_set_power_switch(C0_CPUn_PWR_SWITCH_REG(0), true);
 	/* Release the cluster output clamps. */
 	mmio_clr_32(C0_PWROFF_GATING_REG, C0_PWROFF_GATING);
-	udelay(1);
-	/* Deassert the CPU subsystem reset (active-low). */
-	mmio_write_32(CPU_SYS_RESET_REG, CPU_SYS_RESET);
 	udelay(1);
 	/* Deassert DBGPWRDUP for all cores. */
 	mmio_write_32(DBG_REG0, 0);

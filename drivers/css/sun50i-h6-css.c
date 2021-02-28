@@ -14,6 +14,26 @@
 static uint32_t rvba;
 
 void
+css_suspend_css(uint32_t new_state)
+{
+	if (new_state < SCPI_CSS_OFF)
+		return;
+
+	/* Assert the CPU subsystem reset (active-low). */
+	mmio_write_32(CPU_SYS_RESET_REG, 0);
+}
+
+void
+css_resume_css(uint32_t old_state)
+{
+	if (old_state < SCPI_CSS_OFF)
+		return;
+
+	/* Deassert the CPU subsystem reset (active-low). */
+	mmio_write_32(CPU_SYS_RESET_REG, CPU_SYS_RESET);
+}
+
+void
 css_suspend_cluster(uint32_t cluster UNUSED, uint32_t new_state)
 {
 	if (new_state < SCPI_CSS_OFF)
@@ -33,8 +53,6 @@ css_suspend_cluster(uint32_t cluster UNUSED, uint32_t new_state)
 	mmio_write_32(C0_RST_CTRL_REG, 0);
 	/* Assert all power-on resets (active-low). */
 	mmio_write_32(C0_PWRON_RESET_REG, 0);
-	/* Assert the CPU subsystem reset (active-low). */
-	mmio_write_32(CPU_SYS_RESET_REG, 0);
 }
 
 void
@@ -43,8 +61,6 @@ css_resume_cluster(uint32_t cluster UNUSED, uint32_t old_state)
 	if (old_state < SCPI_CSS_OFF)
 		return;
 
-	/* Deassert the CPU subsystem reset (active-low). */
-	mmio_write_32(CPU_SYS_RESET_REG, CPU_SYS_RESET);
 	/* Deassert the cluster hard reset (active-low). */
 	mmio_write_32(C0_PWRON_RESET_REG, C0_PWRON_RESET_REG_nH_RST);
 	/* Deassert DBGPWRDUP for all cores. */
