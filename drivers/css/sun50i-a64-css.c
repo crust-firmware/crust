@@ -64,6 +64,8 @@ css_resume_cluster(uint32_t cluster UNUSED, uint32_t old_state)
 	mmio_write_32(C0_RST_CTRL_REG, 0);
 	/* Enable hardware L2 cache flush (active-low). */
 	mmio_clr_32(C0_CTRL_REG0, C0_CTRL_REG0_L2RSTDISABLE);
+	/* Program all cores to start in AArch64 mode. */
+	mmio_set_32(C0_CTRL_REG0, C0_CTRL_REG0_AA64nAA32_MASK);
 	/* Put the cluster back into coherency (deassert ACINACTM). */
 	mmio_clr_32(C0_CTRL_REG1, C0_CTRL_REG1_ACINACTM);
 	/* Deassert all cluster resets (active-low). */
@@ -109,8 +111,6 @@ css_resume_core(uint32_t cluster UNUSED, uint32_t core, uint32_t old_state)
 	mmio_clr_32(C0_RST_CTRL_REG, C0_RST_CTRL_REG_nCORERESET(core));
 	/* Assert core power-on reset (active-low). */
 	mmio_clr_32(C0_PWRON_RESET_REG, C0_PWRON_RESET_REG_nCPUPORESET(core));
-	/* Program the core to start in AArch64 mode. */
-	mmio_set_32(C0_CTRL_REG0, C0_CTRL_REG0_AA64nAA32(core));
 	/* Core 0 does not have a separate power domain. */
 	if (core > 0) {
 		/* Turn on power to the core power domain. */
@@ -124,4 +124,11 @@ css_resume_core(uint32_t cluster UNUSED, uint32_t core, uint32_t old_state)
 	mmio_set_32(C0_RST_CTRL_REG, C0_RST_CTRL_REG_nCORERESET(core));
 	/* Assert DBGPWRDUP (allow debug access to the core). */
 	mmio_set_32(DBG_REG0, DBG_REG0_DBGPWRDUP(core));
+}
+
+void
+css_init(void)
+{
+	/* Program all cores to start in AArch64 mode. */
+	mmio_set_32(C0_CTRL_REG0, C0_CTRL_REG0_AA64nAA32_MASK);
 }

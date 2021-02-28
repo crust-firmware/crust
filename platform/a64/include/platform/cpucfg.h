@@ -15,6 +15,7 @@
 #define C0_CTRL_REG0_BROADCASTOUTER       BIT(29)
 #define C0_CTRL_REG0_BROADCASTCACHEMAINT  BIT(28)
 #define C0_CTRL_REG0_AA64nAA32(n)         BIT(24 + (n))
+#define C0_CTRL_REG0_AA64nAA32_MASK       (0xf << 24)
 #define C0_CTRL_REG0_CP15SDISABLE(n)      BIT(8 + (n))
 #define C0_CTRL_REG0_L2RSTDISABLE         BIT(4)
 
