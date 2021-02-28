@@ -22,6 +22,8 @@
 #define DEV_SPINLOCK  0x03004000
 #define DEV_HSTIMER   0x03005000
 #define DEV_SID       0x03006000
+#define DEV_TZASC     0x03007000
+#define DEV_SPC       0x03008000
 #define DEV_TIMER     0x03009000
 #define DEV_PWM       0x0300a000
 #define DEV_PIO       0x0300b000
