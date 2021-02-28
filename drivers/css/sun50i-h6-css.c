@@ -14,31 +14,6 @@
 static uint32_t rvba;
 
 void
-css_resume_cluster(uint32_t cluster UNUSED, uint32_t old_state)
-{
-	if (old_state < SCPI_CSS_OFF)
-		return;
-
-	/* Deassert the CPU subsystem reset (active-low). */
-	mmio_write_32(CPU_SYS_RESET_REG, CPU_SYS_RESET);
-	/* Deassert the cluster hard reset (active-low). */
-	mmio_write_32(C0_PWRON_RESET_REG, C0_PWRON_RESET_REG_nH_RST);
-	/* Deassert DBGPWRDUP for all cores. */
-	mmio_write_32(DBG_REG0, 0);
-	/* Assert all cluster and core resets (active-low). */
-	mmio_write_32(C0_RST_CTRL_REG, 0);
-	/* Enable hardware L2 cache flush (active-low). */
-	mmio_clr_32(C0_CTRL_REG0, C0_CTRL_REG0_L2RSTDISABLE);
-	/* Put the cluster back into coherency (deassert ACINACTM). */
-	mmio_clr_32(C0_CTRL_REG1, C0_CTRL_REG1_ACINACTM);
-	/* Deassert all cluster resets (active-low). */
-	mmio_write_32(C0_RST_CTRL_REG, C0_RST_CTRL_REG_MASK);
-	/* Restore the reset vector base addresses for all cores. */
-	for (uint32_t i = 0; i < css_get_core_count(cluster); ++i)
-		mmio_write_32(RVBA_LO_REG(i), rvba);
-}
-
-void
 css_suspend_cluster(uint32_t cluster UNUSED, uint32_t new_state)
 {
 	if (new_state < SCPI_CSS_OFF)
@@ -65,6 +40,51 @@ css_suspend_cluster(uint32_t cluster UNUSED, uint32_t new_state)
 }
 
 void
+css_resume_cluster(uint32_t cluster UNUSED, uint32_t old_state)
+{
+	if (old_state < SCPI_CSS_OFF)
+		return;
+
+	/* Deassert the CPU subsystem reset (active-low). */
+	mmio_write_32(CPU_SYS_RESET_REG, CPU_SYS_RESET);
+	/* Deassert the cluster hard reset (active-low). */
+	mmio_write_32(C0_PWRON_RESET_REG, C0_PWRON_RESET_REG_nH_RST);
+	/* Deassert DBGPWRDUP for all cores. */
+	mmio_write_32(DBG_REG0, 0);
+	/* Assert all cluster and core resets (active-low). */
+	mmio_write_32(C0_RST_CTRL_REG, 0);
+	/* Enable hardware L2 cache flush (active-low). */
+	mmio_clr_32(C0_CTRL_REG0, C0_CTRL_REG0_L2RSTDISABLE);
+	/* Put the cluster back into coherency (deassert ACINACTM). */
+	mmio_clr_32(C0_CTRL_REG1, C0_CTRL_REG1_ACINACTM);
+	/* Deassert all cluster resets (active-low). */
+	mmio_write_32(C0_RST_CTRL_REG, C0_RST_CTRL_REG_MASK);
+	/* Restore the reset vector base addresses for all cores. */
+	for (uint32_t i = 0; i < css_get_core_count(cluster); ++i)
+		mmio_write_32(RVBA_LO_REG(i), rvba);
+}
+
+void
+css_suspend_core(uint32_t cluster UNUSED, uint32_t core, uint32_t new_state)
+{
+	if (new_state < SCPI_CSS_OFF)
+		return;
+
+	/* Wait for the core to be in WFI and ready to shut down. */
+	mmio_poll_32(C0_CPU_STATUS_REG, C0_CPU_STATUS_REG_STANDBYWFI(core));
+	/* Deassert DBGPWRDUP (prevent debug access to the core). */
+	mmio_clr_32(DBG_REG0, DBG_REG0_DBGPWRDUP(core));
+	/* Activate the core output clamps. */
+	mmio_set_32(C0_PWROFF_GATING_REG, C0_CPUn_PWROFF_GATING(core));
+	/* Assert core reset (active-low). */
+	mmio_clr_32(C0_RST_CTRL_REG, C0_RST_CTRL_REG_nCORERESET(core));
+	/* Assert core power-on reset (active-low). */
+	mmio_clr_32(C0_PWRON_RESET_REG, C0_PWRON_RESET_REG_nCPUPORESET(core));
+	/* Remove power from the core power domain. */
+	css_set_power_switch(C0_CPUn_PWR_SWITCH_REG(core), false);
+}
+
+void
 css_resume_core(uint32_t cluster UNUSED, uint32_t core, uint32_t old_state)
 {
 	if (old_state < SCPI_CSS_OFF)
@@ -86,24 +106,4 @@ css_resume_core(uint32_t cluster UNUSED, uint32_t core, uint32_t old_state)
 	mmio_set_32(C0_RST_CTRL_REG, C0_RST_CTRL_REG_nCORERESET(core));
 	/* Assert DBGPWRDUP (allow debug access to the core). */
 	mmio_set_32(DBG_REG0, DBG_REG0_DBGPWRDUP(core));
-}
-
-void
-css_suspend_core(uint32_t cluster UNUSED, uint32_t core, uint32_t new_state)
-{
-	if (new_state < SCPI_CSS_OFF)
-		return;
-
-	/* Wait for the core to be in WFI and ready to shut down. */
-	mmio_poll_32(C0_CPU_STATUS_REG, C0_CPU_STATUS_REG_STANDBYWFI(core));
-	/* Deassert DBGPWRDUP (prevent debug access to the core). */
-	mmio_clr_32(DBG_REG0, DBG_REG0_DBGPWRDUP(core));
-	/* Activate the core output clamps. */
-	mmio_set_32(C0_PWROFF_GATING_REG, C0_CPUn_PWROFF_GATING(core));
-	/* Assert core reset (active-low). */
-	mmio_clr_32(C0_RST_CTRL_REG, C0_RST_CTRL_REG_nCORERESET(core));
-	/* Assert core power-on reset (active-low). */
-	mmio_clr_32(C0_PWRON_RESET_REG, C0_PWRON_RESET_REG_nCPUPORESET(core));
-	/* Remove power from the core power domain. */
-	css_set_power_switch(C0_CPUn_PWR_SWITCH_REG(core), false);
 }
