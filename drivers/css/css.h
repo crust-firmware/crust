@@ -28,6 +28,15 @@ extern struct power_state power_state;
 uint32_t css_get_core_count(uint32_t cluster) ATTRIBUTE(const);
 
 /**
+ * Get the pending IRQ status for each core in the CSS.
+ *
+ * Cores with pending IRQs will be woken up.
+ *
+ * @return Each set bit means some IRQ is pending for that core.
+ */
+uint32_t css_get_irq_status(void);
+
+/**
  * Suspend the compute subsystem (CSS).
  *
  * This function assumes that the previous CSS power state was "on".

@@ -151,6 +151,7 @@ system_state_machine(uint32_t exception)
 		switch (system_state) {
 		case SS_AWAKE:
 			/* Poll runtime devices. */
+			css_poll();
 			if (watchdog)
 				watchdog_restart(watchdog);
 

@@ -59,4 +59,9 @@ int css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
  */
 void css_resume(void);
 
+/**
+ * Poll for CPUs that must wake up to handle pending IRQs.
+ */
+void css_poll(void);
+
 #endif /* COMMON_CSS_H */

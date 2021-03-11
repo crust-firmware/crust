@@ -11,6 +11,10 @@
 
 #include "css.h"
 
+/* The register layout assumes a maximum of two clusters. */
+#define FIQ_BIT BIT(2 * MAX_CORES_PER_CLUSTER)
+#define IRQ_BIT BIT(0)
+
 static uint8_t lead_cluster, lead_core;
 
 int
@@ -105,9 +109,32 @@ css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
 	return SCPI_OK;
 }
 
+static void
+css_wake_one_cpu(uint32_t cluster, uint32_t core)
+{
+	css_set_power_state(cluster, core,
+	                    SCPI_CSS_ON, SCPI_CSS_ON, SCPI_CSS_ON);
+}
+
 void
 css_resume(void)
 {
-	css_set_power_state(lead_cluster, lead_core,
-	                    SCPI_CSS_ON, SCPI_CSS_ON, SCPI_CSS_ON);
+	css_wake_one_cpu(lead_cluster, lead_core);
+}
+
+void
+css_poll(void)
+{
+	uint32_t status = css_get_irq_status();
+
+	for (uint32_t i = 0; i < css_get_cluster_count(); ++i) {
+		/* Assume each cluster is allocated the same number of bits. */
+		for (uint32_t j = 0; j < MAX_CORES_PER_CLUSTER; ++j) {
+			if ((status & (FIQ_BIT | IRQ_BIT)) &&
+			    (power_state.core[i][j] == SCPI_CSS_OFF))
+				css_wake_one_cpu(i, j);
+			/* Shift the next core status on top of the mask. */
+			status >>= 1;
+		}
+	}
 }

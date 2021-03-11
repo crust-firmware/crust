@@ -24,6 +24,15 @@ css_get_core_count(uint32_t cluster UNUSED)
 }
 
 /*
+ * Generic implementation used when no platform support is available.
+ */
+uint32_t WEAK
+css_get_irq_status(void)
+{
+	return 0;
+}
+
+/*
  * Generic implementation used when no platform customization is needed.
  */
 void WEAK
