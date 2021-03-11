@@ -98,4 +98,8 @@
 #define CPU_SYS_RESET_REG                 (DEV_R_CPUCFG + 0x0140)
 #define CPU_SYS_RESET                     BIT(0)
 
+#define IRQ_FIQ_STATUS_REG                (DEV_R_CPUCFG + 0x014c)
+#define C0_IRQ_OUT(n)                     BIT(0 + (n))
+#define C0_IRQ_OUT_MASK                   (0xf << 0)
+
 #endif /* PLATFORM_CPUCFG_H */
