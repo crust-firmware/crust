@@ -23,6 +23,7 @@
 
 /* See r_ccu driver for bit definitions */
 #define APB0_GATE_REG                     (DEV_R_PRCM + 0x0028)
+#define RTC_GATE_REG                      (DEV_R_PRCM + 0x002c)
 
 /* Documented in A23/A31s manual; all bits are present on H3 */
 #define PLL_CTRL_REG0                     (DEV_R_PRCM + 0x0040)
@@ -66,6 +67,16 @@
 #define VDD_SYS_RESET                     BIT(0)
 
 #define C0_CPUn_PWR_SWITCH_REG(n)         (DEV_R_PRCM + 0x0140 + 0x04 * (n))
+
+#define ADDA_PR_CFG_REG                   (DEV_R_PRCM + 0x01c0)
+#define ADDA_PR_CFG_REG_RESET             BIT(28)
+#define ADDA_PR_CFG_REG_RW                BIT(24)
+#define ADDA_PR_CFG_REG_ADDR(x)           ((x) << 16)
+#define ADDA_PR_CFG_REG_ADDR_MASK         (0x1f << 16)
+#define ADDA_PR_CFG_REG_WDAT(x)           ((x) << 8)
+#define ADDA_PR_CFG_REG_WDAT_MASK         (0xff << 8)
+#define ADDA_PR_CFG_REG_RDAT(x)           ((x) << 0)
+#define ADDA_PR_CFG_REG_RDAT_MASK         (0xff << 0)
 
 #define PRCM_SEC_SWITCH_REG               (DEV_R_PRCM + 0x01d0)
 #define PRCM_SEC_SWITCH_REG_POWER_SEC     BIT(2)
