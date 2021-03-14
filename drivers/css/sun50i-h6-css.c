@@ -13,6 +13,12 @@
 /* Reset Vector Base Address. */
 static uint32_t rvba;
 
+uint32_t
+css_get_irq_status(void)
+{
+	return mmio_read_32(CPUIDLE_PEND_REG);
+}
+
 void
 css_suspend_css(uint32_t new_state)
 {
