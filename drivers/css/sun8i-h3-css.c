@@ -21,8 +21,6 @@ css_suspend_core(uint32_t cluster UNUSED, uint32_t core, uint32_t new_state)
 	mmio_poll_32(CPUn_STATUS_REG(core), CPUn_STATUS_REG_STANDBYWFI);
 	/* Deassert DBGPWRDUP (prevent debug access to the core). */
 	mmio_clr_32(DBG_CTRL_REG1, DBG_CTRL_REG1_DBGPWRDUP(core));
-	/* Assert core reset and power-on reset (active-low). */
-	mmio_write_32(CPUn_RST_CTRL_REG(core), 0);
 	/* Activate the core output clamps. */
 	mmio_set_32(C0_PWROFF_GATING_REG, C0_CPUn_PWROFF_GATING(core));
 	/* Remove power from the core power domain. */
