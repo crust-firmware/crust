@@ -167,7 +167,10 @@ static const struct ccu_clock ccu_clocks[SUN50I_A64_CCU_CLOCKS] = {
 		.get_parent = ccu_get_null_parent,
 		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x015c, 31),
-		.reset      = BITMAP_INDEX(0x00fc, 31),
+#if !CONFIG(SOC_H5)
+		/* MBUS reset intermittently breaks DRAM resume on H5. */
+		.reset = BITMAP_INDEX(0x00fc, 31),
+#endif
 	},
 };
 
