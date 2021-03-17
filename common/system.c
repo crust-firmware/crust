@@ -70,7 +70,8 @@ select_suspend_depth(uint8_t current_state)
 	/* Bail if the DRAM controller or peripherals need running clocks. */
 	if (!CONFIG(HAVE_DRAM_SUSPEND) || clock_active(&osc24m))
 		return SD_NONE;
-	if (irq_needs_avcc())
+	/* Wakeup sources needing AVCC are only supported while asleep. */
+	if (current_state != SS_SHUTDOWN && irq_needs_avcc())
 		return SD_OSC24M;
 	if (current_state != SS_SHUTDOWN || irq_needs_vdd_sys())
 		return SD_AVCC;
@@ -197,16 +198,13 @@ system_state_machine(uint32_t exception)
 
 			/* Turn off all unnecessary power domains. */
 			regulator_disable(&cpu_supply);
-			if (system_state == SS_SHUTDOWN)
+			if (system_state == SS_SHUTDOWN) {
 				regulator_disable(&dram_supply);
-			if (suspend_depth >= SD_OSC24M &&
-			    (!CONFIG(VCC_PLL_POWERS_AVCC) ||
-			     suspend_depth >= SD_AVCC) &&
-			    (!CONFIG(VCC_PLL_POWERS_DRAM) ||
-			     system_state == SS_SHUTDOWN))
-				regulator_disable(&vcc_pll_supply);
-			if (suspend_depth >= SD_VDD_SYS)
-				regulator_disable(&vdd_sys_supply);
+				if (suspend_depth >= SD_OSC24M)
+					regulator_disable(&vcc_pll_supply);
+				if (suspend_depth >= SD_VDD_SYS)
+					regulator_disable(&vdd_sys_supply);
+			}
 
 			/*
 			 * The regulator provider is often part of the same
@@ -248,7 +246,7 @@ system_state_machine(uint32_t exception)
 			device_put(pmic);
 
 			/* Give regulator outputs time to rise. */
-			udelay(25000);
+			udelay(5000);
 
 			/* Restore SoC-internal power domains. */
 			r_ccu_resume();
