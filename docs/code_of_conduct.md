@@ -1,74 +1,42 @@
-# Contributor Covenant Code of Conduct
+# Code of Conduct
 
-## Our Pledge
+This code of conduct outlines expectations for participation in the Crust
+Firmware community, which is committed to providing a welcoming and inspiring
+community for all. People violating this code of conduct may be banned from the
+community.
 
-In the interest of fostering an open and welcoming environment, we as
-contributors and maintainers pledge to making participation in our project and
-our community a harassment-free experience for everyone, regardless of age,
-body size, disability, ethnicity, gender identity and expression, level of
-experience, education, socio-economic status, nationality, personal appearance,
-race, religion, or sexual identity and orientation.
+Our open source community strives to:
 
-## Our Standards
+* Be friendly and patient: Remember you might not be communicating in someone
+  else's primary spoken or programming language, and others may not have your
+  level of understanding.
+* Be welcoming: Our community welcomes and supports people of all types and
+  backgrounds. This includes, but is not limited to members of any race,
+  ethnicity, culture, national origin, color, immigration status, social and
+  economic class, educational level, sex, sexual orientation, gender identity
+  and expression, age, size, family status, political belief, religion, and
+  mental and physical ability.
+* Be respectful: We are a world-wide community of professionals, and we conduct
+  ourselves professionally. Disagreement is no excuse for poor behavior and
+  poor manners. Disrespectful and unacceptable behavior includes, but is not
+  limited to:
+  * Violent threats or language.
+  * Discriminatory or derogatory jokes and language.
+  * Posting gratuitous, sexually explicit or violent material.
+  * Posting, or threatening to post, people's personally identifying
+    information ("doxing").
+  * Insults, especially those using discriminatory terms or slurs.
+  * Behavior that could be perceived as unwanted sexual attention.
+  * Advocating for or encouraging any of the above behaviors.
+* Understand disagreements: Disagreements, both social and technical, are
+  useful learning opportunities. Seek to understand the other viewpoints and
+  resolve differences constructively.
 
-Examples of behavior that contributes to creating a positive environment
-include:
+This code is not exhaustive or complete. It serves to capture our common
+understanding of a productive, collaborative environment. We expect the code to
+be followed in spirit as much as in the letter.
 
-* Using welcoming and inclusive language
-* Being respectful of differing viewpoints and experiences
-* Gracefully accepting constructive criticism
-* Focusing on what is best for the community
-* Showing empathy towards other community members
+This document was derived from the [Adélie Linux Code of Conduct][alcoc], which
+is licensed as CC BY-NC-SA 4.0.
 
-Examples of unacceptable behavior by participants include:
-
-* The use of sexualized language or imagery and unwelcome sexual attention or
-  advances
-* Trolling, insulting/derogatory comments, and personal or political attacks
-* Public or private harassment
-* Publishing others' private information, such as a physical or electronic
-  address, without explicit permission
-* Other conduct which could reasonably be considered inappropriate in a
-  professional setting
-
-## Our Responsibilities
-
-Project maintainers are responsible for clarifying the standards of acceptable
-behavior and are expected to take appropriate and fair corrective action in
-response to any instances of unacceptable behavior.
-
-Project maintainers have the right and responsibility to remove, edit, or
-reject comments, commits, code, wiki edits, issues, and other contributions
-that are not aligned to this Code of Conduct, or to ban temporarily or
-permanently any contributor for other behaviors that they deem inappropriate,
-threatening, offensive, or harmful.
-
-## Scope
-
-This Code of Conduct applies both within project spaces and in public spaces
-when an individual is representing the project or its community. Examples of
-representing a project or community include using an official project e-mail
-address, posting via an official social media account, or acting as an
-appointed representative at an online or offline event. Representation of a
-project may be further defined and clarified by project maintainers.
-
-## Enforcement
-
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the project team. All complaints will be reviewed and
-investigated and will result in a response that is deemed necessary and
-appropriate to the circumstances. The project team is obligated to maintain
-confidentiality with regard to the reporter of an incident.  Further details of
-specific enforcement policies may be posted separately.
-
-Project maintainers who do not follow or enforce the Code of Conduct in good
-faith may face temporary or permanent repercussions as determined by other
-members of the project's leadership.
-
-## Attribution
-
-This Code of Conduct is adapted from the [Contributor Covenant][homepage],
-version 1.4, available at
-https://www.contributor-covenant.org/version/1/4/code-of-conduct.html
-
-[homepage]: https://www.contributor-covenant.org
+[alcoc]: http://www.adelielinux.org/conduct.html
