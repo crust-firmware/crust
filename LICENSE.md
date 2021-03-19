@@ -1,3 +1,15 @@
+# Crust Firmware Licensing
+
+The Crust firmware itself is dual-licensed as BSD-3-clause or GPL-2.0-only. You
+may use and redistribute it under either set of license terms.
+
+It uses some third-party BSD-1-Clause and MIT-licensed headers; those licenses
+are compatible with either main license.
+
+The Kconfig configuration system is licensed as GPL-2.0-only. However, it is a
+build time dependency only, and all GPL-2.0-only files are restricted to the
+`3rdparty/kconfig` directory.
+
 ## BSD 1-clause License
 
     Copyright © 2014 OpenRISC Project Maintainers. All rights reserved.
