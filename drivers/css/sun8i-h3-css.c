@@ -6,10 +6,31 @@
 #include <mmio.h>
 #include <scpi_protocol.h>
 #include <stdint.h>
+#include <clock/ccu.h>
 #include <platform/cpucfg.h>
 #include <platform/prcm.h>
 
 #include "css.h"
+
+void
+css_suspend_cluster(uint32_t cluster, uint32_t new_state)
+{
+	if (new_state < SCPI_CSS_RETENTION)
+		return;
+
+	/* Lower the cluster clock frequency. */
+	ccu_suspend_cluster(cluster);
+}
+
+void
+css_resume_cluster(uint32_t cluster, uint32_t old_state)
+{
+	if (old_state < SCPI_CSS_RETENTION)
+		return;
+
+	/* Raise the cluster clock frequency. */
+	ccu_resume_cluster(cluster);
+}
 
 void
 css_suspend_core(uint32_t cluster UNUSED, uint32_t core, uint32_t new_state)

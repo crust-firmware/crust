@@ -101,7 +101,17 @@ ccu_suspend(void)
 }
 
 void
+ccu_suspend_cluster(uint32_t cluster UNUSED)
+{
+}
+
+void
 ccu_resume(void)
+{
+}
+
+void
+ccu_resume_cluster(uint32_t cluster UNUSED)
 {
 }
 
@@ -115,4 +125,5 @@ ccu_init(void)
 	              APB2_CLK_M(0));
 
 	ccu_resume();
+	ccu_resume_cluster(0);
 }

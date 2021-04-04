@@ -166,14 +166,6 @@ static const struct clock_handle pll_cpux = {
 void
 ccu_suspend(void)
 {
-	/* Set CPUX to LOSC (32kHz), APB to CPUX/4, AXI to CPUX/3. */
-	mmio_write_32(DEV_CCU + CPUX_AXI_CFG_REG,
-	              CPUX_CLK_SRC(0) |
-	              CPUX_APB_CLK_M(3) |
-	              CPUX_AXI_CLK_M(2));
-
-	clock_put(&pll_cpux);
-
 	/* Set AHB1 to LOSC/1 (32kHz), APB1 to AHB1/2 (16kHz). */
 	mmio_write_32(DEV_CCU + AHB1_APB1_CFG_REG,
 	              AHB1_CLK_SRC(0) |
@@ -184,18 +176,24 @@ ccu_suspend(void)
 	/* Set AHB2 to AHB1/1 (32kHz). */
 	mmio_write_32(DEV_CCU + AHB2_CFG_REG,
 	              AHB2_CLK_SRC(0));
+
+	clock_put(&pll_cpux);
+}
+
+void
+ccu_suspend_cluster(uint32_t cluster UNUSED)
+{
+	/* Set CPUX to LOSC (32kHz), APB to CPUX/4, AXI to CPUX/3. */
+	mmio_write_32(DEV_CCU + CPUX_AXI_CFG_REG,
+	              CPUX_CLK_SRC(0) |
+	              CPUX_APB_CLK_M(3) |
+	              CPUX_AXI_CLK_M(2));
 }
 
 void
 ccu_resume(void)
 {
 	clock_get(&pll_cpux);
-
-	/* Set CPUX to PLL_CPUX, APB to CPUX/4, AXI to CPUX/3. */
-	mmio_write_32(DEV_CCU + CPUX_AXI_CFG_REG,
-	              CPUX_CLK_SRC(2) |
-	              CPUX_APB_CLK_M(3) |
-	              CPUX_AXI_CLK_M(2));
 
 	/* Set AHB1 to PLL_PERIPH0/3 (200MHz), APB1 to AHB1/2 (100MHz). */
 	mmio_write_32(DEV_CCU + AHB1_APB1_CFG_REG,
@@ -210,6 +208,16 @@ ccu_resume(void)
 }
 
 void
+ccu_resume_cluster(uint32_t cluster UNUSED)
+{
+	/* Set CPUX to PLL_CPUX, APB to CPUX/4, AXI to CPUX/3. */
+	mmio_write_32(DEV_CCU + CPUX_AXI_CFG_REG,
+	              CPUX_CLK_SRC(2) |
+	              CPUX_APB_CLK_M(3) |
+	              CPUX_AXI_CLK_M(2));
+}
+
+void
 ccu_init(void)
 {
 	/* Set APB2 to OSC24M/1 (24MHz). */
@@ -219,4 +227,5 @@ ccu_init(void)
 	              APB2_CLK_M(0));
 
 	ccu_resume();
+	ccu_resume_cluster(0);
 }

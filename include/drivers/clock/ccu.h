@@ -32,7 +32,9 @@ extern const struct ccu ccu;
 extern const struct ccu r_ccu;
 
 void ccu_suspend(void);
+void ccu_suspend_cluster(uint32_t cluster);
 void ccu_resume(void);
+void ccu_resume_cluster(uint32_t cluster);
 void ccu_init(void);
 
 void r_ccu_suspend(uint8_t depth);

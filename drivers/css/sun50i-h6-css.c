@@ -6,6 +6,7 @@
 #include <mmio.h>
 #include <scpi_protocol.h>
 #include <stdint.h>
+#include <clock/ccu.h>
 #include <platform/cpucfg.h>
 
 #include "css.h"
@@ -40,7 +41,7 @@ css_resume_css(uint32_t old_state)
 }
 
 void
-css_suspend_cluster(uint32_t cluster UNUSED, uint32_t new_state)
+css_suspend_cluster(uint32_t cluster, uint32_t new_state)
 {
 	if (new_state < SCPI_CSS_RETENTION)
 		return;
@@ -55,6 +56,8 @@ css_suspend_cluster(uint32_t cluster UNUSED, uint32_t new_state)
 	mmio_write_32(C0_CTRL_REG1, C0_CTRL_REG1_ACINACTM);
 	/* Wait for the cluster (L2 cache) to be idle. */
 	mmio_poll_32(C0_CPU_STATUS_REG, C0_CPU_STATUS_REG_STANDBYWFIL2);
+	/* Lower the cluster clock frequency. */
+	ccu_suspend_cluster(cluster);
 	if (new_state < SCPI_CSS_OFF)
 		return;
 
@@ -67,6 +70,9 @@ css_resume_cluster(uint32_t cluster, uint32_t old_state)
 {
 	if (old_state < SCPI_CSS_RETENTION)
 		return;
+
+	/* Raise the cluster clock frequency. */
+	ccu_resume_cluster(cluster);
 	if (old_state < SCPI_CSS_OFF) {
 		/* Enable coherency (deassert ACINACTM). */
 		mmio_write_32(C0_CTRL_REG1, 0);
