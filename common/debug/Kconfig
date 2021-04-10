@@ -97,4 +97,14 @@ config DEBUG_PRINT_SPRS
 		CPU implementation. Enable this option to print a subset
 		of these SPRs in a human-readable format during boot.
 
+config DEBUG_RECORD_STEPS
+	bool "Record steps of the suspend/resume process in the RTC"
+	help
+		Record the start of various steps of the suspend and
+		resume processes in one of the RTC's general purpose
+		registers. This provides an approximation of what the
+		firmware was doing at the time of a hang. The last step
+		will remain available in the RTC until a clean shutdown
+		or reboot, or until power is removed.
+
 endmenu

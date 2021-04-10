@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <steps.h>
 #include <system.h>
 #include <util.h>
 #include <version.h>
@@ -160,6 +161,9 @@ scpi_cmd_set_sys_power_handler(uint32_t *rx_payload,
 		system_reset();
 	else
 		return SCPI_E_PARAM;
+
+	/* Clear the current step during an orderly state transition. */
+	record_step(STEP_NONE);
 
 	return SCPI_OK;
 }

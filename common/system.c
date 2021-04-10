@@ -19,6 +19,7 @@
 #include <serial.h>
 #include <simple_device.h>
 #include <stddef.h>
+#include <steps.h>
 #include <system.h>
 #include <version.h>
 #include <watchdog.h>
@@ -132,6 +133,7 @@ system_state_machine(uint32_t exception)
 	/* Log startup messages. */
 	info("Crust " VERSION_STRING);
 	report_exception(exception);
+	report_last_step();
 	debug_print_sprs();
 
 	/*
@@ -165,6 +167,7 @@ system_state_machine(uint32_t exception)
 			debug("Suspending...");
 
 			/* Synchronize device state with Linux. */
+			record_step(STEP_SUSPEND_DEVICES);
 			simple_device_sync(&pio);
 			simple_device_sync(&r_pio);
 
@@ -175,7 +178,9 @@ system_state_machine(uint32_t exception)
 			cir = cir_get();
 
 			/* Configure the SoC for minimal power consumption. */
+			record_step(STEP_SUSPEND_DRAM);
 			dram_suspend();
+			record_step(STEP_SUSPEND_CCU);
 			ccu_suspend();
 
 			/*
@@ -186,10 +191,12 @@ system_state_machine(uint32_t exception)
 			device_put(watchdog), watchdog = NULL;
 
 			/* Gate the rest of the SoC before removing power. */
+			record_step(STEP_SUSPEND_PRCM);
 			suspend_depth = select_suspend_depth(system_state);
 			r_ccu_suspend(suspend_depth);
 
 			/* Perform PMIC-specific actions. */
+			record_step(STEP_SUSPEND_PMIC);
 			if ((pmic = pmic_get())) {
 				if (system_state == SS_SHUTDOWN &&
 				    CONFIG(PMIC_SHUTDOWN))
@@ -199,6 +206,7 @@ system_state_machine(uint32_t exception)
 			}
 
 			/* Turn off all unnecessary power domains. */
+			record_step(STEP_SUSPEND_REGULATORS);
 			regulator_disable(&cpu_supply);
 			if (system_state == SS_SHUTDOWN) {
 				regulator_disable(&dram_supply);
@@ -215,6 +223,7 @@ system_state_machine(uint32_t exception)
 			 */
 			device_put(pmic);
 
+			record_step(STEP_SUSPEND_COMPLETE);
 			debug("Suspend to %d complete!", suspend_depth);
 
 			/* The system is now off or asleep. */
@@ -237,7 +246,9 @@ system_state_machine(uint32_t exception)
 			 * The PMIC is expected to restore regulator state.
 			 * If it fails, manually turn the regulators back on.
 			 */
+			record_step(STEP_RESUME_PMIC);
 			if (!(pmic = pmic_get()) || pmic_resume(pmic)) {
+				record_step(STEP_RESUME_REGULATORS);
 				regulator_enable(&vdd_sys_supply);
 				regulator_enable(&vcc_pll_supply);
 				regulator_enable(&dram_supply);
@@ -249,6 +260,7 @@ system_state_machine(uint32_t exception)
 			udelay(5000);
 
 			/* Restore SoC-internal power domains. */
+			record_step(STEP_RESUME_PRCM);
 			r_ccu_resume();
 
 			/* Enable watchdog protection. */
@@ -261,10 +273,13 @@ system_state_machine(uint32_t exception)
 			debug("Resuming...");
 
 			/* Configure the SoC for full functionality. */
+			record_step(STEP_RESUME_CCU);
 			ccu_resume();
+			record_step(STEP_RESUME_DRAM);
 			dram_resume();
 
 			/* Release wakeup sources. */
+			record_step(STEP_RESUME_DEVICES);
 			device_put(cir), cir = NULL;
 
 			/* Acquire runtime-only devices. */
@@ -273,6 +288,7 @@ system_state_machine(uint32_t exception)
 			/* Resume execution on the CSS. */
 			css_resume();
 
+			record_step(STEP_RESUME_COMPLETE);
 			debug("Resume complete!");
 
 			/* The system is now awake. */

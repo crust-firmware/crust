@@ -7,3 +7,4 @@ obj-$(CONFIG_DEBUG_MONITOR)       += monitor.o
 obj-$(CONFIG_DEBUG_PRINT_BATTERY) += battery.o
 obj-$(CONFIG_DEBUG_PRINT_LATENCY) += latency.o
 obj-$(CONFIG_DEBUG_PRINT_SPRS)    += sprs.o
+obj-$(CONFIG_DEBUG_RECORD_STEPS)  += steps.o

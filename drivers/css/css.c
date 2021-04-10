@@ -4,8 +4,10 @@
  */
 
 #include <css.h>
+#include <debug.h>
 #include <scpi_protocol.h>
 #include <stdint.h>
+#include <steps.h>
 #include <system.h>
 #include <util.h>
 
@@ -68,6 +70,7 @@ css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
 		uint8_t *cluster_cores = power_state.core[cluster];
 		uint8_t *css_clusters  = power_state.cluster;
 
+		record_step(STEP_SUSPEND_CORE);
 		css_suspend_core(cluster, core, core_state);
 		*core_ps = core_state;
 
@@ -76,6 +79,7 @@ css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
 			if (cluster_cores[i] < cluster_state)
 				cluster_state = cluster_cores[i];
 		}
+		record_step(STEP_SUSPEND_CLUSTER);
 		css_suspend_cluster(cluster, cluster_state);
 		*cluster_ps = cluster_state;
 
@@ -84,6 +88,7 @@ css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
 			if (css_clusters[i] < css_state)
 				css_state = css_clusters[i];
 		}
+		record_step(STEP_SUSPEND_CSS);
 		css_suspend_css(css_state);
 		*css_ps = css_state;
 
@@ -96,12 +101,15 @@ css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
 			lead_core    = core;
 		}
 	} else {
+		record_step(STEP_RESUME_CSS);
 		css_resume_css(*css_ps);
 		*css_ps = SCPI_CSS_ON;
 
+		record_step(STEP_RESUME_CLUSTER);
 		css_resume_cluster(cluster, *cluster_ps);
 		*cluster_ps = SCPI_CSS_ON;
 
+		record_step(STEP_RESUME_CORE);
 		css_resume_core(cluster, core, *core_ps);
 		*core_ps = SCPI_CSS_ON;
 	}
