@@ -213,3 +213,14 @@ System power states are defined by the SCPI specification.
 - Crust MAY modify `PIO`, `R_CIR_RX`, `R_PIO`, `R_INTC`, and `R_UART`, but only
   during boot or suspend, and it MUST restore the original configuration before
   Linux resumes.
+
+### RTC
+
+Crust uses the following RTC general purpose registers:
+
+| N | Use                               |
+|---|-----------------------------------|
+| 0 | N/A (used by p-boot/u-boot)       |
+| 1 | N/A (used by p-boot/u-boot)       |
+| 2 | Last exception encountered        |
+| 3 | Last suspend/resume step executed |
