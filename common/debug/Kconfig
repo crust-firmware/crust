@@ -107,4 +107,15 @@ config DEBUG_RECORD_STEPS
 		will remain available in the RTC until a clean shutdown
 		or reboot, or until power is removed.
 
+config DEBUG_VERIFY_DRAM
+	bool "Verify DRAM contents after controller resume"
+	help
+		After reinitializing the DRAM controller during system
+		resume, verify that DRAM contents were preserved via a
+		simple checksum.
+
+		The algorithm is very simplistic, and only a small
+		portion of DRAM is checked, so there is no guarantee
+		that corruption will be detected.
+
 endmenu

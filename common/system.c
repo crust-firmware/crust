@@ -179,6 +179,7 @@ system_state_machine(uint32_t exception)
 
 			/* Configure the SoC for minimal power consumption. */
 			record_step(STEP_SUSPEND_DRAM);
+			dram_save_checksum();
 			dram_suspend();
 			record_step(STEP_SUSPEND_CCU);
 			ccu_suspend();
@@ -277,6 +278,7 @@ system_state_machine(uint32_t exception)
 			ccu_resume();
 			record_step(STEP_RESUME_DRAM);
 			dram_resume();
+			dram_verify_checksum();
 
 			/* Release wakeup sources. */
 			record_step(STEP_RESUME_DEVICES);

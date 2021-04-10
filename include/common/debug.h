@@ -36,6 +36,7 @@ enum {
 void hexdump(uintptr_t addr, uint32_t bytes);
 void log(const char *fmt, ...) ATTRIBUTE(format(printf, 1, 2));
 
+#define panic(...) (error(__VA_ARGS__), trap())
 #define error(...) log(LOG_STRING_ERROR __VA_ARGS__)
 #define warn(...)  log(LOG_STRING_WARNING __VA_ARGS__)
 #define info(...)  log(LOG_STRING_INFO __VA_ARGS__)
@@ -92,6 +93,25 @@ void debug_print_sprs(void);
 
 static inline void
 debug_print_sprs(void)
+{
+}
+
+#endif
+
+#if CONFIG(DEBUG_VERIFY_DRAM)
+
+void dram_save_checksum(void);
+void dram_verify_checksum(void);
+
+#else
+
+static inline void
+dram_save_checksum(void)
+{
+}
+
+static inline void
+dram_verify_checksum(void)
 {
 }
 
