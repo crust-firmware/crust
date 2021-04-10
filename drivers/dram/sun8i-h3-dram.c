@@ -166,7 +166,6 @@ dram_suspend(void)
 	               PGCR3_CKNEN,
 	               PGCR3_CKEN_DISABLED |
 	               PGCR3_CKNEN_DISABLED);
-	udelay(1);
 	/* Configure DX pads. */
 	for (uint8_t n = 0; n < 4; ++n) {
 		mmio_clrset_32(DXnGCR0(n),
@@ -196,8 +195,9 @@ dram_suspend(void)
 	               ACIOCR0_CKOE_DISABLED |
 	               ACIOCR0_CKEOE_ENABLED);
 	/* Enable pad hold. */
+	udelay(1);
 	mmio_set_32(VDD_SYS_PWROFF_GATING_REG, GENMASK(1, 0));
-	udelay(10);
+	udelay(1);
 	/* Disable DRAM controller clocks. */
 	mmio_write_32(CLKEN, 0);
 	clock_put(&dram_clocks[DRAM]);
@@ -216,12 +216,7 @@ dram_resume(void)
 	/* Enable DRAM controller clocks. */
 	clock_get(&dram_clocks[MBUS]);
 	clock_get(&dram_clocks[DRAM]);
-	udelay(10);
 	mmio_write_32(CLKEN, CLKEN_VALUE);
-	udelay(10);
-	/* Disable pad hold. */
-	mmio_clr_32(VDD_SYS_PWROFF_GATING_REG, GENMASK(1, 0));
-	udelay(10);
 	/* Configure AC pads. */
 	mmio_clrset_32(ACIOCR0,
 	               ACIOCR0_ACPDD |
@@ -250,19 +245,20 @@ dram_resume(void)
 		               DXnGCR0_DXPDD_DYNAMIC |
 		               DXnGCR0_DQSRPD_DYNAMIC);
 	}
-	udelay(1);
 	/* Enable CKEN and CKNEN. */
 	mmio_clrset_32(PGCR3,
 	               PGCR3_CKEN |
 	               PGCR3_CKNEN,
 	               PGCR3_CKEN_NORMAL |
 	               PGCR3_CKNEN_NORMAL);
+	/* Disable pad hold. */
+	udelay(1);
+	mmio_clr_32(VDD_SYS_PWROFF_GATING_REG, GENMASK(1, 0));
 	udelay(1);
 	/* Disable DRAM self refresh. */
 	mmio_clr_32(PWRCTL, PWRCTL_SELFREF_EN);
 	/* Wait until the DRAM controller exits self-refresh. */
 	mmio_polleq_32(STATR, STATR_OP_MODE, STATR_OP_MODE_NORMAL);
-	udelay(1);
 	/* Enable all controller masters. */
 	mmio_write_32(MC_MAER, ~0);
 
