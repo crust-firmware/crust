@@ -9,7 +9,14 @@
 #include <platform/devices.h>
 
 #define RTC_GP_DATA_REG(n) (DEV_RTC + 0x0100 + 0x4 * (n))
+#define LAST_EXCEPTION_REG RTC_GP_DATA_REG(2)
 #define LAST_STEP_REG      RTC_GP_DATA_REG(3)
+
+void
+record_exception(uint32_t exception, uint32_t pc)
+{
+	mmio_write_32(LAST_EXCEPTION_REG, exception << 24 | pc);
+}
 
 void
 record_step(uint32_t step)

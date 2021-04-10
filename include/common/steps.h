@@ -39,10 +39,16 @@ enum {
 
 #if CONFIG(DEBUG_RECORD_STEPS)
 
+void record_exception(uint32_t exception, uint32_t pc);
 void record_step(uint32_t step);
 void report_last_step(void);
 
 #else
+
+static inline void
+record_exception(uint32_t exception UNUSED, uint32_t pc UNUSED)
+{
+}
 
 static inline void
 record_step(uint32_t step UNUSED)
