@@ -85,7 +85,7 @@ build_objects = $(foreach object,$1,$(eval $(value _build_object)))
 define _build_object
   $(call build_file_flags,$(object),$(flags_object))
   $(call build_overrides,$(object),$(flags_object))
-  $(obj)/$(object): | $(obj)/.
+  $(obj)/$(object): | $(obj)/. $(OBJ_DEPS)
   -include $(obj)/$(object:.o=.d)
 endef
 
@@ -113,7 +113,7 @@ endef
 host_objects = $(foreach object,$1,$(eval $(value _host_object)))
 define _host_object
   $(call host_file_flags,$(object),$(flags_object))
-  $(obj)/$(object): | $(obj)/.
+  $(obj)/$(object): | $(obj)/. $(OBJ_DEPS)
   -include $(obj)/$(object:.o=.d)
 endef
 
@@ -157,7 +157,7 @@ endef
 target_objects = $(foreach object,$1,$(eval $(value _target_object)))
 define _target_object
   $(call target_file_flags,$(object),$(flags_object))
-  $(tgt)/$(object): | $(tgt)/.
+  $(tgt)/$(object): | $(tgt)/. $(OBJ_DEPS)
   -include $(tgt)/$(object:.o=.d)
 endef
 

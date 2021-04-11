@@ -92,6 +92,7 @@ GOALS		:= $(if $(MAKECMDGOALS),$(MAKECMDGOALS),$(.DEFAULT_GOAL))
 MAKEFLAGS	+= -Rr
 
 DOCS		 = $(wildcard $(SRC)/*.md $(SRC)/docs/*.md)
+OBJ_DEPS	 = $(OBJ)/include/version.h
 
 export KCONFIG_AUTOCONFIG := $(OBJ)/include/config/auto.conf
 export KCONFIG_AUTOHEADER := $(OBJ)/include/config.h
