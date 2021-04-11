@@ -12,15 +12,12 @@
 #include <platform/devices.h>
 #include <platform/prcm.h>
 
-/* mctl_reg-sun8iw11.h:63 */
-#define MC_MAER                 (DEV_DRAMCOM + 0x0094)
-
 /* mctl_reg-sun8iw11.h:102 */
 #define PWRCTL                  (DEV_DRAMCTL + 0x0004)
 /* mctl_standby-sun8iw11.c:120,878,891 */
 #define PWRCTL_SELFREF_EN       (0x1 << 0)
 /* mctl_standby-sun8iw11.c:121 */
-#define PWRCTL_UNK08            (0x1 << 8)
+#define PWRCTL_PORT_DIS         (0x1 << 8)
 
 /* mctl_reg-sun8iw11.h:104 */
 #define CLKEN                   (DEV_DRAMCTL + 0x000c)
@@ -147,16 +144,17 @@ static const struct clock_handle dram_clocks[] = {
 	},
 };
 
+static uint32_t pwrctl;
+
 void
 dram_suspend(void)
 {
 	/* Enable DRAM controller register access. */
 	clock_get(&dram_clocks[BUS_DRAM]);
 
-	/* Disable all controller masters. */
-	mmio_write_32(MC_MAER, 0);
-	/* Enable DRAM self-refresh. */
-	mmio_set_32(PWRCTL, PWRCTL_SELFREF_EN);
+	/* Disable controller port access and enable DRAM self-refresh. */
+	pwrctl = mmio_read_32(PWRCTL);
+	mmio_write_32(PWRCTL, pwrctl | PWRCTL_PORT_DIS | PWRCTL_SELFREF_EN);
 	/* Wait until the DRAM controller enters self-refresh. */
 	mmio_polleq_32(STATR, STATR_OP_MODE, STATR_OP_MODE_SELFREF);
 	udelay(1);
@@ -255,12 +253,8 @@ dram_resume(void)
 	udelay(1);
 	mmio_clr_32(VDD_SYS_PWROFF_GATING_REG, GENMASK(1, 0));
 	udelay(1);
-	/* Disable DRAM self refresh. */
-	mmio_clr_32(PWRCTL, PWRCTL_SELFREF_EN);
-	/* Wait until the DRAM controller exits self-refresh. */
-	mmio_polleq_32(STATR, STATR_OP_MODE, STATR_OP_MODE_NORMAL);
-	/* Enable all controller masters. */
-	mmio_write_32(MC_MAER, ~0);
+	/* Restore self refresh state and enable controller port access. */
+	mmio_write_32(PWRCTL, pwrctl);
 
 	/* Disable further DRAM controller register access. */
 	clock_put(&dram_clocks[BUS_DRAM]);
