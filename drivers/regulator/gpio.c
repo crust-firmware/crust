@@ -60,7 +60,7 @@ static const struct regulator_driver gpio_regulator_driver = {
 #if CONFIG(REGULATOR_GPIO_CPU)
 const struct gpio_regulator gpio_cpu_regulator = {
 	.dev = {
-		.name  = "gpio-cpu-regulator",
+		.name  = "vdd-cpux",
 		.drv   = &gpio_regulator_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
@@ -77,7 +77,7 @@ const struct gpio_regulator gpio_cpu_regulator = {
 #if CONFIG(REGULATOR_GPIO_DRAM)
 const struct gpio_regulator gpio_dram_regulator = {
 	.dev = {
-		.name  = "gpio-dram-regulator",
+		.name  = "vcc-dram",
 		.drv   = &gpio_regulator_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
@@ -94,7 +94,7 @@ const struct gpio_regulator gpio_dram_regulator = {
 #if CONFIG(REGULATOR_GPIO_VCC_PLL)
 const struct gpio_regulator gpio_vcc_pll_regulator = {
 	.dev = {
-		.name  = "gpio-vcc-pll-regulator",
+		.name  = "vcc-pll",
 		.drv   = &gpio_regulator_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
@@ -111,7 +111,7 @@ const struct gpio_regulator gpio_vcc_pll_regulator = {
 #if CONFIG(REGULATOR_GPIO_VDD_SYS)
 const struct gpio_regulator gpio_vdd_sys_regulator = {
 	.dev = {
-		.name  = "gpio-vdd-sys-regulator",
+		.name  = "vdd-sys",
 		.drv   = &gpio_regulator_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
