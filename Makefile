@@ -186,7 +186,6 @@ $(OBJ)/include/config/auto.conf: $(OBJ)/3rdparty/kconfig/conf .config
 $(OBJ)/include/config/auto.conf.cmd: $(OBJ)/include/config/auto.conf;
 
 $(OBJ)/include/version.h: $(SRC)/scripts/version.sh FORCE | $(OBJ)/include/.
-	$(M) CHK $@
 	$(Q) $< $(realpath $(SRC)) $@
 
 $(TGT)/%.bin: $(TGT)/%.elf
