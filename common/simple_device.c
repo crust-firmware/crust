@@ -12,21 +12,19 @@ simple_device_probe(const struct device *dev)
 	const struct simple_device *self = to_simple_device(dev);
 	int err;
 
-	if ((err = clock_get(&self->clock)))
-		return err;
 	if (self->pins) {
 		if ((err = gpio_get(&self->pins[0])))
-			goto err_put_clock;
+			return err;
 		if ((err = gpio_get(&self->pins[1])))
 			goto err_put_gpio0;
 	}
+
+	clock_get(&self->clock);
 
 	return SUCCESS;
 
 err_put_gpio0:
 	gpio_put(&self->pins[0]);
-err_put_clock:
-	clock_put(&self->clock);
 
 	return err;
 }
@@ -36,11 +34,11 @@ simple_device_release(const struct device *dev)
 {
 	const struct simple_device *self = to_simple_device(dev);
 
+	clock_put(&self->clock);
 	if (self->pins) {
 		gpio_put(&self->pins[1]);
 		gpio_put(&self->pins[0]);
 	}
-	clock_put(&self->clock);
 }
 
 void

@@ -67,26 +67,24 @@ clock_enable(const struct clock_handle *clock)
 	ops->set_state(clock, CLOCK_STATE_ENABLED);
 }
 
-int
+void
 clock_get(const struct clock_handle *clock)
 {
 	const struct clock_driver_ops *ops = clock_ops_for(clock);
-	const struct clock_handle *parent;
 	struct clock_state *state = clock_state_for(clock);
-	int err;
 
 	/* Perform additional setup if this is the first reference. */
 	if (!state->refcount) {
+		const struct clock_handle *parent;
+		int err UNUSED;
+
 		/* Ensure the controller's driver is loaded. */
-		if ((err = device_get(clock->dev)))
-			return err;
+		err = device_get(clock->dev);
+		assert(err == SUCCESS);
 
 		/* Ensure the clock's parent has an active reference. */
-		if ((parent = ops->get_parent(clock)) &&
-		    (err = clock_get(parent))) {
-			device_put(clock->dev);
-			return err;
-		}
+		if ((parent = ops->get_parent(clock)))
+			clock_get(parent);
 
 		debug("%s: Clock %u running at %u Hz", clock->dev->name,
 		      clock->id, clock_get_rate(clock));
@@ -97,8 +95,6 @@ clock_get(const struct clock_handle *clock)
 
 	/* Enable the clock. */
 	clock_enable(clock);
-
-	return SUCCESS;
 }
 
 uint32_t

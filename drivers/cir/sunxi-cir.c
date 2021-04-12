@@ -67,17 +67,15 @@ sunxi_cir_probe(const struct device *dev)
 	struct sunxi_cir_state *state = sunxi_cir_state_for(dev);
 	int err;
 
+	if ((err = gpio_get(&self->pin)))
+		return err;
+
 	/* Set module clock parent and divider. */
 	state->clk_stash = mmio_read_32(R_CIR_RX_CLK_REG);
 	mmio_write_32(R_CIR_RX_CLK_REG,
 	              CONFIG(CIR_USE_OSC24M) ? 0x01000002 : 0x0);
-
-	if ((err = clock_get(&self->bus_clock)))
-		goto err_restore_clock;
-	if ((err = clock_get(&self->mod_clock)))
-		goto err_put_bus_clock;
-	if ((err = gpio_get(&self->pin)))
-		goto err_put_mod_clock;
+	clock_get(&self->bus_clock);
+	clock_get(&self->mod_clock);
 
 	/* Configure thresholds and sample clock. */
 	mmio_write_32(self->regs + CIR_RXCFG,
@@ -87,15 +85,6 @@ sunxi_cir_probe(const struct device *dev)
 	mmio_write_32(self->regs + CIR_RXCTL, 0x33);
 
 	return SUCCESS;
-
-err_put_mod_clock:
-	clock_put(&self->mod_clock);
-err_put_bus_clock:
-	clock_put(&self->bus_clock);
-err_restore_clock:
-	mmio_write_32(R_CIR_RX_CLK_REG, state->clk_stash);
-
-	return err;
 }
 
 static void
@@ -104,10 +93,10 @@ sunxi_cir_release(const struct device *dev)
 	const struct sunxi_cir *self  = to_sunxi_cir(dev);
 	struct sunxi_cir_state *state = sunxi_cir_state_for(dev);
 
-	gpio_put(&self->pin);
 	clock_put(&self->mod_clock);
 	clock_put(&self->bus_clock);
 	mmio_write_32(R_CIR_RX_CLK_REG, state->clk_stash);
+	gpio_put(&self->pin);
 }
 
 static const struct driver sunxi_cir_driver = {
