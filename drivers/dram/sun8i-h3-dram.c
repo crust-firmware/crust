@@ -193,9 +193,9 @@ dram_suspend(void)
 	               ACIOCR0_CKOE_DISABLED |
 	               ACIOCR0_CKEOE_ENABLED);
 	/* Enable pad hold. */
-	udelay(1);
+	udelay(10);
 	mmio_set_32(VDD_SYS_PWROFF_GATING_REG, GENMASK(1, 0));
-	udelay(1);
+	udelay(10);
 	/* Disable DRAM controller clocks. */
 	mmio_write_32(CLKEN, 0);
 	clock_put(&dram_clocks[DRAM]);
@@ -250,9 +250,9 @@ dram_resume(void)
 	               PGCR3_CKEN_NORMAL |
 	               PGCR3_CKNEN_NORMAL);
 	/* Disable pad hold. */
-	udelay(1);
+	udelay(10);
 	mmio_clr_32(VDD_SYS_PWROFF_GATING_REG, GENMASK(1, 0));
-	udelay(1);
+	udelay(10);
 	/* Restore self refresh state and enable controller port access. */
 	mmio_write_32(PWRCTL, pwrctl);
 
