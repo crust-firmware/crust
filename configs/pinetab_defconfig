@@ -1,0 +1,2 @@
+CONFIG_MFD_AXP20X=y
+# CONFIG_SERIAL is not set
