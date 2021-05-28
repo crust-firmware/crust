@@ -24,8 +24,8 @@ designed to run on a specific SCP implementation, Allwinner's [AR100][].
 See [Crust's ABI documentation][abi] for a detailed description of how Crust
 interacts with other firmware components at runtime.
 
-Interested users and contributors are encouraged to join `#crust` on freenode
-to discuss the firmware and related power management topics.
+Interested users and contributors are encouraged to join `#linux-sunxi` on OFTC
+to discuss the firmware and its integration with other software components.
 
 [abi]: docs/abi.md
 [AR100]: https://linux-sunxi.org/AR100
