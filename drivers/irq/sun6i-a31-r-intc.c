@@ -79,7 +79,7 @@ irq_needs_avcc(void)
 uint32_t
 irq_needs_vdd_sys(void)
 {
-	uint32_t enabled = CONFIG(IRQ_POLL_EINT);
+	uint32_t enabled = 0;
 
 	/* Only read registers with relevant bits. */
 	for (int i = 0; i < NUM_MUX_REGS; ++i) {
@@ -96,7 +96,7 @@ irq_needs_vdd_sys(void)
 uint32_t
 irq_poll(void)
 {
-	uint32_t pending = irq_poll_eint();
+	uint32_t pending = 0;
 
 	for (int i = 0; i < NUM_IRQ_REGS; ++i)
 		pending |= mmio_read_32(DEV_R_INTC + INTC_IRQ_PEND_REG(i));
