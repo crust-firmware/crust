@@ -71,9 +71,9 @@ some patches are currently still needed.
   concatenating Crust onto the end.
 
 Note: The default PMIC bus configuration for most H6 boards is not compatible
-with versions of Linux containing commit [`531fdbeedeb8`][531fdbeedeb8]. To use
-Crust on those boards with those versions of Linux, you must explicitly select
-`CONFIG_I2C_PINS_NONE`.
+with versions of Linux before commit [`531fdbeedeb8`][531fdbeedeb8]. To use
+Crust on those boards with older versions of Linux, you must explicitly select
+`CONFIG_I2C_PINS_PL0_PL1`, or you may use the Crust v0.4 release.
 
 [atf-c335ad480d41]: https://github.com/ARM-Software/ARM-Trusted-Firmware/commits/c335ad480d41
 [atf-v2.3]: https://github.com/ARM-software/arm-trusted-firmware/releases/tag/v2.3

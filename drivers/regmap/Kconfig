@@ -13,7 +13,6 @@ config HAVE_I2C
 choice
 	bool "I2C controller pin selection"
 	depends on HAVE_I2C
-	default I2C_PINS_PL0_PL1 if PLATFORM_H6 # For Linux compatibility
 	default I2C_PINS_NONE if HAVE_RSB
 	default I2C_PINS_PL0_PL1
 	help
