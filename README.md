@@ -70,6 +70,11 @@ some patches are currently still needed.
   load Crust by padding your ATF binary to 48KiB (64KiB for H6) and then
   concatenating Crust onto the end.
 
+Note: The default PMIC bus configuration for most H6 boards is not compatible
+with versions of Linux containing commit [`531fdbeedeb8`][531fdbeedeb8]. To use
+Crust on those boards with those versions of Linux, you must explicitly select
+`CONFIG_I2C_PINS_NONE`.
+
 [atf-c335ad480d41]: https://github.com/ARM-Software/ARM-Trusted-Firmware/commits/c335ad480d41
 [atf-v2.3]: https://github.com/ARM-software/arm-trusted-firmware/releases/tag/v2.3
 [crust-atf]: https://github.com/crust-firmware/arm-trusted-firmware
@@ -77,6 +82,7 @@ some patches are currently still needed.
 [scpi]: http://infocenter.arm.com/help/topic/com.arm.doc.dui0922-/index.html
 [u-boot-18261b855223]: https://github.com/u-boot/u-boot/commit/18261b855223
 [u-boot-v2021.01-rc1]: https://github.com/u-boot/u-boot/releases/tag/v2021.01-rc1
+[531fdbeedeb8]: https://git.kernel.org/torvalds/c/531fdbeedeb8
 
 ## Building the firmware
 
