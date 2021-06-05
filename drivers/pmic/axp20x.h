@@ -22,8 +22,10 @@ to_axp20x_pmic(const struct device *dev)
 
 /* Valid for AXP221, AXP223, AXP803. */
 int axp20x_pmic_reset(const struct device *dev);
+
 /* Valid for AXP221, AXP223, AXP803, AXP805, AXP813. */
 int axp20x_pmic_resume(const struct device *dev);
+
 /* Valid for AXP221, AXP223, AXP803, AXP805, AXP813. */
 int axp20x_pmic_shutdown(const struct device *dev);
 
