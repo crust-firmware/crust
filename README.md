@@ -21,11 +21,19 @@ For this to work, Crust runs outside the main CPU and DRAM, on a dedicated
 always-on microprocessor called a System Control Processor (SCP). Crust is
 designed to run on a specific SCP implementation, Allwinner's [AR100][].
 
+Note that Crust only provides the mechanism for deep sleep. It does not dictate
+any system sleep policy. Specifically, Crust does _not_ decide when to go to
+sleep; the Linux kernel or userspace does that. And with one exception
+(listening for IR remote control key presses), Crust does not decide when to
+wake the system up, either; the hardware, as programmed by Linux, does that.
+Crust is designed to be a mostly-invisible implementation detail of the Linux
+power management interface.
+
 See [Crust's ABI documentation][abi] for a detailed description of how Crust
-interacts with other firmware components at runtime.
+interacts with Linux and other firmware components at runtime.
 
 Interested users and contributors are encouraged to join `#linux-sunxi` on OFTC
-to discuss the firmware and its integration with other software components.
+to discuss the firmware and its integration with other software.
 
 [abi]: docs/abi.md
 [AR100]: https://linux-sunxi.org/AR100
@@ -54,16 +62,16 @@ protocols][scpi] and is developed entirely in the open with community input.
 Effort is underway to upstream all changes to third-party projects; however,
 some patches are currently still needed.
 
-- ARM Trusted Firmware: upstream support for Crust was merged in commit
+- ARM Trusted Firmware-A: upstream support for Crust was merged in commit
   [`c335ad480d41`][atf-c335ad480d41], and is present in all releases starting
   with [v2.3][atf-v2.3]. Optional patches for improved support are available in
   the `crust` branch of [the crust-firmware fork][crust-atf].
 - Linux: while Linux does not directly communicate with Crust, it requires some
   small patches to cleanly share the clock controller and PMIC bus controller
   hardware with Crust. They are available in the `crust-minimal` branch of [the
-  crust-firmware fork][crust-linux]. Those patches, plus additional changes for
-  reduced power consumption (helpful even if you are not using Crust), are
-  available in the `crust` branch.
+  crust-firmware fork][crust-linux]. Those patches, plus additional optional
+  changes for reduced power consumption (helpful even if you are not using
+  Crust), are available in the `crust` branch.
 - U-Boot: upstream support for loading Crust into SRAM was merged in commit
   [`18261b855223`][u-boot-18261b855223], and is present in all releases
   starting with [v2021.01-rc1][u-boot-v2021.01-rc1]. It is also possible to
