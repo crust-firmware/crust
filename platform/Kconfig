@@ -27,6 +27,7 @@ config PLATFORM_A83T
 config PLATFORM_H3
 	bool "H3"
 	depends on ARCH_OR1K
+	select HAVE_DRAM_SUSPEND
 
 config PLATFORM_H6
 	bool "H6"

@@ -188,7 +188,7 @@ dram_suspend(void)
 	               ACIOCR0_CKEOE,
 	               ACIOCR0_ACPDD_ENABLED |
 	               ACIOCR0_ACPDR_ENABLED |
-	               ACIOCR0_ACOE_DISABLED |
+	               ACIOCR0_ACOE_ENABLED * CONFIG(PLATFORM_H3) |
 	               ACIOCR0_ACIOM_CMOS |
 	               ACIOCR0_CKOE_DISABLED |
 	               ACIOCR0_CKEOE_ENABLED);
