@@ -56,8 +56,6 @@ css_resume_core(uint32_t cluster UNUSED, uint32_t core, uint32_t old_state)
 
 	/* Assert core reset and power-on reset (active-low). */
 	mmio_write_32(CPUn_RST_CTRL_REG(core), 0);
-	/* Enable hardware L1 cache flush (active-low). */
-	mmio_clr_32(GEN_CTRL_REG, GEN_CTRL_REG_L1RSTDISABLE(core));
 	/* Turn on power to the core power domain. */
 	css_set_power_switch(C0_CPUn_PWR_SWITCH_REG(core), true);
 	/* Release the core output clamps. */
@@ -68,4 +66,13 @@ css_resume_core(uint32_t cluster UNUSED, uint32_t core, uint32_t old_state)
 	              CPUn_RST_CTRL_REG_nCPUPORESET);
 	/* Assert DBGPWRDUP (allow debug access to the core). */
 	mmio_set_32(DBG_CTRL_REG1, DBG_CTRL_REG1_DBGPWRDUP(core));
+}
+
+void
+css_init(void)
+{
+	/* Enable hardware L1/L2 cache flush for all cores (active-low). */
+	mmio_clr_32(GEN_CTRL_REG,
+	            GEN_CTRL_REG_L2RSTDISABLE |
+	            GEN_CTRL_REG_L1RSTDISABLE_MASK);
 }
