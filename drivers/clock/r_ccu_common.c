@@ -75,11 +75,13 @@ r_ccu_common_resume(void)
 	 */
 	mmio_write_32(VDD_SYS_RESET_REG, VDD_SYS_RESET);
 	mmio_clr_32(VDD_SYS_PWROFF_GATING_REG, VDD_CPUS_GATING | AVCC_GATING);
-	write_pll_ctrl_reg1(PLL_CTRL_REG1_LDO_EN);
-	if (CONFIG(OSC24M_SRC_X24M)) {
-		udelay(2000);
-		write_pll_ctrl_reg1(PLL_CTRL_REG1_CRYSTAL_EN |
-		                    PLL_CTRL_REG1_LDO_EN);
+	if (!mmio_get_32(PLL_CTRL_REG1, PLL_CTRL_REG1_LDO_EN)) {
+		write_pll_ctrl_reg1(PLL_CTRL_REG1_LDO_EN);
+		if (CONFIG(OSC24M_SRC_X24M)) {
+			udelay(2000);
+			write_pll_ctrl_reg1(PLL_CTRL_REG1_CRYSTAL_EN |
+			                    PLL_CTRL_REG1_LDO_EN);
+		}
 	}
 }
 
