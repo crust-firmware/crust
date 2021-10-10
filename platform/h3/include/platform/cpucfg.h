@@ -38,6 +38,12 @@
 #define CPU_CLK_GATING_REG_L2_GATING     BIT(8)
 #define CPU_CLK_GATING_REG_CPU_GATING(n) BIT(0 + (n))
 
+#define IRQ_FIQ_STATUS_REG               (DEV_R_CPUCFG + 0x014c)
+#define C0_IRQ_OUT(n)                    BIT(0 + (n))
+#define C0_IRQ_OUT_MASK                  (0xf << 0)
+#define C0_FIQ_OUT(n)                    BIT(8 + (n))
+#define C0_FIQ_OUT_MASK                  (0xf << 8)
+
 #define GEN_CTRL_REG                     (DEV_R_CPUCFG + 0x0184)
 #define GEN_CTRL_REG_CFGSDISABLE         BIT(8)
 #define GEN_CTRL_REG_ACINACTM            BIT(6)
@@ -45,6 +51,9 @@
 #define GEN_CTRL_REG_L2RSTDISABLE        BIT(4)
 #define GEN_CTRL_REG_L1RSTDISABLE(n)     BIT(0 + (n))
 #define GEN_CTRL_REG_L1RSTDISABLE_MASK   (0xf << 0)
+
+#define EVENT_IN_REG                     (DEV_R_CPUCFG + 0x0190)
+#define EVENT_IN                         BIT(0)
 
 #define DBG_CTRL_REG0                    (DEV_R_CPUCFG + 0x01e0)
 
