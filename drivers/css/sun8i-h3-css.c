@@ -8,9 +8,14 @@
 #include <stdint.h>
 #include <clock/ccu.h>
 #include <platform/cpucfg.h>
+#include <platform/devices.h>
 #include <platform/prcm.h>
 
 #include "css.h"
+
+#define PLL_PERIPH0_CTRL_REG 0x0028
+#define CPUX_AXI_CFG_REG     0x0050
+#define AHB1_APB1_CFG_REG    0x0054
 
 void
 css_suspend_css(uint32_t new_state)
@@ -77,6 +82,8 @@ css_suspend_core(uint32_t cluster UNUSED, uint32_t core, uint32_t new_state)
 void
 css_resume_core(uint32_t cluster UNUSED, uint32_t core, uint32_t old_state)
 {
+	uint32_t bus_clk, cpu_clk;
+
 	if (old_state < SCPI_CSS_OFF)
 		return;
 
@@ -88,11 +95,29 @@ css_resume_core(uint32_t cluster UNUSED, uint32_t core, uint32_t old_state)
 		css_set_power_switch(C0_CPUn_PWR_SWITCH_REG(core), true);
 		/* Release the core output clamps. */
 		mmio_clr_32(C0_PWROFF_GATING_REG, C0_CPUn_PWROFF_GATING(core));
+	} else {
+		/* Save registers that will be clobbered by the BROM. */
+		cpu_clk = mmio_read_32(DEV_CCU + CPUX_AXI_CFG_REG);
+		bus_clk = mmio_read_32(DEV_CCU + AHB1_APB1_CFG_REG);
+
+		/* Bypass PLL_PERIPH0 so AHB1 frequency does not spike. */
+		mmio_set_32(DEV_CCU + PLL_PERIPH0_CTRL_REG, BIT(25));
 	}
 	/* Deassert core reset and power-on reset (active-low). */
 	mmio_write_32(CPUn_RST_CTRL_REG(core),
 	              CPUn_RST_CTRL_REG_nCORERESET |
 	              CPUn_RST_CTRL_REG_nCPUPORESET);
+	if (core == 0) {
+		/* Spin until the BROM has clobbered the clock registers. */
+		mmio_pollz_32(DEV_CCU + AHB1_APB1_CFG_REG, BIT(13));
+
+		/* Disable PLL_PERIPH0 bypass. */
+		mmio_clr_32(DEV_CCU + PLL_PERIPH0_CTRL_REG, BIT(25));
+
+		/* Restore the clobbered registers. */
+		mmio_write_32(DEV_CCU + CPUX_AXI_CFG_REG, cpu_clk);
+		mmio_write_32(DEV_CCU + AHB1_APB1_CFG_REG, bus_clk);
+	}
 	/* Assert DBGPWRDUP (allow debug access to the core). */
 	mmio_set_32(DBG_CTRL_REG1, DBG_CTRL_REG1_DBGPWRDUP(core));
 }
