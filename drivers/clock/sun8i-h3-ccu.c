@@ -140,11 +140,11 @@ static const struct ccu_clock ccu_clocks[SUN8I_H3_CCU_CLOCKS] = {
 		.update     = 16,
 		.reset      = BITMAP_INDEX(0x00f4, 31),
 	},
+	/* MBUS reset breaks DRAM resume on H3. */
 	[CLK_MBUS] = {
 		.get_parent = ccu_get_null_parent,
 		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x015c, 31),
-		.reset      = BITMAP_INDEX(0x00fc, 31),
 	},
 };
 
