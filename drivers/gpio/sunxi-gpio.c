@@ -62,8 +62,9 @@ sunxi_gpio_init_pin(const struct gpio_handle *gpio)
 	uintptr_t regs = self->regs;
 
 	/* Set pin function configuration (mode). */
-	mmio_set_bitfield_32(regs + MODE_REG(port, pin), MODE_BIT(pin),
-	                     MODE_WIDTH, gpio->mode);
+	if (gpio->mode != MODE_OUTPUT)
+		mmio_set_bitfield_32(regs + MODE_REG(port, pin), MODE_BIT(pin),
+		                     MODE_WIDTH, gpio->mode);
 	/* Set pin drive strength. */
 	mmio_set_bitfield_32(regs + DRIVE_REG(port, pin), DRIVE_BIT(pin),
 	                     DRIVE_WIDTH, gpio->drive);
@@ -84,6 +85,8 @@ sunxi_gpio_set_value(const struct gpio_handle *gpio, bool value)
 
 	mmio_set_bitfield_32(regs + DATA_REG(port), DATA_BIT(pin),
 	                     DATA_WIDTH, value);
+	mmio_set_bitfield_32(regs + MODE_REG(port, pin), MODE_BIT(pin),
+	                     MODE_WIDTH, MODE_OUTPUT);
 
 	return SUCCESS;
 }
