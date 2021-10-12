@@ -50,9 +50,9 @@ to choose the appropriate options (there aren't many).
 |-------|-------------------|------|-----------|---------------|------|------|
 | A64   | Production/stable | Yes  | Yes       | Yes           | Yes  | Yes  |
 | A83T  | Known to compile  | Yes  | No        | No            | No   | No   |
-| H3    | Work in progress  | Yes  | No        | No            | No   | N/A  |
+| H3    | Working beta      | Yes  | Yes       | Yes           | Yes  | N/A  |
 | H5    | Production/stable | Yes  | Yes       | Yes           | Yes  | N/A  |
-| H6    | "Beta"/stable     | Yes  | Yes       | Yes           | Yes  | Yes  |
+| H6    | Production/stable | Yes  | Yes       | Yes           | Yes  | Yes  |
 
 ## Prerequisites
 
