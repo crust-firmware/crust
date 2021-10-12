@@ -99,6 +99,7 @@ config DEBUG_PRINT_SPRS
 
 config DEBUG_RECORD_STEPS
 	bool "Record steps of the suspend/resume process in the RTC"
+	depends on !PLATFORM_A83T # No RTC
 	help
 		Record the start of various steps of the suspend and
 		resume processes in one of the RTC's general purpose
