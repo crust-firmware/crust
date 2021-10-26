@@ -115,6 +115,20 @@ mmio_read_32(uintptr_t addr)
 }
 
 /**
+ * Read a 8-bit MMIO register.
+ *
+ * @param addr The address of the register.
+ * @return     The value of the register.
+ */
+static inline uint8_t
+mmio_read_8(uintptr_t addr)
+{
+	volatile uint8_t *ptr = (void *)(addr ^ 3);
+
+	return *ptr;
+}
+
+/**
  * Set bits in a 32-bit MMIO register.
  *
  * @param addr The address of the register.
@@ -138,6 +152,20 @@ static inline void
 mmio_write_32(uintptr_t addr, uint32_t val)
 {
 	volatile uint32_t *ptr = (void *)addr;
+
+	*ptr = val;
+}
+
+/**
+ * Write a 8-bit MMIO register.
+ *
+ * @param addr The address of the register.
+ * @param val  The new value of the register.
+ */
+static inline void
+mmio_write_8(uintptr_t addr, uint8_t val)
+{
+	volatile uint8_t *ptr = (void *)(addr ^ 3);
 
 	*ptr = val;
 }
