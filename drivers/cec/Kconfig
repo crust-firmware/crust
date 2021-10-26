@@ -1,0 +1,11 @@
+#
+# Copyright © 2021 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+config CEC
+	bool "HDMI CEC"
+	help
+		Listen for messages from TV or other devices on HDMI CEC bus.
+		This can be used as a wakeup source. Note: Clocks and resets
+		must be pre-initialized by rich OS.

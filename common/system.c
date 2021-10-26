@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
+#include <cec.h>
 #include <cir.h>
 #include <counter.h>
 #include <css.h>
@@ -82,7 +83,7 @@ select_suspend_depth(uint8_t current_state)
 noreturn void
 system_state_machine(uint32_t exception)
 {
-	const struct device *cir, *mailbox, *pmic, *watchdog;
+	const struct device *cec, *cir, *mailbox, *pmic, *watchdog;
 	uint8_t initial_state = system_state;
 	uint8_t suspend_depth;
 
@@ -96,6 +97,7 @@ system_state_machine(uint32_t exception)
 		system_state = SS_OFF;
 
 		/* Clear out inactive references. */
+		cec      = NULL;
 		cir      = NULL;
 		watchdog = NULL;
 		mailbox  = NULL;
@@ -175,6 +177,7 @@ system_state_machine(uint32_t exception)
 			device_put(mailbox), mailbox = NULL;
 
 			/* Acquire wakeup sources. */
+			cec = cec_get();
 			cir = cir_get();
 
 			/* Configure the SoC for minimal power consumption. */
@@ -236,7 +239,9 @@ system_state_machine(uint32_t exception)
 			debug_print_battery();
 
 			/* Poll wakeup sources. Reset or resume on wakeup. */
-			if ((cir && cir_poll(cir)) || irq_poll())
+			if ((cec && cec_poll(cec)) ||
+			    (cir && cir_poll(cir)) ||
+			    irq_poll())
 				system_state = NEXT_STATE;
 
 			break;
@@ -283,6 +288,7 @@ system_state_machine(uint32_t exception)
 			/* Release wakeup sources. */
 			record_step(STEP_RESUME_DEVICES);
 			device_put(cir), cir = NULL;
+			device_put(cec), cec = NULL;
 
 			/* Acquire runtime-only devices. */
 			mailbox = device_get_or_null(&msgbox.dev);
