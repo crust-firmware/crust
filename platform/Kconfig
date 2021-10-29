@@ -43,3 +43,31 @@ if PLATFORM_A64
 source "a64/Kconfig"
 
 endif
+
+config HAVE_DCXO
+	bool
+	help
+		Select this option on platforms with a DCXO in the RTC
+		domain in addition to X24M pads in the PLL domain.
+
+config HAVE_DRAM_SUSPEND
+	bool
+	help
+		Select this option on platforms with the ability to
+		suspend the DRAM controller.
+
+config HAVE_I2C
+	bool
+	default y
+	help
+		Select this option on platforms with an I2C controller.
+
+config HAVE_RSB
+	bool
+	help
+		Select this option on platforms with an RSB controller.
+
+config HAVE_UART4
+	bool
+	help
+		Select this option on platforms with a UART4.

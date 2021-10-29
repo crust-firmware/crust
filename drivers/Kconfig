@@ -5,7 +5,6 @@
 
 menu "Device drivers"
 
-source "dram/Kconfig"
 source "cir/Kconfig"
 source "clock/Kconfig"
 source "regmap/Kconfig"
