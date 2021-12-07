@@ -8,7 +8,7 @@ OBJ		 = build
 TGT		 = $(OBJ)/scp
 
 BUILDAR		 = ar
-BUILDCC		 = cc
+BUILDCC		?= cc
 
 HOST_COMPILE	?= aarch64-linux-musl-
 HOSTAR		 = $(HOST_COMPILE)gcc-ar
