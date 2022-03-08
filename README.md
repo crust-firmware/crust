@@ -111,10 +111,10 @@ relevant when compiling freestanding firmware programs), or if it is not in
 your `PATH`, export `CROSS_COMPILE` or edit the top of the `Makefile` to
 provide the appropriate prefix or full path.
 
-Run `make` to build the firmware and related tools, or `make scp` to build just
-the firmware, which will be placed at `build/scp/scp.bin`. Adding `V=1` to the
-command line will run a verbose build, showing you the commands as they run.
-Set `SRC`, `OBJ`, or `TGT` as necessary if you want to do an out-of-tree build.
+Run `make` to build the firmware, which will be placed at `build/scp/scp.bin`.
+Adding `V=1` to the command line will perform a verbose build, showing you the
+commands as they run. Set `SRC`, `OBJ`, or `TGT` as necessary if you want to do
+an out-of-tree build.
 
 [bootlin]: https://toolchains.bootlin.com/
 [crust-meta]: https://github.com/crust-firmware/meta

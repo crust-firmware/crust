@@ -112,7 +112,7 @@ $(call descend,3rdparty arch common drivers lib tools)
 M := @$(if $(filter-out 0,$(V)),:,exec printf '  %-7s %s\n')
 Q :=  $(if $(filter-out 0,$(V)),,@)exec
 
-all: scp tools $(test-all)
+all: scp $(test-all)
 
 check: $(test-all:%=%.test)
 

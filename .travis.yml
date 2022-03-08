@@ -75,5 +75,5 @@ matrix:
             sha256sum -b build/$config/scp.bin
             echo =========== end $config ===========
           done
-          make SRC=$TRAVIS_BUILD_DIR V=1 html
+          make SRC=$TRAVIS_BUILD_DIR V=1 html tools
 ...
