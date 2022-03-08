@@ -101,15 +101,12 @@ css_set_power_state(uint32_t cluster, uint32_t core, uint32_t core_state,
 			lead_core    = core;
 		}
 	} else {
-		record_step(STEP_RESUME_CSS);
 		css_resume_css(*css_ps);
 		*css_ps = SCPI_CSS_ON;
 
-		record_step(STEP_RESUME_CLUSTER);
 		css_resume_cluster(cluster, *cluster_ps);
 		*cluster_ps = SCPI_CSS_ON;
 
-		record_step(STEP_RESUME_CORE);
 		css_resume_core(cluster, core, *core_ps);
 		*core_ps = SCPI_CSS_ON;
 	}

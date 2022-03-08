@@ -294,6 +294,7 @@ system_state_machine(uint32_t exception)
 			mailbox = device_get_or_null(&msgbox.dev);
 
 			/* Resume execution on the CSS. */
+			record_step(STEP_RESUME_CSS);
 			css_resume();
 
 			record_step(STEP_RESUME_COMPLETE);
