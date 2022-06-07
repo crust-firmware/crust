@@ -75,7 +75,7 @@ config DEBUG_MONITOR_PMIC
 
 config DEBUG_PRINT_BATTERY
 	bool "Print battery consumption periodically while off/asleep"
-	depends on MFD_AXP803
+	depends on MFD_AXP223 || MFD_AXP803
 	help
 		While the system is off or asleep and the battery is
 		discharging, print the battery voltage, discharge

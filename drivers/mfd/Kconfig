@@ -20,8 +20,14 @@ comment "X-Powers PMIC will communicate via RSB"
 choice
 	bool "X-Powers PMIC variant"
 	depends on MFD_AXP20X
+	default MFD_AXP223 if PLATFORM_A23
 	default MFD_AXP803 if PLATFORM_A64
 	default MFD_AXP805 if PLATFORM_H6
+
+config MFD_AXP223
+	bool "AXP223"
+	help
+		This PMIC is usually paired with the A23/A33 SoC.
 
 config MFD_AXP803
 	bool "AXP803"

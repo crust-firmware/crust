@@ -14,7 +14,11 @@
 #define IC_TYPE_REG   0x03
 #define IC_TYPE_MASK  0xcf
 
-#if CONFIG(MFD_AXP803)
+#if CONFIG(MFD_AXP223)
+#define IC_TYPE_VALUE 0x06
+#define I2C_ADDRESS   0x34
+#define RSB_ADDRESS   (0x2d << 16 | 0x3a3)
+#elif CONFIG(MFD_AXP803)
 #define IC_TYPE_VALUE 0x41
 #define I2C_ADDRESS   0x34
 #define RSB_ADDRESS   (0x2d << 16 | 0x3a3)
