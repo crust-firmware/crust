@@ -5,5 +5,6 @@
 
 obj-y += pmic.o
 
+obj-$(CONFIG_PMIC_AXP223) += axp20x.o axp223.o
 obj-$(CONFIG_PMIC_AXP803) += axp20x.o axp803.o
 obj-$(CONFIG_PMIC_AXP805) += axp20x.o axp805.o

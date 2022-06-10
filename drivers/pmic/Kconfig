@@ -8,6 +8,11 @@ menu "Power management controllers"
 config PMIC
 	bool
 
+config PMIC_AXP223
+	bool
+	select PMIC
+	default MFD_AXP223
+
 config PMIC_AXP803
 	bool
 	select PMIC
