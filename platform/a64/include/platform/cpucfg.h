@@ -102,4 +102,11 @@
 #define C0_IRQ_OUT(n)                     BIT(0 + (n))
 #define C0_IRQ_OUT_MASK                   (0xf << 0)
 
+#define CNT64_CTRL_REG                    (DEV_R_CPUCFG + 0x0280)
+#define CNT64_RL_EN                       BIT(1)
+#define CNT64_CLR_EN                      BIT(0)
+
+#define CNT64_LO_REG                      (DEV_R_CPUCFG + 0x0284)
+#define CNT64_HI_REG                      (DEV_R_CPUCFG + 0x0288)
+
 #endif /* PLATFORM_CPUCFG_H */
