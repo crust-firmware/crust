@@ -123,7 +123,11 @@ mmio_read_32(uintptr_t addr)
 static inline uint8_t
 mmio_read_8(uintptr_t addr)
 {
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 	volatile uint8_t *ptr = (void *)(addr ^ 3);
+#else
+	volatile uint8_t *ptr = (void *)addr;
+#endif
 
 	return *ptr;
 }
@@ -165,7 +169,11 @@ mmio_write_32(uintptr_t addr, uint32_t val)
 static inline void
 mmio_write_8(uintptr_t addr, uint8_t val)
 {
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 	volatile uint8_t *ptr = (void *)(addr ^ 3);
+#else
+	volatile uint8_t *ptr = (void *)addr;
+#endif
 
 	*ptr = val;
 }

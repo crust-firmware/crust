@@ -125,7 +125,7 @@ enum {
  * swapping needed in command implementations.
  */
 struct scpi_msg {
-#ifdef __or1k__
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 	uint16_t size;
 	uint8_t  sender;
 	uint8_t  command;
