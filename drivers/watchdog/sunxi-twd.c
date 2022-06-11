@@ -100,11 +100,3 @@ const struct simple_device r_twd = {
 	.clock = { .dev = &r_ccu.dev, .id = CLK_BUS_R_TWD },
 	.regs  = DEV_R_TWD,
 };
-
-uint32_t
-r_twd_counter_read(void)
-{
-	assert(device_active(&r_twd.dev));
-
-	return mmio_read_32(DEV_R_TWD + TWD_LOW_CNT_REG);
-}
