@@ -5,4 +5,4 @@
 
 obj-y += watchdog.o
 
-obj-y += sunxi-twd.o
+obj-y += sun9i-a80-twd.o

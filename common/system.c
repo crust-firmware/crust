@@ -27,7 +27,7 @@
 #include <clock/ccu.h>
 #include <gpio/sunxi-gpio.h>
 #include <msgbox/sunxi-msgbox.h>
-#include <watchdog/sunxi-twd.h>
+#include <watchdog/sun9i-a80-twd.h>
 
 #define NEXT_STATE (system_state + 2)
 

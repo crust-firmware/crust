@@ -8,7 +8,7 @@
 #include <mmio.h>
 #include <util.h>
 #include <clock/ccu.h>
-#include <watchdog/sunxi-twd.h>
+#include <watchdog/sun9i-a80-twd.h>
 #include <platform/devices.h>
 #include <platform/time.h>
 
@@ -25,7 +25,7 @@
 #define TWD_TIMEOUT     (5 * REFCLK_HZ) /* 5 seconds */
 
 static void
-sunxi_twd_restart(const struct device *dev)
+sun9i_a80_twd_restart(const struct device *dev)
 {
 	const struct simple_device *self = to_simple_device(dev);
 
@@ -33,7 +33,7 @@ sunxi_twd_restart(const struct device *dev)
 }
 
 static void
-sunxi_twd_set_timeout(const struct device *dev, uint32_t timeout)
+sun9i_a80_twd_set_timeout(const struct device *dev, uint32_t timeout)
 {
 	const struct simple_device *self = to_simple_device(dev);
 
@@ -41,7 +41,7 @@ sunxi_twd_set_timeout(const struct device *dev, uint32_t timeout)
 }
 
 static int
-sunxi_twd_probe(const struct device *dev)
+sun9i_a80_twd_probe(const struct device *dev)
 {
 	const struct simple_device *self = to_simple_device(dev);
 	uintptr_t regs = self->regs;
@@ -61,7 +61,7 @@ sunxi_twd_probe(const struct device *dev)
 	mmio_write_32(regs + TWD_INTV_REG, TWD_TIMEOUT);
 
 	/* Update the comparator to (counter + timeout). */
-	sunxi_twd_restart(dev);
+	sun9i_a80_twd_restart(dev);
 
 	/* Start the watchdog counter; enable system reset. */
 	mmio_clrset_32(regs + TWD_CTRL_REG, BIT(1), BIT(9));
@@ -70,7 +70,7 @@ sunxi_twd_probe(const struct device *dev)
 }
 
 static void
-sunxi_twd_release(const struct device *dev)
+sun9i_a80_twd_release(const struct device *dev)
 {
 	const struct simple_device *self = to_simple_device(dev);
 
@@ -80,21 +80,21 @@ sunxi_twd_release(const struct device *dev)
 	simple_device_release(dev);
 }
 
-static const struct watchdog_driver sunxi_twd_driver = {
+static const struct watchdog_driver sun9i_a80_twd_driver = {
 	.drv = {
-		.probe   = sunxi_twd_probe,
-		.release = sunxi_twd_release,
+		.probe   = sun9i_a80_twd_probe,
+		.release = sun9i_a80_twd_release,
 	},
 	.ops = {
-		.restart     = sunxi_twd_restart,
-		.set_timeout = sunxi_twd_set_timeout,
+		.restart     = sun9i_a80_twd_restart,
+		.set_timeout = sun9i_a80_twd_set_timeout,
 	},
 };
 
 const struct simple_device r_twd = {
 	.dev = {
 		.name  = "r_twd",
-		.drv   = &sunxi_twd_driver.drv,
+		.drv   = &sun9i_a80_twd_driver.drv,
 		.state = DEVICE_STATE_INIT,
 	},
 	.clock = { .dev = &r_ccu.dev, .id = CLK_BUS_R_TWD },
