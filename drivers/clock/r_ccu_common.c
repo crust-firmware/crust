@@ -8,7 +8,6 @@
 #include <mmio.h>
 #include <stdint.h>
 #include <system.h>
-#include <watchdog/sunxi-twd.h>
 #include <platform/devices.h>
 #include <platform/prcm.h>
 #include <platform/time.h>
@@ -97,7 +96,7 @@ r_ccu_common_init(void)
 	do {
 		before = cycle_counter_read();
 		barrier();
-		now = r_twd_counter_read();
+		now = system_counter_read();
 		end = now + (REFCLK_HZ >> 9);
 	} while (end < now);
 
@@ -106,7 +105,7 @@ r_ccu_common_init(void)
 		after = cycle_counter_read();
 		/* Ensure the counters are read in a consistent order. */
 		barrier();
-		now = r_twd_counter_read();
+		now = system_counter_read();
 	} while (now < end);
 
 	/*
