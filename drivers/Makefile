@@ -6,6 +6,7 @@
 obj-$(CONFIG_CEC) += cec/
 obj-$(CONFIG_CIR) += cir/
 obj-y += clock/
+obj-y += counter/
 obj-y += css/
 obj-y += dram/
 obj-y += gpio/

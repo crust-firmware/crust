@@ -23,4 +23,13 @@ void cycle_counter_init(void);
  */
 uint32_t cycle_counter_read(void);
 
+/**
+ * Read the system counter.
+ *
+ * This counter is at least 32 bits wide and runs at the platform's reference
+ * clock frequency (usually 24 MHz). Note that this clock may be unavailable
+ * while the system is off or asleep.
+ */
+uint32_t system_counter_read(void);
+
 #endif /* DRIVERS_COUNTER_H */
