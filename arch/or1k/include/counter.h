@@ -9,18 +9,19 @@
 #include <stdint.h>
 
 /**
- * Initialize the system counter.
+ * Initialize the cycle counter.
  *
- * This function must be called before delays or timeouts can be used.
+ * This function must be called once before attempting to read the cycle
+ * counter. Note that the delay and timeout libraries use the cycle counter.
  */
-void counter_init(void);
+void cycle_counter_init(void);
 
 /**
- * Read the system counter.
+ * Read the cycle counter.
  *
  * This counter (the OpenRISC 1000 architectural tick timer) is a 32-bit up
  * counter running at the same frequency as the CPU clock.
  */
-uint32_t counter_read(void);
+uint32_t cycle_counter_read(void);
 
 #endif /* COUNTER_H */

@@ -109,7 +109,7 @@ system_state_machine(uint32_t exception)
 		watchdog = device_get_or_null(&r_twd.dev);
 
 		/* Perform one-time device driver initialization. */
-		counter_init();
+		cycle_counter_init();
 		r_ccu_init();
 		ccu_init();
 		css_init();

@@ -7,14 +7,14 @@
 #include <spr.h>
 
 void
-counter_init(void)
+cycle_counter_init(void)
 {
 	mtspr(SPR_TICK_TTMR_ADDR,
 	      SPR_TICK_TTMR_MODE_CONTINUE << SPR_TICK_TTMR_MODE_LSB);
 }
 
 uint32_t
-counter_read(void)
+cycle_counter_read(void)
 {
 	return mfspr(SPR_TICK_TTCR_ADDR);
 }

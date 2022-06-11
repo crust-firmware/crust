@@ -95,7 +95,7 @@ r_ccu_common_init(void)
 
 	/* Cycle until the interval will not span a counter wraparound. */
 	do {
-		before = counter_read();
+		before = cycle_counter_read();
 		barrier();
 		now = r_twd_counter_read();
 		end = now + (REFCLK_HZ >> 9);
@@ -103,7 +103,7 @@ r_ccu_common_init(void)
 
 	/* Cycle until the end of the interval. */
 	do {
-		after = counter_read();
+		after = cycle_counter_read();
 		/* Ensure the counters are read in a consistent order. */
 		barrier();
 		now = r_twd_counter_read();
