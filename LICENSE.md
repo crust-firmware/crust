@@ -36,7 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ## BSD 3-clause License
 
     Copyright © 2013-2017, ARM Limited and Contributors. All rights reserved.
-    Copyright © 2017-2021 The Crust Firmware Authors.
+    Copyright © 2017-2022 The Crust Firmware Authors.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:

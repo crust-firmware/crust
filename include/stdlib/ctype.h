@@ -1,6 +1,6 @@
 /*
  * Copyright © 2005-2014 Rich Felker, et al.
- * Copyright © 2017-2021 The Crust Firmware Authors.
+ * Copyright © 2017-2022 The Crust Firmware Authors.
  * SPDX-License-Identifier: MIT
  */
 
