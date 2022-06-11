@@ -20,9 +20,9 @@
 	                    PLL_CTRL_REG1_LDO_EN)
 
 /* Persist this var as r_ccu_init() may not be called after an exception. */
-static uint32_t osc16m_rate = 16000000U;
+static uint32_t iosc_rate = 16000000U;
 
-DEFINE_FIXED_RATE(r_ccu_common_get_osc16m_rate, osc16m_rate)
+DEFINE_FIXED_RATE(r_ccu_common_get_iosc_rate, iosc_rate)
 
 /**
  * Write a value to the lockable bits in PLL_CTRL_REG1.
@@ -110,9 +110,9 @@ r_ccu_common_init(void)
 	} while (now < end);
 
 	/*
-	 * Convert the number of OSC16M cycles in 1/512 second to Hz. 512 is
+	 * Convert the number of IOSC cycles in 1/512 second to Hz. 512 is
 	 * chosen because it is the largest power-of-two factor of 24MHz, the
 	 * reference clock frequency.
 	 */
-	osc16m_rate = (after - before) << 9;
+	iosc_rate = (after - before) << 9;
 }

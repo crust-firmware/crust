@@ -91,9 +91,9 @@ uint32_t ccu_helper_get_rate_p(const struct ccu *self,
  * ==============
  */
 
-uint32_t r_ccu_common_get_osc16m_rate(const struct ccu *self,
-                                      const struct ccu_clock *clk,
-                                      uint32_t rate);
+uint32_t r_ccu_common_get_iosc_rate(const struct ccu *self,
+                                    const struct ccu_clock *clk,
+                                    uint32_t rate);
 void r_ccu_common_suspend(uint8_t depth);
 void r_ccu_common_resume(void);
 void r_ccu_common_init(void);

@@ -35,7 +35,7 @@ static const struct clock_handle r_ccu_ar100_parents[] = {
 	},
 	{
 		.dev = &r_ccu.dev,
-		.id  = CLK_OSC16M,
+		.id  = CLK_IOSC,
 	},
 };
 
@@ -97,9 +97,9 @@ ccu_get_r_cir_rate(const struct ccu *self,
 }
 
 static const struct ccu_clock r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
-	[CLK_OSC16M] = {
+	[CLK_IOSC] = {
 		.get_parent = ccu_get_null_parent,
-		.get_rate   = r_ccu_common_get_osc16m_rate,
+		.get_rate   = r_ccu_common_get_iosc_rate,
 	},
 	[CLK_OSC24M] = {
 		.get_parent = ccu_get_null_parent,
@@ -187,7 +187,7 @@ const struct ccu r_ccu = {
 void
 r_ccu_init(void)
 {
-	/* Set CPUS to OSC16M/1 (16MHz). */
+	/* Set CPUS to IOSC/1 (600 kHz or 16MHz). */
 	mmio_write_32(CPUS_CLK_REG,
 	              CPUS_CLK_REG_CLK_SRC(3) |
 	              CPUS_CLK_REG_PRE_DIV(0) |
