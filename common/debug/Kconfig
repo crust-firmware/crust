@@ -91,6 +91,7 @@ config DEBUG_PRINT_LATENCY
 
 config DEBUG_PRINT_SPRS
 	bool "Print the contents of Special Purpose Registers at boot"
+	depends on ARCH_OR1K
 	help
 		The OpenRISC 1000 architecture defines various Special
 		Purpose Registers, or SPRs, that describe the particular
