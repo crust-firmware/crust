@@ -7,6 +7,7 @@
 #include <intrusive.h>
 #include <stdint.h>
 #include <watchdog.h>
+#include <watchdog/sun9i-a80-twd.h>
 
 #include "watchdog.h"
 
@@ -20,6 +21,12 @@ watchdog_ops_for(const struct device *dev)
 		container_of(dev->drv, const struct watchdog_driver, drv);
 
 	return &drv->ops;
+}
+
+const struct device *
+watchdog_get(void)
+{
+	return device_get_or_null(&r_twd.dev);
 }
 
 void

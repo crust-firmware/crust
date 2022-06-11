@@ -9,6 +9,13 @@
 #include <device.h>
 
 /**
+ * Get a reference to an available watchdog device.
+ *
+ * @return A reference to a watchdog device.
+ */
+const struct device *watchdog_get(void);
+
+/**
  * Use the watchdog to reset the system as soon as possible.
  *
  * @param dev The watchdog device.

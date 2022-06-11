@@ -27,7 +27,6 @@
 #include <clock/ccu.h>
 #include <gpio/sunxi-gpio.h>
 #include <msgbox/sunxi-msgbox.h>
-#include <watchdog/sun9i-a80-twd.h>
 
 #define NEXT_STATE (system_state + 2)
 
@@ -106,7 +105,7 @@ system_state_machine(uint32_t exception)
 		system_state = SS_AWAKE;
 
 		/* First, enable watchdog protection. */
-		watchdog = device_get_or_null(&r_twd.dev);
+		watchdog = watchdog_get();
 
 		/* Perform one-time device driver initialization. */
 		cycle_counter_init();
@@ -270,7 +269,7 @@ system_state_machine(uint32_t exception)
 			r_ccu_resume();
 
 			/* Enable watchdog protection. */
-			watchdog = device_get_or_null(&r_twd.dev);
+			watchdog = watchdog_get();
 
 			/* The system is now ready to reset or resume. */
 			system_state = NEXT_STATE;
