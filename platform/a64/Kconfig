@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
 #
 
+if PLATFORM_A64
+
 choice
 	bool "SoC"
 
@@ -15,3 +17,5 @@ config SOC_H5
 	bool "H5"
 
 endchoice
+
+endif

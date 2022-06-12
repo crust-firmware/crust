@@ -38,11 +38,7 @@ config PLATFORM_H6
 
 endchoice
 
-if PLATFORM_A64
-
 source "a64/Kconfig"
-
-endif
 
 config HAVE_DCXO
 	bool
