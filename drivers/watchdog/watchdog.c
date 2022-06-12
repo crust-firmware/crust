@@ -23,13 +23,13 @@ watchdog_ops_for(const struct device *dev)
 }
 
 void
-watchdog_restart(const struct device *dev)
+watchdog_reset_system(const struct device *dev)
 {
-	watchdog_ops_for(dev)->restart(dev);
+	watchdog_ops_for(dev)->reset_system(dev);
 }
 
 void
-watchdog_set_timeout(const struct device *dev, uint32_t timeout)
+watchdog_restart(const struct device *dev)
 {
-	watchdog_ops_for(dev)->set_timeout(dev, timeout);
+	watchdog_ops_for(dev)->restart(dev);
 }

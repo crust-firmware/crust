@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
  */
 
-#include <debug.h>
+#include <delay.h>
 #include <error.h>
 #include <mmio.h>
 #include <util.h>
@@ -25,19 +25,22 @@
 #define TWD_TIMEOUT     (5 * REFCLK_HZ) /* 5 seconds */
 
 static void
+sun9i_a80_twd_reset_system(const struct device *dev)
+{
+	const struct simple_device *self = to_simple_device(dev);
+
+	/* Set the timeout to the smallest value. 0 is broken on some SoCs. */
+	mmio_write_32(self->regs + TWD_INTV_REG, 1);
+
+	udelay(1);
+}
+
+static void
 sun9i_a80_twd_restart(const struct device *dev)
 {
 	const struct simple_device *self = to_simple_device(dev);
 
 	mmio_write_32(self->regs + TWD_RESTART_REG, TWD_RESTART_KEY | BIT(0));
-}
-
-static void
-sun9i_a80_twd_set_timeout(const struct device *dev, uint32_t timeout)
-{
-	const struct simple_device *self = to_simple_device(dev);
-
-	mmio_write_32(self->regs + TWD_INTV_REG, timeout);
 }
 
 static int
@@ -86,8 +89,8 @@ static const struct watchdog_driver sun9i_a80_twd_driver = {
 		.release = sun9i_a80_twd_release,
 	},
 	.ops = {
-		.restart     = sun9i_a80_twd_restart,
-		.set_timeout = sun9i_a80_twd_set_timeout,
+		.reset_system = sun9i_a80_twd_reset_system,
+		.restart      = sun9i_a80_twd_restart,
 	},
 };
 

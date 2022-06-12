@@ -9,18 +9,17 @@
 #include <device.h>
 
 /**
+ * Use the watchdog to reset the system as soon as possible.
+ *
+ * @param dev The watchdog device.
+ */
+void watchdog_reset_system(const struct device *dev);
+
+/**
  * Restart the watchdog. This must be called before the watchdog times out.
  *
  * @param dev The watchdog device.
  */
 void watchdog_restart(const struct device *dev);
-
-/**
- * Set the watchdog timeout. It will take effect after the next restart.
- *
- * @param dev     The watchdog device.
- * @param timeout The new watchdog timeout in clock cycles.
- */
-void watchdog_set_timeout(const struct device *dev, uint32_t timeout);
 
 #endif /* DRIVERS_WATCHDOG_H */

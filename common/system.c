@@ -315,7 +315,7 @@ system_state_machine(uint32_t exception)
 		case SS_RESET:
 			/* Attempt to reset the SoC using the watchdog. */
 			if (watchdog)
-				watchdog_set_timeout(watchdog, 1);
+				watchdog_reset_system(watchdog);
 
 			/* Continue making reboot/reset attempts. */
 			break;
