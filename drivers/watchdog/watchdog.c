@@ -7,6 +7,7 @@
 #include <intrusive.h>
 #include <stdint.h>
 #include <watchdog.h>
+#include <watchdog/sun6i-a31-wdt.h>
 #include <watchdog/sun9i-a80-twd.h>
 
 #include "watchdog.h"
@@ -26,7 +27,14 @@ watchdog_ops_for(const struct device *dev)
 const struct device *
 watchdog_get(void)
 {
-	return device_get_or_null(&r_twd.dev);
+	const struct device *watchdog = NULL;
+
+	if (CONFIG(WATCHDOG_SUN6I_A31_WDT))
+		watchdog = device_get_or_null(&r_wdog.dev);
+	if (CONFIG(WATCHDOG_SUN9I_A80_TWD))
+		watchdog = device_get_or_null(&r_twd.dev);
+
+	return watchdog;
 }
 
 void

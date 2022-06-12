@@ -1,0 +1,42 @@
+#
+# Copyright © 2022 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+choice
+	bool "Watchdog timer"
+	default WATCHDOG_SUN9I_A80_TWD if PLATFORM_H6
+	default WATCHDOG_SUN6I_A31_WDT
+	help
+		The firmware is monitored by a watchdog timer. If an
+		error occurs, the watchdog will reset the system instead
+		of allowing it to hang.
+
+		The watchdog also services user-requested system resets.
+
+config WATCHDOG_SUN6I_A31_WDT
+	bool "Watchdog (R_WDOG)"
+	help
+		This driver supports the watchdog in A31 and newer SoCs.
+
+		This watchdog timer can reset the system after a minimum
+		delay of one half second.
+
+		Due to a bug in the H6 SoC, this watchdog timer hardware
+		is used by other system software on that platform. When
+		building for an H6 board, do not select this driver
+		unless you know what you are doing.
+
+config WATCHDOG_SUN9I_A80_TWD
+	bool "Trusted watchdog (R_TWD)"
+	help
+		This driver supports the trusted watchdog in A80 and
+		newer SoCs.
+
+		This watchdog timer can reset the system immediately.
+
+		Older versions of Linux may interfere with this device,
+		causing an unexpected reboot during system resume. As a
+		workaround, select a different watchdog device.
+
+endchoice

@@ -13,5 +13,6 @@ source "mfd/Kconfig"
 source "pmic/Kconfig"
 source "regulator/Kconfig"
 source "serial/Kconfig"
+source "watchdog/Kconfig"
 
 endmenu
