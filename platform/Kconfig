@@ -17,7 +17,6 @@ choice
 config PLATFORM_A23
 	bool "A23/A33"
 	depends on ARCH_OR1K
-	depends on BROKEN
 	select HAVE_R_RSB
 
 config PLATFORM_A64
