@@ -23,7 +23,9 @@ enum {
 #endif
 	CLK_BUS_R_UART,
 	CLK_BUS_R_I2C,
+#if CONFIG(HAVE_R_TWD)
 	CLK_BUS_R_TWD,
+#endif
 	CLK_R_CIR,
 	SUN8I_R_CCU_CLOCKS
 };

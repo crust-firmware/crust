@@ -18,12 +18,14 @@ config PLATFORM_A64
 	depends on ARCH_OR1K
 	select HAVE_DRAM_SUSPEND
 	select HAVE_R_CIR
+	select HAVE_R_TWD
 
 config PLATFORM_A83T
 	bool "A83T"
 	depends on ARCH_OR1K
 	select HAVE_R_CIR
 	select HAVE_R_RSB
+	select HAVE_R_TWD
 	select HAVE_UART4
 
 config PLATFORM_H3
@@ -31,6 +33,7 @@ config PLATFORM_H3
 	depends on ARCH_OR1K
 	select HAVE_DRAM_SUSPEND
 	select HAVE_R_CIR
+	select HAVE_R_TWD
 
 config PLATFORM_H6
 	bool "H6"
@@ -39,6 +42,7 @@ config PLATFORM_H6
 	select HAVE_DRAM_SUSPEND
 	select HAVE_R_CIR
 	select HAVE_R_RSB
+	select HAVE_R_TWD
 
 endchoice
 
@@ -72,6 +76,11 @@ config HAVE_R_RSB
 	bool
 	help
 		Select this option on platforms with an RSB controller.
+
+config HAVE_R_TWD
+	bool
+	help
+		Select this option on platforms with a trusted watchdog.
 
 config HAVE_UART4
 	bool

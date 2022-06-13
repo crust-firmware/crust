@@ -162,12 +162,14 @@ static const struct ccu_clock r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 		.gate       = BITMAP_INDEX(0x0028, 6),
 		.reset      = BITMAP_INDEX(0x00b0, 6),
 	},
+#if CONFIG(HAVE_R_TWD)
 	[CLK_BUS_R_TWD] = {
 		/* Parent omitted to allow enabling before CCU init. */
 		.get_parent = ccu_get_null_parent,
 		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x0028, 7),
 	},
+#endif
 	[CLK_R_CIR] = {
 		.get_parent = ccu_get_r_cir_parent,
 		.get_rate   = ccu_get_r_cir_rate,

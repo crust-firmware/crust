@@ -29,6 +29,7 @@ config WATCHDOG_SUN6I_A31_WDT
 
 config WATCHDOG_SUN9I_A80_TWD
 	bool "Trusted watchdog (R_TWD)"
+	depends on HAVE_R_TWD
 	help
 		This driver supports the trusted watchdog in A80 and
 		newer SoCs.
