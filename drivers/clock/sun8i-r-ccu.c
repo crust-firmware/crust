@@ -140,7 +140,7 @@ static const struct ccu_clock r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 		.gate       = BITMAP_INDEX(0x0028, 2),
 		.reset      = BITMAP_INDEX(0x00b0, 2),
 	},
-#if CONFIG(HAVE_RSB)
+#if CONFIG(HAVE_R_RSB)
 	[CLK_BUS_R_RSB] = {
 		.get_parent = r_ccu_get_apb0,
 		.get_rate   = ccu_get_parent_rate,

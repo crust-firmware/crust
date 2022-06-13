@@ -21,7 +21,7 @@ config PLATFORM_A64
 config PLATFORM_A83T
 	bool "A83T"
 	depends on ARCH_OR1K
-	select HAVE_RSB
+	select HAVE_R_RSB
 	select HAVE_UART4
 
 config PLATFORM_H3
@@ -34,7 +34,7 @@ config PLATFORM_H6
 	depends on ARCH_OR1K
 	select HAVE_DCXO
 	select HAVE_DRAM_SUSPEND
-	select HAVE_RSB
+	select HAVE_R_RSB
 
 endchoice
 
@@ -58,7 +58,7 @@ config HAVE_R_I2C
 	help
 		Select this option on platforms with an R_I2C controller.
 
-config HAVE_RSB
+config HAVE_R_RSB
 	bool
 	help
 		Select this option on platforms with an RSB controller.

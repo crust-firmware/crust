@@ -6,7 +6,7 @@
 choice
 	bool "I2C controller pin selection"
 	depends on HAVE_R_I2C
-	default I2C_PINS_NONE if HAVE_RSB
+	default I2C_PINS_NONE if HAVE_R_RSB
 	default I2C_PINS_PL0_PL1
 	help
 		Choose which pair of pins is used for the I2C bus.
@@ -30,7 +30,7 @@ config I2C_PINS_PL0_PL1
 
 config I2C_PINS_PL8_PL9
 	bool "PL8/PL9"
-	depends on HAVE_RSB
+	depends on HAVE_R_RSB
 	help
 		Select this option if your board has a PMIC or regulator
 		connected via I2C using the alternate set of pins.
@@ -40,7 +40,7 @@ endchoice
 config I2C_PIN_MODE_PL0_PL1
 	int
 	depends on I2C_PINS_PL0_PL1
-	default 3 if HAVE_RSB
+	default 3 if HAVE_R_RSB
 	default 2
 	help
 		Provide the pin mode that configures PL0/PL1 as I2C SCL/SDA.
@@ -54,7 +54,7 @@ config I2C
 
 config RSB
 	bool
-	default HAVE_RSB && (!I2C_PINS_PL0_PL1 || COMPILE_TEST)
+	default HAVE_R_RSB && (!I2C_PINS_PL0_PL1 || COMPILE_TEST)
 	help
 		This option is selected if the chosen pin configuration
 		allows the RSB controller to be used.
