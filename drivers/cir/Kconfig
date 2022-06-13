@@ -5,6 +5,7 @@
 
 config CIR
 	bool "CIR (infrared) receiver"
+	depends on HAVE_R_CIR
 	help
 		Listen for input from an infrared remote controller or
 		keyboard. This can be used as a wakeup source.

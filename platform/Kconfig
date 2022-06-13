@@ -17,10 +17,12 @@ config PLATFORM_A64
 	bool "A64/H5"
 	depends on ARCH_OR1K
 	select HAVE_DRAM_SUSPEND
+	select HAVE_R_CIR
 
 config PLATFORM_A83T
 	bool "A83T"
 	depends on ARCH_OR1K
+	select HAVE_R_CIR
 	select HAVE_R_RSB
 	select HAVE_UART4
 
@@ -28,12 +30,14 @@ config PLATFORM_H3
 	bool "H3"
 	depends on ARCH_OR1K
 	select HAVE_DRAM_SUSPEND
+	select HAVE_R_CIR
 
 config PLATFORM_H6
 	bool "H6"
 	depends on ARCH_OR1K
 	select HAVE_DCXO
 	select HAVE_DRAM_SUSPEND
+	select HAVE_R_CIR
 	select HAVE_R_RSB
 
 endchoice
@@ -51,6 +55,12 @@ config HAVE_DRAM_SUSPEND
 	help
 		Select this option on platforms with the ability to
 		suspend the DRAM controller.
+
+config HAVE_R_CIR
+	bool
+	help
+		Select this option on platforms with a consumer infrared
+		(CIR) controller.
 
 config HAVE_R_I2C
 	bool

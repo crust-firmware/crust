@@ -128,12 +128,14 @@ static const struct ccu_clock r_ccu_clocks[SUN8I_R_CCU_CLOCKS] = {
 		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x0028, 0),
 	},
+#if CONFIG(HAVE_R_CIR)
 	[CLK_BUS_R_CIR] = {
 		.get_parent = r_ccu_get_apb0,
 		.get_rate   = ccu_get_parent_rate,
 		.gate       = BITMAP_INDEX(0x0028, 1),
 		.reset      = BITMAP_INDEX(0x00b0, 1),
 	},
+#endif
 	[CLK_BUS_R_TIMER] = {
 		.get_parent = r_ccu_get_apb0,
 		.get_rate   = ccu_get_parent_rate,
