@@ -1,0 +1,20 @@
+#
+# Copyright © 2022 The Crust Firmware Authors.
+# SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0-only
+#
+
+if PLATFORM_A23
+
+choice
+	bool "SoC"
+
+config SOC_A23
+	bool "A23"
+	select HAVE_UART4
+
+config SOC_A33
+	bool "A33"
+
+endchoice
+
+endif

@@ -5,6 +5,7 @@
 
 config PLATFORM
 	string
+	default "a23"  if PLATFORM_A23
 	default "a64"  if PLATFORM_A64
 	default "a83t" if PLATFORM_A83T
 	default "h3"   if PLATFORM_H3
@@ -12,6 +13,12 @@ config PLATFORM
 
 choice
 	prompt "Platform selection"
+
+config PLATFORM_A23
+	bool "A23/A33"
+	depends on ARCH_OR1K
+	depends on BROKEN
+	select HAVE_R_RSB
 
 config PLATFORM_A64
 	bool "A64/H5"
@@ -50,6 +57,7 @@ config PLATFORM_H6
 
 endchoice
 
+source "a23/Kconfig"
 source "a64/Kconfig"
 
 config HAVE_DCXO
