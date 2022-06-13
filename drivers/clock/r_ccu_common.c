@@ -19,7 +19,7 @@
 	                    PLL_CTRL_REG1_LDO_EN)
 
 /* Persist this var as r_ccu_init() may not be called after an exception. */
-static uint32_t iosc_rate = 16000000U;
+static uint32_t iosc_rate = CPUCLK_Hz;
 
 DEFINE_FIXED_RATE(r_ccu_common_get_iosc_rate, iosc_rate)
 
