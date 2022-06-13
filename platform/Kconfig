@@ -52,11 +52,11 @@ config HAVE_DRAM_SUSPEND
 		Select this option on platforms with the ability to
 		suspend the DRAM controller.
 
-config HAVE_I2C
+config HAVE_R_I2C
 	bool
 	default y
 	help
-		Select this option on platforms with an I2C controller.
+		Select this option on platforms with an R_I2C controller.
 
 config HAVE_RSB
 	bool

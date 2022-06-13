@@ -5,7 +5,7 @@
 
 choice
 	bool "I2C controller pin selection"
-	depends on HAVE_I2C
+	depends on HAVE_R_I2C
 	default I2C_PINS_NONE if HAVE_RSB
 	default I2C_PINS_PL0_PL1
 	help
@@ -47,7 +47,7 @@ config I2C_PIN_MODE_PL0_PL1
 
 config I2C
 	bool
-	default HAVE_I2C && (!I2C_PINS_NONE || COMPILE_TEST)
+	default HAVE_R_I2C && (!I2C_PINS_NONE || COMPILE_TEST)
 	help
 		This option is selected if the chosen pin configuration
 		allows the I2C controller to be used.
