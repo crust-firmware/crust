@@ -5,6 +5,7 @@
 
 config CEC
 	bool "HDMI CEC"
+	depends on HAVE_HDMI
 	help
 		Listen for messages from TV or other devices on HDMI CEC bus.
 		This can be used as a wakeup source. Note: Clocks and resets

@@ -17,12 +17,14 @@ config PLATFORM_A64
 	bool "A64/H5"
 	depends on ARCH_OR1K
 	select HAVE_DRAM_SUSPEND
+	select HAVE_HDMI
 	select HAVE_R_CIR
 	select HAVE_R_TWD
 
 config PLATFORM_A83T
 	bool "A83T"
 	depends on ARCH_OR1K
+	select HAVE_HDMI
 	select HAVE_R_CIR
 	select HAVE_R_RSB
 	select HAVE_R_TWD
@@ -32,6 +34,7 @@ config PLATFORM_H3
 	bool "H3"
 	depends on ARCH_OR1K
 	select HAVE_DRAM_SUSPEND
+	select HAVE_HDMI
 	select HAVE_R_CIR
 	select HAVE_R_TWD
 
@@ -40,6 +43,7 @@ config PLATFORM_H6
 	depends on ARCH_OR1K
 	select HAVE_DCXO
 	select HAVE_DRAM_SUSPEND
+	select HAVE_HDMI
 	select HAVE_R_CIR
 	select HAVE_R_RSB
 	select HAVE_R_TWD
@@ -59,6 +63,11 @@ config HAVE_DRAM_SUSPEND
 	help
 		Select this option on platforms with the ability to
 		suspend the DRAM controller.
+
+config HAVE_HDMI
+	bool
+	help
+		Select this option on platforms with an HDMI controller.
 
 config HAVE_R_CIR
 	bool
