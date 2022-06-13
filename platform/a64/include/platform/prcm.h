@@ -68,6 +68,7 @@
 #define VDD_SYS_RESET_REG                 (DEV_R_PRCM + 0x0120)
 #define VDD_SYS_RESET                     BIT(0)
 
+/* CPU0 does not have its own power switch */
 #define C0_CPUn_PWR_SWITCH_REG(n)         (DEV_R_PRCM + 0x0140 + 0x04 * (n))
 
 #define ADDA_PR_CFG_REG                   (DEV_R_PRCM + 0x01c0)
