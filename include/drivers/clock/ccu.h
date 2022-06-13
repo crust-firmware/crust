@@ -8,7 +8,10 @@
 
 #include <clock.h>
 #include <device.h>
-#if CONFIG(PLATFORM_A64)
+#if CONFIG(PLATFORM_A23)
+#include <clock/sun8i-a23-ccu.h>
+#include <clock/sun8i-r-ccu.h>
+#elif CONFIG(PLATFORM_A64)
 #include <clock/sun50i-a64-ccu.h>
 #include <clock/sun8i-r-ccu.h>
 #elif CONFIG(PLATFORM_A83T)
