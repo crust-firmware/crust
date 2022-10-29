@@ -80,6 +80,7 @@ LDFLAGS		 = -nostdlib \
 		   -static \
 		   -Wl,-O1 \
 		   -Wl,--build-id=none \
+		   -Wl,--no-warn-rwx-segments \
 		   -Wl,--fatal-warnings \
 		   -Wl,--gc-sections \
 		   -Wl,--no-dynamic-linker \
