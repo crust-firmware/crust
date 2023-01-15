@@ -16,7 +16,11 @@ HOSTCC		 = $(HOST_COMPILE)gcc
 
 AR		 = $(CROSS_COMPILE)gcc-ar
 CC		 = $(CROSS_COMPILE)gcc
+LD		 = $(shell $(CC) -print-prog-name=ld)
 OBJCOPY		 = $(CROSS_COMPILE)objcopy
+
+comma := ,
+ld-option = $(shell if ($(LD) -v $(1)) > /dev/null 2>&1; then echo "$(2)"; else echo "$(3)"; fi)
 
 LEX		 = lex
 YACC		 = bison
@@ -83,7 +87,8 @@ LDFLAGS		 = -nostdlib \
 		   -Wl,--fatal-warnings \
 		   -Wl,--gc-sections \
 		   -Wl,--no-dynamic-linker \
-		   -Wl,--no-undefined
+		   -Wl,--no-undefined \
+		   $(call ld-option,--no-warn-rwx-segments,-Wl$(comma)--no-warn-rwx-segments)
 
 ###############################################################################
 
