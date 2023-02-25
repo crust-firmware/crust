@@ -6,6 +6,7 @@
 #include <device.h>
 #include <intrusive.h>
 #include <pmic.h>
+#include <pmic/axp223.h>
 #include <pmic/axp803.h>
 #include <pmic/axp805.h>
 
@@ -28,9 +29,11 @@ pmic_get(void)
 {
 	const struct device *pmic = NULL;
 
+	if (CONFIG(PMIC_AXP223))
+		pmic = device_get_or_null(&axp223_pmic.dev);
 	if (CONFIG(PMIC_AXP803))
 		pmic = device_get_or_null(&axp803_pmic.dev);
-	if (!pmic && CONFIG(PMIC_AXP805))
+	if (CONFIG(PMIC_AXP805))
 		pmic = device_get_or_null(&axp805_pmic.dev);
 
 	return pmic;
