@@ -17,11 +17,13 @@
 #define CPUX_AXI_CFG_REG     0x0050
 #define AHB1_APB1_CFG_REG    0x0054
 
+#if CONFIG(PLATFORM_H3)
 uint32_t
 css_get_irq_status(void)
 {
 	return mmio_read_32(IRQ_FIQ_STATUS_REG);
 }
+#endif
 
 void
 css_suspend_css(uint32_t new_state)
@@ -101,7 +103,7 @@ css_resume_core(uint32_t cluster UNUSED, uint32_t core, uint32_t old_state)
 		css_set_power_switch(C0_CPUn_PWR_SWITCH_REG(core), true);
 		/* Release the core output clamps. */
 		mmio_clr_32(C0_PWROFF_GATING_REG, C0_CPUn_PWROFF_GATING(core));
-	} else {
+	} else if (CONFIG(PLATFORM_H3)) {
 		/* Save registers that will be clobbered by the BROM. */
 		cpu_clk = mmio_read_32(DEV_CCU + CPUX_AXI_CFG_REG);
 		bus_clk = mmio_read_32(DEV_CCU + AHB1_APB1_CFG_REG);
@@ -113,7 +115,7 @@ css_resume_core(uint32_t cluster UNUSED, uint32_t core, uint32_t old_state)
 	mmio_write_32(CPUn_RST_CTRL_REG(core),
 	              CPUn_RST_CTRL_REG_nCORERESET |
 	              CPUn_RST_CTRL_REG_nCPUPORESET);
-	if (core == 0) {
+	if (core == 0 && CONFIG(PLATFORM_H3)) {
 		/* Spin until the BROM has clobbered the clock registers. */
 		mmio_pollz_32(DEV_CCU + AHB1_APB1_CFG_REG, BIT(13));
 
