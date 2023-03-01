@@ -15,8 +15,6 @@
 struct axp20x_regulator_info {
 	uint8_t enable_register;
 	uint8_t enable_mask;
-	uint8_t value_register;
-	uint8_t value_mask;
 };
 
 extern const struct regulator_driver axp20x_regulator_driver;
