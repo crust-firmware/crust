@@ -5,6 +5,10 @@
 
 menu "Regulators (voltage/current)"
 
+config REGULATOR_AXP221
+	bool
+	default MFD_AXP223
+
 config REGULATOR_AXP803
 	bool
 	default MFD_AXP803
