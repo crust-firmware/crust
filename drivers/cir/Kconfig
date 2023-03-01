@@ -53,7 +53,7 @@ config CIR_USE_OSC24M
 	bool "Use OSC24M as parent clock"
 	help
 		Sometimes boards come without external 32768 Hz oscillator
-		and thus RTC use the internal RC oscilator as a source
+		and thus RTC use the internal RC oscillator as a source
 		for generating 32768 Hz clock. However, such clock is
 		not precise enough for IR signal decoding purposes.
 

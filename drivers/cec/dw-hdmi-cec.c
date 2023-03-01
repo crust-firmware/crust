@@ -154,7 +154,7 @@ dw_hdmi_cec_release(const struct device *dev)
 	mmio_write_8(self->regs + CEC_MASK, state->stash[1]);
 	mmio_write_8(self->regs + CEC_MUTE, state->stash[0]);
 
-	/* Restoring IH_MUTE must be last, since it enables interrutps */
+	/* Restoring IH_MUTE must be last, since it enables interrupts */
 	mmio_write_8(self->regs + IH_MUTE, state->stash[3]);
 
 	clock_put(&self->bus_clock);
