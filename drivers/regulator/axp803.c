@@ -129,18 +129,6 @@ static const struct axp20x_regulator_info axp803_regulators[] = {
 		.value_register  = 0x1d,
 		.value_mask      = GENMASK(3, 0),
 	},
-	[AXP803_REGL_GPIO0] = {
-		.enable_register = 0x90,
-		.enable_mask     = GENMASK(2, 0),
-		.value_register  = 0x91,
-		.value_mask      = GENMASK(4, 0),
-	},
-	[AXP803_REGL_GPIO1] = {
-		.enable_register = 0x92,
-		.enable_mask     = GENMASK(2, 0),
-		.value_register  = 0x93,
-		.value_mask      = GENMASK(4, 0),
-	},
 };
 
 const struct axp20x_regulator axp803_regulator = {
