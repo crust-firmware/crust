@@ -8,10 +8,6 @@
 
 #include "axp20x.h"
 
-#define GPIO_LDO_MASK 0x7
-#define GPIO_LDO_ON   0x3
-#define GPIO_LDO_OFF  0x4
-
 static int
 axp20x_regulator_get_state(const struct regulator_handle *handle,
                            bool *enabled)
@@ -25,14 +21,7 @@ axp20x_regulator_get_state(const struct regulator_handle *handle,
 	if ((err = regmap_read(self->map, addr, &val)))
 		return err;
 
-	/*
-	 * GPIO LDOs have a pin function, not an enable bit. Their
-	 * distinguishing feature is a mask containing more than one bit.
-	 */
-	if (mask == GPIO_LDO_MASK)
-		*enabled = (val & mask) == GPIO_LDO_ON;
-	else
-		*enabled = (val & mask);
+	*enabled = (val & mask);
 
 	return SUCCESS;
 }
@@ -43,18 +32,8 @@ axp20x_regulator_set_state(const struct regulator_handle *handle, bool enabled)
 	const struct axp20x_regulator *self = to_axp20x_regulator(handle->dev);
 	uint8_t addr = self->info[handle->id].enable_register;
 	uint8_t mask = self->info[handle->id].enable_mask;
-	uint8_t val;
 
-	/*
-	 * GPIO LDOs have a pin function, not an enable bit. Their
-	 * distinguishing feature is a mask containing more than one bit.
-	 */
-	if (mask == GPIO_LDO_MASK)
-		val = enabled ? GPIO_LDO_ON : GPIO_LDO_OFF;
-	else
-		val = enabled ? mask : 0;
-
-	return regmap_update_bits(self->map, addr, mask, val);
+	return regmap_update_bits(self->map, addr, mask, enabled ? mask : 0);
 }
 
 static int
