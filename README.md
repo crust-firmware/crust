@@ -9,7 +9,7 @@
 The crust is the lowest-level component of a delicious fruit pie. Similarly,
 Crust is the lowest-level firmware component that runs on `$FRUIT` (Banana,
 Orange, Lichee) Pi single-board computers and other Allwinner-based devices,
-such as the Pine64 Pinebook and PinePhone.
+such as the Olimex TERES-I laptop and the Pine64 PinePhone.
 
 Crust improves battery life and thermal performance by implementing a deep
 sleep state. During deep sleep, the CPU cores, the DRAM controller, and most
