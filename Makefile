@@ -61,7 +61,8 @@ HOSTCPPFLAGS	 = $(COMMON_CPPFLAGS) \
 HOSTLDFLAGS	 =
 HOSTLDLIBS	 =
 
-AFLAGS		 = -Wa,--fatal-warnings
+AFLAGS		 = -Wa,--fatal-warnings \
+		   -Wa,--noexecstack
 CFLAGS		 = $(COMMON_CFLAGS) \
 		   -ffreestanding \
 		   -flto \
