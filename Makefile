@@ -68,6 +68,7 @@ CFLAGS		 = $(COMMON_CFLAGS) \
 		   -flto \
 		   -fno-asynchronous-unwind-tables \
 		   -fno-pie \
+		   -fno-stack-protector \
 		   -fomit-frame-pointer \
 		   -funsigned-char \
 		   -Werror=implicit-fallthrough=5
