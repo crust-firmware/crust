@@ -70,6 +70,7 @@ CFLAGS		 = $(COMMON_CFLAGS) \
 		   -fno-pie \
 		   -fomit-frame-pointer \
 		   -funsigned-char \
+		   -fno-stack-protector \
 		   -Werror=implicit-fallthrough=5
 CPPFLAGS	 = $(COMMON_CPPFLAGS) \
 		   -I$(SRC)/include/drivers \
